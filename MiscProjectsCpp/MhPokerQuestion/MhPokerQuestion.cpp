@@ -250,6 +250,12 @@ std::string GetCardNameShort(Card in_card, bool padded_flag = false)
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+typedef std::pair<Card, Card>            HandPlayer;
+typedef std::vector<HandPlayer>          HandPlayerVector;
+typedef HandPlayerVector::const_iterator HandPlayerVectorIterC;
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 typedef std::vector<Card>          Deck;
 typedef Deck::const_iterator       DeckIterC;
 
@@ -449,6 +455,79 @@ DeckVector GenerateSharedHandsVector(const Deck &in_deck,
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+class MhPokerGame {
+public:
+	static const std::size_t SharedCardCount = 5;	//	Less than CardCount
+	static const std::size_t PlayerCardCount = 2;	// As it's in a std::pair<>
+
+	MhPokerGame(std::size_t player_count, bool shuffle_flag = true)
+		:deck_(ConstructDeck(shuffle_flag))
+		,player_count_(player_count)
+		,player_hands_()
+	{
+		if ((player_count_ < 2) ||
+			(player_count_ > ((CardCount - SharedCardCount) / PlayerCardCount)))
+			throw std::invalid_argument("Invalid player count.");
+
+		//	Cheesy deal doesn't rotate among players, but is nice in testing...
+		for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
+			player_hands_.push_back(std::make_pair(deck_[deck_.size() - 1],
+				deck_[deck_.size() - 2]));
+			deck_.resize(deck_.size() - 2);
+		}
+	}
+
+	std::vector<double> RankPlayerHands(unsigned int max_usecs = 0);
+
+private:
+	Deck             deck_;
+	std::size_t      player_count_;
+	HandPlayerVector player_hands_;
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::vector<double> MhPokerGame::RankPlayerHands(unsigned int max_usecs)
+{
+	struct PerHandAssessor {
+		PerHandAssessor(const HandPlayerVector &player_hands,
+			unsigned int max_usecs)
+			:player_hands_(player_hands)
+			,player_ranking_(player_hands.size())
+			,hands_evaluated_(0)
+			,max_usecs_(max_usecs)
+			,end_time_(boost::posix_time::microsec_clock::universal_time() +
+				boost::posix_time::microsec(max_usecs))
+		{
+		}
+
+		inline bool operator () (const Deck &working_hand)
+		{
+			++hands_evaluated_;
+
+			return((!max_usecs_) ||
+				(boost::posix_time::microsec_clock::universal_time() < end_time_));
+		}
+
+		const HandPlayerVector   &player_hands_;
+		std::vector<double>       player_ranking_;
+		std::size_t               hands_evaluated_;
+		unsigned int              max_usecs_;
+		boost::posix_time::ptime  end_time_;
+
+	private:
+		PerHandAssessor & operator = (const PerHandAssessor &);	//	Not defined.
+	};
+
+	PerHandAssessor my_func(player_hands_, max_usecs);
+
+	GenerateSharedHands(deck_, SharedCardCount, my_func);
+
+	return(my_func.player_ranking_);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 void TEST_CheckDeck(bool shuffle_flag = false)
 {
 	EmitSep('=');
@@ -605,15 +684,12 @@ int main()
 
 	try {
 /*
-std::cout << CalcSharedHandCount( 5, 2) << std::endl;
-std::cout << CalcSharedHandCount( 5, 3) << std::endl;
-std::cout << CalcSharedHandCount( 5, 4) << std::endl;
-std::cout << CalcSharedHandCount( 5, 5) << std::endl;
-std::cout << CalcSharedHandCount(48, 5) << std::endl;
-*/
 		TEST_CheckDeck();
 		TEST_GenCombos::TEST_GenSharedHands_1();
 		TEST_GenCombos::TEST_GenSharedHands_2();
+*/
+		MhPokerGame my_game(2, false);
+		std::vector<double> player_rank(my_game.RankPlayerHands(250000));
 	}
 	catch (const std::exception &except) {
 		std::cerr << "ERROR: " << except.what() << std::endl;
