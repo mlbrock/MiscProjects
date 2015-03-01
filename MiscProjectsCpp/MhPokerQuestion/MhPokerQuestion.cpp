@@ -44,6 +44,61 @@
 #endif // #ifdef _MSC_VER
 
 //	////////////////////////////////////////////////////////////////////////////
+/*
+	Approaches to hand-ranking from "List of poker hands"
+	( https://en.wikipedia.org/wiki/List_of_poker_hands ).
+
+		1)	Straight flush (10 ---> 4 * 10 = 40):
+			a)	Highest card of the straight.
+
+		2)	Four of a kind (13 * 12 = 156 ---> 4 * 156 = 624):
+			a)	Card rank of the four of a kind cards.
+			b)	Rank of fifth card.
+
+		3)	Full house ( 3744):
+			a)	Card rank of the three of a kind cards.
+			b) Card rank of the pair cards.
+
+		4)	Flush (5148):
+			a) Highest card of the flush.
+			b) Second-highest card of the flush.
+			c) Third-highest card of the flush.
+			d) Fourth-highest card of the flush.
+			e) Fifth-highest card of the flush.
+			f) Or tie splits the pot.
+
+		5) Straight (10240):
+			a)	Highest card of the straight.
+			b) Or tie splits the pot.
+
+		6) Three of a kind (13 * 4 * 65 = 3380):
+			a)	Card rank of the three of a kind cards.
+			b) Card rank of the remaining two cards.
+
+		7) Two pair:
+			a) Highest pair of the two pair.
+			b) Lowest pair of the two pair.
+			c) Or card rank of the single remaining card.
+
+		8) One pair:
+			a) Card rank of the pair cards.
+			b) Card rank of highest of the three remaining cards.
+			c) Card rank of second-highest of the three remaining cards.
+			d) Card rank of third-highest of the three remaining cards.
+
+		9) High card:
+			a) Highest card of the hand.
+			b) Second-highest card of the hand.
+			c) Third-highest card of the hand.
+			d) Fourth-highest card of the hand.
+			e) Fifth-highest card of the hand.
+
+		Suit is not used in hand ranking, per my reading of "High card by suit"
+		( https://en.wikipedia.org/wiki/High_card_by_suit ).
+*/
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 std::ostream &EmitSep(char sep_char = '=', std::streamsize sep_length = 79,
 	std::ostream &o_str = std::cout)
 {
@@ -460,30 +515,67 @@ public:
 	static const std::size_t SharedCardCount = 5;	//	Less than CardCount
 	static const std::size_t PlayerCardCount = 2;	// As it's in a std::pair<>
 
-	MhPokerGame(std::size_t player_count, bool shuffle_flag = true)
-		:deck_(ConstructDeck(shuffle_flag))
-		,player_count_(player_count)
-		,player_hands_()
-	{
-		if ((player_count_ < 2) ||
-			(player_count_ > ((CardCount - SharedCardCount) / PlayerCardCount)))
-			throw std::invalid_argument("Invalid player count.");
+	MhPokerGame(std::size_t player_count, bool shuffle_flag = true);
 
-		//	Cheesy deal doesn't rotate among players, but is nice in testing...
-		for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
-			player_hands_.push_back(std::make_pair(deck_[deck_.size() - 1],
-				deck_[deck_.size() - 2]));
-			deck_.resize(deck_.size() - 2);
-		}
-	}
+	Card RevealOneSharedCard();
 
 	std::vector<double> RankPlayerHands(unsigned int max_usecs = 0);
 
+	std::string GetPlayerHandString(std::size_t player_index) const;
+	void EmitPlayerHands(std::ostream &o_str = std::cout) const;
+
 private:
 	Deck             deck_;
+	Deck             revealed_cards_;
 	std::size_t      player_count_;
 	HandPlayerVector player_hands_;
+	DeckVector       player_scratchpad_;
 };
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+MhPokerGame::MhPokerGame(std::size_t player_count, bool shuffle_flag)
+	:deck_(ConstructDeck(shuffle_flag))
+	,revealed_cards_()
+	,player_count_(player_count)
+	,player_hands_()
+	,player_scratchpad_()
+{
+	if ((player_count_ < 2) ||
+		(player_count_ > ((CardCount - SharedCardCount) / PlayerCardCount)))
+		throw std::invalid_argument("Invalid player count.");
+
+	revealed_cards_.reserve(SharedCardCount);
+	player_hands_.reserve(player_count_);
+	player_scratchpad_.resize(player_count_);
+
+	//	Cheesy deal doesn't rotate among players, but is nice in testing...
+	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
+		player_hands_.push_back(std::make_pair(deck_[deck_.size() - 1],
+			deck_[deck_.size() - 2]));
+		deck_.resize(deck_.size() - 2);
+		player_scratchpad_[count_1].push_back(player_hands_.back().first);
+		player_scratchpad_[count_1].push_back(player_hands_.back().second);
+	}
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+Card MhPokerGame::RevealOneSharedCard()
+{
+	if (revealed_cards_.size() == SharedCardCount)
+		throw std::logic_error("Unable to reveal a new shared card as all "
+			"cards have been revealed.");
+
+	revealed_cards_.push_back(deck_.back());
+
+	deck_.pop_back();
+
+	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1)
+		player_scratchpad_[count_1].push_back(revealed_cards_.back());
+
+	return(revealed_cards_.back());
+}
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -503,6 +595,7 @@ std::vector<double> MhPokerGame::RankPlayerHands(unsigned int max_usecs)
 
 		inline bool operator () (const Deck &working_hand)
 		{
+
 			++hands_evaluated_;
 
 			return((!max_usecs_) ||
@@ -524,6 +617,30 @@ std::vector<double> MhPokerGame::RankPlayerHands(unsigned int max_usecs)
 	GenerateSharedHands(deck_, SharedCardCount, my_func);
 
 	return(my_func.player_ranking_);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string MhPokerGame::GetPlayerHandString(std::size_t player_index) const
+{
+	if (player_index >= player_hands_.size())
+		throw std::invalid_argument("Invalid player index.");
+
+	std::ostringstream o_str;
+
+	o_str << "Player-" << std::setfill('0') << std::setw(2) << player_index <<
+		": " << GetCardNameShort(player_hands_[player_index].first, true) <<
+		" | " << GetCardNameShort(player_hands_[player_index].second, true);
+
+	return(o_str.str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+void MhPokerGame::EmitPlayerHands(std::ostream &o_str) const
+{
+	for (std::size_t count_1 = 0; count_1 < player_hands_.size(); ++count_1)
+		o_str << GetPlayerHandString(count_1) << std::endl;
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -677,6 +794,23 @@ void TEST_GenSharedHands_2()
 
 } // namespace TEST_GenCombos
 
+namespace TEST_GameCycle {
+
+//	////////////////////////////////////////////////////////////////////////////
+void TEST_RunGameCycle()
+{
+	MhPokerGame my_game(2, false);
+
+	my_game.EmitPlayerHands();
+
+	my_game.RevealOneSharedCard();
+
+	std::vector<double> player_rank(my_game.RankPlayerHands(250000));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+} // namespace TEST_GameCycle
+
 //	////////////////////////////////////////////////////////////////////////////
 int main()
 {
@@ -688,8 +822,7 @@ int main()
 		TEST_GenCombos::TEST_GenSharedHands_1();
 		TEST_GenCombos::TEST_GenSharedHands_2();
 */
-		MhPokerGame my_game(2, false);
-		std::vector<double> player_rank(my_game.RankPlayerHands(250000));
+		TEST_GameCycle::TEST_RunGameCycle();
 	}
 	catch (const std::exception &except) {
 		std::cerr << "ERROR: " << except.what() << std::endl;
