@@ -534,7 +534,8 @@ private:
 
 	bool EvaluatePlayerHands(std::size_t target_element,
 			std::size_t start_index, DeckVector &working_hands);
-	bool EvaluatePlayerHands(DeckVector &working_hands);
+	bool EvaluatePlayerHands(DeckVector &working_hands,
+		bool short_circuit_flag = false);
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -735,8 +736,6 @@ inline BitsType MyPopCount(BitsType src_bits)
 {
 	return(__popcnt16(src_bits));
 }
-//# pragma warning(push)
-//# pragma warning(disable:4061 4350 4365 4514 4625 4626 4710 4820 4986)
 //	Returns position of lowest set bit + 1. Zero if not bits are set.
 inline BitsType MyLowestBitIndex(BitsType src_bits)
 {
@@ -845,7 +844,6 @@ private:
 };
 //	////////////////////////////////////////////////////////////////////////////
 
-//MhPokerGame::SharedCardCount
 //	////////////////////////////////////////////////////////////////////////////
 typedef CardArray<MhPokerGame::SharedCardCount> HandFull;
 typedef CardArray<RankCount>                    HandRank;
@@ -868,76 +866,57 @@ enum HandType {
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
-bool MhPokerGame::EvaluatePlayerHands(DeckVector &working_hands)
+struct HandEval {
+	HandEval()
+		:hand_type_(HandHighCard)
+		,hand_rank_()
+		,bits_rank_(0)
+		,bits_suit_(0)
+		,count_ranks_(0)
+		,count_suits_(0)
+		,hand_hint_1_(0)
+		,hand_hint_2_(0)
+	{
+	}
+
+	bool EvaluatePlayerHand(const Deck &player_hand,
+		HandType min_hand_type = HandHighCard);
+
+	HandType    hand_type_;
+	HandRank    hand_rank_;
+	BitsRank    bits_rank_;
+	BitsSuit    bits_suit_;
+	BitsRank    count_ranks_;
+	BitsSuit    count_suits_;
+	std::size_t hand_hint_1_;
+	std::size_t hand_hint_2_;
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool MhPokerGame::EvaluatePlayerHands(DeckVector &working_hands,
+	bool short_circuit_flag)
 {
-	HandType    best_hand_type  = HandHighCard;
-	std::size_t best_hand_hint  = 0;
+	HandEval    best_hand_eval;
 	std::size_t best_hand_index = 0;
-	BitsRank    last_bits_rank  = 0;
-	BitsSuit    last_bits_suit  = 0;
 
 	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
 		const Deck &player_hand = working_hands[count_1];
-		HandRank    hand_rank;
-/*
-		BitsRank bits_rank =
-			static_cast<BitsRank>(
-			1 << GetValidRank(player_hand[0]) |
-			1 << GetValidRank(player_hand[1]) |
-			1 << GetValidRank(player_hand[2]) |
-			1 << GetValidRank(player_hand[3]) |
-			1 << GetValidRank(player_hand[4]));
-		BitsSuit bits_suit =
-			static_cast<BitsSuit>(
-			1 << GetValidSuit(player_hand[0]) |
-			1 << GetValidSuit(player_hand[1]) |
-			1 << GetValidSuit(player_hand[2]) |
-			1 << GetValidSuit(player_hand[3]) |
-			1 << GetValidSuit(player_hand[4]));
-*/
-		BitsRank bits_rank = 0;
-		BitsSuit bits_suit = 0;
-		for (std::size_t count_2 = 0; count_2 < player_hand.size(); ++count_2) {
-			bits_rank          |=
-				static_cast<BitsRank>(1 << GetValidRank(player_hand[count_2]));
-			bits_suit          |=
-				static_cast<BitsSuit>(1 << GetValidSuit(player_hand[count_2]));
-			hand_rank[GetValidRank(player_hand[count_2])]++;
-		}
-		BitsRank    count_ranks = MyPopCount(bits_rank);
-		BitsSuit    count_suits = MyPopCount(bits_suit);
-		HandType    hand_type;
-		std::size_t hand_hint;
-		/*
-			Ace low straight:
-				1000000001111
-				1   0   0   F
-		*/
-		if ((count_suits == 1)           &&
-			 ((bits_rank == 0x31)         ||
-			  (bits_rank == (0x31 <<  1)) ||
-			  (bits_rank == (0x31 <<  2)) ||
-			  (bits_rank == (0x31 <<  3)) ||
-			  (bits_rank == (0x31 <<  4)) ||
-			  (bits_rank == (0x31 <<  5)) ||
-			  (bits_rank == (0x31 <<  6)) ||
-			  (bits_rank == (0x31 <<  7)) ||
-			  (bits_rank == (0x31 <<  8)) ||
-			  (bits_rank == 0x100f))) {
-			hand_type = HandStraightFlush;
-			hand_hint = 0;
-		}
-		else ((count_ranks == 2) && (count_suits == 4) &&
-			((hand_rank[bit_low = (MyLowestBitIndex(bits_rank) - 1)] == 4) ||
-			 (hand_rank[bit_high = (MyHighestBitIndex(bits_rank) - 1)] == 4))) {
-			hand_type = HandFourOfAKind;
-			hand_hint = (hand_rank[bit_low] == 4) ? bit_low : bit_high;
-		}
-		if (!count_1) {
-			last_bits_rank = bits_rank;
-			last_bits_suit = bits_suit;
-		}
-		else {
+		HandEval    hand_eval;
+		if (hand_eval.EvaluatePlayerHand(player_hand,
+			(short_circuit_flag || (!count_1)) ? HandHighCard :
+			best_hand_eval.hand_type_)) {
+			if (!count_1) {
+				best_hand_eval  = hand_eval;
+				best_hand_index = count_1;
+			}
+			else if (hand_eval.hand_type_ < best_hand_eval.hand_type_) {
+				best_hand_eval  = hand_eval;
+				best_hand_index = count_1;
+			}
+			else if (hand_eval.hand_type_ == best_hand_eval.hand_type_) {
+				;	//	Some kind of fine-grained eval with hints, et cetera.
+			}
 		}
 	}
 
@@ -950,6 +929,200 @@ bool MhPokerGame::EvaluatePlayerHands(DeckVector &working_hands)
 		(boost::posix_time::microsec_clock::universal_time() < end_time_));
 */
 	return(true);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool HandEval::EvaluatePlayerHand(const Deck &player_hand,
+	HandType min_hand_type)
+{
+/*
+		bits_rank_ =
+			static_cast<BitsRank>(
+			1 << GetValidRank(player_hand[0]) |
+			1 << GetValidRank(player_hand[1]) |
+			1 << GetValidRank(player_hand[2]) |
+			1 << GetValidRank(player_hand[3]) |
+			1 << GetValidRank(player_hand[4]));
+		bits_suit_ =
+			static_cast<BitsSuit>(
+			1 << GetValidSuit(player_hand[0]) |
+			1 << GetValidSuit(player_hand[1]) |
+			1 << GetValidSuit(player_hand[2]) |
+			1 << GetValidSuit(player_hand[3]) |
+			1 << GetValidSuit(player_hand[4]));
+*/
+
+	bits_rank_ = 0;
+	bits_suit_ = 0;
+
+	for (std::size_t count_1 = 0; count_1 < player_hand.size(); ++count_1) {
+		Card this_rank = GetValidRank(player_hand[count_1]);
+		bits_rank_ |= static_cast<BitsRank>(1 << this_rank);
+		bits_suit_ |=
+			static_cast<BitsSuit>(1 << GetValidSuit(player_hand[count_1]));
+		hand_rank_[this_rank]++;
+	}
+
+	count_ranks_ = MyPopCount(bits_rank_);
+	count_suits_ = MyPopCount(bits_suit_);
+
+	/*
+		Ace low straight:
+			1000000001111
+			1   0   0   F
+	*/
+
+	//	//////////////////////////////////////////////////////////////////////
+	/*
+		If a single suit and the rank bits are contiguous (or in the ace-low
+		pattern 0b1000000001111 = 0x100F), it's a straight flush.
+
+		Only hint 1 is provided for straight flushes (high card of the straight).
+	*/
+	//	----------------------------------------------------------------------
+	if ((count_suits_ == 1)           &&
+		 ((bits_rank_ == 0x1f)         ||
+		  (bits_rank_ == (0x1f <<  1)) ||
+		  (bits_rank_ == (0x1f <<  2)) ||
+		  (bits_rank_ == (0x1f <<  3)) ||
+		  (bits_rank_ == (0x1f <<  4)) ||
+		  (bits_rank_ == (0x1f <<  5)) ||
+		  (bits_rank_ == (0x1f <<  6)) ||
+		  (bits_rank_ == (0x1f <<  7)) ||
+		  (bits_rank_ == (0x1f <<  8)) ||
+		  (bits_rank_ == 0x100f))) {
+		hand_type_   = HandStraightFlush;
+		hand_hint_1_ = (bits_rank_ == 0x100f) ? 3 :
+			(MyHighestBitIndex(bits_rank_) - 1);
+		return(true);
+	}
+	else if (min_hand_type == HandStraightFlush)
+		return(false);
+	//	//////////////////////////////////////////////////////////////////////
+
+	//	//////////////////////////////////////////////////////////////////////
+	/*
+		If all four suits are represented and only two different card ranks
+		are present, check to see if either of the card ranks has four
+		instances. If so, it's four-of-a-kind.
+
+		Otherwise, it's a full house.
+	*/
+	//	----------------------------------------------------------------------
+	if ((count_suits_ == 4) && (count_ranks_ == 2)) {
+		BitsType bit_lo = MyLowestBitIndex(bits_rank_) - 1;
+		BitsType bit_hi = MyHighestBitIndex(bits_rank_) - 1;
+		if ((hand_rank_[bit_lo] == 4) || (hand_rank_[bit_hi] == 4)) {
+			hand_type_ = HandFourOfAKind;
+			/*
+				Hint 1 contains the four-of-a-kind rank.
+				Hint 2 contains the 'kicker' rank.
+			*/	
+			if (hand_rank_[bit_lo] == 4) {
+				hand_hint_1_ = bit_lo;
+				hand_hint_2_ = bit_hi;
+			}
+			else {
+				hand_hint_1_ = bit_hi;
+				hand_hint_2_ = bit_lo;
+			}
+			return(true);
+		}
+		else if (min_hand_type == HandFourOfAKind)
+			return(false);
+		hand_type_ = HandFullHouse;
+		/*
+			Hint 1 contains the three-of-a-kind rank.
+			Hint 2 contains the pair rank.
+		*/	
+		if (hand_rank_[bit_lo] == 3) {
+			hand_hint_1_ = bit_lo;
+			hand_hint_2_ = bit_hi;
+		}
+		else {
+			hand_hint_1_ = bit_hi;
+			hand_hint_2_ = bit_lo;
+		}
+		return(true);
+	}
+	else if (min_hand_type == HandFourOfAKind)
+		return(false);
+	//	//////////////////////////////////////////////////////////////////////
+
+	//	//////////////////////////////////////////////////////////////////////
+	/*
+		If we have only two ranks in the hand and the hand wasn't processed
+		by the four-of-a-kind logic, the hand is a full house.
+	*/
+	//	----------------------------------------------------------------------
+	if (count_ranks_ == 2) {
+		BitsType bit_lo = MyLowestBitIndex(bits_rank_) - 1;
+		BitsType bit_hi = MyHighestBitIndex(bits_rank_) - 1;
+		hand_type_ = HandFullHouse;
+		/*
+			Hint 1 contains the three-of-a-kind rank.
+			Hint 2 contains the pair rank.
+		*/	
+		if (hand_rank_[bit_lo] == 3) {
+			hand_hint_1_ = bit_lo;
+			hand_hint_2_ = bit_hi;
+		}
+		else {
+			hand_hint_1_ = bit_hi;
+			hand_hint_2_ = bit_lo;
+		}
+		return(true);
+	}
+	else if (min_hand_type == HandFullHouse)
+		return(false);
+	//	//////////////////////////////////////////////////////////////////////
+
+	//	//////////////////////////////////////////////////////////////////////
+	/*
+		If the hand has a single suit and isn't a straight flush, it's a flush.
+
+		Note that no hints are provided for a flush as they aren't necessary
+		for hand type detection.
+	*/
+	//	----------------------------------------------------------------------
+	if (count_suits_ == 1) {
+		hand_type_ = HandFlush;
+		return(true);
+	}
+	else if (min_hand_type == HandFlush)
+		return(false);
+	//	//////////////////////////////////////////////////////////////////////
+
+	//	//////////////////////////////////////////////////////////////////////
+	/*
+		if the rank bits are contiguous (or are in the ace-low pattern
+		0b1000000001111 = 0x100F), and the hand wasn't processed by the
+		straight flush logic, it's a straight.
+
+		Only hint 1 is provided for straights (high card of the straight).
+	*/
+	//	----------------------------------------------------------------------
+	if ((bits_rank_ == 0x1f)         ||
+		 (bits_rank_ == (0x1f <<  1)) ||
+		 (bits_rank_ == (0x1f <<  2)) ||
+		 (bits_rank_ == (0x1f <<  3)) ||
+		 (bits_rank_ == (0x1f <<  4)) ||
+		 (bits_rank_ == (0x1f <<  5)) ||
+		 (bits_rank_ == (0x1f <<  6)) ||
+		 (bits_rank_ == (0x1f <<  7)) ||
+		 (bits_rank_ == (0x1f <<  8)) ||
+		 (bits_rank_ == 0x100f)) {
+		hand_type_   = HandStraight;
+		hand_hint_1_ = (bits_rank_ == 0x100f) ? 3 :
+			(MyHighestBitIndex(bits_rank_) - 1);
+		return(true);
+	}
+	else if (min_hand_type == HandStraight)
+		return(false);
+	//	//////////////////////////////////////////////////////////////////////
+
+	throw std::logic_error("*** NOT IMPLEMENTED ***");
 }
 //	////////////////////////////////////////////////////////////////////////////
 
