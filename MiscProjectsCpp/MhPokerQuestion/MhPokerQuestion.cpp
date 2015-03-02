@@ -736,7 +736,7 @@ inline BitsType MyPopCount(BitsType src_bits)
 {
 	return(__popcnt16(src_bits));
 }
-//	Returns position of lowest set bit + 1. Zero if not bits are set.
+//	Returns position of lowest set bit + 1. Zero if no bits are set.
 inline BitsType MyLowestBitIndex(BitsType src_bits)
 {
    unsigned long Index;
@@ -745,7 +745,7 @@ inline BitsType MyLowestBitIndex(BitsType src_bits)
 	return(static_cast<BitsType>((!_BitScanForward(&Index, Mask)) ?
 		0 : (Mask + 1)));
 }
-//	Returns position of highest set bit + 1. Zero if not bits are set.
+//	Returns position of highest set bit + 1. Zero if no bits are set.
 inline BitsType MyHighestBitIndex(BitsType src_bits)
 {
    unsigned long Index;
@@ -762,12 +762,12 @@ inline BitsType MyPopCount(BitsType src_bits)
 {
 	return(static_cast<BitsType>(__builtin_popcount(src_bits)));
 }
-//	Returns position of lowest set bit + 1. Zero if not bits are set.
+//	Returns position of lowest set bit + 1. Zero if no bits are set.
 inline BitsType MyLowestBitIndex(BitsType src_bits)
 {
 	return((!src_bits) ? 0 : static_cast<BitsType>(__builtin_ffs(src)));
 }
-//	Returns position of highest set bit + 1. Zero if not bits are set.
+//	Returns position of highest set bit + 1. Zero if no bits are set.
 inline BitsType MyHighestBitIndex(BitsType src_bits)
 {
 	return((!src_bits) ? 0 : static_cast<BitsType>(
@@ -777,35 +777,6 @@ inline BitsType MyHighestBitIndex(BitsType src_bits)
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
-/*
-struct HandFull {
-	HandFull()
-	{
-		::memset(cards_, '\0', sizeof(cards_));
-	}
-
-	std::size_t size() const
-	{
-		return(MhPokerGame::SharedCardCount);
-	}
-
-	const Card & operator [] (std::size_t card_index) const
-	{
-		if (card_index >= MhPokerGame::SharedCardCount)
-			throw std::invalid_argument("Invalid card index specified.");
-
-		return(cards_[card_index]);
-	}
-
-	Card & operator [] (std::size_t card_index)
-	{
-		return(const_cast<Card &>(
-			const_cast<const HandFull * const>(this)->operator[](card_index)));
-	}
-
-	Card cards_[MhPokerGame::SharedCardCount];
-};
-*/
 template <std::size_t CardCount> class CardArray {
 public:
 	static const std::size_t CardArraySize = CardCount;
@@ -847,8 +818,6 @@ private:
 //	////////////////////////////////////////////////////////////////////////////
 typedef CardArray<MhPokerGame::SharedCardCount> HandFull;
 typedef CardArray<RankCount>                    HandRank;
-//typedef std::vector<HandFull>          HandFullVector;
-//typedef HandFullVector::const_iterator HandFullVectorIterC;
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
