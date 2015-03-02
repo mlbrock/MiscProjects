@@ -556,6 +556,8 @@ MhPokerGame::MhPokerGame(std::size_t player_count, bool shuffle_flag)
 		deck_.resize(deck_.size() - 2);
 		player_scratchpad_[count_1].push_back(player_hands_.back().first);
 		player_scratchpad_[count_1].push_back(player_hands_.back().second);
+		std::sort(player_scratchpad_[count_1].begin(),
+			player_scratchpad_[count_1].end());
 	}
 }
 //	////////////////////////////////////////////////////////////////////////////
@@ -571,8 +573,11 @@ Card MhPokerGame::RevealOneSharedCard()
 
 	deck_.pop_back();
 
-	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1)
+	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
 		player_scratchpad_[count_1].push_back(revealed_cards_.back());
+		std::sort(player_scratchpad_[count_1].begin(),
+			player_scratchpad_[count_1].end());
+	}
 
 	return(revealed_cards_.back());
 }
