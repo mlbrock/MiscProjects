@@ -115,9 +115,9 @@ typedef unsigned char Card;
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
-const Card CardCount    = 52;
-const Card SuitCount    =  4;
-const Card PerSuitCount = CardCount / SuitCount;
+const Card CardCount = 52;
+const Card SuitCount =  4;
+const Card RankCount = CardCount / SuitCount;
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -211,7 +211,7 @@ Card GetValidCard(Card in_card)
 //	////////////////////////////////////////////////////////////////////////////
 Card GetValidRank(Card in_card)
 {
-	return(static_cast<Card>(GetValidCard(in_card) % PerSuitCount));
+	return(static_cast<Card>(GetValidCard(in_card) % RankCount));
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -231,7 +231,7 @@ Suit GetValidSuit(Suit in_suit)
 //	////////////////////////////////////////////////////////////////////////////
 Suit GetValidSuit(Card card)
 {
-	return(static_cast<Suit>(GetValidCard(card) / PerSuitCount));
+	return(static_cast<Suit>(GetValidCard(card) / RankCount));
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -529,7 +529,12 @@ private:
 	Deck             revealed_cards_;
 	std::size_t      player_count_;
 	HandPlayerVector player_hands_;
+	DeckVector       player_deck_;
 	DeckVector       player_scratchpad_;
+
+	bool EvaluatePlayerHands(std::size_t target_element,
+			std::size_t start_index, DeckVector &working_hands);
+	bool EvaluatePlayerHands(DeckVector &working_hands);
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -539,6 +544,7 @@ MhPokerGame::MhPokerGame(std::size_t player_count, bool shuffle_flag)
 	,revealed_cards_()
 	,player_count_(player_count)
 	,player_hands_()
+	,player_deck_()
 	,player_scratchpad_()
 {
 	if ((player_count_ < 2) ||
@@ -547,6 +553,7 @@ MhPokerGame::MhPokerGame(std::size_t player_count, bool shuffle_flag)
 
 	revealed_cards_.reserve(SharedCardCount);
 	player_hands_.reserve(player_count_);
+	player_deck_.resize(player_count_);
 	player_scratchpad_.resize(player_count_);
 
 	//	Cheesy deal doesn't rotate among players, but is nice in testing...
@@ -558,6 +565,12 @@ MhPokerGame::MhPokerGame(std::size_t player_count, bool shuffle_flag)
 		player_scratchpad_[count_1].push_back(player_hands_.back().second);
 		std::sort(player_scratchpad_[count_1].begin(),
 			player_scratchpad_[count_1].end());
+	}
+
+	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
+		player_deck_[count_1] = deck_;
+		player_deck_[count_1].push_back(player_hands_[count_1].first);
+		player_deck_[count_1].push_back(player_hands_[count_1].second);
 	}
 }
 //	////////////////////////////////////////////////////////////////////////////
@@ -574,6 +587,7 @@ Card MhPokerGame::RevealOneSharedCard()
 	deck_.pop_back();
 
 	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
+		player_deck_[count_1] = deck_;
 		player_scratchpad_[count_1].push_back(revealed_cards_.back());
 		std::sort(player_scratchpad_[count_1].begin(),
 			player_scratchpad_[count_1].end());
@@ -584,8 +598,47 @@ Card MhPokerGame::RevealOneSharedCard()
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+/*
+	Hand evaluation population:
+		0 shared reveals:
+			General card population: all cards not held by any opponent:
+				52 - ((PC - 1) * 2)
+			Hands can be any combination of 5 from the card pop.
+
+		1 shared reveal:
+			General card population: all cards not held by any opponent:
+				52 - ((PC - 1) * 2) - 1
+			Hands must include at least one of cards known to the player,
+			those cards being their own two held cards plus the single
+			revealed card.
+
+		2 shared reveals:
+			General card population: all cards not held by any opponent:
+				52 - ((PC - 1) * 2) - 2
+			Hands must include at least two of cards known to the player,
+			those cards being their own two held cards plus the two revealed
+			cards.
+
+		3 shared reveals:
+			General card population: all cards not held by any opponent:
+				52 - ((PC - 1) * 2) - 3
+			Hands must include at least three of cards known to the player,
+			those cards being (that set being their own two held cards plus
+			the three revealed cards.
+
+		4 shared reveals:
+			General card population: all cards not held by any opponent:
+				52 - ((PC - 1) * 2) - 4
+			Hands must include at least four of cards known to the player,
+			those cards being (that set being their own two held cards plus
+			the four revealed cards.
+*/
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 std::vector<double> MhPokerGame::RankPlayerHands(unsigned int max_usecs)
 {
+/*
 	struct PerHandAssessor {
 		PerHandAssessor(const HandPlayerVector &player_hands,
 			unsigned int max_usecs)
@@ -622,6 +675,11 @@ std::vector<double> MhPokerGame::RankPlayerHands(unsigned int max_usecs)
 	GenerateSharedHands(deck_, SharedCardCount, my_func);
 
 	return(my_func.player_ranking_);
+*/
+	if (revealed_cards_.empty()) {
+	}
+
+	return(std::vector<double>());
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -646,6 +704,252 @@ void MhPokerGame::EmitPlayerHands(std::ostream &o_str) const
 {
 	for (std::size_t count_1 = 0; count_1 < player_hands_.size(); ++count_1)
 		o_str << GetPlayerHandString(count_1) << std::endl;
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool MhPokerGame::EvaluatePlayerHands(std::size_t target_element,
+	std::size_t start_index, DeckVector &working_hands)
+{
+	while (start_index < player_deck_[0].size()) {
+		for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1)
+			working_hands[count_1][target_element] =
+				player_deck_[count_1][start_index];
+		++start_index;
+		if ((target_element + 1) < SharedCardCount)
+			EvaluatePlayerHands(target_element + 1, start_index, working_hands);
+		else if (!EvaluatePlayerHands(working_hands))
+			return(false);
+	}
+
+	return(true);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+#ifdef _MSC_VER
+typedef unsigned __int16 BitsType;
+typedef BitsType         BitsRank;
+typedef BitsType         BitsSuit;
+inline BitsType MyPopCount(BitsType src_bits)
+{
+	return(__popcnt16(src_bits));
+}
+//# pragma warning(push)
+//# pragma warning(disable:4061 4350 4365 4514 4625 4626 4710 4820 4986)
+//	Returns position of lowest set bit + 1. Zero if not bits are set.
+inline BitsType MyLowestBitIndex(BitsType src_bits)
+{
+   unsigned long Index;
+   unsigned long Mask = src_bits;
+
+	return(static_cast<BitsType>((!_BitScanForward(&Index, Mask)) ?
+		0 : (Mask + 1)));
+}
+//	Returns position of highest set bit + 1. Zero if not bits are set.
+inline BitsType MyHighestBitIndex(BitsType src_bits)
+{
+   unsigned long Index;
+   unsigned long Mask = src_bits;
+
+	return(static_cast<BitsType>((!_BitScanReverse(&Index, Mask)) ?
+		0 : (Mask + 1)));
+}
+#else	//	Assumes Linux...
+typedef u_int32_t BitsType;
+typedef BitsType  BitsRank;
+typedef BitsType  BitsSuit;
+inline BitsType MyPopCount(BitsType src_bits)
+{
+	return(static_cast<BitsType>(__builtin_popcount(src_bits)));
+}
+//	Returns position of lowest set bit + 1. Zero if not bits are set.
+inline BitsType MyLowestBitIndex(BitsType src_bits)
+{
+	return((!src_bits) ? 0 : static_cast<BitsType>(__builtin_ffs(src)));
+}
+//	Returns position of highest set bit + 1. Zero if not bits are set.
+inline BitsType MyHighestBitIndex(BitsType src_bits)
+{
+	return((!src_bits) ? 0 : static_cast<BitsType>(
+		((sizeof(src_bits) * CHAR_BIT) - __builtin_clz(src_bits))));
+}
+#endif // #ifdef _MSC_VER
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+/*
+struct HandFull {
+	HandFull()
+	{
+		::memset(cards_, '\0', sizeof(cards_));
+	}
+
+	std::size_t size() const
+	{
+		return(MhPokerGame::SharedCardCount);
+	}
+
+	const Card & operator [] (std::size_t card_index) const
+	{
+		if (card_index >= MhPokerGame::SharedCardCount)
+			throw std::invalid_argument("Invalid card index specified.");
+
+		return(cards_[card_index]);
+	}
+
+	Card & operator [] (std::size_t card_index)
+	{
+		return(const_cast<Card &>(
+			const_cast<const HandFull * const>(this)->operator[](card_index)));
+	}
+
+	Card cards_[MhPokerGame::SharedCardCount];
+};
+*/
+template <std::size_t CardCount> class CardArray {
+public:
+	static const std::size_t CardArraySize = CardCount;
+
+	CardArray()
+	{
+		clear();
+	}
+
+	std::size_t size() const
+	{
+		return(CardArraySize);
+	}
+
+	void clear()
+	{
+		::memset(cards_, '\0', sizeof(cards_));
+	}
+
+	const Card & operator [] (std::size_t card_index) const
+	{
+		if (card_index >= CardArraySize)
+			throw std::invalid_argument("Invalid card index specified.");
+
+		return(cards_[card_index]);
+	}
+
+	Card & operator [] (std::size_t card_index)
+	{
+		return(const_cast<Card &>(
+			const_cast<const CardArray * const>(this)->operator[](card_index)));
+	}
+
+private:
+	Card cards_[CardArraySize];
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//MhPokerGame::SharedCardCount
+//	////////////////////////////////////////////////////////////////////////////
+typedef CardArray<MhPokerGame::SharedCardCount> HandFull;
+typedef CardArray<RankCount>                    HandRank;
+//typedef std::vector<HandFull>          HandFullVector;
+//typedef HandFullVector::const_iterator HandFullVectorIterC;
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+enum HandType {
+	HandStraightFlush,
+	HandFourOfAKind,
+	HandFullHouse,
+	HandFlush,
+	HandStraight,
+	HandThreeOfAKind,
+	HandTwoPair,
+	HandOnePair,
+	HandHighCard
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool MhPokerGame::EvaluatePlayerHands(DeckVector &working_hands)
+{
+	HandType    best_hand_type  = HandHighCard;
+	std::size_t best_hand_hint  = 0;
+	std::size_t best_hand_index = 0;
+	BitsRank    last_bits_rank  = 0;
+	BitsSuit    last_bits_suit  = 0;
+
+	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
+		const Deck &player_hand = working_hands[count_1];
+		HandRank    hand_rank;
+/*
+		BitsRank bits_rank =
+			static_cast<BitsRank>(
+			1 << GetValidRank(player_hand[0]) |
+			1 << GetValidRank(player_hand[1]) |
+			1 << GetValidRank(player_hand[2]) |
+			1 << GetValidRank(player_hand[3]) |
+			1 << GetValidRank(player_hand[4]));
+		BitsSuit bits_suit =
+			static_cast<BitsSuit>(
+			1 << GetValidSuit(player_hand[0]) |
+			1 << GetValidSuit(player_hand[1]) |
+			1 << GetValidSuit(player_hand[2]) |
+			1 << GetValidSuit(player_hand[3]) |
+			1 << GetValidSuit(player_hand[4]));
+*/
+		BitsRank bits_rank = 0;
+		BitsSuit bits_suit = 0;
+		for (std::size_t count_2 = 0; count_2 < player_hand.size(); ++count_2) {
+			bits_rank          |=
+				static_cast<BitsRank>(1 << GetValidRank(player_hand[count_2]));
+			bits_suit          |=
+				static_cast<BitsSuit>(1 << GetValidSuit(player_hand[count_2]));
+			hand_rank[GetValidRank(player_hand[count_2])]++;
+		}
+		BitsRank    count_ranks = MyPopCount(bits_rank);
+		BitsSuit    count_suits = MyPopCount(bits_suit);
+		HandType    hand_type;
+		std::size_t hand_hint;
+		/*
+			Ace low straight:
+				1000000001111
+				1   0   0   F
+		*/
+		if ((count_suits == 1)           &&
+			 ((bits_rank == 0x31)         ||
+			  (bits_rank == (0x31 <<  1)) ||
+			  (bits_rank == (0x31 <<  2)) ||
+			  (bits_rank == (0x31 <<  3)) ||
+			  (bits_rank == (0x31 <<  4)) ||
+			  (bits_rank == (0x31 <<  5)) ||
+			  (bits_rank == (0x31 <<  6)) ||
+			  (bits_rank == (0x31 <<  7)) ||
+			  (bits_rank == (0x31 <<  8)) ||
+			  (bits_rank == 0x100f))) {
+			hand_type = HandStraightFlush;
+			hand_hint = 0;
+		}
+		else ((count_ranks == 2) && (count_suits == 4) &&
+			((hand_rank[bit_low = (MyLowestBitIndex(bits_rank) - 1)] == 4) ||
+			 (hand_rank[bit_high = (MyHighestBitIndex(bits_rank) - 1)] == 4))) {
+			hand_type = HandFourOfAKind;
+			hand_hint = (hand_rank[bit_low] == 4) ? bit_low : bit_high;
+		}
+		if (!count_1) {
+			last_bits_rank = bits_rank;
+			last_bits_suit = bits_suit;
+		}
+		else {
+		}
+	}
+
+/*
+	++hands_evaluated_;
+*/
+
+/*
+	return((!max_usecs_) ||
+		(boost::posix_time::microsec_clock::universal_time() < end_time_));
+*/
+	return(true);
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -822,6 +1126,10 @@ int main()
 	int return_code = EXIT_SUCCESS;
 
 	try {
+      HandFull hand_full_m;
+const HandFull hand_full_c;
+Card card_m = hand_full_m[3];
+Card card_c = hand_full_c[3];
 /*
 		TEST_CheckDeck();
 		TEST_GenCombos::TEST_GenSharedHands_1();
@@ -836,5 +1144,34 @@ int main()
 
 	return(return_code);
 }
+//	////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//	////////////////////////////////////////////////////////////////////////////
+/*
+template <typename PerHandFunctor>
+	bool MhPokerGame::EvaluatePlayerHands(PerHandFunctor &hand_func)
+{
+	DeckVector working_hand(player_count_);
+
+	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1)
+		working_hands.resize(SharedCardCount, 0);
+
+	return(EvaluatePlayerHands(0, 0, working_hand, hand_func));
+}
+*/
 //	////////////////////////////////////////////////////////////////////////////
 
