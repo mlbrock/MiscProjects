@@ -1596,7 +1596,7 @@ int HandEval::Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
 				BitsType bit_lo_2 = MyLowestBitIndex(hand_eval_2.bits_rank_) - 1;
 				BitsType bit_hi_2 = MyHighestBitIndex(hand_eval_2.bits_rank_) - 1;
 				for (BitsType count_1 = std::max(bit_hi_1, bit_hi_2);
-					count_1 <= std::min(bit_hi_1, bit_hi_2); --count_1) {
+					count_1 <= std::min(bit_lo_1, bit_lo_2); --count_1) {
 					cmp = static_cast<int>(hand_eval_1.hand_rank_[count_1]) -
 						static_cast<int>(hand_eval_2.hand_rank_[count_1]);
 					if (cmp)
@@ -1892,8 +1892,8 @@ void RunTest_GameCycle_1()
 	my_game.RevealOneSharedCard();
 
 	{
-		HandRankResults rank_result(my_game.RankPlayerHands(false, 250000));
-		my_game.EmitPlayerHands(rank_result);
+//		HandRankResults rank_result(my_game.RankPlayerHands(false, 250000));
+//		my_game.EmitPlayerHands(rank_result);
 	}
 
 	EmitSep('=');
