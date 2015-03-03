@@ -228,7 +228,9 @@ enum HandType {
 	HandTwoPair,
 	HandOnePair,
 	HandHighCard,
-	HandNone					//	All hands are better than this.
+	HandNone,					//	All hands are better than this.
+	HandValidMin = HandStraightFlush,
+	HandValidMax = HandHighCard
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -449,8 +451,10 @@ const char *SuitNames[] = {
 
 //	////////////////////////////////////////////////////////////////////////////
 //	CODE NOTE: Must change if order of enum Suit changes...
+//	Un-comment the line below to never use the IBM-PC character set.
+#define DO_NOT_USE_IBM_CHARS
 const char SuitToCharMap[] = {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (!defined(DO_NOT_USE_IBM_CHARS))
 	'\x5',
 	'\x4',
 	'\x3',
@@ -460,7 +464,7 @@ const char SuitToCharMap[] = {
 	'D',
 	'H',
 	'S'
-#endif // #ifdef _MSC_VER
+#endif // #if defined(_MSC_VER) && (!defined(DO_NOT_USE_IBM_CHARS))
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -497,6 +501,20 @@ const char *RankNamesShort[] = {
 	"Q",
 	"K",
 	"A"
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *HandTypeNameList[] = {
+	"Straight flush",
+	"Four-of-a-kind",
+	"Full house",
+	"Flush",
+	"Straight",
+	"Three-of-a-kind",
+	"Two pair",
+	"One pair",
+	"High card"
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -692,6 +710,16 @@ std::ostream &EmitDeckByLine(const Deck &in_deck,
 std::ostream & operator << (std::ostream &o_str, const Deck &in_deck)
 {
 	return(EmitDeck(in_deck, true, false, o_str));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::ostream & operator << (std::ostream &o_str, const HandFull &datum)
+{
+	for (std::size_t count_1 = 0; count_1 < HandFull::CardArraySize; ++count_1)
+		o_str << ((count_1) ? " " : "") << GetCardNameShort(datum[count_1]);
+
+	return(o_str);
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -909,7 +937,6 @@ HandRankResults MhPokerGame::RankPlayerHands(bool randomize_decks,
 			:game_ptr_(game_ptr)
 			,player_decks_ptr_(&player_decks)
 			,player_decks_()
-//			,player_ranking_(player_decks.size())
 			,rank_results_(player_decks.size())
 			,max_usecs_(max_usecs)
 			,end_time_(boost::posix_time::microsec_clock::universal_time() +
@@ -942,14 +969,9 @@ HandRankResults MhPokerGame::RankPlayerHands(bool randomize_decks,
 		HandRankResults           rank_results_;
 		unsigned int              max_usecs_;
 		boost::posix_time::ptime  end_time_;
-
-	private:
-//		PerHandAssessor & operator = (const PerHandAssessor &);	//	Not defined.
 	};
 
 	PerHandAssessor my_func(this, player_deck_, randomize_decks, max_usecs);
-
-//	GenerateSharedHands(deck_, SharedCardCount, my_func);
 
 	HandFullVector working_hands(player_count_);
 
@@ -1313,9 +1335,9 @@ bool HandEval::EvaluatePlayerHand(const HandFull &player_hand,
 	if (count_ranks_ == 3) {
 		BitsType bit_lo = MyLowestBitIndex(bits_rank_) - 1;
 		BitsType bit_hi = MyHighestBitIndex(bits_rank_) - 1;
-		BitsType bit_mi = static_cast<BitsType>(
-			bits_rank_ & (~((1 << bit_lo) | (1 << bit_hi))));
-		if ((hand_rank_[bit_lo] != 2) && (hand_rank_[bit_lo] != 2)) {
+		BitsType bit_mi = MyLowestBitIndex(static_cast<BitsType>(
+			bits_rank_ & (~((1 << bit_lo) | (1 << bit_hi))))) - 1;
+		if ((hand_rank_[bit_lo] != 2) && (hand_rank_[bit_hi] != 2)) {
 			//	Hint 1 contains the three-of-a-kind rank.
 			//	Hint 2 contains the highest rank of the remaining cards.
 			hand_type_   = HandThreeOfAKind;
@@ -1740,6 +1762,163 @@ void RunTest_GameCycle_1()
 
 } // namespace TEST_GameCycle
 
+//	////////////////////////////////////////////////////////////////////////////
+const char *SuitBriefNameChars = "CDHS";
+const char *RankBriefNameChars = "234567890JQKA";
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+Card ParseCard(const char *in_string)
+{
+	if ((!in_string) || (::strlen(in_string) < 2))
+		throw std::invalid_argument("Invalid card parse source string.");
+
+	const char *rank_ptr = ::strchr(RankBriefNameChars,
+		::toupper(*in_string));
+
+	if (!rank_ptr)
+		throw std::invalid_argument("Invalid card parse source string rank.");
+
+	const char *suit_ptr = ::strchr(SuitBriefNameChars,
+		::toupper(in_string[1]));
+
+	if (!suit_ptr)
+		throw std::invalid_argument("Invalid card parse source string suit.");
+
+	return(static_cast<Card>((rank_ptr - RankBriefNameChars) +
+		((suit_ptr - SuitBriefNameChars) * RankCount)));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+HandFull ParseHand(const char *in_string)
+{
+	HandFull out_cards;
+
+	if ((!in_string) || (::strlen(in_string) < (HandFull::CardArraySize * 2)))
+		throw std::invalid_argument("Invalid hand parse source string.");
+
+	for (std::size_t count_1 = 0; count_1 < HandFull::CardArraySize;
+		++count_1, in_string += 2)
+		out_cards[count_1] = ParseCard(in_string);
+
+	return(out_cards);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GetHandTypeName(HandType hand_type)
+{
+	if ((hand_type < HandValidMin) || (hand_type > HandValidMax))
+		throw std::invalid_argument("Invalid hand type.");
+
+	return(HandTypeNameList[hand_type]);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string GetHandTypeName(HandEval hand_eval, bool with_hints_flag = false)
+{
+	std::ostringstream o_str;
+
+	if (!with_hints_flag)
+		return(GetHandTypeName(hand_eval.hand_type_));
+
+	switch (hand_eval.hand_type_) {
+		case HandStraightFlush	:
+			//	Hint 1 is the rank of high card of the straight flush.
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << " high";
+			break;
+		case HandFourOfAKind		:
+			/*
+				Hint 1 contains the four-of-a-kind rank.
+				Hint 2 contains the 'kicker' rank.
+			*/	
+			o_str << "Four " << GetRankName(hand_eval.hand_hint_1_) <<
+				"s, " << GetRankName(hand_eval.hand_hint_2_) << " kicker";
+			break;
+		case HandFullHouse		:
+			/*
+				Hint 1 contains the three-of-a-kind rank.
+				Hint 2 contains the pair rank.
+			*/	
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << "s and " <<
+				GetRankName(hand_eval.hand_hint_2_) << "s";
+			break;
+		case HandFlush				:
+			//	No hints provided for flushes...
+			o_str << GetHandTypeName(hand_eval.hand_type_) << " in "
+				<< GetSuitName(hand_eval.bits_suit_) << "s";
+			break;
+		case HandStraight			:
+			//	Hint 1 is the rank of high card of the straight.
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << " high";
+			break;
+		case HandThreeOfAKind	:
+			/*
+				Hint 1 contains the three-of-a-kind rank.
+				Hint 2 contains the highest rank of the remaining two cards.
+			*/
+			o_str << "Three " << GetRankName(hand_eval.hand_hint_1_) << "s";
+			break;
+		case HandTwoPair			:
+			/*
+				Hints 1 and 2 contain the ranks of the two pairs, with
+				hint 1 being the rank of the high pair.
+			*/
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << "s and " <<
+				GetRankName(hand_eval.hand_hint_2_) << "s";
+			break;
+		case HandOnePair			:
+			//	No hints provided for single pair hands...
+			o_str << GetHandTypeName(hand_eval.hand_type_);
+			break;
+		case HandHighCard			:
+			//	No hints provided (or needed) for high card hands...
+/*
+			cmp = static_cast<int>(hand_eval_1.bits_rank_) -
+				static_cast<int>(hand_eval_2.bits_rank_);
+*/
+			break;
+		case HandNone				:	//	Shouldn't happen.
+			throw std::logic_error("Unexpected HandType::HandNone encountered.");
+			break;
+	}
+
+	return(o_str.str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+namespace TEST_CmdLineHands {
+
+//	////////////////////////////////////////////////////////////////////////////
+void RunTest(int argc, char **argv)
+{
+	for (int count_1 = 1; count_1 < argc; ++count_1) {
+		try {
+			std::cout << "Source Hand: " << argv[count_1];
+			HandFull this_hand(ParseHand(argv[count_1]));
+			std::cout << " ---> OK" << std::endl;
+			std::cout << "Parsed Hand: " << this_hand;
+			HandEval hand_eval;
+			hand_eval.EvaluatePlayerHand(this_hand);
+			std::cout << " (" << GetHandTypeName(hand_eval, true) << ")" <<
+				std::endl;
+		}
+		catch (const std::exception &except) {
+			std::cout << " ---> ERROR: " << except.what() << std::endl;
+		}
+	}
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+} // namespace TEST_CmdLineHands
+
+namespace {
 
 //	////////////////////////////////////////////////////////////////////////////
 void EnsurePlatformSupport()
@@ -1752,21 +1931,22 @@ void EnsurePlatformSupport()
 		throw std::runtime_error("CPU does not support CPUID info type 2.");
 
 	__cpuid(cpu_info_array, 2);
-//	if (!(cpu_info_array[2] & 0x800000))
 	if (!(cpu_info_array[1] & (1 << 23)))
 		throw std::runtime_error("CPU does not support popcnt instruction.");
 #endif // #ifdef _MSC_VER
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+} // Anonymous namespace
 
 //	////////////////////////////////////////////////////////////////////////////
-int main()
+int main(int argc, char **argv)
 {
 	int return_code = EXIT_SUCCESS;
 
 	try {
 		EnsurePlatformSupport();
+		TEST_CmdLineHands::RunTest(argc, argv);
 		TEST_CheckComboCalc::RunTest();
 		TEST_DeckGeneration::RunTest();
 		TEST_GenCombos::RunTest_GenSharedHands_1();
@@ -1796,4 +1976,5 @@ template <typename PerHandFunctor>
 }
 */
 //	////////////////////////////////////////////////////////////////////////////
+
 
