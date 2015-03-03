@@ -276,7 +276,7 @@ inline BitsType MyPopCount(BitsType src_bits)
 //	Returns position of lowest set bit + 1. Zero if no bits are set.
 inline BitsType MyLowestBitIndex(BitsType src_bits)
 {
-	return((!src_bits) ? 0 : static_cast<BitsType>(__builtin_ffs(src)));
+	return((!src_bits) ? 0 : static_cast<BitsType>(__builtin_ffs(src_bits)));
 }
 //	Returns position of highest set bit + 1. Zero if no bits are set.
 inline BitsType MyHighestBitIndex(BitsType src_bits)
@@ -450,6 +450,10 @@ const char *SuitNames[] = {
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+const char *SuitBriefNameChars = "CDHS";
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 //	CODE NOTE: Must change if order of enum Suit changes...
 //	Un-comment the line below to never use the IBM-PC character set.
 #define DO_NOT_USE_IBM_CHARS
@@ -502,6 +506,10 @@ const char *RankNamesShort[] = {
 	"K",
 	"A"
 };
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *RankBriefNameChars = "234567890JQKA";
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -624,6 +632,132 @@ std::string GetCardNameShort(Card in_card, bool padded_flag = false)
 	o_str << "-" << GetSuitChar(in_card);
 
 	return(o_str.str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GetHandTypeName(HandType hand_type)
+{
+	if ((hand_type < HandValidMin) || (hand_type > HandValidMax))
+		throw std::invalid_argument("Invalid hand type.");
+
+	return(HandTypeNameList[hand_type]);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string GetHandTypeName(HandEval hand_eval, bool with_hints_flag = false)
+{
+	std::ostringstream o_str;
+
+	if (!with_hints_flag)
+		return(GetHandTypeName(hand_eval.hand_type_));
+
+	switch (hand_eval.hand_type_) {
+		case HandStraightFlush	:
+			//	Hint 1 is the rank of high card of the straight flush.
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << " high";
+			break;
+		case HandFourOfAKind		:
+			/*
+				Hint 1 contains the four-of-a-kind rank.
+				Hint 2 contains the 'kicker' rank.
+			*/	
+			o_str << "Four " << GetRankName(hand_eval.hand_hint_1_) <<
+				"s, " << GetRankName(hand_eval.hand_hint_2_) << " kicker";
+			break;
+		case HandFullHouse		:
+			/*
+				Hint 1 contains the three-of-a-kind rank.
+				Hint 2 contains the pair rank.
+			*/	
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << "s and " <<
+				GetRankName(hand_eval.hand_hint_2_) << "s";
+			break;
+		case HandFlush				:
+			//	No hints provided for flushes...
+			o_str << GetHandTypeName(hand_eval.hand_type_) << " in "
+				<< GetSuitName(hand_eval.bits_suit_) << "s";
+			break;
+		case HandStraight			:
+			//	Hint 1 is the rank of high card of the straight.
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << " high";
+			break;
+		case HandThreeOfAKind	:
+			/*
+				Hint 1 contains the three-of-a-kind rank.
+				Hint 2 contains the highest rank of the remaining two cards.
+			*/
+			o_str << "Three " << GetRankName(hand_eval.hand_hint_1_) << "s";
+			break;
+		case HandTwoPair			:
+			/*
+				Hints 1 and 2 contain the ranks of the two pairs, with
+				hint 1 being the rank of the high pair.
+			*/
+			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
+				GetRankName(hand_eval.hand_hint_1_) << "s and " <<
+				GetRankName(hand_eval.hand_hint_2_) << "s";
+			break;
+		case HandOnePair			:
+			//	No hints provided for single pair hands...
+			o_str << GetHandTypeName(hand_eval.hand_type_);
+			break;
+		case HandHighCard			:
+			//	No hints provided (or needed) for high card hands...
+/*
+			cmp = static_cast<int>(hand_eval_1.bits_rank_) -
+				static_cast<int>(hand_eval_2.bits_rank_);
+*/
+			break;
+		case HandNone				:	//	Shouldn't happen.
+			throw std::logic_error("Unexpected HandType::HandNone encountered.");
+			break;
+	}
+
+	return(o_str.str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+Card ParseCard(const char *in_string)
+{
+	if ((!in_string) || (::strlen(in_string) < 2))
+		throw std::invalid_argument("Invalid card parse source string.");
+
+	const char *rank_ptr = ::strchr(RankBriefNameChars,
+		::toupper(*in_string));
+
+	if (!rank_ptr)
+		throw std::invalid_argument("Invalid card parse source string rank.");
+
+	const char *suit_ptr = ::strchr(SuitBriefNameChars,
+		::toupper(in_string[1]));
+
+	if (!suit_ptr)
+		throw std::invalid_argument("Invalid card parse source string suit.");
+
+	return(static_cast<Card>((rank_ptr - RankBriefNameChars) +
+		((suit_ptr - SuitBriefNameChars) * RankCount)));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+HandFull ParseHand(const char *in_string)
+{
+	HandFull out_cards;
+
+	if ((!in_string) || (::strlen(in_string) < (HandFull::CardArraySize * 2)))
+		throw std::invalid_argument("Invalid hand parse source string.");
+
+	for (std::size_t count_1 = 0; count_1 < HandFull::CardArraySize;
+		++count_1, in_string += 2)
+		out_cards[count_1] = ParseCard(in_string);
+
+	return(out_cards);
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -1742,6 +1876,10 @@ namespace TEST_GameCycle {
 //	////////////////////////////////////////////////////////////////////////////
 void RunTest_GameCycle_1()
 {
+	EmitSep('=');
+	std::cout << "Game Cycle 1" << std::endl;
+	EmitSep('-');
+
 	MhPokerGame my_game(2, false);
 
 	my_game.EmitPlayerHands();
@@ -1757,147 +1895,25 @@ void RunTest_GameCycle_1()
 		HandRankResults rank_result(my_game.RankPlayerHands(false, 250000));
 		my_game.EmitPlayerHands(rank_result);
 	}
+
+	EmitSep('=');
+
+	std::cout << std::endl;
 }
 //	////////////////////////////////////////////////////////////////////////////
 
 } // namespace TEST_GameCycle
-
-//	////////////////////////////////////////////////////////////////////////////
-const char *SuitBriefNameChars = "CDHS";
-const char *RankBriefNameChars = "234567890JQKA";
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-Card ParseCard(const char *in_string)
-{
-	if ((!in_string) || (::strlen(in_string) < 2))
-		throw std::invalid_argument("Invalid card parse source string.");
-
-	const char *rank_ptr = ::strchr(RankBriefNameChars,
-		::toupper(*in_string));
-
-	if (!rank_ptr)
-		throw std::invalid_argument("Invalid card parse source string rank.");
-
-	const char *suit_ptr = ::strchr(SuitBriefNameChars,
-		::toupper(in_string[1]));
-
-	if (!suit_ptr)
-		throw std::invalid_argument("Invalid card parse source string suit.");
-
-	return(static_cast<Card>((rank_ptr - RankBriefNameChars) +
-		((suit_ptr - SuitBriefNameChars) * RankCount)));
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-HandFull ParseHand(const char *in_string)
-{
-	HandFull out_cards;
-
-	if ((!in_string) || (::strlen(in_string) < (HandFull::CardArraySize * 2)))
-		throw std::invalid_argument("Invalid hand parse source string.");
-
-	for (std::size_t count_1 = 0; count_1 < HandFull::CardArraySize;
-		++count_1, in_string += 2)
-		out_cards[count_1] = ParseCard(in_string);
-
-	return(out_cards);
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-const char *GetHandTypeName(HandType hand_type)
-{
-	if ((hand_type < HandValidMin) || (hand_type > HandValidMax))
-		throw std::invalid_argument("Invalid hand type.");
-
-	return(HandTypeNameList[hand_type]);
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-std::string GetHandTypeName(HandEval hand_eval, bool with_hints_flag = false)
-{
-	std::ostringstream o_str;
-
-	if (!with_hints_flag)
-		return(GetHandTypeName(hand_eval.hand_type_));
-
-	switch (hand_eval.hand_type_) {
-		case HandStraightFlush	:
-			//	Hint 1 is the rank of high card of the straight flush.
-			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
-				GetRankName(hand_eval.hand_hint_1_) << " high";
-			break;
-		case HandFourOfAKind		:
-			/*
-				Hint 1 contains the four-of-a-kind rank.
-				Hint 2 contains the 'kicker' rank.
-			*/	
-			o_str << "Four " << GetRankName(hand_eval.hand_hint_1_) <<
-				"s, " << GetRankName(hand_eval.hand_hint_2_) << " kicker";
-			break;
-		case HandFullHouse		:
-			/*
-				Hint 1 contains the three-of-a-kind rank.
-				Hint 2 contains the pair rank.
-			*/	
-			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
-				GetRankName(hand_eval.hand_hint_1_) << "s and " <<
-				GetRankName(hand_eval.hand_hint_2_) << "s";
-			break;
-		case HandFlush				:
-			//	No hints provided for flushes...
-			o_str << GetHandTypeName(hand_eval.hand_type_) << " in "
-				<< GetSuitName(hand_eval.bits_suit_) << "s";
-			break;
-		case HandStraight			:
-			//	Hint 1 is the rank of high card of the straight.
-			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
-				GetRankName(hand_eval.hand_hint_1_) << " high";
-			break;
-		case HandThreeOfAKind	:
-			/*
-				Hint 1 contains the three-of-a-kind rank.
-				Hint 2 contains the highest rank of the remaining two cards.
-			*/
-			o_str << "Three " << GetRankName(hand_eval.hand_hint_1_) << "s";
-			break;
-		case HandTwoPair			:
-			/*
-				Hints 1 and 2 contain the ranks of the two pairs, with
-				hint 1 being the rank of the high pair.
-			*/
-			o_str << GetHandTypeName(hand_eval.hand_type_) << ", " <<
-				GetRankName(hand_eval.hand_hint_1_) << "s and " <<
-				GetRankName(hand_eval.hand_hint_2_) << "s";
-			break;
-		case HandOnePair			:
-			//	No hints provided for single pair hands...
-			o_str << GetHandTypeName(hand_eval.hand_type_);
-			break;
-		case HandHighCard			:
-			//	No hints provided (or needed) for high card hands...
-/*
-			cmp = static_cast<int>(hand_eval_1.bits_rank_) -
-				static_cast<int>(hand_eval_2.bits_rank_);
-*/
-			break;
-		case HandNone				:	//	Shouldn't happen.
-			throw std::logic_error("Unexpected HandType::HandNone encountered.");
-			break;
-	}
-
-	return(o_str.str());
-}
-//	////////////////////////////////////////////////////////////////////////////
 
 namespace TEST_CmdLineHands {
 
 //	////////////////////////////////////////////////////////////////////////////
 void RunTest(int argc, char **argv)
 {
+	EmitSep('=');
+	std::cout << "Command Line Hand Test (" << (argc - 1) << " hands)" <<
+		std::endl;
+	EmitSep('-');
+
 	for (int count_1 = 1; count_1 < argc; ++count_1) {
 		try {
 			std::cout << "Source Hand: " << argv[count_1];
@@ -1913,6 +1929,10 @@ void RunTest(int argc, char **argv)
 			std::cout << " ---> ERROR: " << except.what() << std::endl;
 		}
 	}
+
+	EmitSep('=');
+
+	std::cout << std::endl;
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -1921,6 +1941,11 @@ void RunTest(int argc, char **argv)
 namespace {
 
 //	////////////////////////////////////////////////////////////////////////////
+/*
+	Windows documentation states that use of the popcnt() intrinsics are
+	supported only for some CPU families/revisions and that if not supported,
+	the results are "unpredictable" --- whatever that means. Upshot is, we test.
+*/
 void EnsurePlatformSupport()
 {
 #ifdef _MSC_VER
