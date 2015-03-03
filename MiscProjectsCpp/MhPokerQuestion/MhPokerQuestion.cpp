@@ -340,7 +340,7 @@ struct HandEval {
 
 	//	If #1 is a better hand than #2, return will be 1.
 	static int Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
-		const HandFull &hand_full_1, const HandFull &hand_full_1);
+		const HandFull &hand_full_1, const HandFull &hand_full_2);
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -1307,7 +1307,7 @@ bool HandEval::EvaluatePlayerHand(const HandFull &player_hand,
 		in a pair, it's a three-of-kind.
 
 		The logic here is a little backwards in order to support the short-
-		circuiting of evaluation.
+		circuiting of hand evaluation.
 	*/
 	//	----------------------------------------------------------------------
 	if (count_ranks_ == 3) {
@@ -1320,12 +1320,12 @@ bool HandEval::EvaluatePlayerHand(const HandFull &player_hand,
 			//	Hint 2 contains the highest rank of the remaining cards.
 			hand_type_   = HandThreeOfAKind;
 			hand_hint_1_ = (hand_rank_[bit_lo] == 3) ? bit_lo :
-				((hand_rank_[bit_hi] == 3) ? bit_hi : bit_mi;
-			if (hand_rank_[bit_lo] == 3)
+				((hand_rank_[bit_hi] == 3) ? bit_hi : bit_mi);
+			if (hand_rank_[bit_lo] == 3) {
 				hand_hint_1_ = bit_lo;
 				hand_hint_2_ = std::max(bit_hi, bit_mi);
 			}
-			else if (hand_rank_[bit_hi] == 3)
+			else if (hand_rank_[bit_hi] == 3) {
 				hand_hint_1_ = bit_hi;
 				hand_hint_2_ = std::max(bit_lo, bit_mi);
 			}
@@ -1337,14 +1337,18 @@ bool HandEval::EvaluatePlayerHand(const HandFull &player_hand,
 		}
 		else if (min_hand_type == HandThreeOfAKind)
 			return(false);
-		//	Two pair logic.
-		//	Hints 1 and 2 contain the ranks of the two pairs.
-		if (hand_rank_[bit_lo] == 2) {
-			hand_hint_1_ = bit_lo;
-			hand_hint_2_ = (hand_rank_[bit_hi] == 2) ? bit_hi : bit_mi;
+		/*
+			Two pair logic.
+
+			Hints 1 and 2 contain the ranks of the two pairs. Hint 1
+			is the rank of the highest pair.
+		*/
+		if (hand_rank_[bit_hi] == 2) {
+			hand_hint_1_ = bit_hi;
+			hand_hint_2_ = (hand_rank_[bit_lo] == 2) ? bit_lo : bit_mi;
 		}
 		else {
-			hand_hint_1_ = bit_hi;
+			hand_hint_1_ = bit_lo;
 			hand_hint_2_ = bit_mi;
 		}
 		hand_type_ = HandTwoPair;
@@ -1376,8 +1380,8 @@ bool HandEval::EvaluatePlayerHand(const HandFull &player_hand,
 	/*
 		Otherwise it's just a high card hand.
 
-		Note that no hints are provided for a high card as they aren't necessary
-		for hand type detection.
+		Note that no hints are provided for a high card hand as they aren't
+		necessary for hand type detection.
 	*/
 	//	----------------------------------------------------------------------
 	hand_type_ = HandHighCard;
@@ -1389,7 +1393,7 @@ bool HandEval::EvaluatePlayerHand(const HandFull &player_hand,
 
 //	////////////////////////////////////////////////////////////////////////////
 int HandEval::Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
-	const HandFull &hand_full_1, const HandFull &hand_full_1)
+	const HandFull &hand_full_1, const HandFull &hand_full_2)
 {
 	//	Sense reversed because lower HandType values are better.
 	if (hand_eval_1.hand_type_ > hand_eval_2.hand_type_)
@@ -1422,16 +1426,26 @@ int HandEval::Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
 			break;
 		case HandFlush				:
 			//	No hints provided for flushes...
-			BitsType bit_lo_1 = MyLowestBitIndex(hand_eval_1.bits_rank_) - 1;
-			BitsType bit_hi_1 = MyHighestBitIndex(hand_eval_1.bits_rank_) - 1;
-			BitsType bit_lo_2 = MyLowestBitIndex(hand_eval_2.bits_rank_) - 1;
-			BitsType bit_hi_2 = MyHighestBitIndex(hand_eval_2.bits_rank_) - 1;
-			for (BitsType count_1 = std::max(bit_hi_1, bit_hi_2);
-				count_1 <= std::min(bit_hi_1, bit_hi_2); --count_1) {
-				cmp = static_cast<int>(hand_eval_1.hand_rank_[count_1]) -
-					static_cast<int>(hand_eval_2.hand_rank_[count_1]);
-				if (cmp)
-					break;
+			{
+				/*
+					Have to test whether calling My{High|Low}estBitIndex() four
+					times and using the high-max and low-min as loop boundaries
+					is a performance win over just iterating from 12 to 0.
+
+					The answer to which should also inform the loop in the
+					HandOnePair case.
+				*/
+				BitsType bit_lo_1 = MyLowestBitIndex(hand_eval_1.bits_rank_) - 1;
+				BitsType bit_hi_1 = MyHighestBitIndex(hand_eval_1.bits_rank_) - 1;
+				BitsType bit_lo_2 = MyLowestBitIndex(hand_eval_2.bits_rank_) - 1;
+				BitsType bit_hi_2 = MyHighestBitIndex(hand_eval_2.bits_rank_) - 1;
+				for (BitsType count_1 = std::max(bit_hi_1, bit_hi_2);
+					count_1 <= std::min(bit_hi_1, bit_hi_2); --count_1) {
+					cmp = static_cast<int>(hand_eval_1.hand_rank_[count_1]) -
+						static_cast<int>(hand_eval_2.hand_rank_[count_1]);
+					if (cmp)
+						break;
+				}
 			}
 			break;
 		case HandStraight			:
@@ -1441,12 +1455,15 @@ int HandEval::Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
 		case HandThreeOfAKind	:
 			/*
 				Hint 1 contains the three-of-a-kind rank.
-				Hint 2 contains the highest rank of the remaining cards.
+				Hint 2 contains the highest rank of the remaining two cards.
 
-				If they're the same, compare the single remaining rank.
+				If hint 2 compares the same, compare the single remaining rank.
+
+				Note that this logic is identical with that for HandTwoPair.
+				They should probably be combined by way of case fall-through.
 			*/
-			if ((cmp = CompareHint1(hand_eval_1, hand_eval_2) == 0) {
-				if ((cmp = CompareHint2(hand_eval_1, hand_eval_2) == 0)
+			if ((cmp = CompareHint1(hand_eval_1, hand_eval_2)) == 0) {
+				if ((cmp = CompareHint2(hand_eval_1, hand_eval_2)) == 0)
 					cmp = static_cast<int>(hand_eval_1.bits_rank_ &
 						(~((1 << hand_eval_1.hand_hint_1_) |
 						   (1 << hand_eval_1.hand_hint_2_)))) -
@@ -1457,12 +1474,13 @@ int HandEval::Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
 			break;
 		case HandTwoPair			:
 			/*
-				Hints 1 and 2 contain the ranks of the two pairs.
+				Hints 1 and 2 contain the ranks of the two pairs, with
+				hint 1 being the rank of the high pair.
 
 				Use the single remaining rank as a tie-breaker.
 			*/
-			if ((cmp = CompareHint1(hand_eval_1, hand_eval_2) == 0) {
-				if ((cmp = CompareHint2(hand_eval_1, hand_eval_2) == 0)
+			if ((cmp = CompareHint1(hand_eval_1, hand_eval_2)) == 0) {
+				if ((cmp = CompareHint2(hand_eval_1, hand_eval_2)) == 0)
 					cmp = static_cast<int>(hand_eval_1.bits_rank_ &
 						(~((1 << hand_eval_1.hand_hint_1_) |
 						   (1 << hand_eval_1.hand_hint_2_)))) -
@@ -1722,16 +1740,33 @@ void RunTest_GameCycle_1()
 
 } // namespace TEST_GameCycle
 
+
+//	////////////////////////////////////////////////////////////////////////////
+void EnsurePlatformSupport()
+{
+#ifdef _MSC_VER
+	int cpu_info_array[4];
+
+	__cpuid(cpu_info_array, 0);
+	if (cpu_info_array[0] < 2)
+		throw std::runtime_error("CPU does not support CPUID info type 2.");
+
+	__cpuid(cpu_info_array, 2);
+//	if (!(cpu_info_array[2] & 0x800000))
+	if (!(cpu_info_array[1] & (1 << 23)))
+		throw std::runtime_error("CPU does not support popcnt instruction.");
+#endif // #ifdef _MSC_VER
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+
 //	////////////////////////////////////////////////////////////////////////////
 int main()
 {
 	int return_code = EXIT_SUCCESS;
 
 	try {
-BitsRank bits_rank_ = 64 | 16 | 4;
-BitsType bit_lo = MyLowestBitIndex(bits_rank_) - 1;
-BitsType bit_hi = MyHighestBitIndex(bits_rank_) - 1;
-BitsType bit_mi = bits_rank_ & (~(64 | 4));
+		EnsurePlatformSupport();
 		TEST_CheckComboCalc::RunTest();
 		TEST_DeckGeneration::RunTest();
 		TEST_GenCombos::RunTest_GenSharedHands_1();
