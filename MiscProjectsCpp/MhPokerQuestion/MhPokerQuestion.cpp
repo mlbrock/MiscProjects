@@ -1182,23 +1182,11 @@ struct FinalHandAssessor {
 
 	inline bool operator () (const HandFullVector &working_hands)
 	{
-if ((working_hands[0][0] == 32) ||
-	 (working_hands[0][1] == 32) ||
-	 (working_hands[0][2] == 32) ||
-	 (working_hands[0][3] == 32) ||
-	 (working_hands[0][4] == 32))
-	std::cout << "A:HERE!!!" << std::endl;
-
 		for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
 			const HandFull &player_hand = working_hands[count_1];
 			HandEval        hand_eval;
 			if (hand_eval.EvaluatePlayerHand(player_hand, (!first_pass_done_) ?
 				HandNone : best_evals_[count_1].hand_type_)) {
-
-if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
-	std::cout << "NEW    : " << player_hand << std::endl;
-}
-
 				if (!first_pass_done_) {
 					best_hands_[count_1] = player_hand;
 					best_evals_[count_1] = hand_eval;
@@ -1208,19 +1196,9 @@ if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
 					best_evals_[count_1] = hand_eval;
 				}
 				else if (hand_eval.hand_type_ == best_evals_[count_1].hand_type_) {
-
-if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
-	std::cout << "TEST   : " << best_hands_[count_1] << "  OR  " << player_hand << std::endl;
-}
-
 					int cmp = HandEval::Compare(hand_eval, best_evals_[count_1],
 						working_hands[count_1], best_hands_[count_1]);
 					if (cmp > 0) {
-
-if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
-	std::cout << "TEST   : " << best_hands_[count_1] << " ---> " << player_hand << std::endl;
-	std::cout << "REPLACE: " << best_hands_[count_1] << " ---> " << player_hand << std::endl;
-}
 						//	New best hand found...
 						best_hands_[count_1] = player_hand;
 						best_evals_[count_1] = hand_eval;
@@ -1261,10 +1239,6 @@ if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
 HandFullVector MhPokerGame::GetFinalPlayerHands(std::size_t &best_hand_index)
 	const
 {
-std::cout << "*** Possible Final Hands (" << player_scratchpad_[0].size() <<
-	" cards, " << 5 <<  " hand size) = " <<
-	CalcPossibleHandCount(player_scratchpad_[0].size(), 5) << std::endl;
-
 	FinalHandAssessor my_func(*this);
 
 	HandFullVector working_hands(player_count_);
@@ -2063,12 +2037,6 @@ namespace TEST_GameCycle {
 void RunTest_GameCycle(std::size_t game_cycle_number = 1,
 	std::size_t player_count = 2, bool shuffle_flag = true)
 {
-//	CODE NOTE: TEST CODE
-if (game_cycle_number != 4) {
-	MhPokerGame my_game(player_count, shuffle_flag);
-	return;
-}
-
 	EmitSep('=');
 	std::cout << "Game Cycle " << game_cycle_number << " (" << player_count <<
 		" players, " << ((shuffle_flag) ? "" : "not ") << "shuffled)" <<
