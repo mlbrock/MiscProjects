@@ -387,20 +387,34 @@ struct HandRankResults {
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+typedef unsigned long long             DeckMask;
+typedef std::vector<DeckMask>          DeckMaskVector;
+typedef DeckMaskVector::const_iterator DeckMaskVectorIterC;
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 class MhPokerGame {
 public:
-	static const std::size_t SharedCardCount = 5;	//	Less than CardCount
+	static const std::size_t SharedCardCount = HandSizeCount;	//	Less than CardCount
 	static const std::size_t PlayerCardCount = 2;	// As it's in a std::pair<>
 	static const std::size_t MaxPlayerCount  =
 		(CardCount - SharedCardCount) / PlayerCardCount;
 
 	MhPokerGame(std::size_t player_count, bool shuffle_flag = true);
 
+	std::size_t GetPlayerCount() const
+	{
+		return(player_count_);
+	}
+
 	Card RevealOneSharedCard();
 
 	HandRankResults RankPlayerHands(bool randomize_decks = true,
 		unsigned int max_usecs = 0);
+	HandFullVector GetFinalPlayerHands(std::size_t &best_hand_index) const;
+	HandFullVector GetFinalPlayerHands() const;
 
+	std::string GetPlayerName(std::size_t player_index) const;
 	std::string GetPlayerHandString(std::size_t player_index) const;
 	void EmitPlayerHands(std::ostream &o_str = std::cout) const;
 	void EmitPlayerHands(const HandRankResults &rank_results,
@@ -413,15 +427,25 @@ public:
 		std::size_t start_index, HandFullVector &working_hands);
 */
 	template <typename PerHandFunctor> 
-		bool EvaluatePlayerHands(const DeckVector &player_decks,
+		bool RankPlayerHands(const DeckVector &player_decks,
 			std::size_t target_element, std::size_t start_index,
-			HandFullVector &working_hands, PerHandFunctor &hand_func);
+			HandFullVector &working_hands, PerHandFunctor &hand_func) const;
 
 	std::size_t EvaluatePlayerHands(const HandFullVector &working_hands,
 		bool short_circuit_flag = false);
 	std::size_t EvaluatePlayerHands(const HandFullVector &working_hands,
 		HandEvalVector *hand_evals, std::vector<std::size_t> *hand_counts,
 		bool short_circuit_flag = false);
+
+	DeckMaskVector GetDeckMasks() const
+	{
+		return(deck_masks_);
+	}
+
+	DeckMaskVector GetDefaultDeckMasks() const
+	{
+		return(default_deck_masks_);
+	}
 
 private:
 	Deck             deck_;
@@ -430,6 +454,8 @@ private:
 	HandPlayerVector player_hands_;
 	DeckVector       player_deck_;
 	DeckVector       player_scratchpad_;
+	DeckMaskVector   deck_masks_;
+	DeckMaskVector   default_deck_masks_;
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -980,12 +1006,16 @@ MhPokerGame::MhPokerGame(std::size_t player_count, bool shuffle_flag)
 	player_hands_.reserve(player_count_);
 	player_deck_.resize(player_count_);
 	player_scratchpad_.resize(player_count_);
+	deck_masks_.resize(player_count_);
+	default_deck_masks_.resize(player_count_);
 
 	//	Cheesy deal doesn't rotate among players, but is nice in testing...
 	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
 		player_hands_.push_back(std::make_pair(deck_[deck_.size() - 1],
 			deck_[deck_.size() - 2]));
 		deck_.resize(deck_.size() - 2);
+		deck_masks_[count_1]         = std::numeric_limits<DeckMask>::max();
+		default_deck_masks_[count_1] = std::numeric_limits<DeckMask>::max();
 		player_scratchpad_[count_1].push_back(player_hands_.back().first);
 		player_scratchpad_[count_1].push_back(player_hands_.back().second);
 		std::sort(player_scratchpad_[count_1].begin(),
@@ -1013,6 +1043,15 @@ Card MhPokerGame::RevealOneSharedCard()
 
 	for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
 		player_deck_[count_1] = deck_;
+		player_deck_[count_1].push_back(player_hands_[count_1].first);
+		player_deck_[count_1].push_back(player_hands_[count_1].second);
+		if (revealed_cards_.size() == 1)
+			deck_masks_[count_1] =
+				(1 << player_hands_[count_1].first) |
+				(1 << player_hands_[count_1].second) |
+				(1 << revealed_cards_.back());
+		else
+			deck_masks_[count_1] |= (1 << revealed_cards_.back());
 		player_scratchpad_[count_1].push_back(revealed_cards_.back());
 		std::sort(player_scratchpad_[count_1].begin(),
 			player_scratchpad_[count_1].end());
@@ -1109,30 +1148,125 @@ HandRankResults MhPokerGame::RankPlayerHands(bool randomize_decks,
 
 	HandFullVector working_hands(player_count_);
 
-	if (revealed_cards_.empty()) {	//	No shared cards revealed.
-		EvaluatePlayerHands(*my_func.player_decks_ptr_, 0, 0, working_hands,
-			my_func);
-		return(my_func.rank_results_);
-	}
-	else {
-		throw std::logic_error("Invocation of MhPokerGame::RankPlayerHands() "
-			"after one or more shared card reveals is not yet supported.");
-	}
+	RankPlayerHands(*my_func.player_decks_ptr_, 0, 0, working_hands, my_func);
 
 	return(my_func.rank_results_);
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
 //	////////////////////////////////////////////////////////////////////////////
-std::string MhPokerGame::GetPlayerHandString(std::size_t player_index) const
+struct FinalHandAssessor {
+	FinalHandAssessor(const MhPokerGame &poker_game)
+		:player_count_(poker_game.GetPlayerCount())
+		,best_hands_(player_count_)
+		,best_evals_(player_count_)
+		,first_pass_done_(false)
+	{
+	}
+
+	inline bool operator () (const HandFullVector &working_hands)
+	{
+		for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
+			const HandFull &player_hand = working_hands[count_1];
+			HandEval        hand_eval;
+			if (hand_eval.EvaluatePlayerHand(player_hand, (!first_pass_done_) ?
+				HandNone : best_evals_[count_1].hand_type_)) {
+				if (!first_pass_done_) {
+					best_hands_[count_1] = player_hand;
+					best_evals_[count_1] = hand_eval;
+				}
+				else if (hand_eval.hand_type_ < best_evals_[count_1].hand_type_) {
+					best_hands_[count_1] = player_hand;
+					best_evals_[count_1] = hand_eval;
+				}
+				else if (hand_eval.hand_type_ == best_evals_[count_1].hand_type_) {
+					int cmp = HandEval::Compare(hand_eval, best_evals_[count_1],
+						working_hands[count_1], best_hands_[count_1]);
+					if (cmp > 0) {
+						//	New best hand found...
+						best_hands_[count_1] = player_hand;
+						best_evals_[count_1] = hand_eval;
+					}
+				}
+			}
+		}
+
+		first_pass_done_ = true;
+
+		return(true);
+	}
+
+	std::size_t GetBestHandIndex() const
+	{
+		std::size_t best_hand_index = 0;
+
+		for (std::size_t count_1 = 1; count_1 < player_count_; ++count_1) {
+			if (HandEval::Compare(best_evals_[best_hand_index],
+				best_evals_[count_1], best_hands_[best_hand_index],
+				best_hands_[count_1]) < 0)
+				best_hand_index = count_1;
+		}
+
+		return(best_hand_index);
+	}
+
+	std::size_t    player_count_;
+	HandFullVector best_hands_;
+	HandEvalVector best_evals_;
+	bool           first_pass_done_;
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
+//	////////////////////////////////////////////////////////////////////////////
+HandFullVector MhPokerGame::GetFinalPlayerHands(std::size_t &best_hand_index)
+	const
+{
+	FinalHandAssessor my_func(*this);
+
+	HandFullVector working_hands(player_count_);
+
+	RankPlayerHands(player_scratchpad_, 0, 0, working_hands, my_func);
+
+	best_hand_index = my_func.GetBestHandIndex();
+
+	return(my_func.best_hands_);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+HandFullVector MhPokerGame::GetFinalPlayerHands() const
+{
+	std::size_t best_hand_index;
+
+	return(GetFinalPlayerHands(best_hand_index));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string MhPokerGame::GetPlayerName(std::size_t player_index) const
 {
 	if (player_index >= player_hands_.size())
 		throw std::invalid_argument("Invalid player index.");
 
 	std::ostringstream o_str;
 
-	o_str << "Player-" << std::setfill('0') << std::setw(2) << player_index <<
-		": " << GetCardNameShort(player_hands_[player_index].first, true) <<
+	o_str << "Player-" << std::setfill('0') << std::setw(2) << player_index;
+
+	return(o_str.str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string MhPokerGame::GetPlayerHandString(std::size_t player_index) const
+{
+	std::ostringstream o_str;
+
+	o_str << GetPlayerName(player_index) << ": " <<
+		GetCardNameShort(player_hands_[player_index].first, true) <<
 		" | " << GetCardNameShort(player_hands_[player_index].second, true);
 
 	return(o_str.str());
@@ -1163,9 +1297,9 @@ void MhPokerGame::EmitPlayerHands(const HandRankResults &rank_results,
 
 //	////////////////////////////////////////////////////////////////////////////
 template <typename PerHandFunctor>
-	bool MhPokerGame::EvaluatePlayerHands(const DeckVector &player_decks,
+	bool MhPokerGame::RankPlayerHands(const DeckVector &player_decks,
 		std::size_t target_element, std::size_t start_index,
-		HandFullVector &working_hands, PerHandFunctor &hand_func)
+		HandFullVector &working_hands, PerHandFunctor &hand_func) const
 {
 	while (start_index < player_decks[0].size()) {
 		for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1)
@@ -1173,7 +1307,7 @@ template <typename PerHandFunctor>
 				player_decks[count_1][start_index];
 		++start_index;
 		if ((target_element + 1) < HandFull::CardArraySize) {
-			if (!EvaluatePlayerHands(player_decks, target_element + 1,
+			if (!RankPlayerHands(player_decks, target_element + 1,
 				start_index, working_hands, hand_func))
 				return(false);
 		}
@@ -1884,18 +2018,36 @@ void RunTest_GameCycle_1()
 
 	MhPokerGame my_game(2, false);
 
-	my_game.EmitPlayerHands();
+//	my_game.EmitPlayerHands();
 
 	{
+		std::cout << "Initial player deal" << std::endl;
 		HandRankResults rank_result(my_game.RankPlayerHands(false, 60250000));
 		my_game.EmitPlayerHands(rank_result);
 	}
 
-	my_game.RevealOneSharedCard();
+	for (std::size_t count_1 = 0; count_1 < HandSizeCount; ++count_1) {
+		EmitSep('-');
+		std::cout << "Revealed shared card " << (count_1 + 1) << " of " <<
+			HandSizeCount << ": " <<
+			GetCardNameShort(my_game.RevealOneSharedCard()) << std::endl;
+		{
+			HandRankResults rank_result(my_game.RankPlayerHands(false, 60250000));
+			my_game.EmitPlayerHands(rank_result);
+		}
+	}
 
-	{
-//		HandRankResults rank_result(my_game.RankPlayerHands(false, 250000));
-//		my_game.EmitPlayerHands(rank_result);
+	EmitSep('-');
+
+	std::size_t best_hand_index;
+	HandFullVector final_hands(my_game.GetFinalPlayerHands(best_hand_index));
+	std::cout << "Final player hands:" << std::endl;
+	for (std::size_t count_1 = 0; count_1 < final_hands.size(); ++count_1) {
+		std::cout << my_game.GetPlayerName(count_1) << ": " << final_hands[count_1];
+		HandEval hand_eval;
+		hand_eval.EvaluatePlayerHand(final_hands[count_1]);
+		std::cout << " (" << GetHandTypeName(hand_eval, true) << ")" <<
+			((count_1 == best_hand_index) ? " WINNING HAND" : "") << std::endl;
 	}
 
 	EmitSep('=');
@@ -2003,5 +2155,4 @@ template <typename PerHandFunctor>
 }
 */
 //	////////////////////////////////////////////////////////////////////////////
-
 
