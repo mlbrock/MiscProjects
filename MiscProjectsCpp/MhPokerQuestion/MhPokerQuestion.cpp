@@ -16,9 +16,9 @@
 //	////////////////////////////////////////////////////////////////////////////
 
 #ifdef _MSC_VER
-# pragma warning(disable:4514 4710)
+# pragma warning(disable:4514 4710 4820)
 # pragma warning(push)
-# pragma warning(disable:4061 4350 4365 4514 4625 4626 4710 4820 4986)
+# pragma warning(disable:4061 4350 4365 4514 4625 4626 4710 4986)
 #endif // #ifdef _MSC_VER
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -243,10 +243,12 @@ inline BitsType MyPopCount(BitsType src_bits)
 {
 	return(__popcnt16(src_bits));
 }
+/*
 inline BitsType MyPopCount(unsigned __int32 src_bits)
 {
 	return(__popcnt(src_bits));
 }
+*/
 //	Returns position of lowest set bit + 1. Zero if no bits are set.
 inline BitsType MyLowestBitIndex(BitsType src_bits)
 {
@@ -372,9 +374,19 @@ struct HandRankResults {
 
 	double GetPercentBest(std::size_t player_index) const
 	{
+/*
 		return((!hands_ranked_) ? 0.0 :
 			((static_cast<double>(best_counts_[player_index]) /
 			static_cast<double>(hands_ranked_)) * 100.0));
+*/
+		std::size_t total_count = 0;
+
+		for (std::size_t count_1 = 0; count_1 < best_counts_.size(); ++count_1)
+			total_count += best_counts_[count_1];
+
+		return((!total_count) ? 0.0 :
+			((static_cast<double>(best_counts_[player_index]) /
+			static_cast<double>(total_count)) * 100.0));
 	}
 
 	HandFullVector           best_hands_;
@@ -705,7 +717,8 @@ std::string GetHandTypeName(HandEval hand_eval, bool with_hints_flag = false)
 		case HandFlush				:
 			//	No hints provided for flushes...
 			o_str << GetHandTypeName(hand_eval.hand_type_) << " in "
-				<< GetSuitName(hand_eval.bits_suit_) << "s";
+				<< GetSuitName(static_cast<Suit>(
+					MyLowestBitIndex(hand_eval.bits_suit_) - 1));
 			break;
 		case HandStraight			:
 			//	Hint 1 is the rank of high card of the straight.
@@ -1046,12 +1059,13 @@ Card MhPokerGame::RevealOneSharedCard()
 		player_deck_[count_1].push_back(player_hands_[count_1].first);
 		player_deck_[count_1].push_back(player_hands_[count_1].second);
 		if (revealed_cards_.size() == 1)
-			deck_masks_[count_1] =
+			deck_masks_[count_1] = static_cast<DeckMask>(
 				(1 << player_hands_[count_1].first) |
 				(1 << player_hands_[count_1].second) |
-				(1 << revealed_cards_.back());
+				(1 << revealed_cards_.back()));
 		else
-			deck_masks_[count_1] |= (1 << revealed_cards_.back());
+			deck_masks_[count_1] |=
+				static_cast<DeckMask>(1 << revealed_cards_.back());
 		player_scratchpad_[count_1].push_back(revealed_cards_.back());
 		std::sort(player_scratchpad_[count_1].begin(),
 			player_scratchpad_[count_1].end());
@@ -1168,11 +1182,23 @@ struct FinalHandAssessor {
 
 	inline bool operator () (const HandFullVector &working_hands)
 	{
+if ((working_hands[0][0] == 32) ||
+	 (working_hands[0][1] == 32) ||
+	 (working_hands[0][2] == 32) ||
+	 (working_hands[0][3] == 32) ||
+	 (working_hands[0][4] == 32))
+	std::cout << "A:HERE!!!" << std::endl;
+
 		for (std::size_t count_1 = 0; count_1 < player_count_; ++count_1) {
 			const HandFull &player_hand = working_hands[count_1];
 			HandEval        hand_eval;
 			if (hand_eval.EvaluatePlayerHand(player_hand, (!first_pass_done_) ?
 				HandNone : best_evals_[count_1].hand_type_)) {
+
+if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
+	std::cout << "NEW    : " << player_hand << std::endl;
+}
+
 				if (!first_pass_done_) {
 					best_hands_[count_1] = player_hand;
 					best_evals_[count_1] = hand_eval;
@@ -1182,9 +1208,19 @@ struct FinalHandAssessor {
 					best_evals_[count_1] = hand_eval;
 				}
 				else if (hand_eval.hand_type_ == best_evals_[count_1].hand_type_) {
+
+if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
+	std::cout << "TEST   : " << best_hands_[count_1] << "  OR  " << player_hand << std::endl;
+}
+
 					int cmp = HandEval::Compare(hand_eval, best_evals_[count_1],
 						working_hands[count_1], best_hands_[count_1]);
 					if (cmp > 0) {
+
+if ((count_1 == 0) && (hand_eval.hand_type_ == HandTwoPair)) {
+	std::cout << "TEST   : " << best_hands_[count_1] << " ---> " << player_hand << std::endl;
+	std::cout << "REPLACE: " << best_hands_[count_1] << " ---> " << player_hand << std::endl;
+}
 						//	New best hand found...
 						best_hands_[count_1] = player_hand;
 						best_evals_[count_1] = hand_eval;
@@ -1225,6 +1261,10 @@ struct FinalHandAssessor {
 HandFullVector MhPokerGame::GetFinalPlayerHands(std::size_t &best_hand_index)
 	const
 {
+std::cout << "*** Possible Final Hands (" << player_scratchpad_[0].size() <<
+	" cards, " << 5 <<  " hand size) = " <<
+	CalcPossibleHandCount(player_scratchpad_[0].size(), 5) << std::endl;
+
 	FinalHandAssessor my_func(*this);
 
 	HandFullVector working_hands(player_count_);
@@ -1640,8 +1680,8 @@ bool HandEval::EvaluatePlayerHand(const HandFull &player_hand,
 			hand_hint_2_ = (hand_rank_[bit_lo] == 2) ? bit_lo : bit_mi;
 		}
 		else {
-			hand_hint_1_ = bit_lo;
-			hand_hint_2_ = bit_mi;
+			hand_hint_1_ = bit_mi;
+			hand_hint_2_ = bit_lo;
 		}
 		hand_type_ = HandTwoPair;
 		return(true);
@@ -1756,12 +1796,17 @@ int HandEval::Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
 			*/
 			if ((cmp = CompareHint1(hand_eval_1, hand_eval_2)) == 0) {
 				if ((cmp = CompareHint2(hand_eval_1, hand_eval_2)) == 0)
+					cmp = static_cast<int>(hand_eval_1.bits_rank_) -
+						static_cast<int>(hand_eval_2.bits_rank_);
+/*
+	CODE NOTE: Obsoleted. To be removed.
 					cmp = static_cast<int>(hand_eval_1.bits_rank_ &
 						(~((1 << hand_eval_1.hand_hint_1_) |
 						   (1 << hand_eval_1.hand_hint_2_)))) -
 							static_cast<int>(hand_eval_2.bits_rank_ &
 						(~((1 << hand_eval_2.hand_hint_1_) |
 						   (1 << hand_eval_2.hand_hint_2_))));
+*/
 			}
 			break;
 		case HandTwoPair			:
@@ -1773,12 +1818,17 @@ int HandEval::Compare(const HandEval &hand_eval_1, const HandEval &hand_eval_2,
 			*/
 			if ((cmp = CompareHint1(hand_eval_1, hand_eval_2)) == 0) {
 				if ((cmp = CompareHint2(hand_eval_1, hand_eval_2)) == 0)
+					cmp = static_cast<int>(hand_eval_1.bits_rank_) -
+						static_cast<int>(hand_eval_2.bits_rank_);
+/*
+	CODE NOTE: Obsoleted. To be removed.
 					cmp = static_cast<int>(hand_eval_1.bits_rank_ &
 						(~((1 << hand_eval_1.hand_hint_1_) |
 						   (1 << hand_eval_1.hand_hint_2_)))) -
 							static_cast<int>(hand_eval_2.bits_rank_ &
 						(~((1 << hand_eval_2.hand_hint_1_) |
 						   (1 << hand_eval_2.hand_hint_2_))));
+*/
 			}
 			break;
 		case HandOnePair			:
@@ -2010,19 +2060,26 @@ void RunTest_GenSharedHands_2()
 namespace TEST_GameCycle {
 
 //	////////////////////////////////////////////////////////////////////////////
-void RunTest_GameCycle_1()
+void RunTest_GameCycle(std::size_t game_cycle_number = 1,
+	std::size_t player_count = 2, bool shuffle_flag = true)
 {
+//	CODE NOTE: TEST CODE
+if (game_cycle_number != 4) {
+	MhPokerGame my_game(player_count, shuffle_flag);
+	return;
+}
+
 	EmitSep('=');
-	std::cout << "Game Cycle 1" << std::endl;
+	std::cout << "Game Cycle " << game_cycle_number << " (" << player_count <<
+		" players, " << ((shuffle_flag) ? "" : "not ") << "shuffled)" <<
+		std::endl;
 	EmitSep('-');
 
-	MhPokerGame my_game(2, false);
-
-//	my_game.EmitPlayerHands();
+	MhPokerGame my_game(player_count, shuffle_flag);
 
 	{
 		std::cout << "Initial player deal" << std::endl;
-		HandRankResults rank_result(my_game.RankPlayerHands(false, 60250000));
+		HandRankResults rank_result(my_game.RankPlayerHands(false, 250000));
 		my_game.EmitPlayerHands(rank_result);
 	}
 
@@ -2032,7 +2089,7 @@ void RunTest_GameCycle_1()
 			HandSizeCount << ": " <<
 			GetCardNameShort(my_game.RevealOneSharedCard()) << std::endl;
 		{
-			HandRankResults rank_result(my_game.RankPlayerHands(false, 60250000));
+			HandRankResults rank_result(my_game.RankPlayerHands(false, 250000));
 			my_game.EmitPlayerHands(rank_result);
 		}
 	}
@@ -2043,7 +2100,8 @@ void RunTest_GameCycle_1()
 	HandFullVector final_hands(my_game.GetFinalPlayerHands(best_hand_index));
 	std::cout << "Final player hands:" << std::endl;
 	for (std::size_t count_1 = 0; count_1 < final_hands.size(); ++count_1) {
-		std::cout << my_game.GetPlayerName(count_1) << ": " << final_hands[count_1];
+		std::cout << my_game.GetPlayerName(count_1) << ": " <<
+			final_hands[count_1];
 		HandEval hand_eval;
 		hand_eval.EvaluatePlayerHand(final_hands[count_1]);
 		std::cout << " (" << GetHandTypeName(hand_eval, true) << ")" <<
@@ -2053,6 +2111,13 @@ void RunTest_GameCycle_1()
 	EmitSep('=');
 
 	std::cout << std::endl;
+}
+//	----------------------------------------------------------------------------
+void RunTest()
+{
+	for (std::size_t count_1 = 0; count_1 < 5; ++count_1) {
+		RunTest_GameCycle(count_1 + 1, 2, true);
+	}
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -2130,7 +2195,7 @@ int main(int argc, char **argv)
 		TEST_DeckGeneration::RunTest();
 		TEST_GenCombos::RunTest_GenSharedHands_1();
 //		TEST_GenCombos::RunTest_GenSharedHands_2();
-		TEST_GameCycle::RunTest_GameCycle_1();
+		TEST_GameCycle::RunTest();
 	}
 	catch (const std::exception &except) {
 		std::cerr << "ERROR: " << except.what() << std::endl;
