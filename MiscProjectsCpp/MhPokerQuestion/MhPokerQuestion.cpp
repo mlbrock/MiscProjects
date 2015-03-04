@@ -1,8 +1,9 @@
 //	////////////////////////////////////////////////////////////////////////////
+//	////////////////////////////////////////////////////////////////////////////
 /*
 	File Name			:	MhPokerQuestion.cpp
 
-	File Description	:	Matt Hostetter's poker question.
+	File Description	:	An interesting poker question.
 
 	Revision History	:	2015-02-28 --- Creation.
 									Michael L. Brock
@@ -494,7 +495,7 @@ const char *SuitBriefNameChars = "CDHS";
 //	////////////////////////////////////////////////////////////////////////////
 //	CODE NOTE: Must change if order of enum Suit changes...
 //	Un-comment the line below to never use the IBM-PC character set.
-#define DO_NOT_USE_IBM_CHARS
+//#define DO_NOT_USE_IBM_CHARS
 const char SuitToCharMap[] = {
 #if defined(_MSC_VER) && (!defined(DO_NOT_USE_IBM_CHARS))
 	'\x5',
