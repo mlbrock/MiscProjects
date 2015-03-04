@@ -423,7 +423,7 @@ public:
 
 	HandRankResults RankPlayerHands(bool randomize_decks = true,
 		unsigned int max_usecs = 0);
-	HandFullVector GetFinalPlayerHands(std::size_t &best_hand_index) const;
+	HandFullVector GetFinalPlayerHands(unsigned int &best_hand_bitset) const;
 	HandFullVector GetFinalPlayerHands() const;
 
 	std::string GetPlayerName(std::size_t player_index) const;
@@ -1212,18 +1212,26 @@ struct FinalHandAssessor {
 		return(true);
 	}
 
-	std::size_t GetBestHandIndex() const
+	unsigned int GetBestHandBitSet() const
 	{
-		std::size_t best_hand_index = 0;
+		std::size_t  best_hand_index  = 0;
+		unsigned int best_hand_bitset = 1;
 
 		for (std::size_t count_1 = 1; count_1 < player_count_; ++count_1) {
-			if (HandEval::Compare(best_evals_[best_hand_index],
+			int cmp = HandEval::Compare(best_evals_[best_hand_index],
 				best_evals_[count_1], best_hands_[best_hand_index],
-				best_hands_[count_1]) < 0)
-				best_hand_index = count_1;
+				best_hands_[count_1]);
+			if (cmp < 0) {
+				best_hand_index  = count_1;
+				best_hand_bitset = 1 << count_1;
+			}
+			else if (!cmp) {
+				std::cout << "TIE!" << std::endl;
+				best_hand_bitset |= 1 << count_1;
+			}
 		}
 
-		return(best_hand_index);
+		return(best_hand_bitset);
 	}
 
 	std::size_t    player_count_;
@@ -1236,7 +1244,7 @@ struct FinalHandAssessor {
 } // Anonymous namespace
 
 //	////////////////////////////////////////////////////////////////////////////
-HandFullVector MhPokerGame::GetFinalPlayerHands(std::size_t &best_hand_index)
+HandFullVector MhPokerGame::GetFinalPlayerHands(unsigned int &best_hand_bitset)
 	const
 {
 	FinalHandAssessor my_func(*this);
@@ -1245,7 +1253,7 @@ HandFullVector MhPokerGame::GetFinalPlayerHands(std::size_t &best_hand_index)
 
 	RankPlayerHands(player_scratchpad_, 0, 0, working_hands, my_func);
 
-	best_hand_index = my_func.GetBestHandIndex();
+	best_hand_bitset = my_func.GetBestHandBitSet();
 
 	return(my_func.best_hands_);
 }
@@ -1254,9 +1262,9 @@ HandFullVector MhPokerGame::GetFinalPlayerHands(std::size_t &best_hand_index)
 //	////////////////////////////////////////////////////////////////////////////
 HandFullVector MhPokerGame::GetFinalPlayerHands() const
 {
-	std::size_t best_hand_index;
+	unsigned int best_hand_bitset;
 
-	return(GetFinalPlayerHands(best_hand_index));
+	return(GetFinalPlayerHands(best_hand_bitset));
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -2064,8 +2072,8 @@ void RunTest_GameCycle(std::size_t game_cycle_number = 1,
 
 	EmitSep('-');
 
-	std::size_t best_hand_index;
-	HandFullVector final_hands(my_game.GetFinalPlayerHands(best_hand_index));
+	unsigned int best_hand_bitset;
+	HandFullVector final_hands(my_game.GetFinalPlayerHands(best_hand_bitset));
 	std::cout << "Final player hands:" << std::endl;
 	for (std::size_t count_1 = 0; count_1 < final_hands.size(); ++count_1) {
 		std::cout << my_game.GetPlayerName(count_1) << ": " <<
@@ -2073,7 +2081,8 @@ void RunTest_GameCycle(std::size_t game_cycle_number = 1,
 		HandEval hand_eval;
 		hand_eval.EvaluatePlayerHand(final_hands[count_1]);
 		std::cout << " (" << GetHandTypeName(hand_eval, true) << ")" <<
-			((count_1 == best_hand_index) ? " WINNING HAND" : "") << std::endl;
+			((best_hand_bitset & (1 << count_1)) ? " WINNING HAND" : "") <<
+			std::endl;
 	}
 
 	EmitSep('=');
