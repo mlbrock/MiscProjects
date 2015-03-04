@@ -1225,10 +1225,8 @@ struct FinalHandAssessor {
 				best_hand_index  = count_1;
 				best_hand_bitset = 1 << count_1;
 			}
-			else if (!cmp) {
-				std::cout << "TIE!" << std::endl;
+			else if (!cmp)
 				best_hand_bitset |= 1 << count_1;
-			}
 		}
 
 		return(best_hand_bitset);
