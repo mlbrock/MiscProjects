@@ -1109,9 +1109,11 @@ HandRankResults MhPokerGame::RankPlayerHands(bool randomize_decks,
 
 	HandFullVector working_hands(player_count_);
 
-	if (revealed_cards_.empty())
+	if (revealed_cards_.empty()) {	//	No shared cards revealed.
 		EvaluatePlayerHands(*my_func.player_decks_ptr_, 0, 0, working_hands,
 			my_func);
+		return(my_func.rank_results_);
+	}
 	else {
 		throw std::logic_error("Invocation of MhPokerGame::RankPlayerHands() "
 			"after one or more shared card reveals is not yet supported.");
