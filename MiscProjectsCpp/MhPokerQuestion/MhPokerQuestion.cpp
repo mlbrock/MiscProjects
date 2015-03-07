@@ -801,23 +801,29 @@ HandFull ParseHand(const char *in_string)
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+struct MyGen {
+	MyGen()
+		:value_(0)
+	{
+	}
+
+	Card operator () ()
+	{
+		return(value_++);
+	}
+
+	Card value_;
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
 //	////////////////////////////////////////////////////////////////////////////
 Deck ConstructDeck(bool shuffle_flag = false)
 {
-	struct MyGen {
-		MyGen()
-			:value_(0)
-		{
-		}
-
-		Card operator () ()
-		{
-			return(value_++);
-		}
-
-		Card value_;
-	};
-
 	Deck  out_deck(CardCount);
 	MyGen tmp_gen;
 
@@ -975,27 +981,33 @@ template <typename PerHandFunctor>
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+struct PerHandAccumulator {
+	PerHandAccumulator(const Deck &in_deck, std::size_t shared_card_count)
+		:out_deck_()
+	{
+		out_deck_.reserve(CalcPossibleHandCount(in_deck, shared_card_count));
+	}
+
+	inline bool operator () (const Deck &working_hand)
+	{
+		out_deck_.push_back(working_hand);
+
+		return(true);
+	}
+
+	DeckVector out_deck_;
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
 //	////////////////////////////////////////////////////////////////////////////
 DeckVector GenerateSharedHandsVector(const Deck &in_deck,
 	std::size_t shared_card_count)
 {
-	struct PerHandAccumulator {
-		PerHandAccumulator(const Deck &in_deck, std::size_t shared_card_count)
-			:out_deck_()
-		{
-			out_deck_.reserve(CalcPossibleHandCount(in_deck, shared_card_count));
-		}
-
-		inline bool operator () (const Deck &working_hand)
-		{
-			out_deck_.push_back(working_hand);
-
-			return(true);
-		}
-
-		DeckVector out_deck_;
-	};
-
 	PerHandAccumulator my_func(in_deck, shared_card_count);
 
 	GenerateSharedHands(in_deck, shared_card_count, my_func);
@@ -1114,51 +1126,57 @@ Card MhPokerGame::RevealOneSharedCard()
 */
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+struct PerHandAssessor {
+	PerHandAssessor(MhPokerGame *game_ptr, const DeckVector &player_decks,
+		bool randomize_decks,
+		unsigned int max_usecs)
+		:game_ptr_(game_ptr)
+		,player_decks_ptr_(&player_decks)
+		,player_decks_()
+		,rank_results_(player_decks.size())
+		,max_usecs_(max_usecs)
+		,end_time_(boost::posix_time::microsec_clock::universal_time() +
+			boost::posix_time::microsec(max_usecs))
+	{
+		if (randomize_decks) {
+			player_decks_ = player_decks;
+			//	CODE NOTE: TO-DO: Randomize the copy of the decks...
+			player_decks_ptr_ = &player_decks_;
+		}
+
+		rank_results_.hands_possible_ =
+			CalcPossibleHandCount(player_decks[0].size(), 5);
+	}
+
+	inline bool operator () (const HandFullVector &working_hands)
+	{
+		++rank_results_.hands_ranked_;
+
+		game_ptr_->EvaluatePlayerHands(working_hands,
+			&rank_results_.best_evals_, &rank_results_.best_counts_, false);
+
+		return((!max_usecs_) ||
+			(boost::posix_time::microsec_clock::universal_time() < end_time_));
+	}
+
+	MhPokerGame              *game_ptr_;
+	const DeckVector         *player_decks_ptr_;
+	DeckVector                player_decks_;
+	HandRankResults           rank_results_;
+	unsigned int              max_usecs_;
+	boost::posix_time::ptime  end_time_;
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
 //	////////////////////////////////////////////////////////////////////////////
 HandRankResults MhPokerGame::RankPlayerHands(bool randomize_decks,
 	unsigned int max_usecs)
 {
-	struct PerHandAssessor {
-		PerHandAssessor(MhPokerGame *game_ptr, const DeckVector &player_decks,
-			bool randomize_decks,
-			unsigned int max_usecs)
-			:game_ptr_(game_ptr)
-			,player_decks_ptr_(&player_decks)
-			,player_decks_()
-			,rank_results_(player_decks.size())
-			,max_usecs_(max_usecs)
-			,end_time_(boost::posix_time::microsec_clock::universal_time() +
-				boost::posix_time::microsec(max_usecs))
-		{
-			if (randomize_decks) {
-				player_decks_ = player_decks;
-				//	CODE NOTE: TO-DO: Randomize the copy of the decks...
-				player_decks_ptr_ = &player_decks_;
-			}
-
-			rank_results_.hands_possible_ =
-				CalcPossibleHandCount(player_decks[0].size(), 5);
-		}
-
-		inline bool operator () (const HandFullVector &working_hands)
-		{
-			++rank_results_.hands_ranked_;
-
-			game_ptr_->EvaluatePlayerHands(working_hands,
-				&rank_results_.best_evals_, &rank_results_.best_counts_, false);
-
-			return((!max_usecs_) ||
-				(boost::posix_time::microsec_clock::universal_time() < end_time_));
-		}
-
-		MhPokerGame              *game_ptr_;
-		const DeckVector         *player_decks_ptr_;
-		DeckVector                player_decks_;
-		HandRankResults           rank_results_;
-		unsigned int              max_usecs_;
-		boost::posix_time::ptime  end_time_;
-	};
-
 	PerHandAssessor my_func(this, player_deck_, randomize_decks, max_usecs);
 
 	HandFullVector working_hands(player_count_);
