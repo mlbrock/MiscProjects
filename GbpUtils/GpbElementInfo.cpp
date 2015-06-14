@@ -47,7 +47,6 @@ struct GpbElementInfoDescriptors {
 	const ::google::protobuf::FieldDescriptor *field_descriptor_;
 	const ::google::protobuf::FileDescriptor  *file_descriptor_;
 	const ::google::protobuf::EnumDescriptor  *enum_descriptor_;
-	const ::google::protobuf::OneofDescriptor *oneof_descriptor_;
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +56,6 @@ class GpbElementInfo {
 	typedef ::google::protobuf::FieldDescriptor GPB_FieldDescriptor;
 	typedef ::google::protobuf::FileDescriptor  GPB_FileDescriptor;
 	typedef ::google::protobuf::EnumDescriptor  GPB_EnumDescriptor;
-	typedef ::google::protobuf::OneofDescriptor GPB_OneofDescriptor;
 public:
 	typedef std::vector<GpbElementInfo>            GpbElementInfoVector_I;
 	typedef GpbElementInfoVector_I::iterator       GpbElementInfoVectorIter_I;
@@ -166,7 +164,6 @@ public:
 		out_descriptors.field_descriptor_ = field_descriptor_;
 		out_descriptors.file_descriptor_  = file_descriptor_;
 		out_descriptors.enum_descriptor_  = enum_descriptor_;
-		out_descriptors.oneof_descriptor_ = oneof_descriptor_;
 
 		return(out_descriptors);
 	}
@@ -186,7 +183,6 @@ private:
 	const GPB_FieldDescriptor *field_descriptor_;
 	const GPB_FileDescriptor  *file_descriptor_;
 	const GPB_EnumDescriptor  *enum_descriptor_;
-	const GPB_OneofDescriptor *oneof_descriptor_;
 	std::size_t                depth_;
 	int                        member_index_;
 	std::size_t                max_depth_;
@@ -262,8 +258,7 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor &descriptor)
 /*
 	CODE NOTE: Perhaps should enhance to support non-message types by
 	searching for first for messages, then for enum types
-	(with FindEnumTypeByName()) and finally for 
-	oneofs.
+	(with FindEnumTypeByName()).
 
 	Perhaps finally could search for any name where it's possible to do
 	fit the result into a GpbElementInfo: FindFieldByName(),
@@ -274,7 +269,6 @@ GpbElementInfo::GpbElementInfo(const std::string &message_name)
 	,field_descriptor_(NULL)
 	,file_descriptor_(NULL)
 	,enum_descriptor_(NULL)
-	,oneof_descriptor_(NULL)
 	,depth_(0)
 	,member_index_(-1)
 	,max_depth_(0)
@@ -315,7 +309,6 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor,
 	,field_descriptor_(NULL)
 	,file_descriptor_(descriptor_->file())
 	,enum_descriptor_(NULL)
-	,oneof_descriptor_(NULL)
 	,depth_(depth)
 	,member_index_(-1)
 	,max_depth_(depth_)
@@ -337,8 +330,6 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor,
 	,enum_descriptor_((field_descriptor_ && (field_descriptor_->cpp_type() ==
 		::google::protobuf::FieldDescriptor::CPPTYPE_ENUM)) ?
 		field_descriptor->enum_type() : NULL)
-	,oneof_descriptor_((field_descriptor_) ?
-		field_descriptor_->containing_oneof() : NULL)
 	,depth_(depth)
 	,member_index_(member_index)
 	,max_depth_(depth_)
