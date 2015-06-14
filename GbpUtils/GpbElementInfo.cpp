@@ -37,16 +37,8 @@
 //	Needed for the .cpp only.
 #include <iomanip>
 #include <sstream>
+#include <boost/algorithm/string.hpp>
 
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-template <typename MessageType>
-	const MessageType &GpbGetMessageDescriptorPtr(const MessageType *message_ptr)
-{
-	return(GpbGetMessageDescriptorPtrHelper<MessageType>::
-		GetDescriptorPtr(message_ptr));
-}
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -74,6 +66,8 @@ public:
 	explicit GpbElementInfo();
 
 	explicit GpbElementInfo(const GPB_Descriptor &descriptor);
+
+	explicit GpbElementInfo(const std::string &message_name);
 
 	const char *GetTypeNameFull() const
 	{
@@ -265,6 +259,56 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor &descriptor)
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+/*
+	CODE NOTE: Perhaps should enhance to support non-message types by
+	searching for first for messages, then for enum types
+	(with FindEnumTypeByName()) and finally for 
+	oneofs.
+
+	Perhaps finally could search for any name where it's possible to do
+	fit the result into a GpbElementInfo: FindFieldByName(),
+	FindExtensionByName(), FindOneofByName(), FindEnumValueByName() .
+*/
+GpbElementInfo::GpbElementInfo(const std::string &message_name)
+	:descriptor_(NULL)
+	,field_descriptor_(NULL)
+	,file_descriptor_(NULL)
+	,enum_descriptor_(NULL)
+	,oneof_descriptor_(NULL)
+	,depth_(0)
+	,member_index_(-1)
+	,max_depth_(0)
+	,member_list_()
+{
+  const ::google::protobuf::Descriptor *descriptor =
+    ::google::protobuf::DescriptorPool::generated_pool()->
+		FindMessageTypeByName(message_name);
+
+	if (!descriptor) {
+		std::string::size_type position;
+		if ((position = message_name.find_first_of(':')) !=
+			std::string::npos) {
+			std::string tmp_name(message_name);
+			boost::replace_all(tmp_name, "::", ".");
+			descriptor = ::google::protobuf::DescriptorPool::generated_pool()->
+				FindMessageTypeByName(tmp_name);
+		}
+	}
+
+	if (!descriptor) {
+		std::ostringstream o_str;
+		o_str << "Unable to locate message name '" << message_name <<
+			"' within the pool of generated descriptors.";
+		throw std::invalid_argument(o_str.str());
+	}
+
+	GpbElementInfo tmp(descriptor, NULL, 0, -1);
+
+	*this = tmp;
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor,
 	std::size_t depth)
 	:descriptor_(descriptor)
@@ -293,7 +337,8 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor,
 	,enum_descriptor_((field_descriptor_ && (field_descriptor_->cpp_type() ==
 		::google::protobuf::FieldDescriptor::CPPTYPE_ENUM)) ?
 		field_descriptor->enum_type() : NULL)
-	,oneof_descriptor_((field_descriptor_) ? field_descriptor_->containing_oneof() : NULL)
+	,oneof_descriptor_((field_descriptor_) ?
+		field_descriptor_->containing_oneof() : NULL)
 	,depth_(depth)
 	,member_index_(member_index)
 	,max_depth_(depth_)
@@ -356,6 +401,7 @@ std::string GpbElementInfo::SourceLocationToString(
 //	////////////////////////////////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 {
+/*
 	::google::protobuf::SourceLocation s_l_1;
 	::google::protobuf::SourceLocation s_l_2;
 
@@ -363,7 +409,7 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 	GpbElementInfo::ClearSourceLocation(s_l_2);
 	datum.GetTypeSourceLocation(s_l_1);
 	datum.GetMemberSourceLocation(s_l_2);
-
+*/
 	o_str << std::setw(datum.depth_ * 3) << "" << "{"
 		"Depth="                << datum.depth_            << ", "
 		"TypeNameFull="         << datum.GetTypeNameFull() << ", "
@@ -371,9 +417,11 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 		"Name="                 << datum.GetName()         << ", "
 		"Label="                << datum.GetLabel()        << ", "
 		"LabelName="            << datum.GetLabelName()    << ", "
-		"FileName="             << datum.GetFileName()     << ", "
+/*		"FileName="             << datum.GetFileName()     << ", "
 		"TypeSourceLocation="   << datum.SourceLocationToString(s_l_1) << ", "
 		"MemberSourceLocation=" << datum.SourceLocationToString(s_l_2) <<
+*/
+		"FileName="             << datum.GetFileName()     <<
 		"}";
 
 	for (std::size_t count_1 = 0; count_1 < datum.member_list_.size();
@@ -398,38 +446,78 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 #endif // #ifdef _MSC_VER
 
 #include <cstdlib>
-
 #include <iostream>
+
+#include <boost/io/ios_state.hpp>
+
+//	////////////////////////////////////////////////////////////////////////////
+void TEST_EmitSep(char sep_char, std::streamsize sep_width = 79,
+	std::ostream &o_str = std::cout)
+{
+	boost::io::ios_all_saver io_state(o_str);
+
+	o_str << std::setfill(sep_char) << std::setw(sep_width) << "" << std::endl;
+}
+//	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
 template <typename MessageType>
-	bool TEST_RunTest(int &return_code)
+	bool TEST_RunTest_1(int &return_code)
 {
+	bool test_passed = true;
+
+	TEST_EmitSep('=');
+	TEST_EmitSep('=');
+	std::cout << "TEST for a templated messaged type:" << std::endl;
+	TEST_EmitSep('=');
+
 	try {
 		MessageType    test_msg;
-		GpbElementInfo element_1(*test_msg.descriptor());
-		std::cout << element_1 << std::endl << std::endl;
-		GpbElementInfo element_2(GpbElementInfo::GetInstance<MessageType>());
-		{
-			std::ostringstream o_str_1;
-			std::ostringstream o_str_2;
-			o_str_1 << element_1;
-			o_str_2 << element_2;
-			if (o_str_1.str() != o_str_2.str())
-				throw std::logic_error("The string representations of "
-					"GpbElementInfo instances are not identical for a one "
-					"constructed from a message instance descriptor and one "
-					"constructed from the class descriptor.");
-		}
-		return(true);
+		GpbElementInfo element(*test_msg.descriptor());
+		std::cout << element << std::endl;
 	}
 	catch (const std::exception &except) {
 		std::cerr << "TEST FAILED: " << except.what() << std::endl;
+		test_passed = false;
 	}
 
-	return_code = EXIT_FAILURE;
+	TEST_EmitSep('=');
+	std::cout << std::endl;
 
-	return(false);
+	if (!test_passed)
+		return_code = EXIT_FAILURE;
+
+	return(test_passed);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool TEST_RunTest_2(int &return_code, const char *message_name)
+{
+	TEST_EmitSep('=');
+	TEST_EmitSep('=');
+	std::cout << "TEST for a message name ('" << message_name << "'):" <<
+		std::endl;
+	TEST_EmitSep('=');
+
+	bool test_passed = true;
+
+	try {
+		GpbElementInfo element(message_name);
+		std::cout << element << std::endl;
+	}
+	catch (const std::exception &except) {
+		std::cerr << "TEST FAILED: " << except.what() << std::endl;
+		test_passed = false;
+	}
+
+	TEST_EmitSep('=');
+	std::cout << std::endl;
+
+	if (!test_passed)
+		return_code = EXIT_FAILURE;
+
+	return(test_passed);
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -439,7 +527,13 @@ int main()
 	int return_code = EXIT_SUCCESS;
 
 	try {
-		TEST_RunTest<GpbElementInfoTest::AddressBook>(return_code);
+		TEST_RunTest_1<GpbElementInfoTest::AddressBook>(return_code);
+		TEST_RunTest_2(return_code, "GpbElementInfoTest::AddressBook");
+		TEST_RunTest_2(return_code, "GpbElementInfoTest.AddressBook");
+		TEST_RunTest_2(return_code, "GpbElementInfoTest::Person::PhoneNumber");
+		TEST_RunTest_2(return_code, "GpbElementInfoTest.Person.PhoneNumber");
+		TEST_RunTest_2(return_code, "GPBELEMENTINFOTEST.PERSON.PHONENUMBER");
+		TEST_RunTest_2(return_code, "gpbelementinfotest.person.phonenumber");
 	}
 	catch (const std::exception &except) {
 		std::cerr << "ERROR: " << except.what() << std::endl;
@@ -451,108 +545,3 @@ int main()
 //	////////////////////////////////////////////////////////////////////////////
 
 #endif // #ifdef TEST_MAIN
-
-
-
-/*
-	CODE NOTE: My GPB internals study. To be removed.
-*/
-#if defined(THIS_IS_NOT_DEFINED)
-
-//	////////////////////////////////////////////////////////////////////////////
-E:\DevEnv\GitRepos\MiscProjects\GbpUtils\Tests\CppOut\GpbElementInfoTest.pb.cc
-Line 37
-//	----------------------------------------------------------------------------
-void protobuf_AssignDesc_GpbElementInfoTest_2eproto() {
-  protobuf_AddDesc_GpbElementInfoTest_2eproto();
-  const ::google::protobuf::FileDescriptor* file =
-    ::google::protobuf::DescriptorPool::generated_pool()->FindFileByName(
-      "GpbElementInfoTest.proto");
-  GOOGLE_CHECK(file != NULL);
-  Person_descriptor_ = file->message_type(0);
-  static const int Person_offsets_[4] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person, name_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person, id_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person, email_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person, phone_),
-  };
-  Person_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      Person_descriptor_,
-      Person::default_instance_,
-      Person_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(Person));
-  Person_PhoneNumber_descriptor_ = Person_descriptor_->nested_type(0);
-  static const int Person_PhoneNumber_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person_PhoneNumber, number_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person_PhoneNumber, type_),
-  };
-  Person_PhoneNumber_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      Person_PhoneNumber_descriptor_,
-      Person_PhoneNumber::default_instance_,
-      Person_PhoneNumber_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person_PhoneNumber, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Person_PhoneNumber, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(Person_PhoneNumber));
-  Person_PhoneType_descriptor_ = Person_descriptor_->enum_type(0);
-  AddressBook_descriptor_ = file->message_type(1);
-  static const int AddressBook_offsets_[1] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AddressBook, person_),
-  };
-  AddressBook_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
-      AddressBook_descriptor_,
-      AddressBook::default_instance_,
-      AddressBook_offsets_,
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AddressBook, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AddressBook, _unknown_fields_),
-      -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(AddressBook));
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-E:\DevEnv\GitRepos\MiscProjects\GbpUtils\Tests\CppOut\GpbElementInfoTest.pb.cc
-Line 124
-//	----------------------------------------------------------------------------
-void protobuf_AddDesc_GpbElementInfoTest_2eproto() {
-  static bool already_here = false;
-  if (already_here) return;
-  already_here = true;
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\030GpbElementInfoTest.proto\022\022GpbElementIn"
-    "foTest\"\356\001\n\006Person\022\014\n\004name\030\001 \002(\t\022\n\n\002id\030\002 "
-    "\002(\005\022\r\n\005email\030\003 \001(\t\0225\n\005phone\030\004 \003(\0132&.GpbE"
-    "lementInfoTest.Person.PhoneNumber\032W\n\013Pho"
-    "neNumber\022\016\n\006number\030\001 \002(\t\0228\n\004type\030\002 \001(\0162$"
-    ".GpbElementInfoTest.Person.PhoneType:\004HO"
-    "ME\"+\n\tPhoneType\022\n\n\006MOBILE\020\000\022\010\n\004HOME\020\001\022\010\n"
-    "\004WORK\020\002\"9\n\013AddressBook\022*\n\006person\030\001 \003(\0132\032"
-    ".GpbElementInfoTest.Person", 346);
-  ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
-    "GpbElementInfoTest.proto", &protobuf_RegisterTypes);
-  Person::default_instance_ = new Person();
-  Person_PhoneNumber::default_instance_ = new Person_PhoneNumber();
-  AddressBook::default_instance_ = new AddressBook();
-  Person::default_instance_->InitAsDefaultInstance();
-  Person_PhoneNumber::default_instance_->InitAsDefaultInstance();
-  AddressBook::default_instance_->InitAsDefaultInstance();
-  ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_GpbElementInfoTest_2eproto);
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-#endif // #if defined(THIS_IS_NOT_DEFINED)
-
