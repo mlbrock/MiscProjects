@@ -408,17 +408,6 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 
 #ifdef TEST_MAIN
 
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100 4512)
-#endif // #ifdef _MSC_VER
-
-#include "./Tests/CppOut/GpbElementInfoTest.pb.h"
-
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif // #ifdef _MSC_VER
-
 #include <cstdlib>
 #include <iostream>
 
@@ -513,7 +502,6 @@ int main()
 	int return_code = EXIT_SUCCESS;
 
 	try {
-		TEST_RunTest_1<GpbElementInfoTestOne::AddressBook>(return_code);
 		TEST_RunTest_2(return_code, "GpbElementInfoTestOne::AddressBook");
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::AddressBook");
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::Person");

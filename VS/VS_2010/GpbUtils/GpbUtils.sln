@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GpbUtilsLib", "GpbUtilsLib\GpbUtilsLib.vcxproj", "{1823B5FA-1A01-4578-9D54-C03ED446E261}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZZZ_GpbElementInfo", "ZZZ_GpbElementInfo\ZZZ_GpbElementInfo.vcxproj", "{51A3D6AA-26CA-4E9F-BDB7-8723BFC6A51C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1823B5FA-1A01-4578-9D54-C03ED446E261} = {1823B5FA-1A01-4578-9D54-C03ED446E261}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

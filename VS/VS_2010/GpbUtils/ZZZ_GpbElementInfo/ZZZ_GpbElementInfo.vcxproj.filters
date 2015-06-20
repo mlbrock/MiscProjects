@@ -13,18 +13,28 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="TestMessages">
+      <UniqueIdentifier>{23a3ca37-19f4-4446-985f-6e7ee45797a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\GbpUtils\GpbElementInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTest.pb.cc">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestOne.pb.cc">
+      <Filter>TestMessages</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTest.pb.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
+    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_AddressBook.pb.cc">
+      <Filter>TestMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_Person.pb.cc">
+      <Filter>TestMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_PhoneNumber.pb.cc">
+      <Filter>TestMessages</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_PhoneType.pb.cc">
+      <Filter>TestMessages</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
