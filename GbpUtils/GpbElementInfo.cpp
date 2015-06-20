@@ -41,6 +41,10 @@
 
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace MLB {
+
+namespace ProtoBufSupport {
+
 //	////////////////////////////////////////////////////////////////////////////
 struct GpbElementInfoDescriptors {
 	const ::google::protobuf::Descriptor      *descriptor_;
@@ -62,111 +66,33 @@ public:
 	typedef GpbElementInfoVector_I::const_iterator GpbElementInfoVectorIterC_I;
 
 	explicit GpbElementInfo();
-
 	explicit GpbElementInfo(const GPB_Descriptor &descriptor);
-
+	explicit GpbElementInfo(const GPB_Descriptor *descriptor);
 	explicit GpbElementInfo(const std::string &message_name);
 
-	const char *GetTypeNameFull() const
-	{
-		return((enum_descriptor_) ? enum_descriptor_->full_name().c_str() :
-			((descriptor_) ? descriptor_->full_name().c_str() :
-			field_descriptor_->cpp_type_name()));
-	}
+	const char *GetTypeNameFull() const;
 
-	const char *GetTypeName() const
-	{
-		return((enum_descriptor_) ? enum_descriptor_->name().c_str() :
-			((descriptor_) ? descriptor_->name().c_str() :
-			field_descriptor_->cpp_type_name()));
-	}
+	const char *GetTypeName() const;
 
-	const char *GetName() const
-	{
-		return((field_descriptor_) ? field_descriptor_->name().c_str() :
-			descriptor_->name().c_str());
-	}
+	const char *GetName() const;
 
-	const char *GetFileName() const
-	{
-		return((field_descriptor_) ? field_descriptor_->file()->name().c_str() :
-			descriptor_->file()->name().c_str());
-	}
+	const char *GetFileName() const;
 
-	const char *GetLabelName() const
-	{
-		return(GetLabelName(GetLabel()));
-	}
+	const char *GetLabelName() const;
 
-	::google::protobuf::FieldDescriptor::Label GetLabel() const
-	{
-		return((field_descriptor_) ? field_descriptor_->label() :
-			::google::protobuf::FieldDescriptor::LABEL_OPTIONAL);
-	}
+	::google::protobuf::FieldDescriptor::Label GetLabel() const;
 
-	bool GetTypeSourceLocation(
-		::google::protobuf::SourceLocation &dst) const
-	{
-		bool return_code;
+	bool GetSourceLocationType(
+		::google::protobuf::SourceLocation &dst) const;
 
-		if (enum_descriptor_)
-			return_code = GetSourceLocationHelper(enum_descriptor_, dst);
-		else if (field_descriptor_)
-			return_code = GetSourceLocationHelper(field_descriptor_, dst);
-		else if (descriptor_)			
-			return_code = GetSourceLocationHelper(descriptor_, dst);
-		else
-			return_code = false;
+	::google::protobuf::SourceLocation GetSourceLocationType() const;
 
-		return(return_code);
-	}
+	bool GetSourceLocationMember(
+		::google::protobuf::SourceLocation &dst) const;
 
-	::google::protobuf::SourceLocation GetTypeSourceLocation() const
-	{
-		::google::protobuf::SourceLocation tmp_dst;
+	::google::protobuf::SourceLocation GetSourceLocationMember() const;
 
-		GetTypeSourceLocation(tmp_dst);
-
-		return(tmp_dst);
-	}
-
-	bool GetMemberSourceLocation(
-		::google::protobuf::SourceLocation &dst) const
-	{
-		bool return_code;
-
-		if (enum_descriptor_)
-			return_code = GetSourceLocationHelper(enum_descriptor_, dst);
-		else if (field_descriptor_)
-			return_code = GetSourceLocationHelper(field_descriptor_, dst);
-		else if (descriptor_)			
-			return_code = GetSourceLocationHelper(descriptor_, dst);
-		else
-			return_code = false;
-
-		return(return_code);
-	}
-
-	::google::protobuf::SourceLocation GetMemberSourceLocation() const
-	{
-		::google::protobuf::SourceLocation tmp_dst;
-
-		GetTypeSourceLocation(tmp_dst);
-
-		return(tmp_dst);
-	}
-
-	GpbElementInfoDescriptors GetDescriptors() const
-	{
-		GpbElementInfoDescriptors out_descriptors;
-
-		out_descriptors.descriptor_       = descriptor_;
-		out_descriptors.field_descriptor_ = field_descriptor_;
-		out_descriptors.file_descriptor_  = file_descriptor_;
-		out_descriptors.enum_descriptor_  = enum_descriptor_;
-
-		return(out_descriptors);
-	}
+	GpbElementInfoDescriptors GetDescriptors() const;
 
 	static std::string SourceLocationToString(
 		const ::google::protobuf::SourceLocation &datum);
@@ -177,6 +103,7 @@ public:
 		return(GpbElementInfo(DerivedMessageType::descriptor(), 0));
 	}
 
+	void TestFileName() const;
 
 private:
 	const GPB_Descriptor      *descriptor_;
@@ -206,36 +133,33 @@ private:
 	}
 
 	static const char *GetLabelName(
-		::google::protobuf::FieldDescriptor::Label label)
-	{
-		if (label == ::google::protobuf::FieldDescriptor::LABEL_OPTIONAL)
-			return("optional");
-		else if (label == ::google::protobuf::FieldDescriptor::LABEL_REQUIRED)
-			return("required");
-		else if (label == ::google::protobuf::FieldDescriptor::LABEL_REPEATED)
-			return("repeated");
-
-		return("*INVALID*");
-	}
+		::google::protobuf::FieldDescriptor::Label label);
 
 	//	Really just to support debugging...
-	static void ClearSourceLocation(::google::protobuf::SourceLocation &datum)
-	{
-		datum.start_line   = 0;
-		datum.end_line     = 0;
-		datum.start_column = 0;
-		datum.end_column   = 0;
-	}
+	static void ClearSourceLocation(::google::protobuf::SourceLocation &datum);
 
 	friend std::ostream & operator << (std::ostream &o_str,
 		const GpbElementInfo &data);
-
 };
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &data);
 //	////////////////////////////////////////////////////////////////////////////
+
+} // namespace ProtoBufSupport
+
+} // namespace MLB
+
+//	////////////////////////////////////////////////////////////////////////////
+//	****************************************************************************
+//	****************************************************************************
+//	****************************************************************************
+//	////////////////////////////////////////////////////////////////////////////
+
+namespace MLB {
+
+namespace ProtoBufSupport {
 
 //	////////////////////////////////////////////////////////////////////////////
 GpbElementInfo::GpbElementInfo()
@@ -249,6 +173,16 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor &descriptor)
 	//	CODE NOTE: Fix me!!!
 {
 	GpbElementInfo tmp(&descriptor, NULL, 0, -1);
+
+	*this = tmp;
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor)
+	//	CODE NOTE: Fix me!!!
+{
+	GpbElementInfo tmp(descriptor, NULL, 0, -1);
 
 	*this = tmp;
 }
@@ -354,19 +288,106 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor,
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
-const GpbElementInfo::GPB_FileDescriptor
-	*GpbElementInfo::DetermineFileDescriptorPtr(
-	const GPB_Descriptor *descriptor,
-	const GPB_FieldDescriptor *field_descriptor)
+const char *GpbElementInfo::GetTypeNameFull() const
 {
-	if (descriptor)
-		return(descriptor->file());
-	else if (!field_descriptor) {
-		throw std::invalid_argument("Unable to determine the file descriptor "
-			"value.");
-	}
+	return((enum_descriptor_) ? enum_descriptor_->full_name().c_str() :
+		((descriptor_) ? descriptor_->full_name().c_str() :
+		field_descriptor_->cpp_type_name()));
+}
+//	////////////////////////////////////////////////////////////////////////////
 
-	return(field_descriptor->file());
+//	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetTypeName() const
+{
+	return((enum_descriptor_) ? enum_descriptor_->name().c_str() :
+		((descriptor_) ? descriptor_->name().c_str() :
+		field_descriptor_->cpp_type_name()));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetName() const
+{
+	return((field_descriptor_) ? field_descriptor_->name().c_str() :
+		descriptor_->name().c_str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetFileName() const
+{
+	return((field_descriptor_) ? field_descriptor_->file()->name().c_str() :
+		descriptor_->file()->name().c_str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetLabelName() const
+{
+	return(GetLabelName(GetLabel()));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+::google::protobuf::FieldDescriptor::Label GpbElementInfo::GetLabel() const
+{
+	return((field_descriptor_) ? field_descriptor_->label() :
+		::google::protobuf::FieldDescriptor::LABEL_OPTIONAL);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool GpbElementInfo::GetSourceLocationType(
+	::google::protobuf::SourceLocation &dst) const
+{
+	return(GetSourceLocationHelper(enum_descriptor_, dst) ||
+		GetSourceLocationHelper(descriptor_, dst));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+::google::protobuf::SourceLocation GpbElementInfo::GetSourceLocationType()
+	const
+{
+	::google::protobuf::SourceLocation tmp_dst;
+
+	GetSourceLocationType(tmp_dst);
+
+	return(tmp_dst);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool GpbElementInfo::GetSourceLocationMember(
+	::google::protobuf::SourceLocation &dst) const
+{
+	return(GetSourceLocationHelper(field_descriptor_, dst));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+::google::protobuf::SourceLocation GpbElementInfo::GetSourceLocationMember()
+	const
+{
+	::google::protobuf::SourceLocation tmp_dst;
+
+	GetSourceLocationMember(tmp_dst);
+
+	return(tmp_dst);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoDescriptors GpbElementInfo::GetDescriptors() const
+{
+	GpbElementInfoDescriptors out_descriptors;
+
+	out_descriptors.descriptor_       = descriptor_;
+	out_descriptors.field_descriptor_ = field_descriptor_;
+	out_descriptors.file_descriptor_  = file_descriptor_;
+	out_descriptors.enum_descriptor_  = enum_descriptor_;
+
+	return(out_descriptors);
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -390,17 +411,80 @@ std::string GpbElementInfo::SourceLocationToString(
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+void GpbElementInfo::TestFileName() const
+{
+	std::string pad;
+
+	{
+		std::ostringstream o_str;
+		o_str << std::setw(depth_ * 3) << "";
+		pad = o_str.str();
+	}
+
+	std::cout << pad << GetTypeName() << " " << GetName() << ": " <<
+		std::endl <<
+		pad << "FILE : " << ((file_descriptor_)  ?
+			file_descriptor_->name()          : "") << std::endl <<
+		pad << "ENUM : " << ((enum_descriptor_)  ?
+			enum_descriptor_->file()->name()  : "") << std::endl <<
+		pad << "FIELD: " << ((field_descriptor_) ?
+			field_descriptor_->file()->name() : "") << std::endl <<
+		pad << "TYPE : " << ((descriptor_)       ?
+			descriptor_->file()->name()       : "");
+
+	for (std::size_t count_1 = 0; count_1 < member_list_.size(); ++count_1) {
+		std::cout << std::endl;
+		member_list_[count_1].TestFileName();
+	}
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const GpbElementInfo::GPB_FileDescriptor
+	*GpbElementInfo::DetermineFileDescriptorPtr(
+	const GPB_Descriptor *descriptor,
+	const GPB_FieldDescriptor *field_descriptor)
+{
+	if (descriptor)
+		return(descriptor->file());
+	else if (!field_descriptor) {
+		throw std::invalid_argument("Unable to determine the file descriptor "
+			"value.");
+	}
+
+	return(field_descriptor->file());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetLabelName(
+	::google::protobuf::FieldDescriptor::Label label)
+{
+	if (label == ::google::protobuf::FieldDescriptor::LABEL_OPTIONAL)
+		return("optional");
+	else if (label == ::google::protobuf::FieldDescriptor::LABEL_REQUIRED)
+		return("required");
+	else if (label == ::google::protobuf::FieldDescriptor::LABEL_REPEATED)
+		return("repeated");
+
+	return("*INVALID*");
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+void GpbElementInfo::ClearSourceLocation(
+	::google::protobuf::SourceLocation &datum)
+{
+	datum.start_line   = 0;
+	datum.end_line     = 0;
+	datum.start_column = 0;
+	datum.end_column   = 0;
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 {
-/*
-	::google::protobuf::SourceLocation s_l_1;
-	::google::protobuf::SourceLocation s_l_2;
-
-	GpbElementInfo::ClearSourceLocation(s_l_1);
-	GpbElementInfo::ClearSourceLocation(s_l_2);
-	datum.GetTypeSourceLocation(s_l_1);
-	datum.GetMemberSourceLocation(s_l_2);
-*/
 	o_str << std::setw(datum.depth_ * 3) << "" << "{"
 		"Depth="                << datum.depth_            << ", "
 		"TypeNameFull="         << datum.GetTypeNameFull() << ", "
@@ -408,10 +492,6 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 		"Name="                 << datum.GetName()         << ", "
 		"Label="                << datum.GetLabel()        << ", "
 		"LabelName="            << datum.GetLabelName()    << ", "
-/*		"FileName="             << datum.GetFileName()     << ", "
-		"TypeSourceLocation="   << datum.SourceLocationToString(s_l_1) << ", "
-		"MemberSourceLocation=" << datum.SourceLocationToString(s_l_2) <<
-*/
 		"FileName="             << datum.GetFileName()     <<
 		"}";
 
@@ -422,6 +502,10 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 	return(o_str);
 }
 //	////////////////////////////////////////////////////////////////////////////
+
+} // namespace ProtoBufSupport
+
+} // namespace MLB
 
 #ifdef TEST_MAIN
 
@@ -452,6 +536,15 @@ void TEST_EmitSep(char sep_char, std::streamsize sep_width = 79,
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+void TEST_EmitDatum(const MLB::ProtoBufSupport::GpbElementInfo &datum)
+{
+//	std::cout << datum << std::endl;
+datum.TestFileName();
+std::cout << std::endl;
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 template <typename MessageType>
 	bool TEST_RunTest_1(int &return_code)
 {
@@ -463,9 +556,9 @@ template <typename MessageType>
 	TEST_EmitSep('=');
 
 	try {
-		MessageType    test_msg;
-		GpbElementInfo element(*test_msg.descriptor());
-		std::cout << element << std::endl;
+		MessageType                          test_msg;
+		MLB::ProtoBufSupport::GpbElementInfo element(*test_msg.descriptor());
+		TEST_EmitDatum(element);
 	}
 	catch (const std::exception &except) {
 		std::cerr << "TEST FAILED: " << except.what() << std::endl;
@@ -494,8 +587,8 @@ bool TEST_RunTest_2(int &return_code, const char *message_name)
 	bool test_passed = true;
 
 	try {
-		GpbElementInfo element(message_name);
-		std::cout << element << std::endl;
+		MLB::ProtoBufSupport::GpbElementInfo element(message_name);
+		TEST_EmitDatum(element);
 	}
 	catch (const std::exception &except) {
 		std::cerr << "TEST FAILED: " << except.what() << std::endl;
@@ -536,3 +629,4 @@ int main()
 //	////////////////////////////////////////////////////////////////////////////
 
 #endif // #ifdef TEST_MAIN
+
