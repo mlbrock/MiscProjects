@@ -4,5 +4,5 @@ SRC_DIR=${PWD}
 
 DST_DIR=${SRC_DIR}/CppOut
 
-protoc -I=${SRC_DIR} --cpp_out=${DST_DIR} ${SRC_DIR}/GpbElementInfoTest.proto
+protoc -I=${SRC_DIR} --cpp_out=${DST_DIR} ${SRC_DIR}/GpbElementInfoTestOne.proto
 
