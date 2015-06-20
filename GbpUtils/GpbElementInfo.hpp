@@ -73,7 +73,13 @@ public:
 
 	const char *GetTypeName() const;
 
+	const char *GetMemberName() const;
+
 	const char *GetName() const;
+
+	const char *GetTypeFileName() const;
+
+	const char *GetMemberFileName() const;
 
 	const char *GetFileName() const;
 

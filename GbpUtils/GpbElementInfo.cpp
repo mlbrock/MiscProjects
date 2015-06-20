@@ -181,10 +181,33 @@ const char *GpbElementInfo::GetTypeName() const
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetMemberName() const
+{
+	return((field_descriptor_) ? field_descriptor_->name().c_str() : "");
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 const char *GpbElementInfo::GetName() const
 {
 	return((field_descriptor_) ? field_descriptor_->name().c_str() :
 		descriptor_->name().c_str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetTypeFileName() const
+{
+	return((enum_descriptor_) ? enum_descriptor_->file()->name().c_str() :
+		((descriptor_) ? descriptor_->file()->name().c_str() : ""));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+const char *GpbElementInfo::GetMemberFileName() const
+{
+	return((field_descriptor_) ? field_descriptor_->file()->name().c_str() :
+		"");
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -361,13 +384,14 @@ void GpbElementInfo::ClearSourceLocation(
 std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 {
 	o_str << std::setw(datum.depth_ * 3) << "" << "{"
-		"Depth="                << datum.depth_            << ", "
-		"TypeNameFull="         << datum.GetTypeNameFull() << ", "
-		"TypeName="             << datum.GetTypeName()     << ", "
-		"Name="                 << datum.GetName()         << ", "
-		"Label="                << datum.GetLabel()        << ", "
-		"LabelName="            << datum.GetLabelName()    << ", "
-		"FileName="             << datum.GetFileName()     <<
+		"Depth="                << datum.depth_              << ", "
+		"TypeNameFull="         << datum.GetTypeNameFull()   << ", "
+		"TypeName="             << datum.GetTypeName()       << ", "
+		"MemberName="           << datum.GetMemberName()     << ", "
+		"Label="                << datum.GetLabel()          << ", "
+		"LabelName="            << datum.GetLabelName()      << ", "
+		"TypeFileName="         << datum.GetTypeFileName()   << ", "
+		"MemberFileName="       << datum.GetMemberFileName() <<
 		"}";
 
 	for (std::size_t count_1 = 0; count_1 < datum.member_list_.size();
@@ -491,10 +515,9 @@ int main()
 	try {
 		TEST_RunTest_1<GpbElementInfoTest::AddressBook>(return_code);
 		TEST_RunTest_2(return_code, "GpbElementInfoTest::AddressBook");
-		TEST_RunTest_2(return_code, "GpbElementInfoTest.AddressBook");
-		TEST_RunTest_2(return_code, "GpbElementInfoTest::Person::PhoneNumber");
-		TEST_RunTest_2(return_code, "GpbElementInfoTest.Person.PhoneNumber");
-		TEST_RunTest_2(return_code, "GpbElementInfoTest::Person::PhoneType");
+		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::AddressBook");
+		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::Person");
+		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::PhoneNumber");
 	}
 	catch (const std::exception &except) {
 		std::cerr << "ERROR: " << except.what() << std::endl;
