@@ -27,7 +27,7 @@
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
-namespace GpbElementInfoTest {
+namespace GpbElementInfoTestOne {
 
 // Internal implementation detail -- do not call these.
 void  protobuf_AddDesc_GpbElementInfoTest_2eproto();
@@ -125,14 +125,14 @@ class Person_PhoneNumber : public ::google::protobuf::Message {
   inline ::std::string* release_number();
   inline void set_allocated_number(::std::string* number);
 
-  // optional .GpbElementInfoTest.Person.PhoneType type = 2 [default = HOME];
+  // optional .GpbElementInfoTestOne.Person.PhoneType type = 2 [default = HOME];
   inline bool has_type() const;
   inline void clear_type();
   static const int kTypeFieldNumber = 2;
-  inline ::GpbElementInfoTest::Person_PhoneType type() const;
-  inline void set_type(::GpbElementInfoTest::Person_PhoneType value);
+  inline ::GpbElementInfoTestOne::Person_PhoneType type() const;
+  inline void set_type(::GpbElementInfoTestOne::Person_PhoneType value);
 
-  // @@protoc_insertion_point(class_scope:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(class_scope:GpbElementInfoTestOne.Person.PhoneNumber)
  private:
   inline void set_has_number();
   inline void clear_has_number();
@@ -265,19 +265,19 @@ class Person : public ::google::protobuf::Message {
   inline ::std::string* release_email();
   inline void set_allocated_email(::std::string* email);
 
-  // repeated .GpbElementInfoTest.Person.PhoneNumber phone = 4;
+  // repeated .GpbElementInfoTestOne.Person.PhoneNumber phone = 4;
   inline int phone_size() const;
   inline void clear_phone();
   static const int kPhoneFieldNumber = 4;
-  inline const ::GpbElementInfoTest::Person_PhoneNumber& phone(int index) const;
-  inline ::GpbElementInfoTest::Person_PhoneNumber* mutable_phone(int index);
-  inline ::GpbElementInfoTest::Person_PhoneNumber* add_phone();
-  inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person_PhoneNumber >&
+  inline const ::GpbElementInfoTestOne::Person_PhoneNumber& phone(int index) const;
+  inline ::GpbElementInfoTestOne::Person_PhoneNumber* mutable_phone(int index);
+  inline ::GpbElementInfoTestOne::Person_PhoneNumber* add_phone();
+  inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person_PhoneNumber >&
       phone() const;
-  inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person_PhoneNumber >*
+  inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person_PhoneNumber >*
       mutable_phone();
 
-  // @@protoc_insertion_point(class_scope:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(class_scope:GpbElementInfoTestOne.Person)
  private:
   inline void set_has_name();
   inline void clear_has_name();
@@ -292,7 +292,7 @@ class Person : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::std::string* name_;
   ::std::string* email_;
-  ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person_PhoneNumber > phone_;
+  ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person_PhoneNumber > phone_;
   ::google::protobuf::int32 id_;
   friend void  protobuf_AddDesc_GpbElementInfoTest_2eproto();
   friend void protobuf_AssignDesc_GpbElementInfoTest_2eproto();
@@ -356,26 +356,26 @@ class AddressBook : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // repeated .GpbElementInfoTest.Person person = 1;
+  // repeated .GpbElementInfoTestOne.Person person = 1;
   inline int person_size() const;
   inline void clear_person();
   static const int kPersonFieldNumber = 1;
-  inline const ::GpbElementInfoTest::Person& person(int index) const;
-  inline ::GpbElementInfoTest::Person* mutable_person(int index);
-  inline ::GpbElementInfoTest::Person* add_person();
-  inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person >&
+  inline const ::GpbElementInfoTestOne::Person& person(int index) const;
+  inline ::GpbElementInfoTestOne::Person* mutable_person(int index);
+  inline ::GpbElementInfoTestOne::Person* add_person();
+  inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person >&
       person() const;
-  inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person >*
+  inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person >*
       mutable_person();
 
-  // @@protoc_insertion_point(class_scope:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(class_scope:GpbElementInfoTestOne.AddressBook)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person > person_;
+  ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person > person_;
   friend void  protobuf_AddDesc_GpbElementInfoTest_2eproto();
   friend void protobuf_AssignDesc_GpbElementInfoTest_2eproto();
   friend void protobuf_ShutdownFile_GpbElementInfoTest_2eproto();
@@ -407,7 +407,7 @@ inline void Person_PhoneNumber::clear_number() {
   clear_has_number();
 }
 inline const ::std::string& Person_PhoneNumber::number() const {
-  // @@protoc_insertion_point(field_get:GpbElementInfoTest.Person.PhoneNumber.number)
+  // @@protoc_insertion_point(field_get:GpbElementInfoTestOne.Person.PhoneNumber.number)
   return *number_;
 }
 inline void Person_PhoneNumber::set_number(const ::std::string& value) {
@@ -416,7 +416,7 @@ inline void Person_PhoneNumber::set_number(const ::std::string& value) {
     number_ = new ::std::string;
   }
   number_->assign(value);
-  // @@protoc_insertion_point(field_set:GpbElementInfoTest.Person.PhoneNumber.number)
+  // @@protoc_insertion_point(field_set:GpbElementInfoTestOne.Person.PhoneNumber.number)
 }
 inline void Person_PhoneNumber::set_number(const char* value) {
   set_has_number();
@@ -424,7 +424,7 @@ inline void Person_PhoneNumber::set_number(const char* value) {
     number_ = new ::std::string;
   }
   number_->assign(value);
-  // @@protoc_insertion_point(field_set_char:GpbElementInfoTest.Person.PhoneNumber.number)
+  // @@protoc_insertion_point(field_set_char:GpbElementInfoTestOne.Person.PhoneNumber.number)
 }
 inline void Person_PhoneNumber::set_number(const char* value, size_t size) {
   set_has_number();
@@ -432,14 +432,14 @@ inline void Person_PhoneNumber::set_number(const char* value, size_t size) {
     number_ = new ::std::string;
   }
   number_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:GpbElementInfoTest.Person.PhoneNumber.number)
+  // @@protoc_insertion_point(field_set_pointer:GpbElementInfoTestOne.Person.PhoneNumber.number)
 }
 inline ::std::string* Person_PhoneNumber::mutable_number() {
   set_has_number();
   if (number_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     number_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:GpbElementInfoTest.Person.PhoneNumber.number)
+  // @@protoc_insertion_point(field_mutable:GpbElementInfoTestOne.Person.PhoneNumber.number)
   return number_;
 }
 inline ::std::string* Person_PhoneNumber::release_number() {
@@ -463,10 +463,10 @@ inline void Person_PhoneNumber::set_allocated_number(::std::string* number) {
     clear_has_number();
     number_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:GpbElementInfoTest.Person.PhoneNumber.number)
+  // @@protoc_insertion_point(field_set_allocated:GpbElementInfoTestOne.Person.PhoneNumber.number)
 }
 
-// optional .GpbElementInfoTest.Person.PhoneType type = 2 [default = HOME];
+// optional .GpbElementInfoTestOne.Person.PhoneType type = 2 [default = HOME];
 inline bool Person_PhoneNumber::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -480,15 +480,15 @@ inline void Person_PhoneNumber::clear_type() {
   type_ = 1;
   clear_has_type();
 }
-inline ::GpbElementInfoTest::Person_PhoneType Person_PhoneNumber::type() const {
-  // @@protoc_insertion_point(field_get:GpbElementInfoTest.Person.PhoneNumber.type)
-  return static_cast< ::GpbElementInfoTest::Person_PhoneType >(type_);
+inline ::GpbElementInfoTestOne::Person_PhoneType Person_PhoneNumber::type() const {
+  // @@protoc_insertion_point(field_get:GpbElementInfoTestOne.Person.PhoneNumber.type)
+  return static_cast< ::GpbElementInfoTestOne::Person_PhoneType >(type_);
 }
-inline void Person_PhoneNumber::set_type(::GpbElementInfoTest::Person_PhoneType value) {
-  assert(::GpbElementInfoTest::Person_PhoneType_IsValid(value));
+inline void Person_PhoneNumber::set_type(::GpbElementInfoTestOne::Person_PhoneType value) {
+  assert(::GpbElementInfoTestOne::Person_PhoneType_IsValid(value));
   set_has_type();
   type_ = value;
-  // @@protoc_insertion_point(field_set:GpbElementInfoTest.Person.PhoneNumber.type)
+  // @@protoc_insertion_point(field_set:GpbElementInfoTestOne.Person.PhoneNumber.type)
 }
 
 // -------------------------------------------------------------------
@@ -512,7 +512,7 @@ inline void Person::clear_name() {
   clear_has_name();
 }
 inline const ::std::string& Person::name() const {
-  // @@protoc_insertion_point(field_get:GpbElementInfoTest.Person.name)
+  // @@protoc_insertion_point(field_get:GpbElementInfoTestOne.Person.name)
   return *name_;
 }
 inline void Person::set_name(const ::std::string& value) {
@@ -521,7 +521,7 @@ inline void Person::set_name(const ::std::string& value) {
     name_ = new ::std::string;
   }
   name_->assign(value);
-  // @@protoc_insertion_point(field_set:GpbElementInfoTest.Person.name)
+  // @@protoc_insertion_point(field_set:GpbElementInfoTestOne.Person.name)
 }
 inline void Person::set_name(const char* value) {
   set_has_name();
@@ -529,7 +529,7 @@ inline void Person::set_name(const char* value) {
     name_ = new ::std::string;
   }
   name_->assign(value);
-  // @@protoc_insertion_point(field_set_char:GpbElementInfoTest.Person.name)
+  // @@protoc_insertion_point(field_set_char:GpbElementInfoTestOne.Person.name)
 }
 inline void Person::set_name(const char* value, size_t size) {
   set_has_name();
@@ -537,14 +537,14 @@ inline void Person::set_name(const char* value, size_t size) {
     name_ = new ::std::string;
   }
   name_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:GpbElementInfoTest.Person.name)
+  // @@protoc_insertion_point(field_set_pointer:GpbElementInfoTestOne.Person.name)
 }
 inline ::std::string* Person::mutable_name() {
   set_has_name();
   if (name_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     name_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:GpbElementInfoTest.Person.name)
+  // @@protoc_insertion_point(field_mutable:GpbElementInfoTestOne.Person.name)
   return name_;
 }
 inline ::std::string* Person::release_name() {
@@ -568,7 +568,7 @@ inline void Person::set_allocated_name(::std::string* name) {
     clear_has_name();
     name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:GpbElementInfoTest.Person.name)
+  // @@protoc_insertion_point(field_set_allocated:GpbElementInfoTestOne.Person.name)
 }
 
 // required int32 id = 2;
@@ -586,13 +586,13 @@ inline void Person::clear_id() {
   clear_has_id();
 }
 inline ::google::protobuf::int32 Person::id() const {
-  // @@protoc_insertion_point(field_get:GpbElementInfoTest.Person.id)
+  // @@protoc_insertion_point(field_get:GpbElementInfoTestOne.Person.id)
   return id_;
 }
 inline void Person::set_id(::google::protobuf::int32 value) {
   set_has_id();
   id_ = value;
-  // @@protoc_insertion_point(field_set:GpbElementInfoTest.Person.id)
+  // @@protoc_insertion_point(field_set:GpbElementInfoTestOne.Person.id)
 }
 
 // optional string email = 3;
@@ -612,7 +612,7 @@ inline void Person::clear_email() {
   clear_has_email();
 }
 inline const ::std::string& Person::email() const {
-  // @@protoc_insertion_point(field_get:GpbElementInfoTest.Person.email)
+  // @@protoc_insertion_point(field_get:GpbElementInfoTestOne.Person.email)
   return *email_;
 }
 inline void Person::set_email(const ::std::string& value) {
@@ -621,7 +621,7 @@ inline void Person::set_email(const ::std::string& value) {
     email_ = new ::std::string;
   }
   email_->assign(value);
-  // @@protoc_insertion_point(field_set:GpbElementInfoTest.Person.email)
+  // @@protoc_insertion_point(field_set:GpbElementInfoTestOne.Person.email)
 }
 inline void Person::set_email(const char* value) {
   set_has_email();
@@ -629,7 +629,7 @@ inline void Person::set_email(const char* value) {
     email_ = new ::std::string;
   }
   email_->assign(value);
-  // @@protoc_insertion_point(field_set_char:GpbElementInfoTest.Person.email)
+  // @@protoc_insertion_point(field_set_char:GpbElementInfoTestOne.Person.email)
 }
 inline void Person::set_email(const char* value, size_t size) {
   set_has_email();
@@ -637,14 +637,14 @@ inline void Person::set_email(const char* value, size_t size) {
     email_ = new ::std::string;
   }
   email_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:GpbElementInfoTest.Person.email)
+  // @@protoc_insertion_point(field_set_pointer:GpbElementInfoTestOne.Person.email)
 }
 inline ::std::string* Person::mutable_email() {
   set_has_email();
   if (email_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     email_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:GpbElementInfoTest.Person.email)
+  // @@protoc_insertion_point(field_mutable:GpbElementInfoTestOne.Person.email)
   return email_;
 }
 inline ::std::string* Person::release_email() {
@@ -668,36 +668,36 @@ inline void Person::set_allocated_email(::std::string* email) {
     clear_has_email();
     email_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:GpbElementInfoTest.Person.email)
+  // @@protoc_insertion_point(field_set_allocated:GpbElementInfoTestOne.Person.email)
 }
 
-// repeated .GpbElementInfoTest.Person.PhoneNumber phone = 4;
+// repeated .GpbElementInfoTestOne.Person.PhoneNumber phone = 4;
 inline int Person::phone_size() const {
   return phone_.size();
 }
 inline void Person::clear_phone() {
   phone_.Clear();
 }
-inline const ::GpbElementInfoTest::Person_PhoneNumber& Person::phone(int index) const {
-  // @@protoc_insertion_point(field_get:GpbElementInfoTest.Person.phone)
+inline const ::GpbElementInfoTestOne::Person_PhoneNumber& Person::phone(int index) const {
+  // @@protoc_insertion_point(field_get:GpbElementInfoTestOne.Person.phone)
   return phone_.Get(index);
 }
-inline ::GpbElementInfoTest::Person_PhoneNumber* Person::mutable_phone(int index) {
-  // @@protoc_insertion_point(field_mutable:GpbElementInfoTest.Person.phone)
+inline ::GpbElementInfoTestOne::Person_PhoneNumber* Person::mutable_phone(int index) {
+  // @@protoc_insertion_point(field_mutable:GpbElementInfoTestOne.Person.phone)
   return phone_.Mutable(index);
 }
-inline ::GpbElementInfoTest::Person_PhoneNumber* Person::add_phone() {
-  // @@protoc_insertion_point(field_add:GpbElementInfoTest.Person.phone)
+inline ::GpbElementInfoTestOne::Person_PhoneNumber* Person::add_phone() {
+  // @@protoc_insertion_point(field_add:GpbElementInfoTestOne.Person.phone)
   return phone_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person_PhoneNumber >&
+inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person_PhoneNumber >&
 Person::phone() const {
-  // @@protoc_insertion_point(field_list:GpbElementInfoTest.Person.phone)
+  // @@protoc_insertion_point(field_list:GpbElementInfoTestOne.Person.phone)
   return phone_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person_PhoneNumber >*
+inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person_PhoneNumber >*
 Person::mutable_phone() {
-  // @@protoc_insertion_point(field_mutable_list:GpbElementInfoTest.Person.phone)
+  // @@protoc_insertion_point(field_mutable_list:GpbElementInfoTestOne.Person.phone)
   return &phone_;
 }
 
@@ -705,49 +705,49 @@ Person::mutable_phone() {
 
 // AddressBook
 
-// repeated .GpbElementInfoTest.Person person = 1;
+// repeated .GpbElementInfoTestOne.Person person = 1;
 inline int AddressBook::person_size() const {
   return person_.size();
 }
 inline void AddressBook::clear_person() {
   person_.Clear();
 }
-inline const ::GpbElementInfoTest::Person& AddressBook::person(int index) const {
-  // @@protoc_insertion_point(field_get:GpbElementInfoTest.AddressBook.person)
+inline const ::GpbElementInfoTestOne::Person& AddressBook::person(int index) const {
+  // @@protoc_insertion_point(field_get:GpbElementInfoTestOne.AddressBook.person)
   return person_.Get(index);
 }
-inline ::GpbElementInfoTest::Person* AddressBook::mutable_person(int index) {
-  // @@protoc_insertion_point(field_mutable:GpbElementInfoTest.AddressBook.person)
+inline ::GpbElementInfoTestOne::Person* AddressBook::mutable_person(int index) {
+  // @@protoc_insertion_point(field_mutable:GpbElementInfoTestOne.AddressBook.person)
   return person_.Mutable(index);
 }
-inline ::GpbElementInfoTest::Person* AddressBook::add_person() {
-  // @@protoc_insertion_point(field_add:GpbElementInfoTest.AddressBook.person)
+inline ::GpbElementInfoTestOne::Person* AddressBook::add_person() {
+  // @@protoc_insertion_point(field_add:GpbElementInfoTestOne.AddressBook.person)
   return person_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person >&
+inline const ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person >&
 AddressBook::person() const {
-  // @@protoc_insertion_point(field_list:GpbElementInfoTest.AddressBook.person)
+  // @@protoc_insertion_point(field_list:GpbElementInfoTestOne.AddressBook.person)
   return person_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTest::Person >*
+inline ::google::protobuf::RepeatedPtrField< ::GpbElementInfoTestOne::Person >*
 AddressBook::mutable_person() {
-  // @@protoc_insertion_point(field_mutable_list:GpbElementInfoTest.AddressBook.person)
+  // @@protoc_insertion_point(field_mutable_list:GpbElementInfoTestOne.AddressBook.person)
   return &person_;
 }
 
 
 // @@protoc_insertion_point(namespace_scope)
 
-}  // namespace GpbElementInfoTest
+}  // namespace GpbElementInfoTestOne
 
 #ifndef SWIG
 namespace google {
 namespace protobuf {
 
-template <> struct is_proto_enum< ::GpbElementInfoTest::Person_PhoneType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::GpbElementInfoTestOne::Person_PhoneType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::GpbElementInfoTest::Person_PhoneType>() {
-  return ::GpbElementInfoTest::Person_PhoneType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::GpbElementInfoTestOne::Person_PhoneType>() {
+  return ::GpbElementInfoTestOne::Person_PhoneType_descriptor();
 }
 
 }  // namespace google

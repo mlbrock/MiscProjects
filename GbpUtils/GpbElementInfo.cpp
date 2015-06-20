@@ -513,8 +513,8 @@ int main()
 	int return_code = EXIT_SUCCESS;
 
 	try {
-		TEST_RunTest_1<GpbElementInfoTest::AddressBook>(return_code);
-		TEST_RunTest_2(return_code, "GpbElementInfoTest::AddressBook");
+		TEST_RunTest_1<GpbElementInfoTestOne::AddressBook>(return_code);
+		TEST_RunTest_2(return_code, "GpbElementInfoTestOne::AddressBook");
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::AddressBook");
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::Person");
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::PhoneNumber");

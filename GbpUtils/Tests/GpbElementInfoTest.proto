@@ -1,4 +1,4 @@
-package GpbElementInfoTest;
+package GpbElementInfoTestOne;
 
 message Person {
   required string name = 1;

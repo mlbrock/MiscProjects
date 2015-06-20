@@ -16,7 +16,7 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 
-namespace GpbElementInfoTest {
+namespace GpbElementInfoTestOne {
 
 namespace {
 
@@ -128,15 +128,15 @@ void protobuf_AddDesc_GpbElementInfoTest_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\030GpbElementInfoTest.proto\022\022GpbElementIn"
-    "foTest\"\356\001\n\006Person\022\014\n\004name\030\001 \002(\t\022\n\n\002id\030\002 "
-    "\002(\005\022\r\n\005email\030\003 \001(\t\0225\n\005phone\030\004 \003(\0132&.GpbE"
-    "lementInfoTest.Person.PhoneNumber\032W\n\013Pho"
-    "neNumber\022\016\n\006number\030\001 \002(\t\0228\n\004type\030\002 \001(\0162$"
-    ".GpbElementInfoTest.Person.PhoneType:\004HO"
-    "ME\"+\n\tPhoneType\022\n\n\006MOBILE\020\000\022\010\n\004HOME\020\001\022\010\n"
-    "\004WORK\020\002\"9\n\013AddressBook\022*\n\006person\030\001 \003(\0132\032"
-    ".GpbElementInfoTest.Person", 346);
+    "\n\030GpbElementInfoTest.proto\022\025GpbElementIn"
+    "foTestOne\"\364\001\n\006Person\022\014\n\004name\030\001 \002(\t\022\n\n\002id"
+    "\030\002 \002(\005\022\r\n\005email\030\003 \001(\t\0228\n\005phone\030\004 \003(\0132).G"
+    "pbElementInfoTestOne.Person.PhoneNumber\032"
+    "Z\n\013PhoneNumber\022\016\n\006number\030\001 \002(\t\022;\n\004type\030\002"
+    " \001(\0162\'.GpbElementInfoTestOne.Person.Phon"
+    "eType:\004HOME\"+\n\tPhoneType\022\n\n\006MOBILE\020\000\022\010\n\004"
+    "HOME\020\001\022\010\n\004WORK\020\002\"<\n\013AddressBook\022-\n\006perso"
+    "n\030\001 \003(\0132\035.GpbElementInfoTestOne.Person", 358);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "GpbElementInfoTest.proto", &protobuf_RegisterTypes);
   Person::default_instance_ = new Person();
@@ -188,7 +188,7 @@ const int Person_PhoneNumber::kTypeFieldNumber;
 Person_PhoneNumber::Person_PhoneNumber()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(constructor:GpbElementInfoTestOne.Person.PhoneNumber)
 }
 
 void Person_PhoneNumber::InitAsDefaultInstance() {
@@ -198,7 +198,7 @@ Person_PhoneNumber::Person_PhoneNumber(const Person_PhoneNumber& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(copy_constructor:GpbElementInfoTestOne.Person.PhoneNumber)
 }
 
 void Person_PhoneNumber::SharedCtor() {
@@ -210,7 +210,7 @@ void Person_PhoneNumber::SharedCtor() {
 }
 
 Person_PhoneNumber::~Person_PhoneNumber() {
-  // @@protoc_insertion_point(destructor:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(destructor:GpbElementInfoTestOne.Person.PhoneNumber)
   SharedDtor();
 }
 
@@ -260,7 +260,7 @@ bool Person_PhoneNumber::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(parse_start:GpbElementInfoTestOne.Person.PhoneNumber)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -282,7 +282,7 @@ bool Person_PhoneNumber::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .GpbElementInfoTest.Person.PhoneType type = 2 [default = HOME];
+      // optional .GpbElementInfoTestOne.Person.PhoneType type = 2 [default = HOME];
       case 2: {
         if (tag == 16) {
          parse_type:
@@ -290,8 +290,8 @@ bool Person_PhoneNumber::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          if (::GpbElementInfoTest::Person_PhoneType_IsValid(value)) {
-            set_type(static_cast< ::GpbElementInfoTest::Person_PhoneType >(value));
+          if (::GpbElementInfoTestOne::Person_PhoneType_IsValid(value)) {
+            set_type(static_cast< ::GpbElementInfoTestOne::Person_PhoneType >(value));
           } else {
             mutable_unknown_fields()->AddVarint(2, value);
           }
@@ -316,17 +316,17 @@ bool Person_PhoneNumber::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(parse_success:GpbElementInfoTestOne.Person.PhoneNumber)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(parse_failure:GpbElementInfoTestOne.Person.PhoneNumber)
   return false;
 #undef DO_
 }
 
 void Person_PhoneNumber::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(serialize_start:GpbElementInfoTestOne.Person.PhoneNumber)
   // required string number = 1;
   if (has_number()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -337,7 +337,7 @@ void Person_PhoneNumber::SerializeWithCachedSizes(
       1, this->number(), output);
   }
 
-  // optional .GpbElementInfoTest.Person.PhoneType type = 2 [default = HOME];
+  // optional .GpbElementInfoTestOne.Person.PhoneType type = 2 [default = HOME];
   if (has_type()) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       2, this->type(), output);
@@ -347,12 +347,12 @@ void Person_PhoneNumber::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(serialize_end:GpbElementInfoTestOne.Person.PhoneNumber)
 }
 
 ::google::protobuf::uint8* Person_PhoneNumber::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(serialize_to_array_start:GpbElementInfoTestOne.Person.PhoneNumber)
   // required string number = 1;
   if (has_number()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -364,7 +364,7 @@ void Person_PhoneNumber::SerializeWithCachedSizes(
         1, this->number(), target);
   }
 
-  // optional .GpbElementInfoTest.Person.PhoneType type = 2 [default = HOME];
+  // optional .GpbElementInfoTestOne.Person.PhoneType type = 2 [default = HOME];
   if (has_type()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       2, this->type(), target);
@@ -374,7 +374,7 @@ void Person_PhoneNumber::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:GpbElementInfoTest.Person.PhoneNumber)
+  // @@protoc_insertion_point(serialize_to_array_end:GpbElementInfoTestOne.Person.PhoneNumber)
   return target;
 }
 
@@ -389,7 +389,7 @@ int Person_PhoneNumber::ByteSize() const {
           this->number());
     }
 
-    // optional .GpbElementInfoTest.Person.PhoneType type = 2 [default = HOME];
+    // optional .GpbElementInfoTestOne.Person.PhoneType type = 2 [default = HOME];
     if (has_type()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
@@ -481,7 +481,7 @@ const int Person::kPhoneFieldNumber;
 Person::Person()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(constructor:GpbElementInfoTestOne.Person)
 }
 
 void Person::InitAsDefaultInstance() {
@@ -491,7 +491,7 @@ Person::Person(const Person& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(copy_constructor:GpbElementInfoTestOne.Person)
 }
 
 void Person::SharedCtor() {
@@ -504,7 +504,7 @@ void Person::SharedCtor() {
 }
 
 Person::~Person() {
-  // @@protoc_insertion_point(destructor:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(destructor:GpbElementInfoTestOne.Person)
   SharedDtor();
 }
 
@@ -563,7 +563,7 @@ bool Person::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(parse_start:GpbElementInfoTestOne.Person)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -617,7 +617,7 @@ bool Person::MergePartialFromCodedStream(
         break;
       }
 
-      // repeated .GpbElementInfoTest.Person.PhoneNumber phone = 4;
+      // repeated .GpbElementInfoTestOne.Person.PhoneNumber phone = 4;
       case 4: {
         if (tag == 34) {
          parse_phone:
@@ -645,17 +645,17 @@ bool Person::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(parse_success:GpbElementInfoTestOne.Person)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(parse_failure:GpbElementInfoTestOne.Person)
   return false;
 #undef DO_
 }
 
 void Person::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(serialize_start:GpbElementInfoTestOne.Person)
   // required string name = 1;
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -681,7 +681,7 @@ void Person::SerializeWithCachedSizes(
       3, this->email(), output);
   }
 
-  // repeated .GpbElementInfoTest.Person.PhoneNumber phone = 4;
+  // repeated .GpbElementInfoTestOne.Person.PhoneNumber phone = 4;
   for (int i = 0; i < this->phone_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       4, this->phone(i), output);
@@ -691,12 +691,12 @@ void Person::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(serialize_end:GpbElementInfoTestOne.Person)
 }
 
 ::google::protobuf::uint8* Person::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(serialize_to_array_start:GpbElementInfoTestOne.Person)
   // required string name = 1;
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -724,7 +724,7 @@ void Person::SerializeWithCachedSizes(
         3, this->email(), target);
   }
 
-  // repeated .GpbElementInfoTest.Person.PhoneNumber phone = 4;
+  // repeated .GpbElementInfoTestOne.Person.PhoneNumber phone = 4;
   for (int i = 0; i < this->phone_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -735,7 +735,7 @@ void Person::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:GpbElementInfoTest.Person)
+  // @@protoc_insertion_point(serialize_to_array_end:GpbElementInfoTestOne.Person)
   return target;
 }
 
@@ -765,7 +765,7 @@ int Person::ByteSize() const {
     }
 
   }
-  // repeated .GpbElementInfoTest.Person.PhoneNumber phone = 4;
+  // repeated .GpbElementInfoTestOne.Person.PhoneNumber phone = 4;
   total_size += 1 * this->phone_size();
   for (int i = 0; i < this->phone_size(); i++) {
     total_size +=
@@ -862,7 +862,7 @@ const int AddressBook::kPersonFieldNumber;
 AddressBook::AddressBook()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(constructor:GpbElementInfoTestOne.AddressBook)
 }
 
 void AddressBook::InitAsDefaultInstance() {
@@ -872,7 +872,7 @@ AddressBook::AddressBook(const AddressBook& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(copy_constructor:GpbElementInfoTestOne.AddressBook)
 }
 
 void AddressBook::SharedCtor() {
@@ -881,7 +881,7 @@ void AddressBook::SharedCtor() {
 }
 
 AddressBook::~AddressBook() {
-  // @@protoc_insertion_point(destructor:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(destructor:GpbElementInfoTestOne.AddressBook)
   SharedDtor();
 }
 
@@ -921,13 +921,13 @@ bool AddressBook::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(parse_start:GpbElementInfoTestOne.AddressBook)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .GpbElementInfoTest.Person person = 1;
+      // repeated .GpbElementInfoTestOne.Person person = 1;
       case 1: {
         if (tag == 10) {
          parse_person:
@@ -955,18 +955,18 @@ bool AddressBook::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(parse_success:GpbElementInfoTestOne.AddressBook)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(parse_failure:GpbElementInfoTestOne.AddressBook)
   return false;
 #undef DO_
 }
 
 void AddressBook::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:GpbElementInfoTest.AddressBook)
-  // repeated .GpbElementInfoTest.Person person = 1;
+  // @@protoc_insertion_point(serialize_start:GpbElementInfoTestOne.AddressBook)
+  // repeated .GpbElementInfoTestOne.Person person = 1;
   for (int i = 0; i < this->person_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       1, this->person(i), output);
@@ -976,13 +976,13 @@ void AddressBook::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(serialize_end:GpbElementInfoTestOne.AddressBook)
 }
 
 ::google::protobuf::uint8* AddressBook::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:GpbElementInfoTest.AddressBook)
-  // repeated .GpbElementInfoTest.Person person = 1;
+  // @@protoc_insertion_point(serialize_to_array_start:GpbElementInfoTestOne.AddressBook)
+  // repeated .GpbElementInfoTestOne.Person person = 1;
   for (int i = 0; i < this->person_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -993,14 +993,14 @@ void AddressBook::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:GpbElementInfoTest.AddressBook)
+  // @@protoc_insertion_point(serialize_to_array_end:GpbElementInfoTestOne.AddressBook)
   return target;
 }
 
 int AddressBook::ByteSize() const {
   int total_size = 0;
 
-  // repeated .GpbElementInfoTest.Person person = 1;
+  // repeated .GpbElementInfoTestOne.Person person = 1;
   total_size += 1 * this->person_size();
   for (int i = 0; i < this->person_size(); i++) {
     total_size +=
@@ -1075,6 +1075,6 @@ void AddressBook::Swap(AddressBook* other) {
 
 // @@protoc_insertion_point(namespace_scope)
 
-}  // namespace GpbElementInfoTest
+}  // namespace GpbElementInfoTestOne
 
 // @@protoc_insertion_point(global_scope)
