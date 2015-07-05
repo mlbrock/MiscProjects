@@ -440,6 +440,7 @@ void GpbElementInfo::ClearSourceLocation(
 //	////////////////////////////////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 {
+/*
 	o_str << std::setw(datum.depth_ * 3) << "" << "{"
 		"Depth="                << datum.depth_              << ", "
 		"TypeNameFull="         << datum.GetTypeNameFull()   << ", "
@@ -454,6 +455,58 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 	for (std::size_t count_1 = 0; count_1 < datum.member_list_.size();
 		++count_1)
 		o_str << std::endl << datum.member_list_[count_1];
+
+	return(o_str);
+*/
+/*
+	o_str << std::setw(datum.depth_ * 3) << "" << "{"
+		"\"Depth\": "            << datum.depth_              << ", "
+		"\"TypeNameFull\": \""   << datum.GetTypeNameFull()   << "\", "
+		"\"TypeName\": \""       << datum.GetTypeName()       << "\", "
+		"\"MemberName\": \""     << datum.GetMemberName()     << "\", "
+		"\"Label\": "            << datum.GetLabel()          << ", "
+		"\"LabelName\": \""      << datum.GetLabelName()      << "\", "
+		"\"TypeFileName\": \""   << datum.GetTypeFileName()   << "\", "
+		"\"MemberFileName\": \"" << datum.GetMemberFileName() << "\"";
+
+	for (std::size_t count_1 = 0; count_1 < datum.member_list_.size();
+		++count_1)
+		o_str << std::endl << datum.member_list_[count_1];
+
+	o_str << "}";
+
+	return(o_str);
+*/
+	std::string pad;
+
+	{
+		std::ostringstream tmp_o_str;
+		tmp_o_str << std::setw((datum.depth_ + 1) * 3) << "";
+		pad = tmp_o_str.str();
+	}
+
+	o_str << std::setw(datum.depth_ * 3) << "" << "{\n"
+		<< pad << "\"Depth\": "            << datum.depth_              << ",\n"
+		<< pad << "\"TypeNameFull\": \""   << datum.GetTypeNameFull()   << "\",\n"
+		<< pad << "\"TypeName\": \""       << datum.GetTypeName()       << "\",\n"
+		<< pad << "\"MemberName\": \""     << datum.GetMemberName()     << "\",\n"
+		<< pad << "\"Label\": "            << datum.GetLabel()          << ",\n"
+		<< pad << "\"LabelName\": \""      << datum.GetLabelName()      << "\",\n"
+		<< pad << "\"TypeFileName\": \""   << datum.GetTypeFileName()   << "\",\n"
+		<< pad << "\"MemberFileName\": \"" << datum.GetMemberFileName() << "\"\n";
+
+	o_str << pad << "\"MemberList\": [\n";
+
+	for (std::size_t count_1 = 0; count_1 < datum.member_list_.size();
+		++count_1)
+		o_str << ((count_1) ? ",\n" : "") << datum.member_list_[count_1];
+
+	if (datum.member_list_.empty())
+		o_str << "]\n";
+	else
+		o_str << "\n" << pad << "]\n";
+
+	o_str << std::setw(datum.depth_ * 3) << "" << "}";
 
 	return(o_str);
 }
@@ -589,9 +642,11 @@ void TEST_RunTest_3_Helper(
 	MLB::ProtoBufSupport::GpbElementInfoVector inte_lists[2],
 	MLB::ProtoBufSupport::GpbElementInfoVector diff_lists[2])
 {
-	TEST_RunTest_3_HelperInner(element_1, element_2, inte_lists[0], diff_lists[0]);
+	TEST_RunTest_3_HelperInner(element_1, element_2, inte_lists[0],
+		diff_lists[0]);
 	TEST_EmitSep('=');
-	TEST_RunTest_3_HelperInner(element_2, element_1, inte_lists[1], diff_lists[1]);
+	TEST_RunTest_3_HelperInner(element_2, element_1, inte_lists[1],
+		diff_lists[1]);
 }
 //	////////////////////////////////////////////////////////////////////////////
 

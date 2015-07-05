@@ -59,6 +59,7 @@ class GpbElementInfo {
 	typedef ::google::protobuf::FieldDescriptor GPB_FieldDescriptor;
 	typedef ::google::protobuf::FileDescriptor  GPB_FileDescriptor;
 	typedef ::google::protobuf::EnumDescriptor  GPB_EnumDescriptor;
+	typedef ::google::protobuf::Reflection      GPB_Reflection;
 public:
 	typedef std::vector<GpbElementInfo>            GpbElementInfoVector_I;
 //	typedef GpbElementInfoVector_I::iterator       GpbElementInfoVectorIter_I;
