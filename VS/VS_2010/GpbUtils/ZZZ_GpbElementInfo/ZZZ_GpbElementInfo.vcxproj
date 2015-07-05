@@ -110,6 +110,10 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestThree.pb.cc">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_AddressBook.pb.cc">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>

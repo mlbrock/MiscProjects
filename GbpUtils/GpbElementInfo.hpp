@@ -61,8 +61,8 @@ class GpbElementInfo {
 	typedef ::google::protobuf::EnumDescriptor  GPB_EnumDescriptor;
 public:
 	typedef std::vector<GpbElementInfo>            GpbElementInfoVector_I;
-	typedef GpbElementInfoVector_I::iterator       GpbElementInfoVectorIter_I;
-	typedef GpbElementInfoVector_I::const_iterator GpbElementInfoVectorIterC_I;
+//	typedef GpbElementInfoVector_I::iterator       GpbElementInfoVectorIter_I;
+//	typedef GpbElementInfoVector_I::const_iterator GpbElementInfoVectorIterC_I;
 
 	explicit GpbElementInfo();
 	explicit GpbElementInfo(const GPB_Descriptor &descriptor);
@@ -98,6 +98,9 @@ public:
 	::google::protobuf::SourceLocation GetSourceLocationMember() const;
 
 	GpbElementInfoDescriptors GetDescriptors() const;
+
+	GpbElementInfoVector_I SetIntersection(const GpbElementInfo &other) const;
+	GpbElementInfoVector_I SetDifference(const GpbElementInfo &other) const;
 
 	static std::string SourceLocationToString(
 		const ::google::protobuf::SourceLocation &datum);
@@ -146,6 +149,12 @@ private:
 	friend std::ostream & operator << (std::ostream &o_str,
 		const GpbElementInfo &data);
 };
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+typedef GpbElementInfo::GpbElementInfoVector_I GpbElementInfoVector;
+typedef GpbElementInfoVector::iterator         GpbElementInfoVectorIter;
+typedef GpbElementInfoVector::const_iterator   GpbElementInfoVectorIterC;
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////

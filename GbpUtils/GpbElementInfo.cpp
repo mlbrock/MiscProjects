@@ -289,6 +289,63 @@ GpbElementInfoDescriptors GpbElementInfo::GetDescriptors() const
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+struct CompareByNameAndType {
+	bool operator () (const GpbElementInfo &lhs, const GpbElementInfo &rhs)
+	{
+		int cmp;
+
+		if ((cmp = ::strcmp(lhs.GetMemberName(), rhs.GetMemberName())) == 0)
+			cmp = ::strcmp(lhs.GetTypeNameFull(), rhs.GetTypeNameFull());
+
+		return(cmp < 0);
+	}
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoVector SetOperationHelper(bool is_diff,
+	const GpbElementInfoVector &in_lhs, const GpbElementInfoVector &in_rhs)
+{
+	GpbElementInfoVector lhs(in_lhs);
+	GpbElementInfoVector rhs(in_rhs);
+	GpbElementInfoVector result(in_lhs.size());
+
+	std::sort(lhs.begin(), lhs.end(), CompareByNameAndType());
+	std::sort(rhs.begin(), rhs.end(), CompareByNameAndType());
+
+	GpbElementInfoVectorIter iter_result((!is_diff) ?
+		std::set_intersection(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+		result.begin(), CompareByNameAndType()) :
+		std::set_difference(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+		result.begin(), CompareByNameAndType()));
+
+	result.resize(iter_result - result.begin());
+
+	return(result);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoVector GpbElementInfo::SetIntersection(
+	const GpbElementInfo &other) const
+{
+	return(SetOperationHelper(false, member_list_, other.member_list_));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoVector GpbElementInfo::SetDifference(
+	const GpbElementInfo &other) const
+{
+	return(SetOperationHelper(true, member_list_, other.member_list_));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
 //	////////////////////////////////////////////////////////////////////////////
 std::string GpbElementInfo::SourceLocationToString(
 	const ::google::protobuf::SourceLocation &datum)
@@ -413,6 +470,8 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 
 #include <boost/io/ios_state.hpp>
 
+namespace {
+
 //	////////////////////////////////////////////////////////////////////////////
 void TEST_EmitSep(char sep_char, std::streamsize sep_width = 79,
 	std::ostream &o_str = std::cout)
@@ -497,6 +556,83 @@ bool TEST_RunTest_2(int &return_code, const char *message_name)
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+void TEST_RunTest_3_HelperInner(
+	const MLB::ProtoBufSupport::GpbElementInfo &element_1,
+	const MLB::ProtoBufSupport::GpbElementInfo &element_2,
+	MLB::ProtoBufSupport::GpbElementInfoVector &inte_list,
+	MLB::ProtoBufSupport::GpbElementInfoVector &diff_list)
+{
+	inte_list = element_1.SetIntersection(element_2);
+	diff_list = element_1.SetDifference(element_2);
+
+	std::cout << "Source     : " << element_1.GetTypeNameFull() << std::endl;
+	std::cout << "Destination: " << element_2.GetTypeNameFull() << std::endl;
+	TEST_EmitSep('-');
+	std::cout << "Same in source and in destination: " << inte_list.size() <<
+		std::endl;
+	std::copy(inte_list.begin(), inte_list.end(), std::ostream_iterator<
+		MLB::ProtoBufSupport::GpbElementInfoVector::value_type>(
+		std::cout, "\n"));
+	TEST_EmitSep('-');
+	std::cout << "In source, not in destination    : " << diff_list.size() <<
+		std::endl;
+	std::copy(diff_list.begin(), diff_list.end(), std::ostream_iterator<
+		MLB::ProtoBufSupport::GpbElementInfoVector::value_type>(
+		std::cout, "\n"));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+void TEST_RunTest_3_Helper(
+	const MLB::ProtoBufSupport::GpbElementInfo &element_1,
+	const MLB::ProtoBufSupport::GpbElementInfo &element_2,
+	MLB::ProtoBufSupport::GpbElementInfoVector inte_lists[2],
+	MLB::ProtoBufSupport::GpbElementInfoVector diff_lists[2])
+{
+	TEST_RunTest_3_HelperInner(element_1, element_2, inte_lists[0], diff_lists[0]);
+	TEST_EmitSep('=');
+	TEST_RunTest_3_HelperInner(element_2, element_1, inte_lists[1], diff_lists[1]);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool TEST_RunTest_3(int &return_code, const char *message_name_1,
+	const char *message_name_2)
+{
+	TEST_EmitSep('=');
+	TEST_EmitSep('=');
+	std::cout << "TEST of conversion logic generation:" << std::endl;
+	std::cout << "   From: " << message_name_1 << std::endl;
+	std::cout << "   To  : " << message_name_2 << std::endl;
+	TEST_EmitSep('=');
+
+	bool test_passed = true;
+
+	try {
+		MLB::ProtoBufSupport::GpbElementInfo       element_1(message_name_1);
+		MLB::ProtoBufSupport::GpbElementInfo       element_2(message_name_2);
+		MLB::ProtoBufSupport::GpbElementInfoVector inte_lists[2];
+		MLB::ProtoBufSupport::GpbElementInfoVector diff_lists[2];
+		TEST_RunTest_3_Helper(element_1, element_2, inte_lists, diff_lists);
+	}
+	catch (const std::exception &except) {
+		std::cerr << "TEST FAILED: " << except.what() << std::endl;
+		test_passed = false;
+	}
+
+	TEST_EmitSep('=');
+	std::cout << std::endl;
+
+	if (!test_passed)
+		return_code = EXIT_FAILURE;
+
+	return(test_passed);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
+//	////////////////////////////////////////////////////////////////////////////
 int main()
 {
 	int return_code = EXIT_SUCCESS;
@@ -506,6 +642,11 @@ int main()
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::AddressBook");
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::Person");
 		TEST_RunTest_2(return_code, "GpbElementInfoTestTwo::PhoneNumber");
+		TEST_RunTest_2(return_code, "GpbElementInfoTestThree::AddressBookOne");
+		TEST_RunTest_2(return_code, "GpbElementInfoTestThree::AddressBookTwo");
+		TEST_RunTest_3(return_code,
+			"GpbElementInfoTestThree::PersonOne",
+			"GpbElementInfoTestThree::PersonTwo");
 	}
 	catch (const std::exception &except) {
 		std::cerr << "ERROR: " << except.what() << std::endl;

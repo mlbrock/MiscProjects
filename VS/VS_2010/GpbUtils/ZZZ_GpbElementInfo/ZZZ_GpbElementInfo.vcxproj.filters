@@ -36,5 +36,8 @@
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_PhoneType.pb.cc">
       <Filter>TestMessages</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestThree.pb.cc">
+      <Filter>TestMessages</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
