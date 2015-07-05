@@ -651,8 +651,8 @@ void TEST_RunTest_3_Helper(
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
-bool TEST_RunTest_3(int &return_code, const char *message_name_1,
-	const char *message_name_2)
+bool TEST_Compare(int &return_code, const std::string &message_name_1,
+	const std::string &message_name_2)
 {
 	TEST_EmitSep('=');
 	TEST_EmitSep('=');
@@ -682,6 +682,14 @@ bool TEST_RunTest_3(int &return_code, const char *message_name_1,
 		return_code = EXIT_FAILURE;
 
 	return(test_passed);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+bool TEST_RunTest_3(int &return_code, const std::string &message_name_1,
+	const std::string &message_name_2)
+{
+	return(TEST_Compare(return_code, message_name_1, message_name_2));
 }
 //	////////////////////////////////////////////////////////////////////////////
 

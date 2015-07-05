@@ -32,7 +32,7 @@
 # pragma warning(disable:4100 4512)
 #endif // #ifdef _MSC_VER
 
-#include <google/protobuf/Descriptor.pb.h>
+#include <google/protobuf/descriptor.pb.h>
 
 #ifdef _MSC_VER
 # pragma warning(pop)
@@ -97,6 +97,11 @@ public:
 		::google::protobuf::SourceLocation &dst) const;
 
 	::google::protobuf::SourceLocation GetSourceLocationMember() const;
+
+	const GPB_FieldDescriptor *GetFieldDescriptor() const
+	{
+		return(field_descriptor_);
+	}
 
 	GpbElementInfoDescriptors GetDescriptors() const;
 
