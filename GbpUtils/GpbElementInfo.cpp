@@ -36,6 +36,16 @@ namespace MLB {
 
 namespace ProtoBufSupport {
 
+namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+const ::google::protobuf::FieldDescriptor::CppType InitialCppTypeValue =
+	static_cast<::google::protobuf::FieldDescriptor::CppType>(
+	::google::protobuf::FieldDescriptor::MAX_CPPTYPE + 1);
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
 //	////////////////////////////////////////////////////////////////////////////
 GpbElementInfo::GpbElementInfo()
 	//	CODE NOTE: Fix me!!!
@@ -78,6 +88,8 @@ GpbElementInfo::GpbElementInfo(const std::string &message_name)
 	,field_descriptor_(NULL)
 	,file_descriptor_(NULL)
 	,enum_descriptor_(NULL)
+	,cpp_type_(InitialCppTypeValue)
+	,datum_type_(GpbDatumType_Count)
 	,depth_(0)
 	,member_index_(-1)
 	,max_depth_(0)
@@ -118,6 +130,8 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor,
 	,field_descriptor_(NULL)
 	,file_descriptor_(descriptor_->file())
 	,enum_descriptor_(NULL)
+	,cpp_type_(InitialCppTypeValue)
+	,datum_type_(GpbDatumType_Count)
 	,depth_(depth)
 	,member_index_(-1)
 	,max_depth_(depth_)
@@ -139,11 +153,28 @@ GpbElementInfo::GpbElementInfo(const GPB_Descriptor *descriptor,
 	,enum_descriptor_((field_descriptor_ && (field_descriptor_->cpp_type() ==
 		::google::protobuf::FieldDescriptor::CPPTYPE_ENUM)) ?
 		field_descriptor->enum_type() : NULL)
+	,cpp_type_(InitialCppTypeValue)
+	,datum_type_(GpbDatumType_Count)
 	,depth_(depth)
 	,member_index_(member_index)
 	,max_depth_(depth_)
 	,member_list_()
 {
+	using namespace ::google::protobuf;
+
+	if (field_descriptor_) {
+		cpp_type_ = field_descriptor_->cpp_type();
+		if (field_descriptor_->label() == FieldDescriptor::LABEL_REPEATED) {
+			if ((cpp_type_ == FieldDescriptor::CPPTYPE_STRING) ||
+				 (cpp_type_ == FieldDescriptor::CPPTYPE_MESSAGE))
+				datum_type_ = GpbDatumType_RepeatedPtr;
+			else
+				datum_type_ = GpbDatumType_Repeated;
+		}
+		else
+			datum_type_ = static_cast<GpbDatumType>(cpp_type_);
+	}
+
 	if ((!descriptor) || (!descriptor->field_count()))
 		return;
 
@@ -307,24 +338,37 @@ struct CompareByNameAndType {
 
 //	////////////////////////////////////////////////////////////////////////////
 GpbElementInfoVector SetOperationHelper(bool is_diff,
-	const GpbElementInfoVector &in_lhs, const GpbElementInfoVector &in_rhs)
+	const GpbElementInfoVector &in_lhs, const GpbElementInfoVector &in_rhs,
+	GpbElementInfoVector &out_lhs, GpbElementInfoVector &out_rhs)
 {
-	GpbElementInfoVector lhs(in_lhs);
-	GpbElementInfoVector rhs(in_rhs);
+	out_lhs = in_lhs;
+	out_rhs = in_rhs;
+
 	GpbElementInfoVector result(in_lhs.size());
 
-	std::sort(lhs.begin(), lhs.end(), CompareByNameAndType());
-	std::sort(rhs.begin(), rhs.end(), CompareByNameAndType());
+	std::sort(out_lhs.begin(), out_lhs.end(), CompareByNameAndType());
+	std::sort(out_rhs.begin(), out_rhs.end(), CompareByNameAndType());
 
 	GpbElementInfoVectorIter iter_result((!is_diff) ?
-		std::set_intersection(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
-		result.begin(), CompareByNameAndType()) :
-		std::set_difference(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
-		result.begin(), CompareByNameAndType()));
+		std::set_intersection(out_lhs.begin(), out_lhs.end(),
+		out_rhs.begin(), out_rhs.end(), result.begin(), CompareByNameAndType()) :
+		std::set_difference(out_lhs.begin(), out_lhs.end(),
+		out_rhs.begin(), out_rhs.end(), result.begin(), CompareByNameAndType()));
 
 	result.resize(iter_result - result.begin());
 
 	return(result);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoVector SetOperationHelper(bool is_diff,
+	const GpbElementInfoVector &in_lhs, const GpbElementInfoVector &in_rhs)
+{
+	GpbElementInfoVector out_lhs;
+	GpbElementInfoVector out_rhs;
+
+	return(SetOperationHelper(is_diff, in_lhs, in_rhs, out_lhs, out_rhs));
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -343,6 +387,27 @@ GpbElementInfoVector GpbElementInfo::SetDifference(
 	const GpbElementInfo &other) const
 {
 	return(SetOperationHelper(true, member_list_, other.member_list_));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoPairVector GpbElementInfo::SetIntersectionPair(
+	const GpbElementInfo &other) const
+{
+	GpbElementInfoVector     tmp_lhs;
+	GpbElementInfoVector     tmp_rhs;
+	GpbElementInfoVector     inte_list(SetOperationHelper(false, member_list_,
+		other.member_list_, tmp_lhs, tmp_rhs));
+	GpbElementInfoPairVector result_list(inte_list.size());
+
+	//	Can't fail --- we just matched lhs and rhs elements.
+	for (std::size_t count_1 = 0; count_1 < result_list.size(); ++count_1)
+		result_list[count_1] = GpbElementInfoPair(inte_list[count_1],
+			*std::lower_bound(tmp_rhs.begin(), tmp_rhs.end(),
+			inte_list[count_1], CompareByNameAndType()));
+
+	return(result_list);
+
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -440,7 +505,6 @@ void GpbElementInfo::ClearSourceLocation(
 //	////////////////////////////////////////////////////////////////////////////
 std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 {
-/*
 	o_str << std::setw(datum.depth_ * 3) << "" << "{"
 		"Depth="                << datum.depth_              << ", "
 		"TypeNameFull="         << datum.GetTypeNameFull()   << ", "
@@ -457,7 +521,6 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 		o_str << std::endl << datum.member_list_[count_1];
 
 	return(o_str);
-*/
 /*
 	o_str << std::setw(datum.depth_ * 3) << "" << "{"
 		"\"Depth\": "            << datum.depth_              << ", "
@@ -477,6 +540,7 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 
 	return(o_str);
 */
+/*
 	std::string pad;
 
 	{
@@ -509,6 +573,7 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 	o_str << std::setw(datum.depth_ * 3) << "" << "}";
 
 	return(o_str);
+*/
 }
 //	////////////////////////////////////////////////////////////////////////////
 

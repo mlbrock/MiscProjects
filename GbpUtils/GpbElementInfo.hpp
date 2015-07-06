@@ -45,6 +45,26 @@ namespace MLB {
 namespace ProtoBufSupport {
 
 //	////////////////////////////////////////////////////////////////////////////
+enum GpbDatumType {
+	GpbDatumType_SInt32      = ::google::protobuf::FieldDescriptor::CPPTYPE_INT32,
+	GpbDatumType_SInt64      = ::google::protobuf::FieldDescriptor::CPPTYPE_INT64,
+	GpbDatumType_UInt32      = ::google::protobuf::FieldDescriptor::CPPTYPE_UINT32,
+	GpbDatumType_UInt64      = ::google::protobuf::FieldDescriptor::CPPTYPE_UINT64,
+	GpbDatumType_Double      = ::google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE,
+	GpbDatumType_Float       = ::google::protobuf::FieldDescriptor::CPPTYPE_FLOAT,
+	GpbDatumType_Bool        = ::google::protobuf::FieldDescriptor::CPPTYPE_BOOL,
+	GpbDatumType_Enum        = ::google::protobuf::FieldDescriptor::CPPTYPE_ENUM,
+	GpbDatumType_String      = ::google::protobuf::FieldDescriptor::CPPTYPE_STRING,
+	GpbDatumType_Message     = ::google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE,
+	GpbDatumType_Repeated    = ::google::protobuf::FieldDescriptor::MAX_CPPTYPE + 1,
+	GpbDatumType_RepeatedPtr,
+	GpbDatumType_Minimum     = GpbDatumType_SInt32,
+	GpbDatumType_Maximum     = GpbDatumType_RepeatedPtr,
+	GpbDatumType_Count       = (GpbDatumType_Maximum - GpbDatumType_Minimum) + 1
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 struct GpbElementInfoDescriptors {
 	const ::google::protobuf::Descriptor      *descriptor_;
 	const ::google::protobuf::FieldDescriptor *field_descriptor_;
@@ -61,14 +81,25 @@ class GpbElementInfo {
 	typedef ::google::protobuf::EnumDescriptor  GPB_EnumDescriptor;
 	typedef ::google::protobuf::Reflection      GPB_Reflection;
 public:
-	typedef std::vector<GpbElementInfo>            GpbElementInfoVector_I;
-//	typedef GpbElementInfoVector_I::iterator       GpbElementInfoVectorIter_I;
-//	typedef GpbElementInfoVector_I::const_iterator GpbElementInfoVectorIterC_I;
+	typedef std::vector<GpbElementInfo>               GpbElementInfoVector_I;
+
+	typedef std::pair<GpbElementInfo, GpbElementInfo> GpbElementInfoPair_I;
+	typedef std::vector<GpbElementInfoPair_I>         GpbElementInfoPairVector_I;
 
 	explicit GpbElementInfo();
 	explicit GpbElementInfo(const GPB_Descriptor &descriptor);
 	explicit GpbElementInfo(const GPB_Descriptor *descriptor);
 	explicit GpbElementInfo(const std::string &message_name);
+
+	inline ::google::protobuf::FieldDescriptor::CppType GetCppType() const
+	{
+		return(cpp_type_);
+	}
+
+	inline GpbDatumType GetDatumType() const
+	{
+		return(datum_type_);
+	}
 
 	const char *GetTypeNameFull() const;
 
@@ -108,6 +139,9 @@ public:
 	GpbElementInfoVector_I SetIntersection(const GpbElementInfo &other) const;
 	GpbElementInfoVector_I SetDifference(const GpbElementInfo &other) const;
 
+	GpbElementInfoPairVector_I SetIntersectionPair(
+		const GpbElementInfo &other) const;
+
 	static std::string SourceLocationToString(
 		const ::google::protobuf::SourceLocation &datum);
 
@@ -120,13 +154,16 @@ public:
 	void TestFileName() const;
 
 private:
-	const GPB_Descriptor      *descriptor_;
-	const GPB_FieldDescriptor *field_descriptor_;
-	const GPB_FileDescriptor  *file_descriptor_;
-	const GPB_EnumDescriptor  *enum_descriptor_;
-	std::size_t                depth_;
-	int                        member_index_;
-	std::size_t                max_depth_;
+	const GPB_Descriptor                         *descriptor_;
+	const GPB_FieldDescriptor                    *field_descriptor_;
+	const GPB_FileDescriptor                     *file_descriptor_;
+	const GPB_EnumDescriptor                     *enum_descriptor_;
+	::google::protobuf::FieldDescriptor::CppType  cpp_type_;
+	GpbDatumType                                  datum_type_;
+	std::size_t                                   depth_;
+	int                                           member_index_;
+	std::size_t                                   max_depth_;
+
 	GpbElementInfoVector_I     member_list_;
 
 	explicit GpbElementInfo(const GPB_Descriptor *descriptor,
@@ -161,6 +198,13 @@ private:
 typedef GpbElementInfo::GpbElementInfoVector_I GpbElementInfoVector;
 typedef GpbElementInfoVector::iterator         GpbElementInfoVectorIter;
 typedef GpbElementInfoVector::const_iterator   GpbElementInfoVectorIterC;
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+typedef GpbElementInfo::GpbElementInfoPair_I     GpbElementInfoPair;
+typedef std::vector<GpbElementInfoPair>          GpbElementInfoPairVector;
+typedef GpbElementInfoPairVector::iterator       GpbElementInfoPairVectorIter;
+typedef GpbElementInfoPairVector::const_iterator GpbElementInfoPairVectorIterC;
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
