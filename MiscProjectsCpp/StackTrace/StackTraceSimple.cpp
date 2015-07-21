@@ -25,6 +25,7 @@
 // ////////////////////////////////////////////////////////////////////////////
 
 #include <execinfo.h>
+#include <cxxabi.h>
 
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
@@ -81,10 +82,25 @@ struct StackTraceShallow {
 			std::string(file_name_ptr_, file_name_size_));
 	}
 
-	std::string GetFunctionName() const
+	std::string GetFunctionName(bool demangle_flag = false) const
 	{
-		return((!func_name_ptr_) ? "" :
-			std::string(func_name_ptr_, func_name_size_));
+		return((!func_name_ptr_) ? "" : ((demangle_flag) ?
+			GetFunctionNameDemangled() :
+			std::string(func_name_ptr_, func_name_size_)));
+	}
+
+	std::string GetFunctionNameDemangled() const
+	{
+		if (!func_name_ptr_)
+			return("");
+
+		std::string tmp_name(func_name_ptr_, func_name_size_);
+
+		int                     status_code;
+		boost::scoped_ptr<char> final_name(abi::__cxa_demangle(
+			tmp_name.c_str(), NULL, NULL, &status_code));
+
+		return((!status_code) ? std::string(final_name.get()) : tmp_name);
 	}
 
 	std::size_t GetFunctionOffset() const
@@ -160,10 +176,10 @@ struct StackTraceShallow {
 		StackTraceShallowVector_I &trace_list);
 
 	static std::pair<std::size_t, std::size_t> GetMaxStringLengths(
-		const StackTraceShallowVector_I &trace_list);
+		const StackTraceShallowVector_I &trace_list, bool demangle_flag = false);
 
 	static void Emit(const StackTraceShallowVector_I &trace_list,
-		std::ostream &o_str = std::cout);
+		bool demangle_flag = false, std::ostream &o_str = std::cout);
 };
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -294,7 +310,7 @@ StackTraceShallowVector &StackTraceShallow::FixUpNumericValues(
 
 // ////////////////////////////////////////////////////////////////////////////
 std::pair<std::size_t, std::size_t> StackTraceShallow::GetMaxStringLengths(
-	const StackTraceShallowVector &trace_list)
+	const StackTraceShallowVector &trace_list, bool demangle_flag)
 {
 	std::pair<std::size_t, std::size_t> results(0, 0);
 	StackTraceShallowVectorIterC  iter_b(trace_list.begin());
@@ -302,7 +318,8 @@ std::pair<std::size_t, std::size_t> StackTraceShallow::GetMaxStringLengths(
 
 	for ( ; iter_b != iter_e; ++iter_b) {
 		results.first  = std::max(results.first,  iter_b->file_name_size_);
-		results.second = std::max(results.second, iter_b->func_name_size_);
+		results.second = std::max(results.second, (!demangle_flag) ?
+			iter_b->func_name_size_ : iter_b->GetFunctionNameDemangled().size());
 	}
 
 	return(results);
@@ -311,10 +328,10 @@ std::pair<std::size_t, std::size_t> StackTraceShallow::GetMaxStringLengths(
 
 // ////////////////////////////////////////////////////////////////////////////
 void StackTraceShallow::Emit(const StackTraceShallowVector &trace_list,
-	std::ostream &o_str)
+	bool demangle_flag, std::ostream &o_str)
 {
 	std::pair<std::size_t, std::size_t> max_lengths(
-		GetMaxStringLengths(trace_list));
+		GetMaxStringLengths(trace_list, demangle_flag));
 
 	StackTraceShallowVectorIterC iter_b(trace_list.begin());
 	StackTraceShallowVectorIterC iter_e(trace_list.end());
@@ -335,7 +352,8 @@ void StackTraceShallow::Emit(const StackTraceShallowVector &trace_list,
 			if (iter_b->func_name_ptr_)
 				o_str
 					<< std::left
-					<< std::setw(max_lengths.second) << iter_b->GetFunctionName()
+					<< std::setw(max_lengths.second) <<
+						iter_b->GetFunctionName(demangle_flag)
 					<< " "
 					<< "0x" << std::right << std::setfill('0') << std::hex
 					<< std::setw(4) << iter_b->GetFunctionOffset()
@@ -366,8 +384,11 @@ void GetBackTrace()
 	StackTraceShallowVector trace_vector(
 		StackTraceShallow::Extract(trace_count, trace_list.get()));
 	StackTraceShallow::FixUpNumericValues(trace_vector);
-	StackTraceShallow::Emit(trace_vector);
 
+	StackTraceShallow::Emit(trace_vector, false);
+	std::cout << std::endl;
+
+	StackTraceShallow::Emit(trace_vector, true);
 	std::cout << std::endl;
 }
 // ////////////////////////////////////////////////////////////////////////////
