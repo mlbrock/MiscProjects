@@ -63,7 +63,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OutputFile>$(SolutionDir)..\_bin\$(Configuration)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)..\_lib\$(Configuration);E:\Vendor\GoogleProtoBuf\protobuf-2.6.1\MSVC_2010\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>setargv.obj;libprotobuf.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setargv.obj;GpbUtilsLib.lib;libprotobuf.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ProgramDatabaseFile>$(SolutionDir)..\_bin\$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)..\_bin\$(Configuration)\$(ProjectName).map</MapFileName>
@@ -94,7 +94,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <OutputFile>$(SolutionDir)..\_bin\$(Configuration)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)..\_lib\$(Configuration);E:\Vendor\GoogleProtoBuf\protobuf-2.6.1\MSVC_2010\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>setargv.obj;libprotobuf.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>setargv.obj;GpbUtilsLib.lib;libprotobuf.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ProgramDatabaseFile>$(SolutionDir)..\_bin\$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(SolutionDir)..\_bin\$(Configuration)\$(ProjectName).map</MapFileName>
@@ -107,28 +107,28 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\GbpUtils\GpbElementInfo.cpp" />
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestOne.pb.cc">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestThree.pb.cc">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_AddressBook.pb.cc">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_Person.pb.cc">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_PhoneNumber.pb.cc">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\..\GbpUtils\Tests\CppOut\GpbElementInfoTestTwo_PhoneType.pb.cc">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4512 /wd4244 /wd4996 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4100 /wd4125 /wd4127 /wd4512 /wd4244 /wd4996</AdditionalOptions>
     </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
