@@ -24,6 +24,8 @@
 //	Required include files...
 // ////////////////////////////////////////////////////////////////////////////
 
+#include <Utility/Utility_Exception.hpp>
+
 #ifdef _MSC_VER
 # include <Windows.h>
 # include <DbgHelp.h>
@@ -37,6 +39,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -80,11 +83,6 @@ struct StackTrace {
 		return(func_address_);
 	}
 
-	std::string  file_name_;
-	std::string  func_name_;
-	std::size_t  func_offset_;
-	const void  *func_address_;
-
 	static StackTraceVector_I &GetBackTrace(StackTraceVector_I &dst_list,
 		bool demangle_flag = true, std::size_t max_frame_count = 1024,
 		std::size_t skip_frame_count = 0);
@@ -96,6 +94,12 @@ struct StackTrace {
 
 	static void Emit(const StackTraceVector_I &trace_list,
 		bool demangle_flag = false, std::ostream &o_str = std::cout);
+
+private:
+	std::string  file_name_;
+	std::string  func_name_;
+	std::size_t  func_offset_;
+	const void  *func_address_;
 };
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -231,15 +235,15 @@ namespace Utility {
 
 		Print the following captures: $1 $3 $4 $5
 
-	Parentheses are empty if not compiled with -rdynamic
+	Parentheses are empty for functions not compiled with -rdynamic
 */
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-struct StackTraceShallow {
-	typedef std::vector<StackTraceShallow> StackTraceShallowVector_I;
+struct StackTraceWork {
+	typedef std::vector<StackTraceWork> StackTraceWorkVector_I;
 
-	StackTraceShallow(
+	StackTraceWork(
 		std::size_t file_name_size = 0, const char *file_name_ptr = NULL,
 		std::size_t func_name_size = 0, const char *func_name_ptr = NULL,
 		std::size_t func_offset_size = 0, const char *func_offset_ptr = NULL,
@@ -257,7 +261,7 @@ struct StackTraceShallow {
 	{
 	}
 
-	void swap(StackTraceShallow &other);
+	void swap(StackTraceWork &other);
 
 	std::string GetFileName() const
 	{
@@ -347,29 +351,29 @@ struct StackTraceShallow {
 	std::size_t  func_offset_value_;
 	const void  *func_address_value_;
 
-	static StackTraceShallow &Extract(const char *src, StackTraceShallow &dst);
-	static StackTraceShallow  Extract(const char *src);
+	static StackTraceWork &Extract(const char *src, StackTraceWork &dst);
+	static StackTraceWork  Extract(const char *src);
 
-	static StackTraceShallowVector_I &Extract(int src_count,
-		const char **src_list, StackTraceShallowVector_I &dst_list);
-	static StackTraceShallowVector_I  Extract(int src_count, 
+	static StackTraceWorkVector_I &Extract(int src_count,
+		const char **src_list, StackTraceWorkVector_I &dst_list);
+	static StackTraceWorkVector_I  Extract(int src_count, 
 		const char **src_list);
 
-	static StackTraceShallowVector_I &FixUpNumericValues(
-		StackTraceShallowVector_I &trace_list);
+	static StackTraceWorkVector_I &FixUpNumericValues(
+		StackTraceWorkVector_I &trace_list);
 
 	static std::pair<std::size_t, std::size_t> GetMaxStringLengths(
-		const StackTraceShallowVector_I &trace_list, bool demangle_flag = false);
+		const StackTraceWorkVector_I &trace_list, bool demangle_flag = false);
 
-	static void Emit(const StackTraceShallowVector_I &trace_list,
+	static void Emit(const StackTraceWorkVector_I &trace_list,
 		bool demangle_flag = false, std::ostream &o_str = std::cout);
 };
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-typedef StackTraceShallow::StackTraceShallowVector_I StackTraceShallowVector;
-typedef StackTraceShallowVector::iterator 			  StackTraceShallowVectorIter;
-typedef StackTraceShallowVector::const_iterator 	  StackTraceShallowVectorIterC;
+typedef StackTraceWork::StackTraceWorkVector_I StackTraceWorkVector;
+typedef StackTraceWorkVector::iterator 			  StackTraceWorkVectorIter;
+typedef StackTraceWorkVector::const_iterator 	  StackTraceWorkVectorIterC;
 // ////////////////////////////////////////////////////////////////////////////
 
 } // namespace Utility
@@ -387,7 +391,7 @@ namespace MLB {
 namespace Utility {
 
 // ////////////////////////////////////////////////////////////////////////////
-void StackTraceShallow::swap(StackTraceShallow &other)
+void StackTraceWork::swap(StackTraceWork &other)
 {
 	std::swap(file_name_size_,     other.file_name_size_);
 	std::swap(file_name_ptr_,      other.file_name_ptr_);
@@ -413,22 +417,22 @@ const boost::regex MyBackTraceMatcher(
 } // Anonymous namespace
 
 // ////////////////////////////////////////////////////////////////////////////
-StackTraceShallow &StackTraceShallow::Extract(const char *src,
-	StackTraceShallow &dst)
+StackTraceWork &StackTraceWork::Extract(const char *src,
+	StackTraceWork &dst)
 {
 //		PCRE: /^(.+)\(((.+)\+0x([\dA-Fa-f]+))*\)\s+\[0x([\dA-Fa-f]+)\]$
 
 	if ((!src) || (!(*src)))
 		throw std::invalid_argument("Null src parameter.");
 
-	StackTraceShallow tmp_dst;
+	StackTraceWork tmp_dst;
 	boost::cmatch     results;
 
 	if (boost::regex_match(src, results, MyBackTraceMatcher,
 		boost::match_default) && (results.size() == 6) && results[1].matched &&
 		results[5].matched) {
 		if (results[3].matched && results[4].matched)
-			StackTraceShallow(
+			StackTraceWork(
 				results[1].second - results[1].first,
 				results[1].first,
 				results[3].second - results[3].first,
@@ -438,7 +442,7 @@ StackTraceShallow &StackTraceShallow::Extract(const char *src,
 				results[5].second - results[5].first,
 				results[5].first).swap(dst);
 		else
-			StackTraceShallow(
+			StackTraceWork(
 				results[1].second - results[1].first,
 				results[1].first,
 				0,
@@ -449,26 +453,26 @@ StackTraceShallow &StackTraceShallow::Extract(const char *src,
 				results[5].first).swap(dst);
 	}
 	else
-		StackTraceShallow().swap(dst);
+		StackTraceWork().swap(dst);
 
 	return(dst);
 }
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-StackTraceShallow StackTraceShallow::Extract(const char *src)
+StackTraceWork StackTraceWork::Extract(const char *src)
 {
-	StackTraceShallow dst;
+	StackTraceWork dst;
 
 	return(Extract(src, dst));
 }
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-StackTraceShallowVector &StackTraceShallow::Extract(int src_count,
-	const char **src_list, StackTraceShallowVector &dst_list)
+StackTraceWorkVector &StackTraceWork::Extract(int src_count,
+	const char **src_list, StackTraceWorkVector &dst_list)
 {
-	StackTraceShallowVector tmp_dst_list;
+	StackTraceWorkVector tmp_dst_list;
 
 	if (src_count > 0) {
 		for (int count_1 = 0; count_1 < src_count; ++count_1)
@@ -482,21 +486,21 @@ StackTraceShallowVector &StackTraceShallow::Extract(int src_count,
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-StackTraceShallowVector StackTraceShallow::Extract(int src_count, 
+StackTraceWorkVector StackTraceWork::Extract(int src_count, 
 	const char **src_list)
 {
-	StackTraceShallowVector dst_list;
+	StackTraceWorkVector dst_list;
 
 	return(Extract(src_count, src_list, dst_list));
 }
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-StackTraceShallowVector &StackTraceShallow::FixUpNumericValues(
-	StackTraceShallowVector &trace_list)
+StackTraceWorkVector &StackTraceWork::FixUpNumericValues(
+	StackTraceWorkVector &trace_list)
 {
-	StackTraceShallowVectorIter iter_b(trace_list.begin());
-	StackTraceShallowVectorIter iter_e(trace_list.end());
+	StackTraceWorkVectorIter iter_b(trace_list.begin());
+	StackTraceWorkVectorIter iter_e(trace_list.end());
 
 	for ( ; iter_b != iter_e; ++iter_b)
 		iter_b->ParseNumericValues();
@@ -506,12 +510,12 @@ StackTraceShallowVector &StackTraceShallow::FixUpNumericValues(
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-std::pair<std::size_t, std::size_t> StackTraceShallow::GetMaxStringLengths(
-	const StackTraceShallowVector &trace_list, bool demangle_flag)
+std::pair<std::size_t, std::size_t> StackTraceWork::GetMaxStringLengths(
+	const StackTraceWorkVector &trace_list, bool demangle_flag)
 {
 	std::pair<std::size_t, std::size_t> results(0, 0);
-	StackTraceShallowVectorIterC  iter_b(trace_list.begin());
-	StackTraceShallowVectorIterC  iter_e(trace_list.end());
+	StackTraceWorkVectorIterC  iter_b(trace_list.begin());
+	StackTraceWorkVectorIterC  iter_e(trace_list.end());
 
 	for ( ; iter_b != iter_e; ++iter_b) {
 		results.first  = std::max(results.first,  iter_b->file_name_size_);
@@ -524,14 +528,14 @@ std::pair<std::size_t, std::size_t> StackTraceShallow::GetMaxStringLengths(
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-void StackTraceShallow::Emit(const StackTraceShallowVector &trace_list,
+void StackTraceWork::Emit(const StackTraceWorkVector &trace_list,
 	bool demangle_flag, std::ostream &o_str)
 {
 	std::pair<std::size_t, std::size_t> max_lengths(
 		GetMaxStringLengths(trace_list, demangle_flag));
 
-	StackTraceShallowVectorIterC iter_b(trace_list.begin());
-	StackTraceShallowVectorIterC iter_e(trace_list.end());
+	StackTraceWorkVectorIterC iter_b(trace_list.begin());
+	StackTraceWorkVectorIterC iter_e(trace_list.end());
 
 	o_str << std::setfill(' ');
 
@@ -578,14 +582,14 @@ void TEST_GetBackTrace()
 	boost::shared_ptr<const char *> trace_list(const_cast<const char **>(
 		::backtrace_symbols(list_data, trace_count)));
 
-	StackTraceShallowVector trace_vector(
-		StackTraceShallow::Extract(trace_count, trace_list.get()));
-	StackTraceShallow::FixUpNumericValues(trace_vector);
+	StackTraceWorkVector trace_vector(
+		StackTraceWork::Extract(trace_count, trace_list.get()));
+	StackTraceWork::FixUpNumericValues(trace_vector);
 
-	StackTraceShallow::Emit(trace_vector, false);
+	StackTraceWork::Emit(trace_vector, false);
 	std::cout << std::endl;
 
-	StackTraceShallow::Emit(trace_vector, true);
+	StackTraceWork::Emit(trace_vector, true);
 	std::cout << std::endl;
 }
 // ////////////////////////////////////////////////////////////////////////////
