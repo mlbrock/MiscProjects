@@ -24,15 +24,198 @@
 //	Required include files...
 // ////////////////////////////////////////////////////////////////////////////
 
-#include <execinfo.h>
-#include <cxxabi.h>
+#ifdef _MSC_VER
+# include <Windows.h>
+# include <DbgHelp.h>
+#else
+# include <execinfo.h>
+# include <cxxabi.h>
+#endif // #ifdef _MSC_VER
 
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <iomanip>
+#include <iostream>
 
 // ////////////////////////////////////////////////////////////////////////////
+
+namespace MLB {
+
+namespace Utility {
+
+// ////////////////////////////////////////////////////////////////////////////
+struct StackTrace {
+	typedef std::vector<StackTrace> StackTraceVector_I;
+
+	explicit StackTrace(const char *file_name = NULL,
+		const char *func_name = NULL, std::size_t func_offset = 0,
+		const void  *func_address = NULL)
+		:file_name_((file_name) ? file_name : "")
+		,func_name_((func_name) ? func_name : "")
+		,func_offset_(func_offset)
+		,func_address_(func_address)
+	{
+	}
+
+	void swap(StackTrace &other);
+
+	std::string GetFileName() const
+	{
+		return(file_name_);
+	}
+
+	std::string GetFunctionName() const
+	{
+		return(func_name_);
+	}
+
+	std::size_t GetFunctionOffset() const
+	{
+		return(func_offset_);
+	}
+
+	const void *GetFunctionAddress() const
+	{
+		return(func_address_);
+	}
+
+	std::string  file_name_;
+	std::string  func_name_;
+	std::size_t  func_offset_;
+	const void  *func_address_;
+
+	static StackTraceVector_I &GetBackTrace(StackTraceVector_I &dst_list,
+		bool demangle_flag = true, std::size_t max_frame_count = 1024,
+		std::size_t skip_frame_count = 0);
+	static StackTraceVector_I  GetBackTrace(bool demangle_flag = true,
+		std::size_t max_frame_count = 1024, std::size_t skip_frame_count = 0);
+
+	static std::pair<std::size_t, std::size_t> GetMaxStringLengths(
+		const StackTraceVector_I &trace_list, bool demangle_flag = false);
+
+	static void Emit(const StackTraceVector_I &trace_list,
+		bool demangle_flag = false, std::ostream &o_str = std::cout);
+};
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+typedef StackTrace::StackTraceVector_I   StackTraceVector;
+typedef StackTraceVector::iterator 		  StackTraceVectorIter;
+typedef StackTraceVector::const_iterator StackTraceVectorIterC;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+//	****************************************************************************
+//	****************************************************************************
+//	****************************************************************************
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+StackTraceVector &StackTrace::GetBackTrace(StackTraceVector &dst_list,
+	bool demangle_flag, std::size_t max_frame_count,
+	std::size_t skip_frame_count)
+{
+	StackTraceVector tmp_dst_list;
+
+	if ((max_frame_count > 0) && (skip_frame_count < max_frame_count)) {
+		;	//	***
+	}
+
+	dst_list.swap(tmp_dst_list);
+
+	return(dst_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+StackTraceVector StackTrace::GetBackTrace(bool demangle_flag,
+	std::size_t max_frame_count, std::size_t skip_frame_count)
+{
+	StackTraceVector dst_list;
+
+	return(GetBackTrace(dst_list, demangle_flag, max_frame_count,
+		skip_frame_count));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // namespace Utility
+
+} // namespace MLB
+
+#ifdef _MSC_VER
+
+namespace MLB {
+
+namespace Utility {
+
+// ////////////////////////////////////////////////////////////////////////////
+class OsDebugSupport {
+};
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+void TEST_GetBackTrace(bool demangle_flag = true,
+	std::size_t max_frame_count = 1024, std::size_t skip_frame_count = 0)
+{
+	HANDLE process_handle = ::GetCurrentProcess();
+
+	::SymInitialize(process_handle, NULL, TRUE);
+
+	USHORT       trace_count;
+	void        *trace_list[256];
+	SYMBOL_INFO  symbol_info[4096 / sizeof(SYMBOL_INFO)];
+
+	IMAGEHLP_MODULE64 module_info;
+
+	module_info.SizeOfStruct = sizeof(module_info);
+
+	symbol_info[0].MaxNameLen   = 255;
+	symbol_info[0].SizeOfStruct = sizeof(SYMBOL_INFO);
+
+	trace_count = ::CaptureStackBackTrace(0, 256, trace_list, NULL);
+
+	for (USHORT count_1 = skip_frame_count; count_1 < trace_count; ++count_1) {
+		try {
+			::SymFromAddr(process_handle,
+				reinterpret_cast<DWORD64>(trace_list[count_1]), 0, symbol_info);
+			std::cout
+				<< "0x" << std::right << std::setfill('0') << std::hex
+				<< std::setw(sizeof(void *) * 2) <<
+					symbol_info[0].Address
+				<< " " << std::dec << std::setfill(' ')
+				<< symbol_info[0].Name
+					;
+::memset(&module_info, '\0', sizeof(module_info));
+module_info.SizeOfStruct = sizeof(module_info);
+			if (::SymGetModuleInfo64(process_handle, symbol_info[0].ModBase,
+				&module_info) != TRUE) {
+				std::ostringstream o_str;
+				o_str << "Attempt to retrieve the module information for the "
+					"module located beginning at address 0x" << std::hex <<
+					symbol_info[0].ModBase << std::dec << " with "
+					"'SymGetModuleInfo64()' failed";
+				ThrowSystemError(o_str.str());
+			}
+			std::cout << std::endl;
+		}
+		catch (const std::exception &except) {
+			std::ostringstream o_str;
+			o_str << "Unable to resolve back trace symbol information for "
+				"frame index " << count_1 << " (with " << skip_frame_count <<
+				" frames skipped) and a total of " << trace_count <<
+				"frames captured: " << except.what();
+			Rethrow(except, o_str.str());
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // namespace Utility
+
+} // namespace MLB
+
+#else
 
 namespace MLB {
 
@@ -188,6 +371,20 @@ typedef StackTraceShallow::StackTraceShallowVector_I StackTraceShallowVector;
 typedef StackTraceShallowVector::iterator 			  StackTraceShallowVectorIter;
 typedef StackTraceShallowVector::const_iterator 	  StackTraceShallowVectorIterC;
 // ////////////////////////////////////////////////////////////////////////////
+
+} // namespace Utility
+
+} // namespace MLB
+
+// ////////////////////////////////////////////////////////////////////////////
+//	****************************************************************************
+//	****************************************************************************
+//	****************************************************************************
+// ////////////////////////////////////////////////////////////////////////////
+
+namespace MLB {
+
+namespace Utility {
 
 // ////////////////////////////////////////////////////////////////////////////
 void StackTraceShallow::swap(StackTraceShallow &other)
@@ -366,7 +563,7 @@ void StackTraceShallow::Emit(const StackTraceShallowVector &trace_list,
 // ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
-void GetBackTrace()
+void TEST_GetBackTrace()
 {
 	const int  list_count = 1024;
 	void      *list_data[list_count];
@@ -397,11 +594,13 @@ void GetBackTrace()
 
 } // namespace MLB
 
+#endif // #ifdef _MSC_VER
+
 #ifdef TEST_MAIN
 
 #include <cstdlib>
 
-namespace SomeNamespaceName {
+namespace TEST_NamespaceName {
 
 // ////////////////////////////////////////////////////////////////////////////
 struct TEST_ClassBottom {
@@ -417,7 +616,7 @@ struct TEST_ClassBottom {
 
 	static void StaticFunc()
 	{
-		MLB::Utility::GetBackTrace();
+		MLB::Utility::TEST_GetBackTrace();
 	}
 };
 //	----------------------------------------------------------------------------
@@ -468,14 +667,14 @@ void TEST_RunTest(int &return_code)
 }
 // ////////////////////////////////////////////////////////////////////////////
 
-} // Anonymous namespace
+} // namespace TEST_NamespaceName
 
 int main()
 {
 	int return_code = EXIT_SUCCESS;
 
 	try {
-		SomeNamespaceName::TEST_RunTest(return_code);
+		TEST_NamespaceName::TEST_RunTest(return_code);
 	}
 	catch (const std::exception &except) {
 		std::cerr << "ERROR: " << except.what() << std::endl;
