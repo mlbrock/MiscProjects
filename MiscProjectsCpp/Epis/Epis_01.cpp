@@ -201,11 +201,6 @@ public:
 	{
 		if (obs_vector_.empty()) {
 			tmp_obs_set_.AddObservation(obs);
-//			AddObservationPrep(obs);
-/*
-			if (tmp_obs_set_.obs_set_.size() < 100)
-				return;
-*/
 			if (tmp_obs_set_.obs_set_total_ < 100)
 				return;
 			//	Populate;
@@ -240,11 +235,10 @@ public:
 					obs_vector_[current_index].obs_count_  += tmp_point.occurrences_;
 					const_cast<DatumPoint *>(&(*iter_b))->occurrences_ -=
 						(interval_size - current_size);
-					current_index = 0;
+					current_size = 0;
 					++current_index;
 				}
 			}
-
 			--iter_b;
 			if (iter_b->occurrences_) {
 				DatumPointSetIterC iter_f(
@@ -257,18 +251,19 @@ public:
 				obs_vector_[99].base_count_ += iter_b->occurrences_;
 				obs_vector_[99].obs_count_  += iter_b->occurrences_;
 			}
-
 			tmp_obs_set_.obs_set_.clear();
-
 			return;
 		}
 
 		//	Obs are ordered within vec, so a bisection search is possible...
-		for (std::size_t count_1 = count_1; count_1 < 100; ++count_1) {
-			if ((obs_vector_[count_1].obs_set_.begin()->value_ <= obs) &&
-				 (obs_vector_[count_1].obs_set_.rbegin()->value_ >= obs)) {
+		for (std::size_t count_1 = 0; count_1 < 100; ++count_1) {
+			DatumPointSet &this_set(obs_vector_[count_1].obs_set_);
+			if (((!count_1) && (this_set.begin()->value_ >= obs)) ||
+				 ((count_1 == 99) && (this_set.rbegin()->value_ <= obs)) ||
+				 ((this_set.begin()->value_ <= obs) &&
+				  (this_set.rbegin()->value_ >= obs))) {
 				DatumPointSetInsResult ins_result(
-					obs_vector_[count_1].obs_set_.insert(DatumPoint(obs, 1)));
+					this_set.insert(DatumPoint(obs, 1)));
 				if (!ins_result.second)
 					++const_cast<DatumPoint *>(&(*ins_result.first))->occurrences_;
 				++obs_vector_[count_1].obs_count_;
@@ -276,19 +271,17 @@ public:
 					obs_vector_[count_1].base_count_) >= 100) {
 					// Partial re-balancing...
 					if (!count_1)
-						RebalanceRight(count_1, 100);
+						RebalanceRight(count_1, 100 - 1);
 					else if (count_1 == 99)
-						RebalanceLeft(count_1, 100);
+						RebalanceLeft(count_1, 100 - 1);
 					else {
 						RebalanceRight(count_1, 99 - count_1);
-						RebalanceLeft(count_1, count_1 - 1);
+						RebalanceLeft(count_1, count_1);
 					}
 				}
 			}
 		}
 	}
-#if 0
-#endif // #if 0
 
 	ObservationType GetValueForPercentile(ObservationType percentile) const
 	{
@@ -317,11 +310,6 @@ private:
 
 		return(static_cast<ObservationType>(working_total /
 			static_cast<double>(obs_vector_[element_index].obs_count_)));
-	}
-
-	void AddObservationPrep(ObservationType obs)
-	{
-		tmp_obs_set_.AddObservation(obs);
 	}
 
 	void RebalanceLeft(std::size_t src_index, std::size_t rebalance_count)
@@ -369,44 +357,8 @@ private:
 			}
 		}
 	}
-#if 0
-#endif // #if 0
-
 };
 //	////////////////////////////////////////////////////////////////////////////
-
-/*
-//	////////////////////////////////////////////////////////////////////////////
-class Epis_03 {
-	std::size_t PercGran = 100;
-public:
-	Epis_03()
-		:obs_set_()
-	{
-	}
-
-	void AddObservation(ObservationType obs)
-	{
-		DatumPointSetInsResult ins_result(obs_set_.insert(DatumPoint(obs, 1)));
-
-		if (!ins_result.second)
-			const_cast<DatumPoint *>(&(*ins_result.first))->occurrences_++;
-	}
-
-	ObservationType GetValueForPercentile(ObservationType percentile) const
-	{
-		if ((percentile < 1) || (percentile > 100))
-			return(0);
-
-		for ()
-		return(obs_vector_[percentile])
-	}
-
-private:
-	DatumPointSet obs_set_;
-}
-//	////////////////////////////////////////////////////////////////////////////
-*/
 
 namespace {
 
@@ -425,18 +377,26 @@ const double          MyTestPerc_2[200] = {0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3
 
 //	////////////////////////////////////////////////////////////////////////////
 template <typename DatumType>
+	void TEST_Report(const DatumType &datum, std::size_t src_count,
+		ObservationType percentile)
+{
+	std::cout << "Src count=" << std::setw(4) << src_count << ", percentile=" <<
+		std::setw(3) << percentile << " --- Result=" << std::setw(4) <<
+		datum.GetValueForPercentile(percentile) << std::endl;
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+template <typename DatumType>
 	DatumType TEST_BasicTest(std::size_t src_count,
 		const ObservationType *src_list, ObservationType percentile)
 {
 	DatumType datum;
 
-	std::cout << "Src count=" << src_count;
-
 	for (std::size_t count_1 = 0; count_1 < src_count; ++count_1)
 		datum.AddObservation(src_list[count_1]);
 
-	std::cout << " percentile=" << percentile << " --- Result=" <<
-		datum.GetValueForPercentile(percentile) << std::endl;
+	TEST_Report(datum, src_count, percentile);
 
 	return(datum);
 }
@@ -461,8 +421,14 @@ void TEST_RunMe()
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
-void TEST_RunPopulate(int /* rand_seed */)
+void TEST_RunPopulate(int src_count)
 {
+	Epis_02 datum;
+
+	for (int count_1 = 0; count_1 < src_count; ++count_1)
+		datum.AddObservation(static_cast<ObservationType>(::rand()));
+
+	TEST_Report(datum, static_cast<std::size_t>(src_count), 50);
 }
 //	////////////////////////////////////////////////////////////////////////////
 
