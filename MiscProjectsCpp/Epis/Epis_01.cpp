@@ -22,6 +22,54 @@
 */
 // ////////////////////////////////////////////////////////////////////////////
 
+// ////////////////////////////////////////////////////////////////////////////
+/**
+	\file MiscProjects/MiscProjectsCpp/Epis_01.cpp
+
+	Discussion:
+	-----------
+	Not being a numerical methods man, I had to refresh my knowledge of
+	how to calculate the damned things.
+
+	All of code below is based upon my belief that you guys wanted me to
+	figure it out for myself. In the real world I'd have just Google'd for
+	it, and hacked the code to meet quality standards. Or possibly Numerical
+	Recipes has something I could use. So I came up with all on my very own.
+	Ugly, yes, but it does seem to work.
+
+	This work is essentially the result of exploratory code refined over the
+	(more than two) hours I've worked on it. I figure there is some cool and
+	elegant way to do this known to all discrete math types. Which I'll try
+	to Google-up after signing-off on this effort. Or if you'd like to point
+	me at a resource, feel free.
+
+	Some Implementation Notes:
+	---- -------------- ------
+	Epis_00: is a quick and simple implementation which gave me an in-code
+	mechanism for checking my work. Checked first against the web page
+	mentioned above.
+
+	Epis_01: was my first cut at a solution: Not very smart, but simple
+	enough to rely upon.
+
+	Epis_02: is what I'm turning in for the grade. It uses Epis_01 to
+	jump-start its internal data through what seems upon reflection a
+	much too-convolute approach. Another overly convolute mechanism is
+	the re-balancing. I must confess I've not given it the hammering in
+	test it deserves, but spot-checking it with constructed inputs
+	shows it works (for those inputs at least). It is, however, _extremely_
+	sensitive to the order in which observations are presented. For an
+	example of this sensitivity, try running it once with no command line
+	parameters, and a second time with the single parameter "noshuffle".
+
+	Development Info:
+	----------- -----
+	gcc --version  --->	gcc (GCC) 4.8.2 20131212 (Red Hat 4.8.2-7)
+	uname -a			--->  Linux localhost.localdomain 3.12.8-300.fc20.x86_64 #1 SMP Thu Jan 16 01:07:50 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+
+	But should be pretty portable; I just compiled and ran it under Windows.
+*/
+// ////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
