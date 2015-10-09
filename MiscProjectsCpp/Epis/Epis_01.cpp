@@ -3,7 +3,7 @@
 //	MLB Utility Library Module File
 // ////////////////////////////////////////////////////////////////////////////
 /*
-	File Name			:	Epis_01.cpp
+	File Name			:	Epis_03.cpp
 
 	File Description	:	Percentiles estimation.
 
@@ -84,6 +84,23 @@
 #include <numeric>
 #include <set>
 #include <vector>
+
+#ifdef _Windows
+# pragma warning(push)
+# pragma warning(disable:4625 4626)
+#endif // #ifdef _Windows
+
+#include <boost/multi_index_container_fwd.hpp>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/ranked_index.hpp>
+#include <boost/multi_index/key_extractors.hpp>
+
+#ifdef _Windows
+# pragma warning(pop)
+#endif // #ifdef _Windows
 
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -362,7 +379,7 @@ public:
 	*/
 	ObservationType GetValueForPercentile(ObservationType percentile) const
 	{
-		if ((percentile < 1) || (percentile > 100))
+		if ((percentile < 1) || (percentile > 99))
 			return(0);
 
 		if (obs_vector_.empty())
@@ -436,6 +453,71 @@ private:
 };
 //	////////////////////////////////////////////////////////////////////////////
 
+//	////////////////////////////////////////////////////////////////////////////
+struct ObsDataByRank { };
+struct ObsDataByAge  { };
+//	----------------------------------------------------------------------------
+typedef boost::multi_index_container<
+	ObservationType,
+	boost::multi_index::indexed_by<
+		boost::multi_index::ranked_non_unique<
+			boost::multi_index::tag<ObsDataByRank>,
+			boost::multi_index::identity<ObservationType>
+		>
+		,
+		boost::multi_index::sequenced<
+			boost::multi_index::tag<ObsDataByAge>
+		>
+	>
+> ObsDataMISet;
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+class Epis_03 {
+	typedef boost::multi_index::index<ObsDataMISet, ObsDataByRank>::type
+		ObsDataMISetIdxByRank;
+	typedef boost::multi_index::index<ObsDataMISet, ObsDataByAge>::type
+		ObsDataMISetIdxByAge;
+
+public:
+	/*
+		Zero means no size limit imposed.
+
+		Policy is to remove the oldest observation from the set.
+	*/
+	explicit Epis_03(std::size_t max_size = 10000)
+		:max_size_(max_size)
+		,obs_set_()
+	{
+	}
+
+	void AddObservation(ObservationType obs)
+	{
+		obs_set_.get<ObsDataByRank>().insert(obs);
+
+		if ((max_size_ > 0) && (obs_set_.size() > max_size_))
+			obs_set_.get<ObsDataByAge>().erase(
+				obs_set_.get<ObsDataByAge>().begin());
+	}
+
+	ObservationType GetValueForPercentile(ObservationType percentile) const
+	{
+		if ((percentile < 1) || (percentile > 99) || obs_set_.empty())
+			return(0);
+
+		ObsDataMISetIdxByRank::const_iterator iter_f(
+			obs_set_.get<ObsDataByRank>().nth(((obs_set_.size() - 1) *
+			percentile) / 100));
+
+		return(*iter_f);
+	}
+
+private:
+	std::size_t  max_size_;
+	ObsDataMISet obs_set_;
+};
+//	////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -495,6 +577,8 @@ void TEST_RunMeForSrc(std::size_t src_count, const ObservationType *src_list,
 		shuffle_flag));
 	Epis_02 epis_02(TEST_BasicTest<Epis_02>(src_count, src_list, percentile,
 		shuffle_flag));
+	Epis_03 epis_03(TEST_BasicTest<Epis_03>(src_count, src_list, percentile,
+		shuffle_flag));
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -545,4 +629,8 @@ int main(int argc, char **argv)
 	return(return_code);
 }
 //	////////////////////////////////////////////////////////////////////////////
+
+
+
+
 
