@@ -1,0 +1,327 @@
+/*
+	CODE NOTE:
+	----------------------------------------------------------------------
+	All Gargantuan/Brute/Crusher classes seem to have Enchant 13.
+	All Reanimated Horde/Prowling Dead/Rot Walker seem to have Enchant 34.
+	Frozen Creeper/Frozen Scourge seem to have Enchant 35.
+	?Could 30 be aura enchanted?
+	?Could 22 be preset?
+	?Could 23 be 100 attack rate?
+	----------------------------------------------------------------------
+		Enchants 20 and 30 were encountered on NPCs of classid 95 who were:
+			Extra Fast
+			Aura Enchanted
+			Magic Resistant
+		The aura was Fanaticism.
+	----------------------------------------------------------------------
+		Enchant 30 encountered:
+			Aura Enchanted
+			Extra Fast
+			Extra Strong
+		The aura was Blessed Aim.
+	----------------------------------------------------------------------
+		Enchant 22 encountered (Battlemaid Sarina):
+			Demon
+			Extra Fast
+			Spectral Hit
+			Fire Enchanted
+			Stone Skin
+	----------------------------------------------------------------------
+		Enchant 13, 22 and 30 encountered (Treehead Woodfist):
+			Extra Strong
+			Extra Fast
+			Aura Enchanted
+			Cursed			
+	----------------------------------------------------------------------
+		Enchant 22 encountered (Coldcrow):
+			Demon
+			Cold Enchanted
+			Mana Burn
+			Spectral Hit
+	----------------------------------------------------------------------
+		Enchant 22 encountered (Rakanishu):
+			Demon
+			Enchanted Enchanted
+			Lightning Enchanted
+			Extra Fast
+			Cold Enchanted
+			Fire Enchanted
+	----------------------------------------------------------------------
+		Enchant 12 encountered (Blood Raven):
+	----------------------------------------------------------------------
+		Enchant 10 encountered (on a Mummy/Dried Corpse/Decayed/Preserved Dead/Cadaver)
+	----------------------------------------------------------------------
+		Enchant 11 encountered (Duriel)
+	----------------------------------------------------------------------
+		Enchant 12 encountered in Hell (Achmel the Cursed):
+	----------------------------------------------------------------------
+		Enchant 23 encountered in NM (Achmel the Cursed):
+			Undead
+			Extra Strong
+			Extra Fast
+		Also in NM:
+			Undead
+			LE
+		Also in Hell:
+			Undead
+			Cold Enchanted
+			Mana Burn
+	----------------------------------------------------------------------
+		Enchant 23 encountered (Coldworm the Burrower)
+			Cold Enchanted
+			Magic Resistant
+			Mana Burn
+			Fire Enchanted
+	----------------------------------------------------------------------
+		Enchant 20 encountered on a beetle:
+			Cursed
+			Extra Strong
+			Fire Enchanted
+	----------------------------------------------------------------------
+		Enchant 20 encountered on a beetle:
+			Cursed
+			Extra Fast
+			Extra Strong
+*/
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Enchantment Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Enchants.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion enchantment constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Enchants_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Enchants_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant enchantment values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ENCHANT_EXTRA_STRONG        =  5;
+var D2JSP_ENCHANT_EXTRA_FAST          =  6;
+var D2JSP_ENCHANT_CURSED              =  7;
+var D2JSP_ENCHANT_MAGIC_RESISTANT     =  8;
+var D2JSP_ENCHANT_FIRE_ENCHANTED      =  9;
+var D2JSP_ENCHANT_CHAMPION            = 16;
+var D2JSP_ENCHANT_LIGHTNING_ENCHANTED = 17;
+var D2JSP_ENCHANT_COLD_ENCHANTED      = 18;
+var D2JSP_ENCHANT_PRESET_BOSS         = 22;
+var D2JSP_ENCHANT_THIEF               = 24;
+var D2JSP_ENCHANT_MANA_BURN           = 25;
+var D2JSP_ENCHANT_TELEPORTATION       = 26;
+var D2JSP_ENCHANT_SPECTRAL_HIT        = 27;
+var D2JSP_ENCHANT_STONE_SKIN          = 28;
+var D2JSP_ENCHANT_MULTIPLE_SHOTS      = 29;
+var D2JSP_ENCHANT_AURA_ENCHANTED      = 30;
+var D2JSP_ENCHANT_GHOSTLY             = 36;
+var D2JSP_ENCHANT_FANATIC             = 37;
+var D2JSP_ENCHANT_POSSESSED           = 38;
+var D2JSP_ENCHANT_BERSERKER           = 39;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ENCHANT_MINIMUM = D2JSP_ENCHANT_EXTRA_STRONG;
+var D2JSP_ENCHANT_MAXIMUM = D2JSP_ENCHANT_BERSERKER;
+var D2JSP_ENCHANT_COUNT   = 18;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ENCHANT_ValidList = [
+	D2JSP_ENCHANT_EXTRA_STRONG,
+	D2JSP_ENCHANT_EXTRA_FAST,
+	D2JSP_ENCHANT_CURSED,
+	D2JSP_ENCHANT_MAGIC_RESISTANT,
+	D2JSP_ENCHANT_FIRE_ENCHANTED,
+	D2JSP_ENCHANT_CHAMPION,
+	D2JSP_ENCHANT_LIGHTNING_ENCHANTED,
+	D2JSP_ENCHANT_COLD_ENCHANTED,
+	D2JSP_ENCHANT_PRESET_BOSS,
+	D2JSP_ENCHANT_THIEF,
+	D2JSP_ENCHANT_MANA_BURN,
+	D2JSP_ENCHANT_TELEPORTATION,
+	D2JSP_ENCHANT_SPECTRAL_HIT,
+	D2JSP_ENCHANT_STONE_SKIN,
+	D2JSP_ENCHANT_MULTIPLE_SHOTS,
+	D2JSP_ENCHANT_AURA_ENCHANTED,
+	D2JSP_ENCHANT_GHOSTLY,
+	D2JSP_ENCHANT_FANATIC,
+	D2JSP_ENCHANT_POSSESSED,
+	D2JSP_ENCHANT_BERSERKER
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ENCHANT_NameList = new Array();
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_EXTRA_STRONG]        = "Extra Strong";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_EXTRA_FAST]          = "Extra Fast";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_CURSED]              = "Cursed";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_MAGIC_RESISTANT]     = "Magic Resistant";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_FIRE_ENCHANTED]      = "Fire Enchanted";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_CHAMPION]            = "Champion";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_LIGHTNING_ENCHANTED] = "Lightning Enchanted";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_COLD_ENCHANTED]      = "Cold Enchanted";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_PRESET_BOSS]         = "Preset Boss";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_THIEF]               = "Thief";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_MANA_BURN]           = "Mana Burn";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_TELEPORTATION]       = "Teleportation";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_SPECTRAL_HIT]        = "Spectral Hit";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_STONE_SKIN]          = "Stone Skin";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_MULTIPLE_SHOTS]      = "Multiple Shots";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_AURA_ENCHANTED]      = "Aura Enchanted";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_GHOSTLY]             = "Ghostly";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_FANATIC]             = "Fanatic";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_POSSESSED]           = "Possessed";
+D2JSP_ENCHANT_NameList[D2JSP_ENCHANT_BERSERKER]           = "Berserker";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ENCHANT_NameLookupList = new Array();
+for (var count_1 = 0; count_1 < D2JSP_ENCHANT_NameList.length; count_1++) {
+	if (D2JSP_ENCHANT_NameList[count_1] != null)
+		D2JSP_ENCHANT_NameLookupList[D2JSP_ENCHANT_NameList[count_1].toLowerCase()] =
+			count_1;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ENCHANT_IsValid(enchant_number)
+{
+	return(((enchant_number >= D2JSP_ENCHANT_MINIMUM) &&
+		(enchant_number <= D2JSP_ENCHANT_MAXIMUM) &&
+		(typeof(D2JSP_ENCHANT_NameList[enchant_number]) == "string")) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ENCHANT_IsName(enchant_name)
+{
+	return((typeof(D2JSP_ENCHANT_NameLookupList[enchant_name.toLowerCase()]) !=
+		"undefined") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ENCHANT_EnchantToName(enchant_number)
+{
+	return((D2JSP_ENCHANT_IsValid(enchant_number)) ?
+		D2JSP_ENCHANT_NameList[enchant_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ENCHANT_NameToEnchant(enchant_name)
+{
+	return((D2JSP_ENCHANT_IsName(enchant_name)) ?
+		D2JSP_ENCHANT_NameLookupList[enchant_name.toLowerCase()] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ENCHANT_ParseToNumber(in_data)
+{
+	var tmp_number;
+	var tmp_data;
+
+	in_data  = D2JSP_UTIL_FORMAT_Trim(in_data + "");
+	tmp_data = in_data;
+	tmp_data = tmp_data.replace(/^\s+|\s+$/g, "");
+	tmp_data = tmp_data.replace(/\s+/g, "_");
+	tmp_data = tmp_data.replace(/^[^A-Za-z_]|[^A-Za-z0-9_]/g, "");
+	tmp_data = (tmp_data != "") ? tmp_data : "\"\"";
+
+	if (D2JSP_UTIL_FORMAT_IsDigit(in_data)) {
+		tmp_number = parseInt(in_data, 10);
+		return((D2JSP_ENCHANT_IsValid(tmp_number)) ? tmp_number : -1);
+	}
+	else if (eval("((typeof(D2JSP_ENCHANT_" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval("D2JSP_ENCHANT_" + tmp_data.toUpperCase()));
+	else if (eval("((typeof(" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval(tmp_data.toUpperCase()));
+	else if (D2JSP_ENCHANT_IsName(in_data))
+		return(D2JSP_ENCHANT_NameToEnchant(in_data));
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ENCHANT_ParseToName(in_data)
+{
+	var tmp_number = D2JSP_ENCHANT_ParseToNumber(in_data);
+
+	return((tmp_number != -1) ? D2JSP_ENCHANT_EnchantToName(tmp_number) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Enchants_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+include("TDW/_D2JSP_Utility.d2l");
+function main() {
+	var count_1;
+	var file_name = "output\\RegressionTest._D2JSP_Enchants.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_Enchants.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	if (file_handle) {
+		file_handle.writeLine(D2JSP_UTIL_FORMAT_LJust("", 78, "="));
+		file_handle.writeLine(D2JSP_UTIL_FORMAT_LJust("", 78, "="));
+		file_handle.writeLine("// Complete Enchant List");
+		file_handle.writeLine(D2JSP_UTIL_FORMAT_LJust("", 78, "="));
+		for (count_1 = 0; count_1 < D2JSP_ENCHANT_NameList.length; count_1++)
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_ENCHANT_NameList[count_1]);
+		file_handle.writeLine(D2JSP_UTIL_FORMAT_LJust("", 78, "="));
+		file_handle.writeLine("");
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+

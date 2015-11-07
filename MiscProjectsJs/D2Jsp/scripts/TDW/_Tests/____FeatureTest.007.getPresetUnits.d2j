@@ -1,0 +1,52 @@
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+//stop();
+
+	print("Looking for type 1 objects (NPCs)...");
+	var found_list = new Array();
+	var room_obj   = getRoom();
+//var room_obj   = getRoom(0);
+	if (room_obj) {
+		do {
+//room_obj.init();
+			var preset_list = room_obj.getPresetUnits();
+			while (preset_list && preset_list.length) {
+				// Nead those area-relative coordinates...
+				preset_list[0].area_x = ((room_obj.x * 5) + preset_list[0].x);
+				preset_list[0].area_y = ((room_obj.y * 5) + preset_list[0].y);
+				found_list.push(preset_list.shift());
+			}
+//room_obj.release();
+//break;
+		} while (room_obj && room_obj.getNext());
+	}
+
+	var total_count = found_list.length;
+	while (found_list.length) {
+		var this_string = "";
+		for (var this_prop in found_list[0])
+			this_string += "|" + this_prop + " = " + found_list[0][this_prop];
+		print(this_string);
+		found_list.shift();
+	}
+	print("Found " + total_count + " matching items.");
+
+/*
+print("==========================================");
+print("GetUnit(1) (NPCs):");
+print("------------------------------------------");
+var npc_obj = getUnit(1);
+if (npc_obj) {
+	do {
+		print("NPC: " + npc_obj.classid + ", [" + npc_obj.x + ", " + npc_obj.y +
+			"] = " + npc_obj.name);
+	} while (npc_obj && npc_obj.getNext());
+}
+print("==========================================");
+*/
+}
+

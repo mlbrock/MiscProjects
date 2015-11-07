@@ -1,0 +1,234 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("d2jspLoader.d2l");
+includeonce("TDW/TDW_Ini.d2l");
+includeonce("TDW/TDW_Inventory.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_IC_FileNameLog    = "output/TDW_InventoryControl.log";
+const TDW_IC_FileNameConfig = "settings/____TDW_InventoryControl.ctl";
+const TDW_IC_FileNameStatus = "settings/____TDW_InventoryControl.DONE.txt";
+
+var TDW_IC_Log = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready.");
+
+	var TDW_IC_Log = new D2JSP_UTIL_Log(TDW_IC_FileNameLog,
+		"TDW_InventoryControl");
+
+	TDW_IC_DoThisChar(TDW_IC_FileNameConfig, TDW_IC_FileNameStatus, TDW_IC_Log);
+
+	TDW_IC_Log.closeLog();
+
+	quit();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IC_IniRead(cfg_file_name, log_obj)
+{
+	var this_ini  = new TDW_INI_File(cfg_file_name);
+
+	if (this_ini.error_list.length) {
+		log_obj.logWarning("Error(s) occurred loading INI from input file '" +
+			cfg_file_name + "':");
+		log_obj.logWarning(this_ini.getErrorList());
+	}
+
+	log_obj.logDetail("Further checking of INI file '" + cfg_file_name + "'...");
+
+	for (var count_1 = 0; count_1 < this_ini.section_list.length; ) {
+		var this_section = this_ini.section_list[count_1];
+		var section_name = this_section.section_name;
+		var tmp_list     = section_name.split("/");
+		if ((tmp_list.length != 2) || (section_name.indexOf(" ") > -1)) {
+			log_obj.logWarning("Invalid section encountered on line number " +
+				this_section.line_number + " (section name '" + section_name +
+				"' is invalid) --- section ignored.");
+			this_ini.deleteSection(this_section.section_name);
+		}
+		else if ((tmp_list[0] == "") ||
+			(D2JSP_UTIL_GEN_NumberToRealm(tmp_list[0]) == -1)) {
+			log_obj.logWarning("Invalid section encountered on line number " +
+				this_section.line_number + " (section name '" + section_name +
+				"' contains an invalid realm designator) --- section ignored.");
+			this_ini.deleteSection(this_section.section_name);
+		}
+		else if (tmp_list[1] == "") {
+			log_obj.logWarning("Invalid section encountered on line number " +
+				this_section.line_number + " (section name '" + section_name +
+				"' contains an invalid account name) --- section ignored.");
+			this_ini.deleteSection(this_section.section_name);
+		}
+		else if (!this_section.findName("Password")) {
+			log_obj.logWarning("Invalid section encountered on line number " +
+				this_section.line_number + " (no password name/value pair found)" +
+				"--- section ignored.");
+			this_ini.deleteSection(this_section.section_name);
+		}
+		else if (this_section.findName("Password").value == "") {
+			log_obj.logWarning("Invalid section encountered on line number " +
+				this_section.line_number + " (empty password value found)" +
+				"--- section ignored.");
+			this_ini.deleteSection(this_section.section_name);
+		}
+		else
+			count_1++;
+	}
+
+	return(this_ini);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IC_DoneCharListRead(status_file_name, log_obj)
+{
+	var done_char_list = new Array();
+
+	if (D2JSP_UTIL_GEN_FileExists(status_file_name)) {
+		var file_handle;
+		if ((file_handle = fileOpen(status_file_name, 0)) != null) {
+			var line_number = 1;
+			var this_line;
+			while (!file_handle.eof) {
+				this_line = file_handle.readLine();
+				this_line = this_line.replace(/^\s+|\s+$/g, "");
+				if ((!this_line.length) || (this_line.charAt(0) == ";"))
+					continue;
+				var tab_count = D2JSP_UTIL_FORMAT_StringCount(this_line, "\t");
+				if (tab_count != 1) {
+					log_obj.logWarning("Invalid line number " + line_number +
+						" encountered in TDW_InventoryControl status file '" +
+						status_file_name + "': Expected 2 components on " +
+						"this line, encountered " + (tab_count + 1) + ".");
+					continue;
+				}
+				var line_data = this_line.split("\t");
+				done_char_list[line_data[0]] = line_data[1];
+			}
+			file_handle.close();
+		}
+		else
+			log_obj.logError("Attempt to open TDW Inventory Control status " +
+				"file '" + status_file_name + "' for reading failed.");
+	}
+
+	return(done_char_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IC_DoneCharListWrite(status_file_name, done_char_list)
+{
+	var return_code = 0;
+
+	if ((file_handle = fileOpen(status_file_name, 1)) != null) {
+		for (var this_prop in done_char_list)
+			file_handle.writeLine(this_prop + "\t" + done_char_list[this_prop]);
+		file_handle.close();
+	}
+	else {
+		log_obj.logError("Attempt to open TDW Inventory Control status " +
+			"file '" + status_file_name + "' for reading failed.");
+		return_code = -1;
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IC_DoThisChar(cfg_file_name, status_file_name, log_obj)
+{
+	var this_ini  = TDW_IC_IniRead(cfg_file_name, log_obj);
+	var done_list = new Array();
+	var name_list = ["", "realm", "account", "character name"];
+
+	var next_flag       = false;
+	var next_realm      = null;
+	var next_account    = null;
+	var next_position   = null;
+	var my_section_name = D2JSP_UTIL_GEN_ParseRealmToNumber(me.realm) + "/" +
+									me.account;
+	var my_full_name    = me.realm + "/" + me.account + "/" + me.name;
+	var done_char_list  = TDW_IC_DoneCharListRead(status_file_name, log_obj);
+
+	if (!(this_ini.findSection(my_section_name))) {
+		log_obj.logInfo("This realm/account is not configured for inventory " +
+			"--- skipped.");
+		guiPrint("Ignored " + my_full_name);
+		next_flag = true;
+	}
+	else {
+		if (my_section_name in done_char_list) {
+			if (done_char_list[my_section_name] < 8) {
+				// WRITE INVENTORY HERE
+				TDW_INV_WriteToFile("output/TDW_Inventory.Consolidated.csv",
+					true, false);
+				TDW_INV_SPACE_WriteToFile("output/TDW_InventorySpace.Consolidated.csv",
+					true, false);
+				guiPrint("Processed inventory for " + my_full_name);
+				done_char_list[my_section_name]++;
+			}
+			if (done_char_list[my_section_name] < 8) {
+				guiSetValue("CharacterLocation",
+					done_char_list[my_section_name] + 1);
+				guiOnExit("charscreen");
+			}
+			else
+				next_flag = true;
+		}
+		else {
+			done_char_list[my_section_name] = 1;
+			// WRITE INVENTORY HERE
+			TDW_INV_WriteToFile("output/TDW_Inventory.Consolidated.csv",
+				true, false);
+			TDW_INV_SPACE_WriteToFile("output/TDW_InventorySpace.Consolidated.csv",
+				true, false);
+			guiPrint("Processed inventory for " + my_full_name);
+			guiSetValue("CharacterLocation",
+				done_char_list[my_section_name] + 1);
+			guiOnExit("charscreen");
+		}
+		TDW_IC_DoneCharListWrite(status_file_name, done_char_list);
+	}
+
+	if (next_flag) {
+		for (var this_prop in done_char_list)
+			this_ini.deleteSection(this_prop);
+		if (this_ini.section_list.length) {
+			var tmp_list = this_ini.section_list[0].section_name.split("/");
+			var realm    = D2JSP_UTIL_GEN_ParseRealmToNumber(tmp_list[0]);
+			var account  = tmp_list[1];
+			var password = this_ini.section_list[0].findName("Password").value;
+			var msg_text = "Will process inventory next for characters on realm " +
+				realm + " (" + D2JSP_UTIL_GEN_ParseRealmToName(realm) +
+				") in account " + account;
+			guiSetValue("Realm", realm);
+			guiSetValue("Accountname", account);
+			guiSetValue("Password", password);
+			guiSetValue("CharacterLocation", 1);
+			guiOnExit("kill");
+			guiPrint(msg_text);
+			log_obj.logInfo(msg_text);
+		}
+		else {
+			log_obj.logInfo("GUI is all done. Should exit.");
+			// ALL DONE
+			guiOnExit("kill&stop");
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

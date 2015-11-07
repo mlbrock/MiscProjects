@@ -1,0 +1,138 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/ISF.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log     = new D2JSP_UTIL_Log("output/TDW_CheckISF." + me.realm +
+		"." + me.account + "." + me.name + ".log", "CheckISF");
+	var error_list = new Array();
+	var isf_cfg;
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	my_log.logInfo("Loading ISF configuration file " +
+		"'settings/ISF.cfg'...");
+	if (!(isf_cfg = ISF_Create("settings/ISF.cfg", 0, error_list))) {
+		while (error_list.length)
+			D2JSP_UTIL_LOG_GetALog().logError(error_list.shift());
+		D2JSP_UTIL_LOG_GetALog().logError("Load of ISF configuration file " +
+			"'settings/ISF.cfg' failed.");
+	}
+	else
+		TEST_ISF_Scan(isf_cfg, my_log);
+
+	my_log.closeLog();
+
+	print("Done");
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_ISF_Scan(isf_cfg, my_log)
+{
+	var isf_flags    = ISF_EVAL_FLAG_RETURN_SOURCE_INFO;
+	var pickup_count = 0;
+	var this_item;
+	var this_parent;
+	var this_string;
+
+	my_log.logInfo("My ISF object is an 'ISF_Cfg' object: " +
+		(isf_cfg instanceof ISF_Cfg));
+	my_log.logInfo("My ISF configuration: " + isf_cfg);
+	my_log.logInfo("My ISF version: " + isf_cfg.getVersion());
+	my_log.logInfo("My ISF source list count: " + isf_cfg.getSourceList().length);
+	my_log.logInfo("My ISF spec list count: [" + isf_cfg.getSpecList().length + "]");
+	my_log.logInfo("My ISF code has specs for '7gr'?: [" + isf_cfg.getCode("7qr") + "]");
+	my_log.logInfo("My ISF first spec: [" + isf_cfg.getSpec(0) + "]");
+
+	my_log.logInfo("If every item in the game were to drop on the ground unided...");
+	this_item = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+
+	// Note: Unless your ISF configuration includes such specifications as:
+	//
+	//		category armor : IsRuneWord=true
+	//		category weapon : IsRuneWord=true
+	//
+	// Any legit RuneWords (or Iths) will be reported as "wouldn't pick up'.
+	//
+	// Also, high-powered rares such as Corruption Grip are ignored unless
+	// your configuration looks for items with those stats.
+	if (this_item) {
+		do {
+			this_parent = this_item.getParent();
+//			if (this_parent && (this_parent.name == me.name) &&
+if (true &&
+				((this_item.code == "amu") || (this_item.code == "rin") ||
+				(D2JSP_ITEM_ItemList[this_item.code][D2JSP_ITEM_ELEMENT_CATEGORY] !=
+				"M"))) {
+				var eval_p = null;
+				var eval_i = null;
+				var eval_k = null;
+				if ((eval_p = isf_cfg.evalItemForPickup(this_item, isf_flags))[0]) {
+					this_string = "I'd pickup the " +
+						(((this_item.quality < D2JSP_ITEM_QUALITY_MAGIC) ||
+						this_item.getFlag(D2JSP_ITEMFLAG_IDENTIFIED)) ?
+						D2JSP_ITEM_ColorItemFixFName(this_item) :
+                  D2JSP_ITEM_ColorItemFullName(this_item)) + " --- ";
+					if (!this_item.getFlag(D2JSP_ITEMFLAG_IDENTIFIED)) {
+						if ((eval_i = isf_cfg.evalItemForId(this_item, isf_flags))[0])
+							this_string += "and id it to see if it's worth keeping.";
+						else
+							this_string += "and keep it unidentified.";
+					}
+					else if (this_item.quality >= D2JSP_ITEM_QUALITY_MAGIC)
+						this_string +=
+							(((eval_k = isf_cfg.evalItemForKeep(this_item, isf_flags))[0]) ?
+							"and keep it." : "but not keep it after identifying it.");
+					else
+						this_string +=
+							(((eval_k = isf_cfg.evalItemForKeep(this_item, isf_flags))[0]) ?
+							"and keep it." : "but I wouldn't keep it.");
+					my_log.logInfo(this_string);
+				}
+				else
+					my_log.logInfo("I wouldn't pickup the " +
+						D2JSP_ITEM_ColorItemFixFName(this_item) + ".");
+			}
+		} while (this_item && this_item.getNext());
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

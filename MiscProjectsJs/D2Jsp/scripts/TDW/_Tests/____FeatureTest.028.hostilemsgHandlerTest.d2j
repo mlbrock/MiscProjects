@@ -1,0 +1,75 @@
+var TDW_BOT_Context                              = new Array();
+TDW_BOT_ContextList["operation.hostility.fight"] = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	while (true) {
+		me.overhead("Waiting for hostility msgs");
+		delay(500);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function NON_CORE_FUNC()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	print("HM HANDLER 1: String is \"" + arguments[0] + "\"");
+
+	if (arguments[0].match(/^\S+ has expressed hostility towards you.$/i)) {
+		print("HM HANDLER 2-A: Matched string");
+		if (!TDW_BOT_ContextList["operation.hostility.fight"]) {
+			print("HM HANDLER 3-A: Test passed. Would quit() here.");
+//			quit();								// We're in trouble. REALLY quit()!
+			return(0);
+		}
+		print("HM HANDLER 3-A: Test failed. Would fight here.");
+	}
+	else if (arguments[0].match(/^\S+ is no longer hostile towards you.$/i)) {
+		print("HM HANDLER 2-B: Matched string");
+		var player_name = arguments[0].split(/[\s]/)[0];
+		print("HM HANDLER 3-B: Got player name (" + player_name + ")");
+skjsksksk(1,2);
+		print(VXVXVX + "Player " + player_name +
+			" is no longer hostile; you are no longer prepared to duel.");
+	}
+
+/*
+	var in_string = arguments[0];
+
+	print("HM HANDLER 1: String is \"" + in_string + "\"");
+
+	if (in_string.match(/^\S+ has expressed hostility towards you.$/i)) {
+		print("HM HANDLER 2-A: Matched string");
+		if (!TDW_BOT_ContextList["operation.hostility.fight"]) {
+			print("IN HANDLER 3-A: Test passed. Would quit() here.");
+//			quit();								// We're in trouble. REALLY quit()!
+			return(0);
+		}
+		print("HM HANDLER 3-A: Test failed. Would fight here.");
+	}
+	else if (in_string.match(/^\S+ is no longer hostile towards you.$/i)) {
+		print("HM HANDLER 2-B: Matched string");
+		var player_name = in_string.split(/[\s]/)[0];
+		print("HM HANDLER 3-B: Got player name (" + player_name + ")");
+		print("Player " + player_name +
+			" is no longer hostile; you are no longer prepared to duel.");
+	}
+*/
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	print("GM HANDLER 1: String is \"" + in_string + "\"");
+}
+// ////////////////////////////////////////////////////////////////////////////
+

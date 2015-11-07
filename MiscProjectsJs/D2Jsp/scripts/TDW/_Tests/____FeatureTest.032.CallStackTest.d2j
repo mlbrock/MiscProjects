@@ -1,0 +1,91 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/____FeatureTest.032.CallStackTest.d2j.log",
+		"FeatureTest.032", null, null, null, true);
+
+	for (var this_prop in main)
+		print(this_prop + " = " + main[this_prop]);
+
+	Call_1(10);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+function Call_1(value)
+{
+	Call_2();
+}
+
+function Call_2()
+{
+	Call_3();
+}
+
+function Call_3()
+{
+	Call_4();
+}
+
+function Call_4()
+{
+	Call_5();
+}
+
+function Call_5()
+{
+	Call_6();
+}
+
+function Call_6()
+{
+	Call_7();
+}
+
+function Call_7()
+{
+	Call_8();
+}
+
+function Call_8()
+{
+	Call_9();
+}
+
+function Call_9()
+{
+	Call_10();
+}
+
+function Call_10()
+{
+	Call_11();
+}
+
+function Call_11()
+{
+	Call_12();
+}
+
+function Call_12()
+{
+	Call_13();
+}
+
+function Call_13()
+{
+	Call_14();
+}
+
+function Call_14()
+{
+	Call_15();
+}
+
+function Call_15()
+{
+//	D2JSP_UTIL_LogCallStack();
+	Call_XXX(666);
+}
+

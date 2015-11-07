@@ -1,0 +1,1586 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Area Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Areas.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion area constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Areas_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Areas_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant area values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_AREA_NONE                                                 = 0;
+var D2JSP_AREA_ROGUE_ENCAMPMENT                                     = 1;
+var D2JSP_AREA_BLOOD_MOOR                                           = 2;
+var D2JSP_AREA_COLD_PLAINS                                          = 3;
+var D2JSP_AREA_STONY_FIELD                                          = 4;
+var D2JSP_AREA_DARK_WOOD                                            = 5;
+var D2JSP_AREA_BLACK_MARSH                                          = 6;
+var D2JSP_AREA_TAMOE_HIGHLAND                                       = 7;
+var D2JSP_AREA_DEN_OF_EVIL                                          = 8;
+var D2JSP_AREA_CAVE_LEVEL_1                                         = 9;
+var D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1                          = 10;
+var D2JSP_AREA_HOLE_LEVEL_1                                         = 11;
+var D2JSP_AREA_PIT_LEVEL_1                                          = 12;
+var D2JSP_AREA_CAVE_LEVEL_2                                         = 13;
+var D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2                          = 14;
+var D2JSP_AREA_HOLE_LEVEL_2                                         = 15;
+var D2JSP_AREA_PIT_LEVEL_2                                          = 16;
+var D2JSP_AREA_BURIAL_GROUNDS                                       = 17;
+var D2JSP_AREA_CRYPT                                                = 18;
+var D2JSP_AREA_MAUSOLEUM                                            = 19;
+var D2JSP_AREA_FORGOTTEN_TOWER                                      = 20;
+var D2JSP_AREA_TOWER_CELLAR_LEVEL_1                                 = 21;
+var D2JSP_AREA_TOWER_CELLAR_LEVEL_2                                 = 22;
+var D2JSP_AREA_TOWER_CELLAR_LEVEL_3                                 = 23;
+var D2JSP_AREA_TOWER_CELLAR_LEVEL_4                                 = 24;
+var D2JSP_AREA_TOWER_CELLAR_LEVEL_5                                 = 25;
+var D2JSP_AREA_MONASTERY_GATE                                       = 26;
+var D2JSP_AREA_OUTER_CLOISTER                                       = 27;
+var D2JSP_AREA_BARRACKS                                             = 28;
+var D2JSP_AREA_JAIL_LEVEL_1                                         = 29;
+var D2JSP_AREA_JAIL_LEVEL_2                                         = 30;
+var D2JSP_AREA_JAIL_LEVEL_3                                         = 31;
+var D2JSP_AREA_INNER_CLOISTER                                       = 32;
+var D2JSP_AREA_CATHEDRAL                                            = 33;
+var D2JSP_AREA_CATACOMBS_LEVEL_1                                    = 34;
+var D2JSP_AREA_CATACOMBS_LEVEL_2                                    = 35;
+var D2JSP_AREA_CATACOMBS_LEVEL_3                                    = 36;
+var D2JSP_AREA_CATACOMBS_LEVEL_4                                    = 37;
+var D2JSP_AREA_TRISTRAM                                             = 38;
+var D2JSP_AREA_MOO_MOO_FARM                                         = 39;
+var D2JSP_AREA_LUT_GHOLEIN                                          = 40;
+var D2JSP_AREA_ROCKY_WASTE                                          = 41;
+var D2JSP_AREA_DRY_HILLS                                            = 42;
+var D2JSP_AREA_FAR_OASIS                                            = 43;
+var D2JSP_AREA_LOST_CITY                                            = 44;
+var D2JSP_AREA_VALLEY_OF_SNAKES                                     = 45;
+var D2JSP_AREA_CANYON_OF_THE_MAGI                                   = 46;
+var D2JSP_AREA_A2_SEWERS_LEVEL_1                                    = 47;
+var D2JSP_AREA_A2_SEWERS_LEVEL_2                                    = 48;
+var D2JSP_AREA_A2_SEWERS_LEVEL_3                                    = 49;
+var D2JSP_AREA_HAREM_LEVEL_1                                        = 50;
+var D2JSP_AREA_HAREM_LEVEL_2                                        = 51;
+var D2JSP_AREA_PALACE_CELLAR_LEVEL_1                                = 52;
+var D2JSP_AREA_PALACE_CELLAR_LEVEL_2                                = 53;
+var D2JSP_AREA_PALACE_CELLAR_LEVEL_3                                = 54;
+var D2JSP_AREA_STONY_TOMB_LEVEL_1                                   = 55;
+var D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1                            = 56;
+var D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2                            = 57;
+var D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1                            = 58;
+var D2JSP_AREA_STONY_TOMB_LEVEL_2                                   = 59;
+var D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3                            = 60;
+var D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2                            = 61;
+var D2JSP_AREA_MAGGOT_LAIR_LEVEL_1                                  = 62;
+var D2JSP_AREA_MAGGOT_LAIR_LEVEL_2                                  = 63;
+var D2JSP_AREA_MAGGOT_LAIR_LEVEL_3                                  = 64;
+var D2JSP_AREA_ANCIENT_TUNNELS                                      = 65;
+var D2JSP_AREA_TAL_RASHAS_TOMB1                                     = 66;
+var D2JSP_AREA_TAL_RASHAS_TOMB2                                     = 67;
+var D2JSP_AREA_TAL_RASHAS_TOMB3                                     = 68;
+var D2JSP_AREA_TAL_RASHAS_TOMB4                                     = 69;
+var D2JSP_AREA_TAL_RASHAS_TOMB5                                     = 70;
+var D2JSP_AREA_TAL_RASHAS_TOMB6                                     = 71;
+var D2JSP_AREA_TAL_RASHAS_TOMB7                                     = 72;
+var D2JSP_AREA_DURIELS_LAIR                                         = 73;
+var D2JSP_AREA_ARCANE_SANCTUARY                                     = 74;
+var D2JSP_AREA_KURAST_DOCKTOWN                                      = 75;
+var D2JSP_AREA_SPIDER_FOREST                                        = 76;
+var D2JSP_AREA_GREAT_MARSH                                          = 77;
+var D2JSP_AREA_FLAYER_JUNGLE                                        = 78;
+var D2JSP_AREA_LOWER_KURAST                                         = 79;
+var D2JSP_AREA_KURAST_BAZAAR                                        = 80;
+var D2JSP_AREA_UPPER_KURAST                                         = 81;
+var D2JSP_AREA_KURAST_CAUSEWAY                                      = 82;
+var D2JSP_AREA_TRAVINCAL                                            = 83;
+var D2JSP_AREA_SPIDER_CAVE                                          = 84;
+var D2JSP_AREA_SPIDER_CAVERN                                        = 85;
+var D2JSP_AREA_SWAMPY_PIT_LEVEL_1                                   = 86;
+var D2JSP_AREA_SWAMPY_PIT_LEVEL_2                                   = 87;
+var D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1                               = 88;
+var D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2                               = 89;
+var D2JSP_AREA_SWAMPY_PIT_LEVEL_3                                   = 90;
+var D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3                               = 91;
+var D2JSP_AREA_A3_SEWERS_LEVEL_1                                    = 92;
+var D2JSP_AREA_A3_SEWERS_LEVEL_2                                    = 93;
+var D2JSP_AREA_RUINED_TEMPLE                                        = 94;
+var D2JSP_AREA_DISUSED_FANE                                         = 95;
+var D2JSP_AREA_FORGOTTEN_RELIQUARY                                  = 96;
+var D2JSP_AREA_FORGOTTEN_TEMPLE                                     = 97;
+var D2JSP_AREA_RUINED_FANE                                          = 98;
+var D2JSP_AREA_DISUSED_RELIQUARY                                    = 99;
+var D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1                              = 100;
+var D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2                              = 101;
+var D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3                              = 102;
+var D2JSP_AREA_THE_PANDEMONIUM_FORTRESS                             = 103;
+var D2JSP_AREA_OUTER_STEPPES                                        = 104;
+var D2JSP_AREA_PLAINS_OF_DESPAIR                                    = 105;
+var D2JSP_AREA_CITY_OF_THE_DAMNED                                   = 106;
+var D2JSP_AREA_RIVER_OF_FLAME                                       = 107;
+var D2JSP_AREA_CHAOS_SANCTUM                                        = 108;
+var D2JSP_AREA_HARROGATH                                            = 109;
+var D2JSP_AREA_BLOODY_FOOTHILLS                                     = 110;
+var D2JSP_AREA_RIGID_HIGHLANDS                                      = 111;
+var D2JSP_AREA_ARREAT_PLATEAU                                       = 112;
+var D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1                           = 113;	// Crystalline Passage
+var D2JSP_AREA_CELLAR_OF_PITY                                       = 114;	// Frozen River
+var D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2                           = 115;	// Glacial Trail
+var D2JSP_AREA_ECHO_CHAMBER                                         = 116;	// Drifter Cavern
+var D2JSP_AREA_TUNDRA_WASTELANDS                                    = 117;	// Frozen Tundra
+var D2JSP_AREA_GLACIAL_CAVES_LEVEL_1                                = 118;	// Ancient's Way
+var D2JSP_AREA_GLACIAL_CAVES_LEVEL_2                                = 119;	// Icy Cellar
+var D2JSP_AREA_ROCKY_SUMMIT                                         = 120;	// Arreat Summit
+var D2JSP_AREA_NIHLATHAKS_TEMPLE                                    = 121;
+var D2JSP_AREA_HALLS_OF_ANGUISH                                     = 122;	// Halls of Anguish
+var D2JSP_AREA_HALLS_OF_DEATHS_CALLING                              = 123;	// Halls of Pain
+var D2JSP_AREA_HALLS_OF_VAUGHT                                      = 124;
+var D2JSP_AREA_HELL1                                                = 125;	// Abaddon
+var D2JSP_AREA_HELL2                                                = 126;	// Pit of Acheron
+var D2JSP_AREA_HELL3                                                = 127; // Infernal Pit
+var D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1                          = 128;
+var D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2                          = 129;
+var D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3                          = 130;
+var D2JSP_AREA_THRONE_OF_DESTRUCTION                                = 131;
+var D2JSP_AREA_THE_WORLDSTONE_CHAMBER                               = 132;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_AREA_MINIMUM       = D2JSP_AREA_NONE;
+var D2JSP_AREA_MAXIMUM       = D2JSP_AREA_THE_WORLDSTONE_CHAMBER;
+var D2JSP_AREA_MINIMUM_VALID = D2JSP_AREA_ROGUE_ENCAMPMENT;
+var D2JSP_AREA_MAXIMUM_VALID = D2JSP_AREA_THE_WORLDSTONE_CHAMBER;
+var D2JSP_AREA_COUNT         = (D2JSP_AREA_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps area numbers to names (and vice versa).
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_AREA_AreaNameList = new Array(D2JSP_AREA_COUNT);
+D2JSP_AREA_AreaNameList[D2JSP_AREA_NONE]                        = "*NOT-AN-AREA*";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_ROGUE_ENCAMPMENT]            = "Rogue Encampment";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_BLOOD_MOOR]                  = "Blood Moor";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_COLD_PLAINS]                 = "Cold Plains";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_STONY_FIELD]                 = "Stony Field";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DARK_WOOD]                   = "Dark Wood";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_BLACK_MARSH]                 = "Black Marsh";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAMOE_HIGHLAND]              = "Tamoe Highland";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DEN_OF_EVIL]                 = "Den of Evil";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CAVE_LEVEL_1]                = "Cave Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1] = "Underground Passage Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HOLE_LEVEL_1]                = "Hole Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_PIT_LEVEL_1]                 = "Pit Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CAVE_LEVEL_2]                = "Cave Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2] = "Underground Passage Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HOLE_LEVEL_2]                = "Hole Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_PIT_LEVEL_2]                 = "Pit Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_BURIAL_GROUNDS]              = "Burial Grounds";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CRYPT]                       = "Crypt";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_MAUSOLEUM]                   = "Mausoleum";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FORGOTTEN_TOWER]             = "Forgotten Tower";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TOWER_CELLAR_LEVEL_1]        = "Tower Cellar Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TOWER_CELLAR_LEVEL_2]        = "Tower Cellar Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TOWER_CELLAR_LEVEL_3]        = "Tower Cellar Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TOWER_CELLAR_LEVEL_4]        = "Tower Cellar Level 4";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TOWER_CELLAR_LEVEL_5]        = "Tower Cellar Level 5";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_MONASTERY_GATE]              = "Monastery Gate";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_OUTER_CLOISTER]              = "Outer Cloister";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_BARRACKS]                    = "Barracks";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_JAIL_LEVEL_1]                = "Jail Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_JAIL_LEVEL_2]                = "Jail Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_JAIL_LEVEL_3]                = "Jail Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_INNER_CLOISTER]              = "Inner Cloister";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CATHEDRAL]                   = "Cathedral";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CATACOMBS_LEVEL_1]           = "Catacombs Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CATACOMBS_LEVEL_2]           = "Catacombs Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CATACOMBS_LEVEL_3]           = "Catacombs Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CATACOMBS_LEVEL_4]           = "Catacombs Level 4";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TRISTRAM]                    = "Tristram";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_MOO_MOO_FARM]                = "Moo Moo Farm";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_LUT_GHOLEIN]                 = "Lut Gholein";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_ROCKY_WASTE]                 = "Rocky Waste";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DRY_HILLS]                   = "Dry Hills";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FAR_OASIS]                   = "Far Oasis";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_LOST_CITY]                   = "Lost City";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_VALLEY_OF_SNAKES]            = "Valley of Snakes";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CANYON_OF_THE_MAGI]          = "Canyon of the Magi";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_A2_SEWERS_LEVEL_1]           = "Sewers Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_A2_SEWERS_LEVEL_2]           = "Sewers Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_A2_SEWERS_LEVEL_3]           = "Sewers Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HAREM_LEVEL_1]               = "Harem Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HAREM_LEVEL_2]               = "Harem Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_PALACE_CELLAR_LEVEL_1]       = "Palace Cellar Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_PALACE_CELLAR_LEVEL_2]       = "Palace Cellar Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_PALACE_CELLAR_LEVEL_3]       = "Palace Cellar Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_STONY_TOMB_LEVEL_1]          = "Stony Tomb Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1]   = "Halls of the Dead Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2]   = "Halls of the Dead Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1]   = "Claw Viper Temple Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_STONY_TOMB_LEVEL_2]          = "Stony Tomb Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3]   = "Halls of the Dead Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2]   = "Claw Viper Temple Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_MAGGOT_LAIR_LEVEL_1]         = "Maggot Lair Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_MAGGOT_LAIR_LEVEL_2]         = "Maggot Lair Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_MAGGOT_LAIR_LEVEL_3]         = "Maggot Lair Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_ANCIENT_TUNNELS]             = "Ancient Tunnels";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAL_RASHAS_TOMB1]            = "Tal Rasha's Tomb";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAL_RASHAS_TOMB2]            = "Tal Rasha's Tomb";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAL_RASHAS_TOMB3]            = "Tal Rasha's Tomb";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAL_RASHAS_TOMB4]            = "Tal Rasha's Tomb";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAL_RASHAS_TOMB5]            = "Tal Rasha's Tomb";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAL_RASHAS_TOMB6]            = "Tal Rasha's Tomb";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TAL_RASHAS_TOMB7]            = "Tal Rasha's Tomb";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DURIELS_LAIR]                = "Duriel's Lair";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_ARCANE_SANCTUARY]            = "Arcane Sanctuary";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_KURAST_DOCKTOWN]             = "Kurast Docktown";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_SPIDER_FOREST]               = "Spider Forest";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_GREAT_MARSH]                 = "Great Marsh";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FLAYER_JUNGLE]               = "Flayer Jungle";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_LOWER_KURAST]                = "Lower Kurast";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_KURAST_BAZAAR]               = "Kurast Bazaar";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_UPPER_KURAST]                = "Upper Kurast";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_KURAST_CAUSEWAY]             = "Kurast Causeway";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TRAVINCAL]                   = "Travincal";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_SPIDER_CAVE]                 = "Spider Cave";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_SPIDER_CAVERN]               = "Spider Cavern";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_SWAMPY_PIT_LEVEL_1]          = "Swampy Pit Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_SWAMPY_PIT_LEVEL_2]          = "Swampy Pit Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1]      = "Flayer Dungeon Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2]      = "Flayer Dungeon Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_SWAMPY_PIT_LEVEL_3]          = "Swampy Pit Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3]      = "Flayer Dungeon Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_A3_SEWERS_LEVEL_1]           = "Sewers Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_A3_SEWERS_LEVEL_2]           = "Sewers Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_RUINED_TEMPLE]               = "Ruined Temple";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DISUSED_FANE]                = "Disused Fane";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FORGOTTEN_RELIQUARY]         = "Forgotten Reliquary";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_FORGOTTEN_TEMPLE]            = "Forgotten Temple";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_RUINED_FANE]                 = "Ruined Fane";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DISUSED_RELIQUARY]           = "Disused Reliquary";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1]     = "Durance of Hate Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2]     = "Durance of Hate Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3]     = "Durance of Hate Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_THE_PANDEMONIUM_FORTRESS]    = "The Pandemonium Fortress";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_OUTER_STEPPES]               = "Outer Steppes";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_PLAINS_OF_DESPAIR]           = "Plains of Despair";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CITY_OF_THE_DAMNED]          = "City of the Damned";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_RIVER_OF_FLAME]              = "River of Flame";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CHAOS_SANCTUM]               = "Chaos Sanctum";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HARROGATH]                   = "Harrogath";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_BLOODY_FOOTHILLS]            = "Bloody Foothills";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_RIGID_HIGHLANDS]             = "Rigid Highlands";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_ARREAT_PLATEAU]              = "Arreat Plateau";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1]  = "Crystalized Cavern Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CELLAR_OF_PITY]              = "Cellar of Pity";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2]  = "Crystalized Cavern Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_ECHO_CHAMBER]                = "Echo Chamber";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_TUNDRA_WASTELANDS]           = "Tundra Wastelands";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_GLACIAL_CAVES_LEVEL_1]       = "Glacial Caves Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_GLACIAL_CAVES_LEVEL_2]       = "Glacial Caves Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_ROCKY_SUMMIT]                = "Rocky Summit";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_NIHLATHAKS_TEMPLE]           = "Nihlathak's Temple";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HALLS_OF_ANGUISH]            = "Halls of Anguish";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HALLS_OF_DEATHS_CALLING]     = "Halls of Death's Calling";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HALLS_OF_VAUGHT]             = "Halls of Vaught";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HELL1]                       = "Hell1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HELL2]                       = "Hell2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_HELL3]                       = "Hell3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1] = "The Worldstone Keep Level 1";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2] = "The Worldstone Keep Level 2";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3] = "The Worldstone Keep Level 3";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_THRONE_OF_DESTRUCTION]       = "Throne of Destruction";
+D2JSP_AREA_AreaNameList[D2JSP_AREA_THE_WORLDSTONE_CHAMBER]      = "The Worldstone Chamber";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// An array of arrays of the game waypoints . . .
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_WayPoints = [
+	[D2JSP_AREA_ROGUE_ENCAMPMENT,
+	 D2JSP_AREA_COLD_PLAINS,
+	 D2JSP_AREA_STONY_FIELD,
+	 D2JSP_AREA_DARK_WOOD,
+	 D2JSP_AREA_BLACK_MARSH,
+	 D2JSP_AREA_OUTER_CLOISTER,
+	 D2JSP_AREA_JAIL_LEVEL_1,
+	 D2JSP_AREA_INNER_CLOISTER,
+	 D2JSP_AREA_CATACOMBS_LEVEL_2],
+	[D2JSP_AREA_LUT_GHOLEIN,
+	 D2JSP_AREA_A2_SEWERS_LEVEL_2,
+	 D2JSP_AREA_DRY_HILLS,
+	 D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2,
+	 D2JSP_AREA_FAR_OASIS,
+	 D2JSP_AREA_LOST_CITY,
+	 D2JSP_AREA_PALACE_CELLAR_LEVEL_1,
+	 D2JSP_AREA_ARCANE_SANCTUARY,
+	 D2JSP_AREA_CANYON_OF_THE_MAGI],
+	[D2JSP_AREA_KURAST_DOCKTOWN,
+	 D2JSP_AREA_SPIDER_FOREST,
+	 D2JSP_AREA_GREAT_MARSH,
+	 D2JSP_AREA_FLAYER_JUNGLE,
+	 D2JSP_AREA_LOWER_KURAST,
+	 D2JSP_AREA_KURAST_BAZAAR,
+	 D2JSP_AREA_UPPER_KURAST,
+	 D2JSP_AREA_TRAVINCAL,
+	 D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2],
+	[D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+	 D2JSP_AREA_CITY_OF_THE_DAMNED,
+	 D2JSP_AREA_RIVER_OF_FLAME],
+	[D2JSP_AREA_HARROGATH,
+	 D2JSP_AREA_RIGID_HIGHLANDS,
+	 D2JSP_AREA_ARREAT_PLATEAU,
+	 D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1,
+	 D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2,
+	 D2JSP_AREA_HALLS_OF_DEATHS_CALLING,
+	 D2JSP_AREA_TUNDRA_WASTELANDS,
+	 D2JSP_AREA_GLACIAL_CAVES_LEVEL_1,
+	 D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2]
+	];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_AreaToWPIndex = new Array(D2JSP_AREA_COUNT);
+var D2JSP_WPIndexToArea = new Array();
+for (count_1 = 0; count_1 < D2JSP_AreaToWPIndex.length; count_1++)
+	D2JSP_AreaToWPIndex[count_1] = -1;
+for (count_1 = 0; count_1 < D2JSP_WayPoints.length; count_1++) {
+	for (count_2 = 0; count_2 < D2JSP_WayPoints[count_1].length; count_2++) {
+		D2JSP_AreaToWPIndex[D2JSP_WayPoints[count_1][count_2]] =
+			D2JSP_WPIndexToArea.length;
+		D2JSP_WPIndexToArea.push(D2JSP_WayPoints[count_1][count_2]);
+	}
+}
+delete count_1;
+delete count_2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_Waypoint(area, room_spec, unit_id_spec)
+{
+	this.area         = area;
+	this.room_spec    = D2JSP_UTIL_GEN_ExpandArgs(room_spec);
+	this.unit_id_spec = D2JSP_UTIL_GEN_ExpandArgs(unit_id_spec);
+
+	this.toString     = D2JSP_AREA_Waypoint_toString;
+
+	function D2JSP_AREA_Waypoint_toString() {
+		return("Waypoint for area " + this.area + " (" +
+			D2JSP_AREA_AreaToName(this.area) + ") in room spec [" +
+			this.room_spec + "], classid spec [" + this.unit_id_spec + "].");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_AREA_WaypointObjList = [
+	[new D2JSP_AREA_Waypoint(D2JSP_AREA_ROGUE_ENCAMPMENT, 1, 119),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_COLD_PLAINS, null, 119),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_STONY_FIELD, null, 119),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_DARK_WOOD, null, 119),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_BLACK_MARSH, null, 119),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_OUTER_CLOISTER, null, 119),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_JAIL_LEVEL_1, [248, 249, 250, 251], 157),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_INNER_CLOISTER, null, 119),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_CATACOMBS_LEVEL_2, [295, 296, 297, 298], 157)
+	],
+	[new D2JSP_AREA_Waypoint(D2JSP_AREA_LUT_GHOLEIN, null, 156),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_A2_SEWERS_LEVEL_2, [345, 346, 347, 348], 323),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_DRY_HILLS, null, 156),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2, [476, 477, 478, 479], 156),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_FAR_OASIS, null, 156),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_LOST_CITY, null, 156),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_PALACE_CELLAR_LEVEL_1, null, 288),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_ARCANE_SANCTUARY, 524, 402),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_CANYON_OF_THE_MAGI, 394, 402)
+	],
+	[new D2JSP_AREA_Waypoint(D2JSP_AREA_KURAST_DOCKTOWN, null, 237),
+//	 new D2JSP_AREA_Waypoint(D2JSP_AREA_SPIDER_FOREST, [575, 576, 577, 578, 579, 580, 581, 582, 583, 584], 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_SPIDER_FOREST, null, 237),
+//	 new D2JSP_AREA_Waypoint(D2JSP_AREA_GREAT_MARSH, [585, 586, 587, 588, 589, 590, 591, 592, 593, 594], 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_GREAT_MARSH, null, 237),
+//	 new D2JSP_AREA_Waypoint(D2JSP_AREA_FLAYER_JUNGLE, [595, 596, 597, 598, 599, 600, 601, 602, 603, 604], 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_FLAYER_JUNGLE, null, 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_LOWER_KURAST, 631, 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_KURAST_BAZAAR, 631, 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_UPPER_KURAST, 631, 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_TRAVINCAL, 656, 237),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2, [792, 793, 794, 795], 324)
+	],
+	[new D2JSP_AREA_Waypoint(D2JSP_AREA_THE_PANDEMONIUM_FORTRESS, null, 398),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_CITY_OF_THE_DAMNED, 811, 238),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_RIVER_OF_FLAME, null, 238)
+	],
+	[new D2JSP_AREA_Waypoint(D2JSP_AREA_HARROGATH, null, 429),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_RIGID_HIGHLANDS, 880, 496),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_ARREAT_PLATEAU, [953, 954], 496),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1, [1034, 1035, 1036, 1037], 511),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2, [1034, 1035, 1036, 1037], 511),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_HALLS_OF_DEATHS_CALLING, [1049, 1050, 1051, 1052], 496),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_TUNDRA_WASTELANDS, [953, 954], 496),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_GLACIAL_CAVES_LEVEL_1, [1034, 1035, 1036, 1037], 511),
+	 new D2JSP_AREA_Waypoint(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2, [1082, 1083, 1084, 1085], 494)
+	]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_Area(area_number, area_name, area_name_mpq, is_inside, drlg_type,
+	level_type, sub_type, is_complex)
+{
+	this.area_number   = area_number;
+	this.area_name     = area_name;
+	this.area_name_mpq = (area_name_mpq == null) ? area_name : area_name_mpq;
+	this.is_inside     = (is_inside) ? true : false;
+	this.drlg_type     = drlg_type;
+	this.level_type    = level_type;
+	this.sub_type      = sub_type;
+	this.is_complex    = (is_complex)  ? true : false;
+	this.is_outside    = (this.is_inside) ? false : true;
+
+	this.act           = (area_number < D2JSP_AREA_LUT_GHOLEIN) ? 1 :
+		(area_number < D2JSP_AREA_KURAST_DOCKTOWN) ? 2 :
+		(area_number < D2JSP_AREA_THE_PANDEMONIUM_FORTRESS) ? 3 :
+		(area_number < D2JSP_AREA_HARROGATH) ? 4 : 5;
+	this.is_act_first  = ((area_number == D2JSP_AREA_ROGUE_ENCAMPMENT) ||
+		(area_number == D2JSP_AREA_LUT_GHOLEIN) ||
+		(area_number == D2JSP_AREA_KURAST_DOCKTOWN) ||
+		(area_number == D2JSP_AREA_THE_PANDEMONIUM_FORTRESS) ||
+		(area_number == D2JSP_AREA_HARROGATH)) ? true : false;
+	this.is_act_last   = ((area_number == D2JSP_AREA_CATACOMBS_LEVEL_4) ||
+		(area_number == D2JSP_AREA_DURIELS_LAIR) ||
+		(area_number == D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3) ||
+		(area_number == D2JSP_AREA_CHAOS_SANCTUM) ||
+		(area_number == D2JSP_AREA_THE_WORLDSTONE_CHAMBER)) ? true : false;
+	this.is_town       = this.is_act_first;
+
+	this.has_wp          = false;
+	this.is_act_wp_first = false;
+	this.is_act_wp_last  = false;
+	this.wp_index_major  = 0;
+	this.wp_index_minor  = 0;
+
+	for (var count_1 = 0; count_1 < D2JSP_WayPoints[this.act - 1].length;
+		count_1++) {
+		if (area_number == D2JSP_WayPoints[this.act - 1][count_1]) {
+			this.has_wp          = true;
+			this.is_act_wp_first = this.is_act_first;
+			this.is_act_wp_last  =
+				((count_1 + 1) == D2JSP_WayPoints[this.act - 1].length) ?
+				true : false;
+			this.wp_index_major  = this.act - 1;
+			this.wp_index_minor  = count_1;
+			break;
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_AREA_List = new Array(D2JSP_AREA_COUNT);
+D2JSP_AREA_List[D2JSP_AREA_NONE]                        =
+	new D2JSP_Area(D2JSP_AREA_NONE,
+		"*NOT-AN-AREA*",                 null,
+		 0, 0, 0, 0, false);
+D2JSP_AREA_List[D2JSP_AREA_ROGUE_ENCAMPMENT]            =
+	new D2JSP_Area(D2JSP_AREA_ROGUE_ENCAMPMENT,
+		"Rogue Encampment",              null,
+		 0, 2, 1, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_BLOOD_MOOR]                  =
+	new D2JSP_Area(D2JSP_AREA_BLOOD_MOOR,
+		"Blood Moor",                    null,
+		 0, 3, 2, 6, false);
+D2JSP_AREA_List[D2JSP_AREA_COLD_PLAINS]                 =
+	new D2JSP_Area(D2JSP_AREA_COLD_PLAINS,
+		"Cold Plains",                   null,
+		 0, 3, 2, 6, false);
+D2JSP_AREA_List[D2JSP_AREA_STONY_FIELD]                 =
+	new D2JSP_Area(D2JSP_AREA_STONY_FIELD,
+		"Stony Field",                   null,
+		 0, 3, 2, 6, false);
+D2JSP_AREA_List[D2JSP_AREA_DARK_WOOD]                   =
+	new D2JSP_Area(D2JSP_AREA_DARK_WOOD,
+		"Dark Wood",                     null,
+		 0, 3, 2, 6, false);
+D2JSP_AREA_List[D2JSP_AREA_BLACK_MARSH]                 =
+	new D2JSP_Area(D2JSP_AREA_BLACK_MARSH,
+		"Black Marsh",                   null,
+		 0, 3, 2, 6, false);
+D2JSP_AREA_List[D2JSP_AREA_TAMOE_HIGHLAND]              =
+	new D2JSP_Area(D2JSP_AREA_TAMOE_HIGHLAND,
+		"Tamoe Highland",                null,
+		 0, 3, 2, 6, false);
+D2JSP_AREA_List[D2JSP_AREA_DEN_OF_EVIL]                 =
+	new D2JSP_Area(D2JSP_AREA_DEN_OF_EVIL,
+		"Den of Evil",                   null,
+		 1, 1, 3, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_CAVE_LEVEL_1]                =
+	new D2JSP_Area(D2JSP_AREA_CAVE_LEVEL_1,
+		"Cave Level 1",                  null,
+		 1, 1, 3, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1] =
+	new D2JSP_Area(D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1,
+		"Underground Passage Level 1",   null,
+		 1, 1, 3, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_HOLE_LEVEL_1]                =
+	new D2JSP_Area(D2JSP_AREA_HOLE_LEVEL_1,
+		"Hole Level 1",                  null,
+		 1, 1, 3, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_PIT_LEVEL_1]                 =
+	new D2JSP_Area(D2JSP_AREA_PIT_LEVEL_1,
+		"Pit Level 1",                   null,
+		 1, 1, 3, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_CAVE_LEVEL_2]                =
+	new D2JSP_Area(D2JSP_AREA_CAVE_LEVEL_2,
+		"Cave Level 2",                  null,
+		 1, 2, 3, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2] =
+	new D2JSP_Area(D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2,
+		"Underground Passage Level 2",   null,
+		 1, 2, 3, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HOLE_LEVEL_2]                =
+	new D2JSP_Area(D2JSP_AREA_HOLE_LEVEL_2,
+		"Hole Level 2",                  null,
+		 1, 2, 3, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_PIT_LEVEL_2]                 =
+	new D2JSP_Area(D2JSP_AREA_PIT_LEVEL_2,
+		"Pit Level 2",                   null,
+		 1, 2, 3, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_BURIAL_GROUNDS]              =
+	new D2JSP_Area(D2JSP_AREA_BURIAL_GROUNDS,
+		"Burial Grounds",                null,
+		 0, 3, 2, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CRYPT]                       =
+	new D2JSP_Area(D2JSP_AREA_CRYPT,
+		"Crypt",                         null,
+		 1, 1, 4, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_MAUSOLEUM]                   =
+	new D2JSP_Area(D2JSP_AREA_MAUSOLEUM,
+		"Mausoleum",                     null,
+		 1, 1, 4, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_FORGOTTEN_TOWER]             =
+	new D2JSP_Area(D2JSP_AREA_FORGOTTEN_TOWER,
+		"Forgotten Tower",               null,
+		 1, 2, 2, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TOWER_CELLAR_LEVEL_1]        =
+	new D2JSP_Area(D2JSP_AREA_TOWER_CELLAR_LEVEL_1,
+		"Tower Cellar Level 1",          null,
+		 1, 1, 4, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TOWER_CELLAR_LEVEL_2]        =
+	new D2JSP_Area(D2JSP_AREA_TOWER_CELLAR_LEVEL_2,
+		"Tower Cellar Level 2",          null,
+		 1, 1, 4, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TOWER_CELLAR_LEVEL_3]        =
+	new D2JSP_Area(D2JSP_AREA_TOWER_CELLAR_LEVEL_3,
+		"Tower Cellar Level 3",          null,
+		 1, 1, 4, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TOWER_CELLAR_LEVEL_4]        =
+	new D2JSP_Area(D2JSP_AREA_TOWER_CELLAR_LEVEL_4,
+		"Tower Cellar Level 4",          null,
+		 1, 1, 4, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TOWER_CELLAR_LEVEL_5]        =
+	new D2JSP_Area(D2JSP_AREA_TOWER_CELLAR_LEVEL_5,
+		"Tower Cellar Level 5",          null,
+		 1, 2, 4, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_MONASTERY_GATE]              =
+	new D2JSP_Area(D2JSP_AREA_MONASTERY_GATE,
+		"Monastery Gate",                null,
+		 0, 2, 5, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_OUTER_CLOISTER]              =
+	new D2JSP_Area(D2JSP_AREA_OUTER_CLOISTER,
+		"Outer Cloister",                null,
+		 0, 2, 6, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_BARRACKS]                    =
+	new D2JSP_Area(D2JSP_AREA_BARRACKS,
+		"Barracks",                      null,
+		 1, 1, 7, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_JAIL_LEVEL_1]                =
+	new D2JSP_Area(D2JSP_AREA_JAIL_LEVEL_1,
+		"Jail Level 1",                  null,
+		 1, 1, 8, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_JAIL_LEVEL_2]                =
+	new D2JSP_Area(D2JSP_AREA_JAIL_LEVEL_2,
+		"Jail Level 2",                  null,
+		 1, 1, 8, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_JAIL_LEVEL_3]                =
+	new D2JSP_Area(D2JSP_AREA_JAIL_LEVEL_3,
+		"Jail Level 3",                  null,
+		 1, 1, 8, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_INNER_CLOISTER]              =
+	new D2JSP_Area(D2JSP_AREA_INNER_CLOISTER,
+		"Inner Cloister",                null,
+		 0, 2, 6, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CATHEDRAL]                   =
+	new D2JSP_Area(D2JSP_AREA_CATHEDRAL,
+		"Cathedral",                     null,
+		 1, 2, 9, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CATACOMBS_LEVEL_1]           =
+	new D2JSP_Area(D2JSP_AREA_CATACOMBS_LEVEL_1,
+		"Catacombs Level 1",             null,
+		 1, 1, 10, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CATACOMBS_LEVEL_2]           =
+	new D2JSP_Area(D2JSP_AREA_CATACOMBS_LEVEL_2,
+		"Catacombs Level 2",             null,
+		 1, 1, 10, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CATACOMBS_LEVEL_3]           =
+	new D2JSP_Area(D2JSP_AREA_CATACOMBS_LEVEL_3,
+		"Catacombs Level 3",             null,
+		 1, 1, 10, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CATACOMBS_LEVEL_4]           =
+	new D2JSP_Area(D2JSP_AREA_CATACOMBS_LEVEL_4,
+		"Catacombs Level 4",             null,
+		 1, 2, 10, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TRISTRAM]                    =
+	new D2JSP_Area(D2JSP_AREA_TRISTRAM,
+		"Tristram",                      null,
+		 0, 2, 11, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_MOO_MOO_FARM]                =
+	new D2JSP_Area(D2JSP_AREA_MOO_MOO_FARM,
+		"Moo Moo Farm",                  null,
+		 0, 3, 2, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_LUT_GHOLEIN]                 =
+	new D2JSP_Area(D2JSP_AREA_LUT_GHOLEIN,
+		"Lut Gholein",                   null,
+		 0, 2, 12, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_ROCKY_WASTE]                 =
+	new D2JSP_Area(D2JSP_AREA_ROCKY_WASTE,
+		"Rocky Waste",                   null,
+		 0, 3, 16, 9, false);
+D2JSP_AREA_List[D2JSP_AREA_DRY_HILLS]                   =
+	new D2JSP_Area(D2JSP_AREA_DRY_HILLS,
+		"Dry Hills",                     null,
+		 0, 3, 16, 9, false);
+D2JSP_AREA_List[D2JSP_AREA_FAR_OASIS]                   =
+	new D2JSP_Area(D2JSP_AREA_FAR_OASIS,
+		"Far Oasis",                     null,
+		 0, 3, 16, 9, false);
+D2JSP_AREA_List[D2JSP_AREA_LOST_CITY]                   =
+	new D2JSP_Area(D2JSP_AREA_LOST_CITY,
+		"Lost City",                     null,
+		 0, 3, 16, 9, false);
+D2JSP_AREA_List[D2JSP_AREA_VALLEY_OF_SNAKES]            =
+	new D2JSP_Area(D2JSP_AREA_VALLEY_OF_SNAKES,
+		"Valley of Snakes",              null,
+		 0, 3, 16, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CANYON_OF_THE_MAGI]          =
+	new D2JSP_Area(D2JSP_AREA_CANYON_OF_THE_MAGI,
+		"Canyon of the Magi",            null,
+		 0, 3, 16, 9, false);
+D2JSP_AREA_List[D2JSP_AREA_A2_SEWERS_LEVEL_1]           =
+	new D2JSP_Area(D2JSP_AREA_A2_SEWERS_LEVEL_1,
+		"Sewers Level 1",                null,
+		 1, 1, 13, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_A2_SEWERS_LEVEL_2]           =
+	new D2JSP_Area(D2JSP_AREA_A2_SEWERS_LEVEL_2,
+		"Sewers Level 2",                null,
+		 1, 1, 13, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_A2_SEWERS_LEVEL_3]           =
+	new D2JSP_Area(D2JSP_AREA_A2_SEWERS_LEVEL_3,
+		"Sewers Level 3",                null,
+		 1, 1, 13, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HAREM_LEVEL_1]               =
+	new D2JSP_Area(D2JSP_AREA_HAREM_LEVEL_1,
+		"Harem Level 1",                 null,
+		 1, 2, 14, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HAREM_LEVEL_2]               =
+	new D2JSP_Area(D2JSP_AREA_HAREM_LEVEL_2,
+		"Harem Level 2",                 null,
+		 1, 1, 14, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_PALACE_CELLAR_LEVEL_1]       =
+	new D2JSP_Area(D2JSP_AREA_PALACE_CELLAR_LEVEL_1,
+		"Palace Cellar Level 1",        null,
+		 1, 1, 15, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_PALACE_CELLAR_LEVEL_2]       =
+	new D2JSP_Area(D2JSP_AREA_PALACE_CELLAR_LEVEL_2,
+		"Palace Cellar Level 2",         null,
+		 1, 1, 15, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_PALACE_CELLAR_LEVEL_3]       =
+	new D2JSP_Area(D2JSP_AREA_PALACE_CELLAR_LEVEL_3,
+		"Palace Cellar Level 3",         null,
+		 1, 1, 15, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_STONY_TOMB_LEVEL_1]          =
+	new D2JSP_Area(D2JSP_AREA_STONY_TOMB_LEVEL_1,
+		"Stony Tomb Level 1",            null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1]   =
+	new D2JSP_Area(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1,
+		"Halls of the Dead Level 1",     null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2]   =
+	new D2JSP_Area(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2,
+		"Halls of the Dead Level 2",     null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1]   =
+	new D2JSP_Area(D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1,
+		"Claw Viper Temple Level 1",     null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_STONY_TOMB_LEVEL_2]          =
+	new D2JSP_Area(D2JSP_AREA_STONY_TOMB_LEVEL_2,
+		"Stony Tomb Level 2",            null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3]   =
+	new D2JSP_Area(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3,
+		"Halls of the Dead Level 3",     null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2]   =
+	new D2JSP_Area(D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2,
+		"Claw Viper Temple Level 2",     null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_MAGGOT_LAIR_LEVEL_1]         =
+	new D2JSP_Area(D2JSP_AREA_MAGGOT_LAIR_LEVEL_1,
+		"Maggot Lair Level 1",           null,
+		 1, 1, 18, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_MAGGOT_LAIR_LEVEL_2]         =
+	new D2JSP_Area(D2JSP_AREA_MAGGOT_LAIR_LEVEL_2,
+		"Maggot Lair Level 2",           null,
+		 1, 1, 18, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_MAGGOT_LAIR_LEVEL_3]         =
+	new D2JSP_Area(D2JSP_AREA_MAGGOT_LAIR_LEVEL_3,
+		"Maggot Lair Level 3",           null,
+		 1, 1, 18, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_ANCIENT_TUNNELS]             =
+	new D2JSP_Area(D2JSP_AREA_ANCIENT_TUNNELS,
+		"Ancient Tunnels",               null,
+		 1, 1, 13, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TAL_RASHAS_TOMB1]            =
+	new D2JSP_Area(D2JSP_AREA_TAL_RASHAS_TOMB1,
+		"Tal Rasha's Tomb",              null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TAL_RASHAS_TOMB2]            =
+	new D2JSP_Area(D2JSP_AREA_TAL_RASHAS_TOMB2,
+		"Tal Rasha's Tomb",              null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TAL_RASHAS_TOMB3]            =
+	new D2JSP_Area(D2JSP_AREA_TAL_RASHAS_TOMB3,
+		"Tal Rasha's Tomb",              null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TAL_RASHAS_TOMB4]            =
+	new D2JSP_Area(D2JSP_AREA_TAL_RASHAS_TOMB4,
+		"Tal Rasha's Tomb",              null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TAL_RASHAS_TOMB5]            =
+	new D2JSP_Area(D2JSP_AREA_TAL_RASHAS_TOMB5,
+		"Tal Rasha's Tomb",              null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TAL_RASHAS_TOMB6]            =
+	new D2JSP_Area(D2JSP_AREA_TAL_RASHAS_TOMB6,
+		"Tal Rasha's Tomb",              null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TAL_RASHAS_TOMB7]            =
+	new D2JSP_Area(D2JSP_AREA_TAL_RASHAS_TOMB7,
+		"Tal Rasha's Tomb",              null,
+		 1, 1, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_DURIELS_LAIR]                =
+	new D2JSP_Area(D2JSP_AREA_DURIELS_LAIR,
+		"Duriel's Lair",                 null,
+		 1, 2, 17, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_ARCANE_SANCTUARY]            =
+	new D2JSP_Area(D2JSP_AREA_ARCANE_SANCTUARY,
+		"Arcane Sanctuary",              null,
+		 1, 1, 19, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_KURAST_DOCKTOWN]             =
+	new D2JSP_Area(D2JSP_AREA_KURAST_DOCKTOWN,
+		"Kurast Docktown",               null,
+		 0, 2, 20, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_SPIDER_FOREST]               =
+	new D2JSP_Area(D2JSP_AREA_SPIDER_FOREST,
+		"Spider Forest",                 null,
+		 0, 3, 21, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_GREAT_MARSH]                 =
+	new D2JSP_Area(D2JSP_AREA_GREAT_MARSH,
+		"Great Marsh",                   null,
+		 0, 3, 21, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_FLAYER_JUNGLE]               =
+	new D2JSP_Area(D2JSP_AREA_FLAYER_JUNGLE,
+		"Flayer Jungle",                 null,
+		 0, 3, 21, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_LOWER_KURAST]                =
+	new D2JSP_Area(D2JSP_AREA_LOWER_KURAST,
+		"Lower Kurast",                  null,
+		 0, 3, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_KURAST_BAZAAR]               =
+	new D2JSP_Area(D2JSP_AREA_KURAST_BAZAAR,
+		"Kurast Bazaar",                 null,
+		 0, 3, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_UPPER_KURAST]                =
+	new D2JSP_Area(D2JSP_AREA_UPPER_KURAST,
+		"Upper Kurast",                  null,
+		 0, 3, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_KURAST_CAUSEWAY]             =
+	new D2JSP_Area(D2JSP_AREA_KURAST_CAUSEWAY,
+		"Kurast Causeway",               null,
+		 0, 3, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TRAVINCAL]                   =
+	new D2JSP_Area(D2JSP_AREA_TRAVINCAL,
+		"Travincal",                     null,
+		 0, 3, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_SPIDER_CAVE]                 =
+	new D2JSP_Area(D2JSP_AREA_SPIDER_CAVE,
+		"Spider Cave",                   null,
+		 1, 1, 23, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_SPIDER_CAVERN]               =
+	new D2JSP_Area(D2JSP_AREA_SPIDER_CAVERN,
+		"Spider Cavern",                 null,
+		 1, 1, 23, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_SWAMPY_PIT_LEVEL_1]          =
+	new D2JSP_Area(D2JSP_AREA_SWAMPY_PIT_LEVEL_1,
+		"Swampy Pit Level 1",            null,
+		 1, 1, 24, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_SWAMPY_PIT_LEVEL_2]          =
+	new D2JSP_Area(D2JSP_AREA_SWAMPY_PIT_LEVEL_2,
+		"Swampy Pit Level 2",            null,
+		 1, 1, 24, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1]      =
+	new D2JSP_Area(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1,
+		"Flayer Dungeon Level 1",        null,
+		 1, 1, 24, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2]      =
+	new D2JSP_Area(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2,
+		"Flayer Dungeon Level 2",        null,
+		 1, 1, 24, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_SWAMPY_PIT_LEVEL_3]          =
+	new D2JSP_Area(D2JSP_AREA_SWAMPY_PIT_LEVEL_3,
+		"Swampy Pit Level 3",            null,
+		 1, 2, 24, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3]      =
+	new D2JSP_Area(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3,
+		"Flayer Dungeon Level 3",        null,
+		 1, 2, 24, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_A3_SEWERS_LEVEL_1]           =
+	new D2JSP_Area(D2JSP_AREA_A3_SEWERS_LEVEL_1,
+		"Sewers Level 1",                null,
+		 1, 1, 25, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_A3_SEWERS_LEVEL_2]           =
+	new D2JSP_Area(D2JSP_AREA_A3_SEWERS_LEVEL_2,
+		"Sewers Level 2",                null,
+		 1, 2, 25, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_RUINED_TEMPLE]               =
+	new D2JSP_Area(D2JSP_AREA_RUINED_TEMPLE,
+		"Ruined Temple",                 null,
+		 1, 2, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_DISUSED_FANE]                =
+	new D2JSP_Area(D2JSP_AREA_DISUSED_FANE,
+		"Disused Fane",                  null,
+		 1, 2, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_FORGOTTEN_RELIQUARY]         =
+	new D2JSP_Area(D2JSP_AREA_FORGOTTEN_RELIQUARY,
+		"Forgotten Reliquary",           null,
+		 1, 2, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_FORGOTTEN_TEMPLE]            =
+	new D2JSP_Area(D2JSP_AREA_FORGOTTEN_TEMPLE,
+		"Forgotten Temple",              null,
+		 1, 2, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_RUINED_FANE]                 =
+	new D2JSP_Area(D2JSP_AREA_RUINED_FANE,
+		"Ruined Fane",                   null,
+		 1, 2, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_DISUSED_RELIQUARY]           =
+	new D2JSP_Area(D2JSP_AREA_DISUSED_RELIQUARY,
+		"Disused Reliquary",             null,
+		 1, 2, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1]     =
+	new D2JSP_Area(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1,
+		"Durance of Hate Level 1",       null,
+		 1, 1, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2]     =
+	new D2JSP_Area(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2,
+		"Durance of Hate Level 2",       null,
+		 1, 1, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3]     =
+	new D2JSP_Area(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+		"Durance of Hate Level 3",       null,
+		 1, 2, 22, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_THE_PANDEMONIUM_FORTRESS]    =
+	new D2JSP_Area(D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+		"The Pandemonium Fortress",      null,
+		 0, 2, 26, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_OUTER_STEPPES]               =
+	new D2JSP_Area(D2JSP_AREA_OUTER_STEPPES,
+		"Outer Steppes",                 null,
+		 0, 3, 27, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_PLAINS_OF_DESPAIR]           =
+	new D2JSP_Area(D2JSP_AREA_PLAINS_OF_DESPAIR,
+		"Plains of Despair",             null,
+		 0, 3, 27, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CITY_OF_THE_DAMNED]          =
+	new D2JSP_Area(D2JSP_AREA_CITY_OF_THE_DAMNED,
+		"City of the Damned",            null,
+		 0, 3, 27, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_RIVER_OF_FLAME]              =
+	new D2JSP_Area(D2JSP_AREA_RIVER_OF_FLAME,
+		"River of Flame",                null,
+		 0, 1, 28, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CHAOS_SANCTUM]               =
+	new D2JSP_Area(D2JSP_AREA_CHAOS_SANCTUM,
+		"Chaos Sanctum",                 null,
+		 0, 3, 28, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HARROGATH]                   =
+	new D2JSP_Area(D2JSP_AREA_HARROGATH,
+		"Harrogath",                     null,
+		 0, 2, 29, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_BLOODY_FOOTHILLS]            =
+	new D2JSP_Area(D2JSP_AREA_BLOODY_FOOTHILLS,
+		"Bloody Foothills",              null,
+		 0, 3, 30, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_RIGID_HIGHLANDS]             =
+	new D2JSP_Area(D2JSP_AREA_RIGID_HIGHLANDS,
+		"Frigid Highlands",              "Rigid Highlands",
+		 0, 3, 31, 10, false);
+D2JSP_AREA_List[D2JSP_AREA_ARREAT_PLATEAU]              =
+	new D2JSP_Area(D2JSP_AREA_ARREAT_PLATEAU,
+		"Arreat Plateau",                null,
+		 0, 3, 31, 10, false);
+D2JSP_AREA_List[D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1]  =
+	new D2JSP_Area(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1,
+		"Crystalline Passage",           "Crystalized Cavern Level 1",
+		 1, 1, 33, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_CELLAR_OF_PITY]              =
+	new D2JSP_Area(D2JSP_AREA_CELLAR_OF_PITY,
+		"Frozen River",                  "Cellar of Pity",
+		 1, 1, 33, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2]  =
+	new D2JSP_Area(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2,
+		"Glacial Trail",                 "Crystalized Cavern Level 2",
+		 1, 1, 33, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_ECHO_CHAMBER]                =
+	new D2JSP_Area(D2JSP_AREA_ECHO_CHAMBER,
+		"Drifter Cavern",                "Echo Chamber",
+		 1, 1, 33, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_TUNDRA_WASTELANDS]           =
+	new D2JSP_Area(D2JSP_AREA_TUNDRA_WASTELANDS,
+		"Frozen Tundra",                 "Tundra Wastelands",
+		 0, 3, 31, 11, false);
+D2JSP_AREA_List[D2JSP_AREA_GLACIAL_CAVES_LEVEL_1]       =
+	new D2JSP_Area(D2JSP_AREA_GLACIAL_CAVES_LEVEL_1,
+		"Ancient's Way",                 "Glacial Caves Level 1",
+		 1, 1, 33, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_GLACIAL_CAVES_LEVEL_2]       =
+	new D2JSP_Area(D2JSP_AREA_GLACIAL_CAVES_LEVEL_2,
+		"Icy Cellar",                    "Glacial Caves Level 2",
+		 1, 1, 33, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_ROCKY_SUMMIT]                =
+	new D2JSP_Area(D2JSP_AREA_ROCKY_SUMMIT,
+		"Arreat Summit",                 "Rocky Summit",
+		 0, 2, 31, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_NIHLATHAKS_TEMPLE]           =
+	new D2JSP_Area(D2JSP_AREA_NIHLATHAKS_TEMPLE,
+		"Nihlathak's Temple",             null,
+		 1, 2, 31, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HALLS_OF_ANGUISH]            =
+	new D2JSP_Area(D2JSP_AREA_HALLS_OF_ANGUISH,
+		"Halls of Anguish",              null,
+		 1, 1, 32, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HALLS_OF_DEATHS_CALLING]     =
+	new D2JSP_Area(D2JSP_AREA_HALLS_OF_DEATHS_CALLING,
+		"Halls of Pain",                 "Halls of Death's Calling",
+		 1, 1, 32, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HALLS_OF_VAUGHT]             =
+	new D2JSP_Area(D2JSP_AREA_HALLS_OF_VAUGHT,
+		"Halls of Vaught",               null,
+		 1, 2, 32, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_HELL1]                       =
+	new D2JSP_Area(D2JSP_AREA_HELL1,
+		"Abaddon",                       "Hell1",
+		 0, 1, 35, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_HELL2]                       =
+	new D2JSP_Area(D2JSP_AREA_HELL2,
+		"Pit of Acheron",                "Hell2",
+		 0, 1, 35, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_HELL3]                       =
+	new D2JSP_Area(D2JSP_AREA_HELL3,
+		"Infernal Pit",                  "Hell3",
+		 0, 1, 35, -1, true);
+D2JSP_AREA_List[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1] =
+	new D2JSP_Area(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1,
+		"The Worldstone Keep Level 1",   null,
+		 1, 1, 34, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2] =
+	new D2JSP_Area(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2,
+		"The Worldstone Keep Level 2",   null,
+		 1, 1, 34, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3] =
+	new D2JSP_Area(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3,
+		"The Worldstone Keep Level 3",   null,
+		 1, 1, 34, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_THRONE_OF_DESTRUCTION]       =
+	new D2JSP_Area(D2JSP_AREA_THRONE_OF_DESTRUCTION,
+		"Throne of Destruction",         null,
+		 1, 2, 34, -1, false);
+D2JSP_AREA_List[D2JSP_AREA_THE_WORLDSTONE_CHAMBER]      =
+	new D2JSP_Area(D2JSP_AREA_THE_WORLDSTONE_CHAMBER,
+		"The Worldstone Chamber",        null,
+		 1, 2, 34, -1, false);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_GetNumberBasic(area_number)
+{
+	if (D2JSP_UTIL_GEN_TypeOfNumber(area_number))
+		return(area_number);
+	else if (D2JSP_UTIL_GEN_TypeOfString(area_number) &&
+		D2JSP_UTIL_FORMAT_IsDigit(area_number))
+		return(parseInt(area_number, 10));
+	else
+		return(me.area);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsValid(area_number)
+{
+	return(((area_number >= D2JSP_AREA_MINIMUM) &&
+		(area_number <= D2JSP_AREA_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsValidInGame(area_number)
+{
+	return(((area_number > D2JSP_AREA_MINIMUM) &&
+		(area_number <= D2JSP_AREA_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// NB: The Secret Cow Level is considered to be in Act 1 by this function.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_GetAct(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	if (D2JSP_AREA_IsValidInGame(area_number))
+		return((area_number < D2JSP_AREA_LUT_GHOLEIN) ? 1 :
+			(area_number < D2JSP_AREA_KURAST_DOCKTOWN) ? 2 :
+			(area_number < D2JSP_AREA_THE_PANDEMONIUM_FORTRESS) ? 3 :
+			(area_number < D2JSP_AREA_HARROGATH) ? 4 : 5);
+	else
+		return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_HasWayPoint(area_number)
+{
+	var count_1;
+	var count_2;
+
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	if (D2JSP_AREA_IsValidInGame(area_number)) {
+		for (count_1 = 0; count_1 < D2JSP_WayPoints.length; count_1++) {
+			for (count_2 = 0; count_2 < D2JSP_WayPoints[count_1].length;
+				count_2++) {
+				if (area_number == D2JSP_WayPoints[count_1][count_2])
+					return(true);
+			}
+		}
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_AreaToWayPointIndices(area_number)
+{
+	var count_1;
+	var count_2;
+
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	if (D2JSP_AREA_IsValidInGame(area_number)) {
+		for (count_1 = 0; count_1 < D2JSP_WayPoints.length; count_1++) {
+			for (count_2 = 0; count_2 < D2JSP_WayPoints[count_1].length;
+				count_2++) {
+				if (area_number == D2JSP_WayPoints[count_1][count_2])
+					return([count_1, count_2]);
+			}
+		}
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsFirstInAct(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return(((area_number == D2JSP_AREA_ROGUE_ENCAMPMENT) ||
+		(area_number == D2JSP_AREA_LUT_GHOLEIN) ||
+		(area_number == D2JSP_AREA_KURAST_DOCKTOWN) ||
+		(area_number == D2JSP_AREA_THE_PANDEMONIUM_FORTRESS) ||
+		(area_number == D2JSP_AREA_HARROGATH)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsLastInAct(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return(((area_number == D2JSP_AREA_CATACOMBS_LEVEL_4) ||
+		(area_number == D2JSP_AREA_DURIELS_LAIR) ||
+		(area_number == D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3) ||
+		(area_number == D2JSP_AREA_CHAOS_SANCTUM) ||
+		(area_number == D2JSP_AREA_THE_WORLDSTONE_CHAMBER)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsFirstInActWithWayPoint(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return(D2JSP_AREA_IsFirstInAct(area_number));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsLastInActWithWayPoint(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return(((area_number == D2JSP_AREA_CATACOMBS_LEVEL_2) ||
+		(area_number == D2JSP_AREA_CANYON_OF_THE_MAGI) ||
+		(area_number == D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2) ||
+		(area_number == D2JSP_AREA_RIVER_OF_FLAME) ||
+		(area_number == D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsTown(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return(D2JSP_AREA_IsFirstInAct(area_number));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsNextToTown(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return(((area_number == D2JSP_AREA_BLOOD_MOOR) ||
+		(area_number == D2JSP_AREA_ROCKY_WASTE) ||
+		(area_number == D2JSP_AREA_SPIDER_FOREST) ||
+		(area_number == D2JSP_AREA_OUTER_STEPPES) ||
+		(area_number == D2JSP_AREA_BLOODY_FOOTHILLS)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsInside(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_List[area_number].is_inside : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsOutside(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_List[area_number].is_outside : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsComplex(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_List[area_number].is_complex : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_DRLGType(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_List[area_number].drlg_type : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_LevelType(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_List[area_number].level_type : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_SubType(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_List[area_number].sub_type : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_AreaToName(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+/*
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_AreaNameList[area_number] : "*INVALID*");
+*/
+	return((D2JSP_AREA_IsValid(area_number)) ?
+		D2JSP_AREA_List[area_number].area_name : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_NameToArea(area_name)
+{
+	var count_1;
+	var this_name;
+
+	area_name.toLowerCase();
+
+	for (count_1 = 0; count_1 < D2JSP_AREA_AreaNameList.length; count_1++) {
+		this_name = D2JSP_AREA_AreaNameList[count_1];
+		if (area_name == this_name.toLowerCase())
+			return(count_1);
+	}
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_ActToTown(act_number)
+{
+	return((D2JSP_UTIL_GEN_TypeOfNumber(act_number) && (act_number >= 1) &&
+		(act_number <= 5)) ? D2JSP_WayPoints[act_number - 1][0] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_AreaToTown(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	return((D2JSP_AREA_IsValidInGame(area_number)) ?
+		D2JSP_WayPoints[D2JSP_AREA_GetAct(area_number) - 1][0] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IHaveWayPointArea(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	if (parseFloat(me.version) >= 0.32)
+		return((D2JSP_AREA_IsValidInGame(area_number) &&
+			getWaypoint(D2JSP_AreaToWPIndex[area_number])) ? true : false);
+	else
+		return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IHaveWayPointIndex(way_point_index)
+{
+	if (parseFloat(me.version) >= 0.32)
+		return(((way_point_index >= 0) &&
+			(way_point_index < D2JSP_WPIndexToArea.length) &&
+			getWaypoint(way_point_index)) ? true : false);
+	else
+		return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_GetWaypointObjectForArea(area_number)
+{
+	var waypoint_indices = D2JSP_AREA_AreaToWayPointIndices(area_number);
+
+	return((!waypoint_indices) ? null :
+		D2JSP_AREA_WaypointObjList[waypoint_indices[0]][waypoint_indices[1]]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_GetAreaTransitTile(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	if (D2JSP_AREA_IsValid(area_number)) {
+		var tile_obj = getUnit(D2JSP_UTIL_GETUNIT_TILE);
+		if (tile_obj) {
+			do {
+				if (tile_obj.area == area_number)
+					return(tile_obj);
+			} while (tile_obj && tile_obj.getNext());
+		}
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsValidWaypointAccess(wp_access)
+{
+	if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(wp_access) &&
+		(wp_access.length == D2JSP_AREA_WaypointObjList.length)) {
+		for (var count_1 = 0; count_1 < wp_access.length; count_1++) {
+			if (wp_access[count_1].length !=
+				D2JSP_AREA_WaypointObjList[count_1].length)
+				return(false);
+			for (var count_2 = 0; count_2 < wp_access[count_1].length; count_2++) {
+				if ((!D2JSP_UTIL_GEN_TypeOfBoolean(wp_access[count_1][count_2])) &&
+					(!D2JSP_UTIL_GEN_TypeOfNumber(wp_access[count_1][count_2])))
+					return(false);
+			}
+		}
+		return(true);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_HasWaypointAccess(area_number, wp_access)
+{
+	if (D2JSP_AREA_IsValidWaypointAccess(wp_access) &&
+		D2JSP_AREA_IsValidInGame(area_number) &&
+		D2JSP_AREA_HasWayPoint(area_number)) {
+		var wp_indices = D2JSP_AREA_AreaToWayPointIndices(area_number);
+		return(wp_access[wp_indices[0]][wp_indices[1]])
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_GetEmptyWaypointAccess()
+{
+	var wp_access = D2JSP_UTIL_GEN_CloneObject(D2JSP_WayPoints);
+
+	for (var count_1 = 0; count_1 < wp_access.length; count_1++) {
+		for (var count_2 = 0; count_2 < wp_access[count_1].length; count_2++)
+			wp_access[count_1][count_2] = false;
+	}
+
+	return(wp_access);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_GetAreaCoords(area_number)
+{
+	area_number = D2JSP_AREA_GetNumberBasic(area_number);
+
+	if (D2JSP_AREA_IsValidInGame(area_number) &&
+		(D2JSP_AREA_GetAct(area_number) == me.act)) {
+		var room_obj = getRoom(area_number);
+		if (room_obj) {
+			var x_1 = room_obj.levelx;
+			var y_1 = room_obj.levely;
+			var x_2 = 0;
+			var y_2 = 0;
+			do {
+				var coll_table = room_obj.getCollision();
+				x_2 = Math.max(x_2, (room_obj.x * 5) + (coll_table[0].length - 1));
+				y_2 = Math.max(y_2, (room_obj.y * 5) + (coll_table.length - 1));
+			} while (room_obj && room_obj.getNext(area_number));
+			return([x_1, y_1, x_2, y_2]);
+		}
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsInAreaXYWithCoords(area_coords, in_x, in_y)
+{
+/*
+print("D2JSP_AREA_IsInAreaXYWithCoords([" + area_coords + "], " + in_x +
+	", " + in_y + ")");
+*/
+	return((area_coords && (in_x >= area_coords[0]) &&
+		(in_x <= area_coords[2]) && (in_y >= area_coords[1]) &&
+		(in_y <= area_coords[3])) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsInAreaXY(area_number, in_x, in_y)
+{
+	return(D2JSP_AREA_IsInAreaXYWithCoords(D2JSP_AREA_GetAreaCoords(area_number),
+		in_x, in_y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsInAreaPair(area_number, in_pair)
+{
+	return(D2JSP_AREA_IsInAreaXY(area_number, in_pair[0], in_pair[1]));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsInAreaObject(area_number, in_object)
+{
+	return(D2JSP_AREA_IsInAreaXY(area_number, in_object.x, in_object.y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Areas_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var longest_name = 0;
+	var count_1;
+	var count_2;
+	var file_name = "output/RegressionTest._D2JSP_Areas.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_Areas.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	for (count_1 = 0; count_1 < D2JSP_AREA_AreaNameList.length; count_1++)
+		longest_name = (longest_name > D2JSP_AREA_AreaNameList[count_1].length) ?
+			longest_name : D2JSP_AREA_AreaNameList[count_1].length;
+
+	if (file_handle) {
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Complete Area List");
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_AREA_AreaNameList.length; count_1++)
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_AREA_AreaNameList[count_1]);
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Waypoint List");
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_WayPoints.length; count_1++) {
+			file_handle.writeLine("Act " + (count_1 + 1));
+			for (count_2 = 0; count_2 < D2JSP_WayPoints[count_1].length; count_2++)
+				file_handle.writeLine("\t" + count_2 + "\t" +
+					D2JSP_WayPoints[count_1][count_2] + "\t" +
+					D2JSP_AREA_AreaToName(D2JSP_WayPoints[count_1][count_2]));
+		}
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Area to Waypoint Index");
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_AreaToWPIndex.length; count_1++) {
+			if (D2JSP_AreaToWPIndex[count_1] > -1)
+				file_handle.writeLine(D2JSP_UTIL_FORMAT_LJust(
+					D2JSP_AREA_AreaToName(count_1), longest_name) + " = " +
+					D2JSP_UTIL_FORMAT_RJust(D2JSP_AreaToWPIndex[count_1], 2));
+		}
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Waypoint Index To Area");
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_WPIndexToArea.length; count_1++)
+			file_handle.writeLine(D2JSP_UTIL_FORMAT_RJust(count_1, 2) + " = " +
+				D2JSP_AREA_AreaToName(D2JSP_WPIndexToArea[count_1]));
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Waypoints I Have (May need to be refreshed " +
+			"from the server by interacting with a waypoint)");
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_WPIndexToArea.length; count_1++) {
+			if (D2JSP_AREA_IHaveWayPointIndex(count_1))
+				file_handle.writeLine(D2JSP_UTIL_FORMAT_RJust(count_1, 2) + " = " +
+					D2JSP_AREA_AreaToName(D2JSP_WPIndexToArea[count_1]));
+		}
+		D2JSP_AREA_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

@@ -1,0 +1,123 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Required include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Items.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/CheckSnagItMaps.txt");
+
+	if ((set_map = LoadSnagItMap("settings/snagset.ini", true, my_log)) != null)
+		uni_map = LoadSnagItMap("settings/snagunique.ini", false, my_log);
+
+	stop();
+}
+
+function LoadSnagItMap(file_name, set_flag, log_obj)
+{
+	var line_list = new Array();
+	var map_list  = new Array();
+	var file_handle;
+	var this_entry;
+	var out_file_name_1;
+	var out_file_name_2;
+
+	out_file_name_1 = file_name + ".ANALYSIS.txt";
+	out_file_name_2 = file_name + ".ANALYSIS.csv";
+
+	if (!(file_handle = fileOpen(file_name, 0)))
+		log_obj.logError("Unable to open file '" + file_name + "' for reading.");
+	else {
+		while (!file_handle.eof)
+			line_list.push(file_handle.readLine());
+		file_handle.close();
+		for (count_1 = 0; count_1 < line_list.length; count_1++) {
+			line_list[count_1] = line_list[count_1].replace(/^\s+|\s+$/g, "");
+			if (!line_list[count_1].length)
+				continue;
+			if ((line_list[count_1].slice(0, 3) == "amu") ||
+				(line_list[count_1].slice(0, 3) == "rin")) {
+				log_obj.logInfo("Line number " + (count_1 + 1) +
+					" skipped because it's a piece of jewlery ("  +
+					line_list[count_1] + ")");
+				continue;
+			}
+			this_entry = line_list[count_1].match(/^(\S{3})\s*=\s*(.+)\s+\((.+)\)$/);
+			if (!this_entry) {
+				log_obj.logError("Line number " + (count_1 + 1) + " is malformed ('" +
+					line_list[count_1] + "').");
+				continue;
+			}
+			if (this_entry[1] in map_list) {
+				if (map_list[this_entry[1]][1] == this_entry[2])
+					log_obj.logError("Item code '" + this_entry[1] +
+						" appears more than once in file '" + file_name +
+						"' (on line " + map_list[this_entry[1]][0] + " and line " +
+						(count_1 + 1) + "), but entries are identical.");
+				else
+					log_obj.logError("Item code '" + this_entry[1] +
+						" appears more than once in file '" + file_name +
+						"' (on line " + map_list[this_entry[1]][0] + " and line " +
+						(count_1 + 1) + "), and the entries are different ('" +
+						map_list[this_entry[1]][1] + "' versus '" +
+						this_entry[2] + "').");
+			}
+			else {
+				if (set_flag)
+					this_entry[3] = this_entry[3].replace(/^set\s+/i, "");
+				else
+					this_entry[3] = this_entry[3].replace(/^unique\s+/i, "");
+				map_list[this_entry[1]]    = new Array();
+				map_list[this_entry[1]][0] = count_1 + 1;
+				map_list[this_entry[1]][1] = new String(this_entry[1]);
+				map_list[this_entry[1]][2] = new String(this_entry[2]);
+				map_list[this_entry[1]][3] = new String(this_entry[3]);
+				if (this_entry[1] in D2JSP_ITEM_ItemList)
+					map_list[this_entry[1]][4] = new String(D2JSP_ITEM_ItemList
+						[this_entry[1]][D2JSP_ITEM_ELEMENT_NAME]);
+				else
+					map_list[this_entry[1]][4] = "*** ERROR CODE NOT FOUND ***";
+				map_list[this_entry[1]][5] = (set_flag) ?
+					D2JSP_ITEM_SetItemNameParseToName(this_entry[2]) :
+					D2JSP_ITEM_UniqueItemNameParseToName(this_entry[2]);
+				map_list[this_entry[1]][5] = (map_list[this_entry[1]][5] != null) ?
+					map_list[this_entry[1]][5] : "*** ERROR NAME NOT FOUND ***";
+			}
+		}
+		if (!(file_handle = fileOpen(out_file_name_1, 1)))
+			log_obj.logError("Unable to open file '" + out_file_name_1 +
+				"' for writing.");
+		else {
+			for (var this_prop in map_list)
+				file_handle.writeLine(map_list[this_prop][0] + "\t = " +
+					map_list[this_prop][1] + " = " +
+					D2JSP_UTIL_FORMAT_LJust(map_list[this_prop][2], 40) + " = " +
+					D2JSP_UTIL_FORMAT_LJust(map_list[this_prop][3], 30) + " = " +
+					D2JSP_UTIL_FORMAT_LJust(map_list[this_prop][4], 30) + " = " +
+					((map_list[this_prop][5] != null) ? map_list[this_prop][5] :
+					"*** ERROR NOT FOUND ***"));
+			file_handle.close();
+		}
+		if (!(file_handle = fileOpen(out_file_name_2, 1)))
+			log_obj.logError("Unable to open file '" + out_file_name_2 +
+				"' for writing.");
+		else {
+			for (var this_prop in map_list)
+				file_handle.writeLine(map_list[this_prop][0] + "," +
+					"\"" + map_list[this_prop][1] + "\"," +
+					"\"" + map_list[this_prop][2] + "\"," +
+					"\"" + map_list[this_prop][3] + "\"," +
+					"\"" + map_list[this_prop][4] + "\"," +
+					"\"" + ((map_list[this_prop][5] != null) ?
+					map_list[this_prop][5] : "*** ERROR NOT FOUND ***") + "\"");
+			file_handle.close();
+		}
+  }
+
+	return(map_list);
+}
+

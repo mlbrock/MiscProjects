@@ -1,0 +1,150 @@
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Charm Runner Bot Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BotPitRunner.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Charm Runner Bot Library.
+//
+// Revison History : 2004-01-26 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_BotCharmRunner_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_BotCharmRunner_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotLib.d2l");
+include("TDW/TDW_BotMephisto.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BOT_CHARM_PathFlags =
+	TDW_PATHL_AREA_LOAD_FLAG_NONE              |
+	TDW_PATHL_AREA_LOAD_FLAG_BASIC             |
+	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX |
+//	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_ALL     |
+//	TDW_PATHL_AREA_LOAD_FLAG_CENTER_ACCESS     |
+//	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_SRC     |
+//	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_DST     |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_SRC  |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_DST  |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_SRC  |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_DST  |
+	TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BOT_CHARM_AreaList = [
+	D2JSP_AREA_LOWER_KURAST,
+	D2JSP_AREA_KURAST_BAZAAR,
+	D2JSP_AREA_UPPER_KURAST
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_CHARM_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_CHARM_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_CHARM_Run();
+
+	TDW_BOT_CHARM_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_CHARM_Init(config_list)
+{
+	return(TDW_BOT_Init("TDW_BotCharmRunner", null, config_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_CHARM_Run()
+{
+	return(TDW_BOT_CHARM_DoCharmRun());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_CHARM_Finish()
+{
+	TDW_BOT_MB_KillMephisto();
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_CHARM_DoCharmRun(access_strategy)
+{
+	access_strategy =
+		(access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_MOVE_COMPAT_TownMove("waypoint");
+
+	if (!TDW_MOVE_WaypointAccessDataDoneFlag) {
+		TDW_MOVE_GetMyWayPointAccess();
+		access_strategy.wp_access =
+			D2JSP_UTIL_GEN_CloneObject(TDW_MOVE_WaypointAccessData);
+	}
+
+	for (count_1 = 0; count_1 < TDW_BOT_CHARM_AreaList.length; count_1++) {
+		if (!D2JSP_AREA_HasWayPoint(TDW_BOT_CHARM_AreaList[count_1]))
+			continue;
+		else if (!D2JSP_AREA_HasWaypointAccess(TDW_BOT_CHARM_AreaList[count_1],
+			access_strategy.wp_access)) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_WARNING, "You don't have the " +
+				D2JSP_AREA_AreaToName(TDW_BOT_CHARM_AreaList[count_1]) +
+				" waypoint --- attempting to acquire it...");
+			TDW_BOT_CHECK_PrecastChecks(30000);
+			if (TDW_BOT_WP_AcquireWaypointOneBasic(TDW_BOT_CHARM_AreaList[count_1],
+				access_strategy))
+				return(-1);
+			break;
+		}
+	}
+
+	TDW_PATHL_LoadAreaLinksMulti(TDW_BOT_CHARM_AreaList, access_strategy,
+		TDW_BOT_CHARM_PathFlags);
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	if (TDW_PATH_GotoTargetArea(TDW_BOT_CHARM_AreaList[0],
+		access_strategy, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT)) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_WARNING, "Unable to get to area " +
+			TDW_BOT_CHARM_AreaList[0] + " (" +
+			D2JSP_AREA_AreaToName(TDW_BOT_CHARM_AreaList[0]) + ").");
+		return(-1);
+	}
+
+	if (!TDW_BOT_CHECK_PrecastChecks(30000)) {
+		TDW_BOT_Log.logError("Aborting run because precasts could not be " +
+			"completed.");
+		return(-1);
+	}
+
+	return(TDW_BOTLIB_ClearArea(TDW_BOT_CHARM_AreaList, access_strategy,
+		null, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_BotCharmRunner_d2l) == "undefined") {
+

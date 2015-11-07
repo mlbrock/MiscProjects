@@ -1,0 +1,488 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_GP_ExitSleepMS = 3000;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["teleport.step.size.max"]           = 120;
+TDW_BOT_ConfigureList["teleport.step.fudge.final"]        = 3;
+TDW_BOT_ConfigureList["mysnagit.gold.minimum"]            = 2000;
+TDW_BOT_ConfigureList["chicken.mercenary.hp"]             = 0;
+TDW_BOT_ConfigureList["town.revive.mercenary"]            = false;
+TDW_BOT_ConfigureList["town.heal.mercenary.hp"]           = 0;
+TDW_BOT_ConfigureList["potion.mercenary.hp.health"]       = 0;
+TDW_BOT_ConfigureList["potion.mercenary.hp.rejuvenation"] = 0;
+TDW_BOT_ConfigureList["mercernary.needed"]                = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_ISF_CfgData = [
+	"Eth",
+	"r05",
+	"Type rune : code > r15",
+//	"Category armor  : Class > exceptional : Quality > set : Quality ! rare",
+//	"Category weapon : Class > exceptional : Quality > set : Quality ! rare",
+	"Type Orb",
+	"Type Staf",
+	"Type Wand",
+	"Type Scep",
+	"Type Circlet : quality > magic",
+	"amu",
+	"rin : quality ! set",
+/*
+"rin : quality ! set : quality ! magic",
+"amu : quality ! set : quality ! magic",
+"Type mpot",
+"Type gem0",
+"Type gem1",
+"Type gem2",
+"Type gem3",
+"Type gem4",
+"Type gema",
+"Type gemd",
+"Type geme",
+"Type gemr",
+"Type gems",
+"Type gemt",
+"Type gemz",
+*/
+	"jew",
+	"cm1",
+	"cm2 : identified = 0",
+	"cm3 : identified = 0",
+	"Type rune : code > r22",
+	"rvs,rvl"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	config_list["chicken.mercenary.hp"]             = 0;
+	config_list["town.revive.mercenary"]            = false;
+	config_list["town.heal.mercenary.hp"]           = 0;
+	config_list["potion.mercenary.hp.health"]       = 0;
+	config_list["potion.mercenary.hp.rejuvenation"] = 0;
+	config_list["mercernary.needed"]                = false;
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	TDW_GP_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GP_Start(config_list)
+{
+	var error_list = new Array();
+	var time_start;
+	var time_end;
+	var error_msg_string;
+
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/TDW_GarbagePicker." + me.realm +
+		"." + me.account + "." + me.name + ".log", "GarbagePicker");
+
+	print("The GarbagePicker is running");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	time_start = new Date();
+	TDW_BOT_Log.logInfo("-----> Beginning Garbage Picker run", time_start);
+
+	TDW_BOT_CTX_ContextCreate(TDW_BOT_ConfigureList, config_list,
+		"Garbage Picker Bot Configuration", TDW_BOT_Log);
+
+	TDW_BOT_SKILL_SpellFixUp();
+
+	TDW_BOT_Log.logInfo("Loading ISF configuration data from internal source...");
+	if (!(TDW_ISF_Cfg = ISF_Create(TDW_ISF_CfgData, 0, error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to load ISF configuration file '" +
+			TDW_BOT_ContextList["isf.configuration.file"] + "'... exiting");
+	}
+	print("Done");
+
+/*
+	TDW_BOT_Log.logInfo("Loading ISF configuration file '" +
+		TDW_BOT_ContextList["isf.configuration.file"] + "'...");
+	if (!(TDW_ISF_Cfg = ISF_Create(TDW_BOT_ContextList["isf.configuration.file"],
+		0, error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to load ISF configuration file '" +
+			TDW_BOT_ContextList["isf.configuration.file"] + "'... exiting");
+	}
+	print("Done");
+*/
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_NONE))
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+
+	if (D2JSP_NPC_GetMercIsLiving()) {
+		D2JSP_UTIL_LOG_GetALog().logInfo("A mercenary by the name of " +
+			D2JSP_NPC_GetMercName() + " has been located.");
+		TDW_BOT_ContextList["mercernary.name"] = D2JSP_NPC_GetMercName();
+	}
+
+	me.randommove    = true;
+	me.quitonhostile = true;
+	me.chickenhp     = me.hp / 4;
+	me.chickenmp     = me.mp / 4;
+
+	me.showcast      = (TDW_BOT_ContextList["operation.d2jsp.me.showcast"]) ?
+		1 : 0;
+
+	if (me.act != 1)
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+	else if (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT)
+		TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic, null);
+
+	print("Creating the " + D2JSP_AREA_AreaToName(D2JSP_AREA_MOO_MOO_FARM) +
+		" map...");
+	TDW_PATH_CreateArea(D2JSP_AREA_MOO_MOO_FARM);
+	print("Initializing the " + D2JSP_AREA_AreaToName(D2JSP_AREA_MOO_MOO_FARM) +
+		" collision tables...");
+	TDW_PATH_MapGlobal.area_list[D2JSP_AREA_MOO_MOO_FARM].
+		getCenterAccessibleList();
+	print("...Done");
+
+	while (me.area != D2JSP_AREA_MOO_MOO_FARM) {
+		D2JSP_UTIL_BNET_OverheadSafe("Move into the " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_MOO_MOO_FARM));
+		delay(500);
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Picking up garbage");
+	if (me.area == D2JSP_AREA_MOO_MOO_FARM)
+		TDW_RS_ChestPopArea([D2JSP_AREA_MOO_MOO_FARM], false, true);
+
+	TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic);
+
+	TDW_MOVE_COMPAT_TownMove("Cain");
+
+	time_end = new Date();
+	TDW_BOT_Log.logInfo("-----> Ending Garbage Picker run (" +
+		((time_end.getTime() - time_start.getTime()) / 1000.0) + " seconds)",
+		time_end);
+
+	print("Script completed normally.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RS_ChestPopArea(in_params, clear_area_flag, pickup_now_flag)
+{
+	var return_code     = 0;
+	var area_list       = new Array();
+	var done_list       = new Array();
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	if (D2JSP_UTIL_GEN_TypeOfArray(in_params) && in_params.length) {
+		for (var count_1 = 0; count_1 < in_params.length; count_1++) {
+			var this_area = (D2JSP_UTIL_GEN_TypeOfString(in_params[count_1])) ?
+				parseInt(in_params[count_1], 10) : in_params[count_1];
+			if (!D2JSP_AREA_IsValidInGame(this_area)) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Invalid destination area specified (" +
+					in_params[count_1] + ").");
+				return(-1);
+			}
+			area_list.push(this_area);
+		}
+	}
+	else {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "No destination area specified in which to " +
+			"pop chests!!!");
+		return(-1);
+	}
+
+	var tmp_attack_spec;
+
+	if (!clear_area_flag) {
+		tmp_attack_spec       = TDW_BOT_AttackNPCSpec;
+		TDW_BOT_AttackNPCSpec = new TDW_BOT_ATTACK_SpecialNPCSpec();
+	}
+
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		var this_area = area_list[count_1];
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_STATUS, "Target area is number " + this_area +
+			" (" + D2JSP_AREA_AreaToName(this_area) + ").");
+		if (me.act != D2JSP_AREA_GetAct(this_area)) {
+			if (!D2JSP_AREA_IsTown(me.area))
+				TDW_MOVE_PortalToTown(null, null, 20, 50);
+			TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(this_area), "waypoint");
+		}
+		if (me.area != this_area) {
+			var path_links = TDW_PATH_ConstructTargetList(this_area, me.area,
+				access_strategy);
+			if (path_links == null) {
+				return_code = -1;
+				break;
+			}
+			else if ((!path_links.length) && (!D2JSP_AREA_IsTown(me.area))) {
+				TDW_MOVE_PortalToTown(null, null, 20, 50);
+				TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(this_area), "waypoint");
+				path_links = TDW_PATH_ConstructTargetList(this_area, me.area,
+					access_strategy);
+			}
+			if ((path_links == null) || (!path_links.length)) {
+				return_code = -1;
+				break;
+			}
+			if ((return_code = TDW_PATH_DoPathList(path_links, access_strategy)))
+				break;
+		}
+		TDW_PATH_CreateArea(me.area);
+		done_list[me.area + ""] = true;
+		path_list = new Array();
+		var my_rooms = TDW_PATH_MapGlobal.area_list[me.area].room_list;
+		var coord_list = new Array(my_rooms.length);
+		for (var count_2 = 0; count_2 < my_rooms.length; count_2++)
+			coord_list[count_2] = [[my_rooms[count_2].x, my_rooms[count_2].y],
+				my_rooms[count_2].getCenter()];
+		coord_list = TDW_RS_ChestPop_SortCoords(coord_list);
+		while (coord_list.length) {
+//			path_list.unshift([me.x, me.y]);
+if (true) {	// Set to false for testing.
+			if (pickup_now_flag)
+				TDW_GP_MySnagIt();
+			else
+				TDW_BOT_SUPP_PopNearbyChests();
+}
+			D2JSP_UTIL_BNET_OverheadSafe("Pop pass");
+			TDW_BOT_CHECK_DoChecks();
+			var next_center = null;
+			while (coord_list.length) {
+				var next_room  = TDW_PATH_FindRoomByBaseXY(coord_list[0][0][0],
+					coord_list[0][0][1]);
+				if (next_room && (!next_room.is_excluded)) {
+					next_center = next_room.getCenterAccessible();
+					if (next_center) {
+						next_center = [coord_list[0][0], next_center];
+						coord_list.shift();
+						break;
+					}
+				}
+				coord_list.shift();
+			}
+			D2JSP_UTIL_BNET_OverheadSafe("Pop pass");
+			if (clear_area_flag)
+				TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+			if (next_center) {
+				if (access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_GOTO_XYPAIR, next_center[1])) {
+					return_code = -1;
+					break;
+				}
+				var my_room = getRoom(0);
+				if ((my_room.x == next_center[0][0]) &&
+					(my_room.y == next_center[0][1]))
+					path_list.unshift([[my_room.x, my_room.y], [me.x, me.y]]);
+				else
+					TDW_RS_LogBadRoom("Pathing to room failure.", next_center[1]);
+				if (clear_area_flag)
+					TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+				if (pickup_now_flag)
+					TDW_GP_MySnagIt();
+				else
+					TDW_BOT_SUPP_PopNearbyChests();
+			}
+			D2JSP_UTIL_BNET_OverheadSafe("Pop pass");
+			runGC();
+		}
+		if (return_code)
+			break;
+		D2JSP_UTIL_BNET_OverheadSafe("");
+//path_list.length = 0;
+		if (!pickup_now_flag) {
+			path_list = TDW_RS_ChestPop_SortCoords(path_list);
+			while (path_list.length) {
+				var this_coord = path_list.shift();
+				D2JSP_UTIL_BNET_OverheadSafe("Pickup pass");
+				if (access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_GOTO_XYPAIR, this_coord[1]));
+				TDW_BOT_SUPP_PopNearbyChests();
+				TDW_GP_DoPickup(this_coord[1]);
+				runGC();
+			}
+		}
+	}
+
+	if (!clear_area_flag)
+		TDW_BOT_AttackNPCSpec = tmp_attack_spec;
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RS_ChestPop_SortCoords(in_path_list, in_origin)
+{
+	var out_path_list = new Array();
+	var tmp_path_list = D2JSP_UTIL_GEN_CloneObject(in_path_list);
+	var curr_origin;
+
+	in_origin   = (in_origin != null) ? in_origin : [me.x, me.y];
+	curr_origin = in_origin;
+
+	while (tmp_path_list.length) {
+		var nearest_coord_index = -1;
+		var nearest_coord       = Number.MAX_VALUE;
+		var this_distance;
+		var count_1;
+		for (count_1 = 0; count_1 < tmp_path_list.length; count_1++) {
+			this_distance =
+				(Dist(in_origin[0], in_origin[1],
+				 tmp_path_list[count_1][1][0], tmp_path_list[count_1][1][1]) +
+				 Dist(curr_origin[0], curr_origin[1],
+				 tmp_path_list[count_1][1][0], tmp_path_list[count_1][1][1])) / 2;
+			if ((this_distance < nearest_coord) || (!count_1)) {
+				nearest_coord       = this_distance;
+				nearest_coord_index = count_1;
+			}
+		}
+		curr_origin = tmp_path_list[nearest_coord_index][1];
+		out_path_list.push(tmp_path_list[nearest_coord_index]);
+		tmp_path_list.splice(nearest_coord_index, 1);
+	}
+
+	return(out_path_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RS_LogBadRoom(in_message, destination)
+{
+	TDW_PATH_CreateArea(me.area);
+	var bad_room = TDW_PATH_FindRoomByXYPair(destination);
+
+	TDW_BOT_Log.logFatal("BAD ROOM DUMP: " + in_message);
+
+	if (bad_room) {
+		var old_log_screen_flag = TDW_BOT_Log.screenOff();
+		TDW_BOT_Log.logFatal("BAD ROOM DUMP: destination = [" + destination +
+			"], current location = [" + me.x + ", " + me.y + "], distance = " +
+			D2JSP_SYLIB_myDistPair(destination));
+		TDW_BOT_Log.logFatal("BAD ROOM DUMP: area = " + me.area + " = " +
+			D2JSP_AREA_AreaToName());
+		TDW_BOT_Log.logFatal(D2JSP_UTIL_COLOR_RED + "Bad room is number " +
+			bad_room.number + ", meta map location = [" + bad_room.room_col +
+			", " + bad_room.room_row + "], base X,Y = [" + bad_room.x + ", " +
+			bad_room.y + "], room extent = [" + bad_room.x_1 + ", " +
+			bad_room.y_1 + "] ---> [" + bad_room.x_2 + ", " + bad_room.y_2 +
+			"], exclusion flag = " + bad_room.is_excluded);
+		TDW_BOT_Log.logFatal("BAD ROOM DUMP: EXCLUDE KEY: " +
+			"D2JSP_RoomListExclude[\"" + bad_room.level + "|" +
+			bad_room.number + "|" + bad_room.check_sum + "\"] = true;");
+		TDW_BOT_Log.logFatal("Visual Dump:");
+		TDW_BOT_Log.logFatal("------ -----");
+		var tmp_list = bad_room.getStringList();
+		TDW_BOT_Log.logFatal(tmp_list);
+		TDW_BOT_Log.logFatal("Value Dump:");
+		TDW_BOT_Log.logFatal("----- -----");
+		var tmp_list = bad_room.getStringValueList();
+		TDW_BOT_Log.logFatal(tmp_list);
+		if (old_log_screen_flag)
+			TDW_BOT_Log.screenOn();
+		TDW_BOT_Log.flushLog();
+	}
+	else
+		TDW_BOT_Log.logFatal(D2JSP_UTIL_COLOR_RED + "Unable to log bad room!!!");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GP_MySnagIt(destination, isf_cfg)
+{
+	destination = (arguments.length >= 2) ? destination : [me.x, me.y];
+	isf_cfg     = (isf_cfg instanceof ISF_Cfg) ?isf_cfg : TDW_ISF_Cfg;
+
+	if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(destination) &&
+		(destination.length >= 2))
+		TDW_BOT_Log.logDetail("Pickup procedure started     : (destination = [" +
+			destination[0] + ", " + destination[1] + "], current location = [" +
+			me.x + ", " + me.y + "])");
+	else
+		TDW_BOT_Log.logDetail("Pickup procedure started     : (destination = [" +
+			"*UNSPECIFIED*], current location = [" + me.x + ", " + me.y + "])");
+
+	TDW_BOT_SUPP_PopNearbyChests(TDW_BOT_ContextList["mysnagit.pop.chests.radius"],
+		destination, TDW_BOT_ContextList["mysnagit.pop.chests.flags"]);
+
+	if (TDW_GP_DoPickup(destination, isf_cfg))
+		TDW_BOT_SUPP_DoExitWithMsg("Error in item pickup management.");
+
+	if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(destination) &&
+		(destination.length >= 2))
+		TDW_BOT_Log.logDetail("Pickup procedure completed   : (destination = [" +
+			destination[0] + ", " + destination[1] + "], current location = [" +
+			me.x + ", " + me.y + "])");
+	else
+		TDW_BOT_Log.logDetail("Pickup procedure completed   : (destination = [" +
+			"*UNSPECIFIED*], current location = [" + me.x + ", " + me.y + "])");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GP_DoPickup(destination, isf_cfg)
+{
+	destination = (arguments.length >= 2) ? destination : [me.x, me.y];
+	isf_cfg     = (isf_cfg instanceof ISF_Cfg) ? isf_cfg : TDW_ISF_Cfg;
+
+	isf_cfg.doPickup(ISF_PICKUP_FLAG_ITEM | ISF_PICKUP_FLAG_GOLD,
+		TDW_BOT_ContextList["mysnagit.radius"], TDW_BELTMAN_FLAG_RVL_ONLY,
+		TDW_BOT_ContextList["mysnagit.gold.minimum"], destination,
+		TDW_BOT_CHECK_DoChecks);
+
+	while (ISF_LastPickupNoSpace.length) {
+		var missed_list = ISF_LastPickupNoSpace;
+		var start_area  = me.area;
+		TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic);
+		TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_NONE |
+			((TDW_BOT_ContextList["mercernary.needed"]) ?
+			TDW_BOT_MOVE_TOWN_FLAG_MERC_NEEDED : TDW_BOT_MOVE_TOWN_FLAG_NONE),
+			null);
+		TDW_MOVE_COMPAT_TownMove("Cain");
+		while (me.area != D2JSP_AREA_MOO_MOO_FARM) {
+			D2JSP_UTIL_BNET_OverheadSafe("Move into the " +
+				D2JSP_AREA_AreaToName(D2JSP_AREA_MOO_MOO_FARM));
+			delay(500);
+		}
+		for (var count_1 = 0; count_1 < missed_list.length; ) {
+			if (missed_list[count_1].isf_flag &&
+				(!D2JSP_ITEM_CONT_FindSpace(missed_list[count_1].xsize,
+				missed_list[count_1].ysize, D2JSP_ITEM_CONT_BuildMapList(),
+				D2JSP_ITEM_CONT_SRC_INVENTORY)))
+				missed_list.splice(count_1, 1);
+			else
+				count_1++;
+		}
+		if (missed_list.length)
+			isf_cfg.doPickup(ISF_PICKUP_FLAG_ITEM | ISF_PICKUP_FLAG_GOLD,
+				TDW_BOT_ContextList["mysnagit.radius"], TDW_BELTMAN_FLAG_RVL_ONLY,
+				TDW_BOT_ContextList["mysnagit.gold.minimum"], destination,
+				TDW_BOT_CHECK_DoChecks);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

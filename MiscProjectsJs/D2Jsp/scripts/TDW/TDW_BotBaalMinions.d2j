@@ -1,0 +1,181 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+//TDW_BOT_ConfigureList["teleport.step.size"]          = 15;
+//TDW_BOT_ConfigureList["teleport.step.size.max"]      = 120;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	TDW_BBM_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BBM_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_BotBaalMinions", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+//	TDW_BOT_SUPP_DoMessageDND("talk witcha lata!");
+
+	TDW_BBM_KillBaalMinions();
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BBM_KillBaalMinions()
+{
+	var count_1;
+
+var TDW_RS_ThroneTileSpot   = [15089, 5006];
+var TDW_RS_BaalPortalSpot   = [15207, 5886];
+var TDW_RS_MoveToThroneList = [
+//	[15102, 5240],
+//	[15072, 5241],
+//	[15103, 5244],
+//	[15124, 5240],
+//	[15111, 5206],
+//	[15083, 5207],
+//	[15080, 5166],
+//	[15063, 5167],
+//	[15111, 5167],
+//	[15128, 5168],
+//	[15112, 5128],
+//	[15133, 5129],
+//	[15082, 5127],
+//	[15064, 5126],
+//	[15097, 5125],
+//	[15096, 5112],
+//	[15096, 5099],
+//	[15114, 5103],
+//	[15084, 5108],
+//	[15095, 5091],
+	[15094, 5067],
+	[15094, 5044],
+	[15094, 5029],
+	[15075, 5010],
+	[15076, 5039],
+	[15116, 5042],
+	[15109, 5005],
+	[15094, 5031]
+];
+var TDW_RS_MoveAtThroneList = [
+	[15095, 5028],
+	[15077, 5010],
+	[15113, 5011],
+	[15091, 5031],
+	[15093, 5052],
+	[15091, 5026]
+];
+var TDW_RS_FindBaalList = [
+	[15172, 5888],
+	[15168, 5938],
+	[15135, 5943],
+	[15137, 5899],
+	[15092, 5900],
+	[15134, 5948],
+	[15173, 5929],
+	[15171, 5885]
+];
+
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Colenzo the Annihilator",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN | TDW_BOT_ATTACK_NPC_FLAG_MUST_KILL,
+		5, 7, 18));
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Achmel the Cursed",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN | TDW_BOT_ATTACK_NPC_FLAG_MUST_KILL,
+		5, 7, 18));
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Bartuc the Bloody",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN | TDW_BOT_ATTACK_NPC_FLAG_MUST_KILL,
+		1, 7, 18));
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Ventar the Unholy",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN | TDW_BOT_ATTACK_NPC_FLAG_MUST_KILL,
+		5, 7, 18));
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Lister the Tormentor",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN | TDW_BOT_ATTACK_NPC_FLAG_MUST_KILL,
+		1, 7, 18));
+
+	// //////////////////////////////////////////////////////////////////////
+	// Have to pre-build these explicitly because we don't actually path there.
+	TDW_PATH_CreateArea(D2JSP_AREA_THE_WORLDSTONE_CHAMBER);
+	TDW_PATH_BuildMap(D2JSP_AREA_THE_WORLDSTONE_CHAMBER);
+	// //////////////////////////////////////////////////////////////////////
+
+	if (TDW_BOT_MOVE_WaypointOutbound(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2))
+		return(-1);
+	else if ((return_code = TDW_PATH_GotoTargetArea(
+		D2JSP_AREA_THRONE_OF_DESTRUCTION, access_strategy,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT)))
+		return(return_code);
+
+	TDW_BOT_MOVE_TeleportToDestinationList(TDW_RS_MoveToThroneList,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_TARGET);
+
+	if (getUnit(D2JSP_UTIL_GETUNIT_NPC, "Baal"))
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_STATUS, "Waiting for a Baal minion attack wave.");
+
+	while (getUnit(D2JSP_UTIL_GETUNIT_NPC, "Baal")) {
+		var msg_text = (TDW_BOT_AttackNPCSpec.findNPC("Lister the Tormentor")) ?
+			"Waiting for a Baal minion attack wave." :
+			("Waiting for Baal to enter " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_THE_WORLDSTONE_CHAMBER) + ".");
+		for (count_1 = 0; count_1 < TDW_RS_MoveAtThroneList.length; count_1++) {
+			D2JSP_UTIL_BNET_OverheadSafe(msg_text);
+			TDW_BOT_MOVE_TeleportToDestination(TDW_RS_MoveAtThroneList[count_1],
+				TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+			if (TDW_ISF_Cfg != null)
+				TDW_BOT_SUPP_MySnagIt([me.x, me.y]);
+			delay(100);
+		}
+		D2JSP_UTIL_BNET_OverheadSafe(msg_text);
+		delay(100);
+	}
+
+	access_strategy.callback_func(access_strategy,
+		TDW_PATH_ASCB_MSG_STATUS, "Baal's minions are now dead!");
+
+  return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

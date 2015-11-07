@@ -1,0 +1,115 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+//TDW_BOT_ConfigureList["teleport.step.size"]          = 15;
+//TDW_BOT_ConfigureList["teleport.step.size.max"]      = 120;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+//	config_list["chicken.mercenary.hp"]             = -1;
+//	config_list["town.revive.mercenary"]            = false;
+//	config_list["town.heal.mercenary.hp"]           = -1;
+//	config_list["mercernary.needed"]                = false;
+//	config_list["mercernary.wanted"]                = false;
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	TDW_SB_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SB_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_BotSummoner", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_BOT_SUPP_DoMessageDND("talk witcha lata!");
+
+	TDW_SB_KillSummoner();
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SB_KillSummoner()
+{
+	var return_code;
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("The Summoner",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 5, 0, 10,
+		null, null, null, TDW_BOT_FinalComplete));
+
+	TDW_MOVE_COMPAT_TownMove("waypoint");
+
+	if (!TDW_BOT_MOVE_WaypointOutbound(D2JSP_AREA_ARCANE_SANCTUARY)) {
+		if (!TDW_BOT_CHECK_PrecastChecks(30000)) {
+			TDW_BOT_Log.logError("Aborting run because precasts could not be " +
+				"completed.");
+			return(-1);
+		}
+		var coord_list = TDW_PATH_GetCenterList([525, 526, 527, 528]);
+		if (!coord_list.length) {
+			TDW_BOT_Log.logWarning("Unable to find The Summoner room");
+			return_code = -1;
+		}
+		else {
+			if (return_code = access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[0]))
+				return(return_code);
+			TDW_BOT_AttackNPCSpec.killAny();
+			if (TDW_BOT_AttackNPCSpec.findNPC("The Summoner"))
+				TDW_BOT_Log.logWarning("Unable to locate The Summoner in area " +
+					me.area + " (" + D2JSP_AREA_AreaToName() + ".");
+		}
+	}
+
+	return(return_code)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

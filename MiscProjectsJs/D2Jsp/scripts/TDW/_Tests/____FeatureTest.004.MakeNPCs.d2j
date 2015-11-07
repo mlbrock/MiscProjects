@@ -1,0 +1,56 @@
+includeonce("TDW/_D2JSP_Areas.d2l");
+
+function main()
+{
+	var skill_name_1 = "Charged Bolt Sentry";
+	var skill_name_2 = "Charged Bolt Sentry";
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	skill_name_2 = (skill_name_1.length < 16) ? skill_name_1 :
+		skill_name_1.substring(0, 16) + String.fromCharCode(me.classid) +
+		skill_name_1.substring(17);
+
+	if (me.classid != 6)
+		print("Sorry, you must be an Assassin to run this test.");
+	else if (!me.getSkill(skill_name_2))
+		print("Sorry, you must have the " + skill_name_1 +
+			" skill to run this test.");
+	else {
+		var display_count = 0;
+		while (true) {
+			if (D2JSP_AREA_IsTown())
+				me.overhead("Leave town for testing");
+			else {
+				if (me.getSkill(0) != skill_name_2) {
+					me.setSkill(skill_name_2, 0);
+					while (me.getSkill(0) != skill_name_2)
+						delay(50);
+				}
+				me.useSkill(0, me.x, me.y);
+				if (!(display_count % 100)) {
+					var npc_obj   = getUnit(1);
+					var npc_count = 0;
+					if (npc_obj) {
+						do {
+							npc_count++;
+						} while (npc_obj && npc_obj.getNext());
+					}
+				}
+			}
+			delay(250);
+			if (!(display_count % 100))
+				me.overhead("NPC Count = " + npc_count);
+			else
+				me.overhead("NPC Count = " + npc_count + " + ???");
+			display_count++;
+		}
+	}
+
+	print("Done");
+	stop();
+}
+
+

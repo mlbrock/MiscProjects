@@ -1,0 +1,86 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("SyLib.d2l");
+
+var D2J_LP_LookAroundSecs = 10;
+var D2J_LP_LogIntervalMS = 1000;
+
+function main() {
+
+	var last_x     = -1;
+	var last_y     = -1;
+	var last_area  = -1;
+	var start_date = new Date();
+	var show_count = 0;
+	var file_name;
+	var file_handle;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+	file_name = "LoggedPath." + me.realm + "." + me.account + "." +
+		me.name + ".txt";
+
+	file_handle = fileOpen(file_name, 2);
+	if (file_handle) {
+		last_area = me.area;
+		last_x    = me.x;
+		last_y    = me.y;
+		file_handle.writeLine("// ///////////////////////");
+		file_handle.writeLine("// ///////////////////////");
+		file_handle.writeLine("// LogPath.d2j Output File");
+		file_handle.writeLine("// ///////////////////////");
+		file_handle.writeLine("//");
+		file_handle.writeLine("// Start Date    : " + start_date.toString());
+		file_handle.writeLine("// Start Act     : " + me.act);
+		file_handle.writeLine("// Start Area    : " + me.area + " (" +
+			D2JSP_AREA_AreaToName(me.area) + ")");
+		file_handle.writeLine("// Start Location: " + last_x + ", " + last_y);
+		file_handle.writeLine("// Log Interval  : " + D2J_LP_LogIntervalMS +
+			" milliseconds");
+		file_handle.writeLine("//");
+		file_handle.writeLine("// ///////////////////////");
+		file_handle.writeLine("//");
+		file_handle.writeLine("// Area = " + last_area);
+		D2J_LP_DoSnapshot(file_handle, last_x, last_y);
+		show_count = 0;
+		print("LogPath facility is ready for character movement.");
+		while (1) {
+			if (last_area != me.area) {
+				last_area = me.area;
+				last_x    = me.x;
+				last_y    = me.y;
+				print("New area is " + last_area + " (" +
+					D2JSP_AREA_AreaToName(last_area) + ")");
+				file_handle.writeLine("// Area = " + last_area + " (" +
+					D2JSP_AREA_AreaToName(last_area) + ")");
+				D2J_LP_DoSnapshot(file_handle, last_x, last_y);
+				show_count = 0;
+			}
+			tmp_x = me.x;
+			tmp_y = me.y;
+			if (Dist(tmp_x, tmp_y, last_x, last_y) >= 5) {
+				last_x = tmp_x;
+				last_y = tmp_y;
+				D2J_LP_DoSnapshot(file_handle, last_x, last_y);
+				show_count = 0;
+			}
+			delay(1);
+			if (++show_count >= 250) {
+				D2JSP_UTIL_BNET_OverheadSafe(me.area + ": [" + me.x + ", " + me.y + "]");
+				show_count = 0;
+			}
+		}
+	}
+	else
+		print("Unable to open LogPath.d2j output file '" + file_name +
+			"' for writing.");
+}
+
+function D2J_LP_DoSnapshot(file_handle, last_x, last_y)
+{
+	D2JSP_UTIL_BNET_OverheadSafe(me.area + ": [" + last_x + ", " + last_y + "]");
+	file_handle.writeLine("\t[" + last_x + ", " + last_y + "],");
+}
+

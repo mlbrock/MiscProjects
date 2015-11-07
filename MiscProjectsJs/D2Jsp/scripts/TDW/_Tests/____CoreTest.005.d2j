@@ -1,0 +1,62 @@
+/*
+	___CoreTest.005.d2j
+
+	Symptoms    :
+		Catastrophic failure: UNHANDLED EXCEPTION: ACCESS_VIOLATION (c0000005)
+
+		Catastrophic failure occurs when attempting to access the 'prefix' and
+		'suffix' members of an unidentified rare item.
+
+		Doesn't occur with magic, set, or unique items. I suppose it's related to
+		the fact that rare items have randomly-generated affixes for dislay of
+		the full name.
+
+		On the basis of the above supposition, I tried to access the 'fname'
+		member. Same result.
+
+		Would probably also happen with unidentified crafted items if any such
+		thing could exist.
+
+		As you can probably imagine, this was a difficult bug to track down...
+
+	Tested under :
+		D2X Product and D2 Loader for
+			24 Core --- Win 2000 / SP 3 / 1 2.0 Ghz Pentium 4 CPU / 512KB RAM
+			24 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			25 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			26 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	var this_item  = getUnit(4);
+	var found_flag = false;
+
+	if (this_item) {
+		do {
+			if (!this_item.getFlag(0x10)) {
+				if (this_item.quality == 6) {
+					print("An unidentified rare " + this_item.name + " was found.");
+					print("Get ready to lose your Diablo window in 3 seconds...");
+					delay(3000);
+					found_flag = true;
+				}
+				print("An unidentified " + this_item.name + " was found " +
+					"(prefix = " + this_item.prefix + ", suffix = " +
+					this_item.suffix + ")");
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	if (found_flag) {
+		print("Hmmm... Found an unidentified rare item, but didn't crash.");
+		print("Unable to replicate the problem in this environment or it's " +
+			"been fixed in the core.");
+	}
+	else
+		print("No unidentified rare items found in the vicinity --- " +
+			"can't perform the test.");
+
+	print("End of test.");
+}
+
+

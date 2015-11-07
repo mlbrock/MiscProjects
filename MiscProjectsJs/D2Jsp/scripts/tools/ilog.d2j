@@ -1,0 +1,430 @@
+// Item logger v0.6
+// by blue mind and raeky
+// ----------------------------------------------------------------------------
+// Purpose : see http://items.d2jsp.org
+// ----------------------------------------------------------------------------
+// Need to add :
+// - base item stats for armor/weapons
+// - check end lines
+// - core support for superior/inferior items
+// ----------------------------------------------------------------------------
+
+var version = "0.6";
+
+var hndOutput;
+
+function main() {
+	delay(4000);
+	openOutputFile();
+	if (!hndOutput) { print("Failed to open output file"); return; }
+	OutputVHeader(); // version header
+	OutputCHeader(); // realm character header
+	OutputSHeader(); // character stat header
+	OutputMHeader(); // merc stat header
+	LoopItems();
+	OutputEnd();
+	hndOutput.close();
+	quit();
+}
+
+function v(a) {
+	if (a!=undefined) return a;
+	return "";
+}
+
+var parent = "";
+
+function OutputItemStats(item) {
+	var szItem;
+	var i;
+	var stat;
+	szItem  = v(item.itemtype) + ":";			// itemtype
+	szItem += v(item.code) + ":";				// item 3 letter code
+	szItem += v(item.id) + ":";					// an id number, not unique, just unique in game 
+	if (!item.getParent() && item.mode == 6) {
+		szItem += parent + "::";				// child of previous item
+	} else {
+		itemparent = item.getParent();
+		szItem += ":" + itemparent.name + ":";	// not socketed in something!
+		parent = item.id;
+	}
+	szItem += v(item.itemclass) + ":";			// 0=Normal, 1=Exceptional, 2=Elite
+	szItem += v(item.mode) + ":";				// 0:storage, 1:equipped, 2:belt, 3:ground, 4:cursor, 5:being dropped, 6:socketed in another item
+	szItem += ":";								// placeholder: str requirement
+	szItem += ":";								// placeholder: dex requirement
+	szItem += ":";								// placeholder: level requirement
+	szItem += v(item.itemloc) + ":";			// if (mode!=1) 0:inventory (incl. belt), 3:stash, 4:cube else gives position where it is equipped
+	szItem += v(item.x) + ":";					// x location
+	szItem += v(item.xsize) + ":";				// x size
+	szItem += v(item.y) + ":";					// y location
+	szItem += v(item.ysize) + ":";				// y size
+	szItem += item.ilvl + ":";					// ilvl of item
+	szItem += v(item.quality) + ":"				// item quality
+	szItem += v(item.getFlag(0x1)) + ":";		// isEquipped player or merc is wearing the item (don't trust too much, especially when bit 9 is set)  
+	szItem += v(item.getFlag(0x8)) + ":";		// isInSocket 8 if in socket, valid for rune and jewels, not gems 
+	szItem += v(item.getFlag(0x10)) + ":";		// isIdentified, 0 if unid
+	szItem += v(item.getFlag(0x100)) + ":";		// isBroken just a bet, but i'm pretty sure it's correct 
+	szItem += v(item.getFlag(0x400)) + ":";		// isRejuv only seen set for full rejuvs for now 
+	szItem += v(item.getFlag(0x800)) + ":";		// isSocketed the item has sockets (they can be full or empty) 
+	szItem += v(item.getFlag(0x4000)) + ":";	// isNotInSocket 0 if in socket, 0 if in belt, 0 if equipped or equipped by merc, 0 for gems/charms/.. 
+	szItem += v(item.getFlag(0x10000)) + ":";	// isEar a player ear 
+	szItem += v(item.getFlag(0x400000)) + ":";	// isEthereal, 0 if not ethereal 
+	szItem += v(item.getFlag(0x1000000)) + ":";	// isNamed has a custom name "Player's item" 
+	szItem += ":";								// placeholder: player's name that named the item.
+	szItem += v(item.getFlag(0x4000000)) + ":";	// isRuneword, set if it is a runeword (note that 'ith' qualifies ;)
+	szItem += v(item.invfile) + ":";			// normal graphic file
+	szItem += v(item.uinvfile) + ":";			// unqiue graphic file
+	szItem += v(item.sinvfile) + ":";			// set graphic file
+	szItem += v(item.name) + ":";				// base item name
+	if (item.getFlag(0x10) && (item.quality>3)) {
+		szItem += v(item.fname) + ":";			// full item name
+		szItem += v(item.prefix) + ":";			// prefix
+		szItem += v(item.suffix) + ":";			// suffix
+	} else {
+		szItem += ":::";
+	}
+	
+	// Dump full stats now
+	for(var i=0;i<323;i++) {
+		stat = item.getStat(i);
+		if (stat) szItem += i+":"+stat+":";
+	}
+	hndOutput.writeLine(szItem);
+}
+
+function LoopItems() {
+	var item=getItem();
+	if (item) do {
+		OutputItemStats(item);
+	} while (item && item.getNext());
+}
+
+// version of this script header
+function OutputVHeader() {
+	var szHeader;
+	szHeader  = "v:";
+	szHeader += version + ":";
+	hndOutput.writeLine(szHeader);
+}
+
+// the character stats header
+function OutputSHeader() {
+	var szHeader;
+	szHeader  = "s:";
+	if (me.classid == 0) {
+		// Amazon skills, tab 1
+		szHeader += v(me.getSkill("Jab",1)) + ":";
+		szHeader += v(me.getSkill("Power Strike",1)) + ":";
+		szHeader += v(me.getSkill("Poison Javelin",1)) + ":";
+		szHeader += v(me.getSkill("Impale",1)) + ":";
+		szHeader += v(me.getSkill("Lightning Bolt",1)) + ":";
+		szHeader += v(me.getSkill("Charged Strike",1)) + ":";
+		szHeader += v(me.getSkill("Plague Javelin",1)) + ":";
+		szHeader += v(me.getSkill("Fend",1)) + ":";
+		szHeader += v(me.getSkill("Lightning Strike",1)) + ":";
+		szHeader += v(me.getSkill("Lightning Fury",1)) + ":";
+		// Amazon skills, tab 2
+		szHeader += v(me.getSkill("Inner Sight",1)) + ":";
+		szHeader += v(me.getSkill("Dodge",1)) + ":";
+		szHeader += v(me.getSkill("Critical Strike",1)) + ":";
+		szHeader += v(me.getSkill("Slow Missiles",1)) + ":";
+		szHeader += v(me.getSkill("Avoid",1)) + ":";
+		szHeader += v(me.getSkill("Penetrate",1)) + ":";
+		szHeader += v(me.getSkill("Decoy",1)) + ":";
+		szHeader += v(me.getSkill("Evade",1)) + ":";
+		szHeader += v(me.getSkill("Valkyrie",1)) + ":";
+		szHeader += v(me.getSkill("Pierce",1)) + ":";
+		// Amazon skills, tab 3
+		szHeader += v(me.getSkill("Magic Arrow",1)) + ":";
+		szHeader += v(me.getSkill("Fire Arrow",1)) + ":";
+		szHeader += v(me.getSkill("Cold Arrow",1)) + ":";
+		szHeader += v(me.getSkill("Multiple Shot",1)) + ":";
+		szHeader += v(me.getSkill("Exploding Arrow",1)) + ":";
+		szHeader += v(me.getSkill("Ice Arrow",1)) + ":";
+		szHeader += v(me.getSkill("Guided Arrow",1)) + ":";
+		szHeader += v(me.getSkill("Immolation Arrow",1)) + ":";
+		szHeader += v(me.getSkill("Strafe",1)) + ":";
+		szHeader += v(me.getSkill("Freezing Arrow",1)) + ":";
+	} else if (me.classid == 1) {
+		// Sorceress skills, tab 1
+		szHeader += v(me.getSkill("Ice Bolt",1)) + ":";
+		szHeader += v(me.getSkill("Frozen Armor",1)) + ":";
+		szHeader += v(me.getSkill("Frost Nova",1)) + ":";
+		szHeader += v(me.getSkill("Ice Blast",1)) + ":";
+		szHeader += v(me.getSkill("Shiver Armor",1)) + ":";
+		szHeader += v(me.getSkill("Glacial Spike",1)) + ":";
+		szHeader += v(me.getSkill("Blizzard",1)) + ":";
+		szHeader += v(me.getSkill("Chilling Armor",1)) + ":";
+		szHeader += v(me.getSkill("Frozen Orb",1)) + ":";
+		szHeader += v(me.getSkill("Cold Mastery",1)) + ":";
+		// Sorceress skills, tab 2
+		szHeader += v(me.getSkill("Charged Bolt",1)) + ":";
+		szHeader += v(me.getSkill("Telekinesis",1)) + ":";
+		szHeader += v(me.getSkill("Static Field",1)) + ":";
+		szHeader += v(me.getSkill("Lightning",1)) + ":";
+		szHeader += v(me.getSkill("Nova",1)) + ":";
+		szHeader += v(me.getSkill("Chain Lightning",1)) + ":";
+		szHeader += v(me.getSkill("Teleport",1)) + ":";
+		szHeader += v(me.getSkill("Thunderstorm",1)) + ":";
+		szHeader += v(me.getSkill("Energy Shield",1)) + ":";
+		szHeader += v(me.getSkill("Lightning Mastery",1)) + ":";
+		// Sorceress skills, tab 3
+		szHeader += v(me.getSkill("Fire Bolt",1)) + ":";
+		szHeader += v(me.getSkill("Warmth",1)) + ":";
+		szHeader += v(me.getSkill("Inferno",1)) + ":";
+		szHeader += v(me.getSkill("Blaze",1)) + ":";
+		szHeader += v(me.getSkill("Fireball",1)) + ":";
+		szHeader += v(me.getSkill("Fire Wall",1)) + ":";
+		szHeader += v(me.getSkill("Enchant",1)) + ":";
+		szHeader += v(me.getSkill("Meteor",1)) + ":";
+		szHeader += v(me.getSkill("Fire Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Hydra",1)) + ":";
+	} else if (me.classid == 2) {
+		// Necromancer skills, tab 1
+		szHeader += v(me.getSkill("Raise Skeleton",1)) + ":";
+		szHeader += v(me.getSkill("Skeleton Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Clay Golem",1)) + ":";
+		szHeader += v(me.getSkill("Golem Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Skeletal Mage",1)) + ":";
+		szHeader += v(me.getSkill("Blood Golem",1)) + ":";
+		szHeader += v(me.getSkill("Summon Resist",1)) + ":";
+		szHeader += v(me.getSkill("Iron Golem",1)) + ":";
+		szHeader += v(me.getSkill("Fire Golem",1)) + ":";
+		szHeader += v(me.getSkill("Revive",1)) + ":";
+		// Necromancer skills, tab 2
+		szHeader += v(me.getSkill("Teeth",1)) + ":";
+		szHeader += v(me.getSkill("Bone Armor",1)) + ":";
+		szHeader += v(me.getSkill("Poison Dagger",1)) + ":";
+		szHeader += v(me.getSkill("Corpse Explosion",1)) + ":";
+		szHeader += v(me.getSkill("Bone Wall",1)) + ":";
+		szHeader += v(me.getSkill("Poison Explosion",1)) + ":";
+		szHeader += v(me.getSkill("Bone Spear",1)) + ":";
+		szHeader += v(me.getSkill("Bone Prison",1)) + ":";
+		szHeader += v(me.getSkill("Poison Nova",1)) + ":";
+		szHeader += v(me.getSkill("Bone Spirit",1)) + ":";
+		// Necromancer skills, tab 3
+		szHeader += v(me.getSkill("Amplify Damage",1)) + ":";
+		szHeader += v(me.getSkill("Dim Vision",1)) + ":";
+		szHeader += v(me.getSkill("Weaken",1)) + ":";
+		szHeader += v(me.getSkill("Iron Maiden",1)) + ":";
+		szHeader += v(me.getSkill("Terror",1)) + ":";
+		szHeader += v(me.getSkill("Confuse",1)) + ":";
+		szHeader += v(me.getSkill("Life Tap",1)) + ":";
+		szHeader += v(me.getSkill("Attract",1)) + ":";
+		szHeader += v(me.getSkill("Decrepify",1)) + ":";
+		szHeader += v(me.getSkill("Lower Resist",1)) + ":";
+	} else if (me.classid == 3) {
+		// Paladin skills, tab 1
+		szHeader += v(me.getSkill("Prayer",1)) + ":";
+		szHeader += v(me.getSkill("Resist Fire",1)) + ":";
+		szHeader += v(me.getSkill("Resist Cold",1)) + ":";
+		szHeader += v(me.getSkill("Resist Lightning",1)) + ":";
+		szHeader += v(me.getSkill("Defiance",1)) + ":";
+		szHeader += v(me.getSkill("Cleansing",1)) + ":";
+		szHeader += v(me.getSkill("Vigor",1)) + ":";
+		szHeader += v(me.getSkill("Meditation",1)) + ":";
+		szHeader += v(me.getSkill("Redemption",1)) + ":";
+		szHeader += v(me.getSkill("Salvation",1)) + ":";
+		// Paladin skills, tab 2
+		szHeader += v(me.getSkill("Might",1)) + ":";
+		szHeader += v(me.getSkill("Holy Fire",1)) + ":";
+		szHeader += v(me.getSkill("Thorns",1)) + ":";
+		szHeader += v(me.getSkill("Blessed Aim",1)) + ":";
+		szHeader += v(me.getSkill("Concentration",1)) + ":";
+		szHeader += v(me.getSkill("Holy Freeze",1)) + ":";
+		szHeader += v(me.getSkill("Holy Shock",1)) + ":";
+		szHeader += v(me.getSkill("Sanctuary",1)) + ":";
+		szHeader += v(me.getSkill("Fanaticism",1)) + ":";
+		szHeader += v(me.getSkill("Conviction",1)) + ":";
+		// Paladin skills, tab 3
+		szHeader += v(me.getSkill("Sacrifice",1)) + ":";
+		szHeader += v(me.getSkill("Holy Bolt",1)) + ":";
+		szHeader += v(me.getSkill("Smite",1)) + ":";
+		szHeader += v(me.getSkill("Zeal",1)) + ":";
+		szHeader += v(me.getSkill("Charge",1)) + ":";
+		szHeader += v(me.getSkill("Vengeance",1)) + ":";
+		szHeader += v(me.getSkill("Blessed Hammer",1)) + ":";
+		szHeader += v(me.getSkill("Conversion",1)) + ":";
+		szHeader += v(me.getSkill("Holy Shield",1)) + ":";
+		szHeader += v(me.getSkill("Fist of the Heavens",1)) + ":";
+	} else if (me.classid == 4) {
+		// Barbarian skills, tab 1
+		szHeader += v(me.getSkill("Howl",1)) + ":";
+		szHeader += v(me.getSkill("Find Potion",1)) + ":";
+		szHeader += v(me.getSkill("Shout",1)) + ":";
+		szHeader += v(me.getSkill("Taunt",1)) + ":";
+		szHeader += v(me.getSkill("Battle Cry",1)) + ":";
+		szHeader += v(me.getSkill("Find Item",1)) + ":";
+		szHeader += v(me.getSkill("Battle Orders",1)) + ":";
+		szHeader += v(me.getSkill("Grim Ward",1)) + ":";
+		szHeader += v(me.getSkill("War Cry",1)) + ":";
+		szHeader += v(me.getSkill("Battle Command",1)) + ":";
+		// Barbarian skills, tab 2
+		szHeader += v(me.getSkill("Sword Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Axe Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Mace Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Polearm Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Throwing Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Spear Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Increased Stamina",1)) + ":";
+		szHeader += v(me.getSkill("Increased Speed",1)) + ":";
+		szHeader += v(me.getSkill("Iron Skin",1)) + ":";
+		szHeader += v(me.getSkill("Natural Resistance",1)) + ":";
+		// Barbarian skills, tab 3
+		szHeader += v(me.getSkill("Bash",1)) + ":";
+		szHeader += v(me.getSkill("Double Swing",1)) + ":";
+		szHeader += v(me.getSkill("Leap",1)) + ":";
+		szHeader += v(me.getSkill("Double Throw",1)) + ":";
+		szHeader += v(me.getSkill("Stun",1)) + ":";
+		szHeader += v(me.getSkill("Leap Attack",1)) + ":";
+		szHeader += v(me.getSkill("Concentrate",1)) + ":";
+		szHeader += v(me.getSkill("Frenzy",1)) + ":";
+		szHeader += v(me.getSkill("Whirlwind",1)) + ":";
+		szHeader += v(me.getSkill("Berserk",1)) + ":";
+	} else if (me.classid == 5) {
+		// Druid skills, tab 1
+		szHeader += v(me.getSkill("Firestorm",1)) + ":";
+		szHeader += v(me.getSkill("Molten Boulder",1)) + ":";
+		szHeader += v(me.getSkill("Arctic Blast",1)) + ":";
+		szHeader += v(me.getSkill("Cyclone Armor",1)) + ":";
+		szHeader += v(me.getSkill("Fissure",1)) + ":";
+		szHeader += v(me.getSkill("Twister",1)) + ":";
+		szHeader += v(me.getSkill("Volcano",1)) + ":";
+		szHeader += v(me.getSkill("Tornado",1)) + ":";
+		szHeader += v(me.getSkill("Hurricane",1)) + ":";
+		szHeader += v(me.getSkill("Armageddon",1)) + ":";
+		// Druid skills, tab 2
+		szHeader += v(me.getSkill("Werewolf",1)) + ":";
+		szHeader += v(me.getSkill("Lycanthropy",1)) + ":";
+		szHeader += v(me.getSkill("Werebear",1)) + ":";
+		szHeader += v(me.getSkill("Maul",1)) + ":";
+		szHeader += v(me.getSkill("Feral Rage",1)) + ":";
+		szHeader += v(me.getSkill("Fire Claws",1)) + ":";
+		szHeader += v(me.getSkill("Rabies",1)) + ":";
+		szHeader += v(me.getSkill("Shock Wave",1)) + ":";
+		szHeader += v(me.getSkill("Hunger",1)) + ":";
+		szHeader += v(me.getSkill("Fury",1)) + ":";
+		// Druid skills, tab 3
+		szHeader += v(me.getSkill("Raven",1)) + ":";
+		szHeader += v(me.getSkill("Poison Creeper",1)) + ":";
+		szHeader += v(me.getSkill("Oak Sage",1)) + ":";
+		szHeader += v(me.getSkill("Summon Spirit Wolf",1)) + ":";
+		szHeader += v(me.getSkill("Carrion Vine",1)) + ":";
+		szHeader += v(me.getSkill("Heart of Wolverine",1)) + ":";
+		szHeader += v(me.getSkill("Summon Dire Wolf",1)) + ":";
+		szHeader += v(me.getSkill("Solar Creeper",1)) + ":";
+		szHeader += v(me.getSkill("Spirit of Barbs",1)) + ":";
+		szHeader += v(me.getSkill("Summon Grizzly",1)) + ":";
+	} else if (me.classid == 6) {
+		// Assassin skills, tab 1
+		szHeader += v(me.getSkill("Tiger Strike",1)) + ":";
+		szHeader += v(me.getSkill("Dragon Talon",1)) + ":";
+		szHeader += v(me.getSkill("Fists of Fire",1)) + ":";
+		szHeader += v(me.getSkill("Dragon Claw",1)) + ":";
+		szHeader += v(me.getSkill("Cobra Strike",1)) + ":";
+		szHeader += v(me.getSkill("Claws of Thunder",1)) + ":";
+		szHeader += v(me.getSkill("Blades of Ice",1)) + ":";
+		szHeader += v(me.getSkill("Dragon Tail",1)) + ":";
+		szHeader += v(me.getSkill("Dragon Flight",1)) + ":";
+		szHeader += v(me.getSkill("Phoenix Strike",1)) + ":";
+		// Assassin skills, tab 2
+		szHeader += v(me.getSkill("Claw Mastery",1)) + ":";
+		szHeader += v(me.getSkill("Psychic Hammer",1)) + ":";
+		szHeader += v(me.getSkill("Burst of Speed",1)) + ":";
+		szHeader += v(me.getSkill("Cloak of Shadows",1)) + ":";
+		szHeader += v(me.getSkill("Weapon Block",1)) + ":";
+		szHeader += v(me.getSkill("Fade",1)) + ":";
+		szHeader += v(me.getSkill("Shadow Warrior",1)) + ":";
+		szHeader += v(me.getSkill("Mind Blast",1)) + ":";
+		szHeader += v(me.getSkill("Venom",1)) + ":";
+		szHeader += v(me.getSkill("Shadow Master",1)) + ":";
+		// Assassin skills, tab 3
+		szHeader += v(me.getSkill("Fire Blast",1)) + ":";
+		szHeader += v(me.getSkill("Shock Web",1)) + ":";
+		szHeader += v(me.getSkill("Blade Sentinel",1)) + ":";
+		szHeader += v(me.getSkill("Charged Bolt Sentry",1)) + ":";
+		szHeader += v(me.getSkill("Wake of Fire",1)) + ":";
+		szHeader += v(me.getSkill("Blade Fury",1)) + ":";
+		szHeader += v(me.getSkill("Lightning Sentry",1)) + ":";
+		szHeader += v(me.getSkill("Wake Of Inferno",1)) + ":";
+		szHeader += v(me.getSkill("Death Sentry",1)) + ":";
+		szHeader += v(me.getSkill("Blade Shield",1)) + ":";
+	}
+	var i;
+	var mystat;
+	for(var i=0;i<323;i++) {
+		mystat = me.getStat(i);
+		if (mystat) szHeader += i+":"+mystat+":";
+	}
+	hndOutput.writeLine(szHeader);
+}
+
+// merc stat header
+function OutputMHeader() {
+	var szHeader;
+	findMerc();
+	szHeader  = "m:";
+	if (mymerc != "") {
+		szHeader += mymerc + ":";				// merc name
+		merc = getNPC(mymerc);
+		szHeader += merc.classid + ":";			// class id
+		var j;
+		var mercstat;
+		for(var j=0;j<323;j++) {
+			mercstat = merc.getStat(j);
+			if (mercstat) szHeader += j+":"+mercstat+":";
+		}
+	} else {
+		szHeader += ":";						// no merc found.
+	}		
+	hndOutput.writeLine(szHeader);
+}
+
+var mymerc = "";
+function findMerc() {
+	npc = getNPC();
+	var item=getItem();
+	if (npc) do {
+		parent = npc.getParent();
+		if (parent && parent.name == me.name && npc.hp > 0) {
+			mymerc = npc.name;
+			break;
+		}
+	} while (npc && npc.getNext());
+}
+
+// the character/account/realm header
+function OutputCHeader() {
+	var szHeader;
+	szHeader  = "c:";
+	szHeader += v(me.realm.substr(0,me.realm.indexOf("."))) + ":";  // realm
+	szHeader += v(me.account) + ":";		// account
+	szHeader += v(me.name) + ":";			// name
+	szHeader += v(me.classid) + ":";		// class id
+	szHeader += v(me.getStat(12)) + ":";	// my level
+	szHeader += "0:";						// 1:hardcore/0:softcore flag
+	szHeader += "0:";						// 1:ladder/0:not flag
+	hndOutput.writeLine(szHeader);
+}
+
+// the endeing of the file
+function OutputEnd() {
+	var timestamp;
+	var szEnding;
+	timestamp = new Date();
+	szEnding  = "finished:";
+	szEnding += Date.parse(timestamp)/1000;
+	hndOutput.writeLine(szEnding);
+}
+
+function openOutputFile() {
+	var hndOutputName;
+	var timestamp;
+	timestamp = new Date();
+	hndOutputName = "output/itemdb/" + me.name + "-";
+	hndOutputName += Date.parse(timestamp)/1000;
+	hndOutputName += ".txt";
+	print(hndOutputName);
+	hndOutput=fileOpen(hndOutputName,1);
+	return hndOutput;
+}

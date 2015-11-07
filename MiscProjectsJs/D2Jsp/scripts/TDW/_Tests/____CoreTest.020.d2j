@@ -1,0 +1,70 @@
+/*
+	___CoreTest.020.d2j
+
+	Symptoms    :
+
+		Room numbers sometimes take on bad values.
+
+		The maximum valid room number in the game is 1089 (see LvlPrest.txt).
+		But this test script exposes cases where the values are much, much
+		high --- several orders of magnitude.
+
+		They kinda look like they could be pointers...
+
+		It should be noted that the invalid numbers can change from game-to-game.
+		This happens even in single-player, where the maps are the same for each
+		game session in each difficulty.
+
+		Further, they can change EVEN WITHIN THE SAME GAME. Try going to an area
+		where the symptoms are observed; taking a WP elsewhere; returning to the
+		original area; and running the script again.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			31.Final Release Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+
+		I've been testing this bug in the Act 2 Lost City.
+*/
+
+function main()
+{
+	var file_name = "output/____CoreTest.020.log";
+	var bad_count = 0;
+	var file_handle;
+
+	print("Waiting 1 second for game load completion...");
+	delay(1000);
+	print("Ready.");
+
+	if (!(file_handle = fileOpen(file_name, 2)))
+		print("Unable to open file '" + file_name + "' for appending.");
+	else {
+		file_handle.writeLine("Test file opened on " + (new Date()));
+		while ((me.area == 1) || (me.area == 40) || (me.area == 75) ||
+			(me.area == 193) || (me.area == 109)) {
+			me.overhead("Please leave town");
+			delay(250);
+		}
+		delay(250);
+		var this_room = getRoom();
+		if (this_room) {
+			do {
+				if (this_room.number > 1089) {
+					print("Bad room number: " + this_room.number +
+						" (area = " + me.area + ") = [" + this_room.x + ", " + this_room.y + "]");
+					file_handle.writeLine("Bad room number: " + this_room.number +
+						" (area = " + me.area + ") = [" + this_room.x + ", " + this_room.y + "]");
+					bad_count++;
+				}
+			} while (this_room && this_room.getNext());
+		}
+		file_handle.writeLine("***** Bad room number count = " + bad_count);
+		file_handle.writeLine("");
+		file_handle.close();
+	}
+
+	print("Stopping script");
+	stop();
+}
+
+

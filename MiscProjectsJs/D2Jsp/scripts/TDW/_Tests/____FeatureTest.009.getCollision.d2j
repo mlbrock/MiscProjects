@@ -1,0 +1,255 @@
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/_D2JSP_RoomStats.d2l");
+
+var FileHandle     = null;
+var IterationCount = 100;
+
+function main()
+{
+	var file_name = "output/____FeatureTest.009.getCollision.log";
+	var count_1;
+	var count_2;
+	var count_3;
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	print("Please don't move this character!");
+
+	var my_room    = getRoom(0);
+	var xStart     = my_room.getStat(D2JSP_ROOMSTAT_XSTART);
+	var yStart     = my_room.getStat(D2JSP_ROOMSTAT_YSTART);
+	var xSize1     = my_room.getStat(D2JSP_ROOMSTAT_XSIZE1);
+	var ySize1     = my_room.getStat(D2JSP_ROOMSTAT_YSIZE1);
+	var x_1        = xStart;
+	var y_1        = yStart;
+	var x_2        = x_1 + (xSize1 - 1);
+	var y_2        = y_1 + (ySize1 - 1);
+	var cell_rows  = (y_2 - y_1) + 1;
+	var cell_cols  = (x_2 - x_1) + 1;
+
+	var coll_table = new Array(cell_rows);
+	for (count_1 = 0; count_1 < cell_cols; count_1++)
+		coll_table[count_1] = new Array(cell_cols);
+
+	var start_time;
+	var end_time;
+
+	var out_string_1 = D2JSP_UTIL_FORMAT_RJust("Iterations", 10) + " " +
+		D2JSP_UTIL_FORMAT_LJust("Start Time", 23) + " " +
+		D2JSP_UTIL_FORMAT_LJust("End Time", 23) + " " +
+		D2JSP_UTIL_FORMAT_RJust("Total Time", 10 + 1 + 6) + " " +
+		D2JSP_UTIL_FORMAT_RJust("Mean Time", 10 + 1 + 6) + " " +
+		D2JSP_UTIL_FORMAT_LJust("Description");
+	var out_string_2 = D2JSP_UTIL_FORMAT_RJust("", 10, "-") + " " +
+		D2JSP_UTIL_FORMAT_LJust("", 23, "-") + " " +
+		D2JSP_UTIL_FORMAT_LJust("", 23, "-") + " " +
+		D2JSP_UTIL_FORMAT_RJust("", 10 + 1 + 6, "-") + " " +
+		D2JSP_UTIL_FORMAT_RJust("", 10 + 1 + 6, "-") + " " +
+		D2JSP_UTIL_FORMAT_LJust("", 40, "-");
+
+	if ((FileHandle = fileOpen(file_name, 1)) != null) {
+		TEST_EmitString(out_string_1);
+		TEST_EmitString(out_string_2);
+		// Test 1-A
+		me.overhead("Test 1-A");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++)
+			my_room.getCollision(0);
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"1-A: Raw getCollision(0) test.");
+		runGC();
+		//
+		// Test 1-B
+		me.overhead("Test 1-B");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++)
+			my_room.getCollision();
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"1-B: Raw getCollision() test.");
+		runGC();
+		//
+		// Test 1-C
+		me.overhead("Test 1-C");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++) {
+			for (count_2 = 0; count_2 < cell_rows; count_2++) {
+				for (count_3 = 0; count_3 < cell_cols; count_3++)
+					my_room.getCollision(count_2, count_3);
+			}
+		}
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"1-C: Raw getCollision(X, Y) test.");
+		runGC();
+		//
+
+		// Test 2-A
+		me.overhead("Test 2-A");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++)
+			var coll_data = my_room.getCollision(0);
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"2-A: Data assigned getCollision(0) test.");
+		runGC();
+		//
+		// Test 2-B
+		me.overhead("Test 2-B");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++)
+			var coll_data = my_room.getCollision();
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"2-B: Data assigned getCollision() test.");
+		runGC();
+		//
+		// Test 2-C
+		me.overhead("Test 2-C");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++) {
+			for (count_2 = 0; count_2 < cell_rows; count_2++) {
+				for (count_3 = 0; count_3 < cell_cols; count_3++)
+					var coll_data = my_room.getCollision(count_2, count_3);
+			}
+		}
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"2-C: Data assigned getCollision(X, Y) test.");
+		runGC();
+		//
+
+		// Test 3-A
+		me.overhead("Test 3-A");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++) {
+			var coll_data = my_room.getCollision(0);
+			for (count_2 = 0; count_2 < cell_rows; count_2++) {
+				for (count_3 = 0; count_3 < cell_cols; count_3++)
+					coll_table[count_2][count_3] =
+						coll_data[(count_2 * ySize1) + count_3]
+			}
+		}
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"3-A: Full construction getCollision(0) test.");
+		TEST_EmitCollision("3-A: Full construction getCollision(0) test.",
+			cell_rows, cell_cols, coll_table)
+		runGC();
+		//
+		// Test 3-B
+		me.overhead("Test 3-B");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++) {
+			var coll_data = my_room.getCollision();
+			for (count_2 = 0; count_2 < cell_rows; count_2++) {
+				for (count_3 = 0; count_3 < cell_cols; count_3++)
+					coll_table[count_2][count_3] =
+						coll_data[count_2][count_3];
+			}
+		}
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"3-B: Full construction getCollision() test.");
+		TEST_EmitCollision("3-B: Full construction getCollision() test.",
+			cell_rows, cell_cols, coll_table)
+		runGC();
+		//
+		// Test 3-C
+		me.overhead("Test 3-C");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++) {
+			for (count_2 = 0; count_2 < cell_rows; count_2++) {
+				for (count_3 = 0; count_3 < cell_cols; count_3++)
+					coll_table[count_2][count_3] =
+						my_room.getCollision(count_3, count_2);
+			}
+		}
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"3-C: Full construction getCollision(X, Y) test.");
+		TEST_EmitCollision("3-C: Full construction getCollision(X, Y) test.",
+			cell_rows, cell_cols, coll_table)
+		runGC();
+		//
+
+/*
+		// Test 4-B
+		var my_cell;
+		me.overhead("Test 4-B");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < IterationCount; count_1++) {
+			var coll_data = my_room.getCollision(0);
+			for (count_2 = 0; count_2 < cell_rows; count_2++) {
+				for (count_3 = 0; count_3 < cell_cols; count_3++)
+					my_cell = coll_data[count_2].charCodeAt(count_3);
+			}
+		}
+		end_time = new Date();
+		TEST_Report(IterationCount, start_time, end_time,
+			"4-B: charCodeAt() use of getCollision(0) test.");
+		runGC();
+		//
+*/
+		TEST_EmitString(out_string_2);
+		FileHandle.close();
+	}
+	else
+		print("Unable to open '" + file_name + "' for writing.");
+
+	print("Script complete.");
+	stop();
+
+}
+
+function TEST_Report(iteration_count, start_time, end_time, test_text)
+{
+	var total_time = end_time - start_time;
+	var mean_time  = (total_time / iteration_count) / 3;
+	var out_string = D2JSP_UTIL_FORMAT_RJust(iteration_count, 10) + " " +
+		D2JSP_UTIL_DATE_ToSmallDate(start_time) + " " +
+		D2JSP_UTIL_DATE_ToSmallDate(end_time) + " " +
+		D2JSP_UTIL_FORMAT_RJust(total_time.toFixed(6), 10 + 1 + 6) + " " +
+		D2JSP_UTIL_FORMAT_RJust(mean_time.toFixed(6), 10 + 1 + 6) + " " +
+		test_text;
+
+	TEST_EmitString(out_string);
+}
+
+function TEST_EmitString(out_string)
+{
+	print(out_string);
+	FileHandle.writeLine(out_string);
+}
+
+function TEST_EmitCollision(test_text, cell_rows, cell_cols, coll_table)
+{
+	FileHandle.writeLine(D2JSP_UTIL_FORMAT_RJust("", 60, "="));
+	FileHandle.writeLine(test_text);
+	FileHandle.writeLine(D2JSP_UTIL_FORMAT_RJust("", 60, "-"));
+
+	for (var count_2 = 0; count_2 < cell_rows; count_2++) {
+		var tmp_string = D2JSP_UTIL_FORMAT_ZeroFill(count_2, 2);
+		for (var count_3 = 0; count_3 < cell_cols; count_3++)
+			tmp_string += ((count_3) ? "|" : ":") + 
+				D2JSP_UTIL_FORMAT_ZeroFill(coll_table[count_2][count_3].
+				toString(16), 2);
+		FileHandle.writeLine(tmp_string);
+	}
+
+	FileHandle.writeLine(D2JSP_UTIL_FORMAT_RJust("", 60, "-"));
+
+	for (var count_2 = 0; count_2 < cell_rows; count_2++) {
+		var tmp_string = D2JSP_UTIL_FORMAT_ZeroFill(count_2, 2) + ":";
+		for (var count_3 = 0; count_3 < cell_cols; count_3++)
+			tmp_string += (coll_table[count_2][count_3] & 0x01) ? "*" : " ";
+		FileHandle.writeLine(tmp_string);
+	}
+
+	FileHandle.writeLine(D2JSP_UTIL_FORMAT_RJust("", 60, "="));
+	FileHandle.writeLine("");
+}
+

@@ -1,0 +1,27 @@
+var SpellList = ["Energy Shield", "Shiver Armor"];
+
+function main() {
+	print("Running");
+
+	DoSpell();
+}
+
+
+function DoSpell()
+{
+	var spell_name = SpellList[0];
+
+	me.setSkill(spell_name, 0);
+
+	while (true) {
+		for (var count_1 = 5; count_1; count_1--) {
+			me.overhead("Countdown = " + count_1);
+			delay(1000);
+		}
+		clickMap(3, 1, me.x, me.y);
+		delay(100);
+		clickMap(5, 1, me.x, me.y);
+	}
+}
+
+

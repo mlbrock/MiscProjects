@@ -1,0 +1,63 @@
+include("mlmap.d2l");
+include("vec_coord.d2l");
+
+var UpdateDelay = 200;
+var units = new Array();
+var map = new oMap();
+
+
+function main()
+{
+	var area = -1;//me.area;
+	while(1) {
+		if (area != me.area) {
+			print("Entering new area");
+			print("Initializing map");
+			//map = new oMap();
+			map.InitializeMap();
+			print("Initializing units");
+			InitUnits();
+			area = me.area;
+			print("Initalizing done");
+		}
+		
+		for (var i = 0; i < units.length; i++) {
+			var pos = GameToScreen(units[i].x, units[i].y);
+			units[i].hook.x = pos.x;
+			units[i].hook.y = pos.y;
+		}
+		delay(UpdateDelay);
+	}
+}
+
+function InitUnits()
+{
+	if (units && units.length) {
+		for (var i = 0; i < units.length; i++) {
+			units[i].hook.x = 0;
+			units[i].hook.y = 0;
+			units[i].hook.text = "";
+			units[i].hook = null;
+			units[i] = null;
+		}
+	}
+	
+	var u = null;
+	units = new Array();
+	for (var k in  map.PresetUnits) {
+		var o = new Object();
+		o.x = map.PresetUnits[k].x;
+		o.y = map.PresetUnits[k].y;
+		o.hook = getScreenHook();
+		o.hook.text = "id: " + map.PresetUnits[k].id;
+		o.hook.color = 0;
+		units.push(o);
+	}
+}
+
+function GameToScreen(x, y)
+{
+	var v = new vector(-(x - me.x), y - me.y);
+	v.rotate(135);
+	return new coord(400 + Math.round(v.x * 22), 300 - Math.round(v.y * 12));
+}

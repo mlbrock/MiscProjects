@@ -1,0 +1,19 @@
+include("TDW/TDW_OOG_Utility.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log = new TDW_BASIC_Log("output/TDW_OOG_TestLoadCharacterInfo.log");
+
+	my_log.setLevelFile(TDW_BASIC_LOG_Level_MINUTIAE);
+
+	delay(10000);
+
+	TDW_OOG_DumpControls(null, TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE);
+
+	TDW_OOG_LoadCharacterInfo();
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

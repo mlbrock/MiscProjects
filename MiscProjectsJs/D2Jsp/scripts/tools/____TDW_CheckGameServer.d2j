@@ -1,0 +1,80 @@
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+//	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+//	log_obj.logInfoQuiet("GAME MSG   : " + arguments[0]);
+WriteMe("GAME MSG   : " + arguments[0]);
+
+/*
+	if ((arguments[0].length == (3 + "diablo walks the earth".length)) &&
+		(arguments[0].charCodeAt(0) == 255) && (arguments[0][1] == "c") &&
+		("0123456789".indexOf(arguments[0][2]) > -1) &&
+		(arguments[0].slice(3).toLowerCase() == "diablo walks the earth")) {
+		if (TDW_CGS_ThisServer && (!TDW_CGS_WalkTime)) {
+			TDW_CGS_OverheadMsg = D2JSP_UTIL_COLOR_GREEN +
+				"DClone Walks Server " + TDW_CGS_ThisServer + "!!!";
+			TDW_CGS_WalkTime    = new Date();
+			TDW_CGS_WalkMsg     = D2JSP_UTIL_COLOR_GREEN +
+				"Diablo Walks the Earth on Server " + TDW_CGS_ThisServer +
+				" as of " + TDW_CGS_WalkTime + "!!!";
+//			log_obj.logInfo(TDW_CGS_WalkMsg);
+WriteMe(TDW_CGS_WalkMsg);
+			TDW_CGS_SaveWalkInfo();
+		}
+	}
+
+	if (arguments[0].match(/\d+ Stones of Jordan Sold to Merchants/)) {
+		var tmp_list = arguments[0].match(/\d(\d+) Stones of Jordan Sold to Merchants/);
+		if (TDW_CGS_ThisServer && (!TDW_CGS_WalkTime) &&
+			tmp_list && (tmp_list.length == 2)) {
+			TDW_CGS_SellTimeLast  = new Date();
+			TDW_CGS_SellCountLast = parseInt(tmp_list[1], 10);
+			if (!TDW_CGS_SellInstances) {
+				TDW_CGS_SellTimeFirst  = TDW_CGS_SellTimeLast;
+				TDW_CGS_SellCountFirst = TDW_CGS_SellCountLast;
+			}
+			TDW_CGS_SellInstances++;
+		}
+	}
+
+	if (arguments[0].match(/Diablo Walks the Earth/) ||
+		arguments[0].match(/\d+ Stones of Jordan Sold to Merchants/)) {
+		var tmp_string = "";
+		for (var count_1 = 0; count_1 < arguments[0].length; count_1++)
+			tmp_string += "[" +
+			D2JSP_UTIL_FORMAT_RJust(arguments[0].charCodeAt(count_1), 3) + "]";
+//		log_obj.logInfoQuiet("GAME MSG   : " + tmp_string);
+WriteMe("GAME MSG   : " + tmp_string);
+	}
+*/
+
+var tmp_string = "";
+for (var count_1 = 0; count_1 < arguments[0].length; count_1++)
+	tmp_string += "[" +
+	D2JSP_UTIL_FORMAT_RJust(arguments[0].charCodeAt(count_1), 3) + "]";
+WriteMe("GAME MSG   : " + tmp_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function WriteMe(in_text)
+{
+	var file_handle = fileOpen("output/____WriteMe.txt", 2);
+
+	if (file_handle) {
+		file_handle.writeLine(in_text);
+		file_handle.close();
+	}
+	else {
+//		print("***** FILE WRITE ERROR, STOPPING *****");
+		stop();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+function main()
+{
+	while (true)
+		delay(500);
+}

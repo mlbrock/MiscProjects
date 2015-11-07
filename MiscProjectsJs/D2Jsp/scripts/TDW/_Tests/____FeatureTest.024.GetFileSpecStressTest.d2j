@@ -1,0 +1,22 @@
+//include("TDW/TDW_Cfg.d2l");
+//include("TDW/_EMPTY.d2l");
+
+function main()
+{
+	while (true) {
+//		TDW_CFG_GetFileSpecList("libs/TDW_BOT_CFG", "SomeBot", "d2l");
+//		TDW_CFG_GetFileSpec("settings/ISF", "SomeBot", "d2l");
+//		TDW_CFG_GetFileSpecList("settings/ISF", "SomeBot", "d2l");
+//		if ((file_handle = fileOpen("SomeFileName", 0)) != null)
+//			file_handle.close();
+		name_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+		while (name_list.length) {
+			if ((file_handle = fileOpen(name_list[0], 0)) != null)
+				file_handle.close();
+			name_list.shift();
+			delay(100);
+		}
+	}
+}
+
+

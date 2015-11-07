@@ -1,0 +1,275 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotGarbagePicker.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_ISF_Cfg_Gamble = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["isf.configuration.file.gamble"]         = null;
+TDW_BOT_ConfigureList["tdw.bot.gamble.vendor.act"]             = 5;
+TDW_BOT_ConfigureList["tdw.bot.gamble.gold.percent.min.start"] = 90;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	TDW_BOT_BG_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_BG_Start(config_list)
+{
+//TDW_BOT_ConfigureList["tdw.bot.gamble.gold.percent.min.start"] = 10;
+
+	var init_err_msg = TDW_BOT_BG_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_BG_Run();
+
+	TDW_BOT_BG_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_BG_Init(config_list)
+{
+	var bot_name = "TDW_BotGamble";
+	var init_err_msg;
+
+	if (!(init_err_msg = TDW_BOT_Init(bot_name, null, config_list,
+		TDW_BOT_INIT_FLAG_ISF_TRIPLE))) {
+		var isf_file_name =
+			(TDW_BOT_ContextList["isf.configuration.file.gamble"]) ?
+			TDW_BOT_ContextList["isf.configuration.file.gamble"] :
+			TDW_CFG_GetFileSpec("settings/ISF.GAMBLE", bot_name);
+		TDW_BOT_ContextList["isf.configuration.file.gamble"] = isf_file_name;
+		if (!isf_file_name)
+			init_err_msg = "No ISF gambling configuration file was specified.";
+		else {
+			TDW_BOT_Log.logInfo("Loading ISF gambling configuration file '" +
+				isf_file_name + "'...");
+			var error_list = new Array();
+			if (!(TDW_ISF_Cfg_Gamble = ISF_Create(isf_file_name, 0, error_list))) {
+				while (error_list.length)
+					TDW_BOT_Log.logError(error_list.shift());
+				init_err_msg = "Unable to load ISF gambling configuration file '" +
+					isf_file_name + "' (see log file for details).";
+			}
+		}
+	}
+
+	return(init_err_msg);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_BG_Run()
+{
+	var did_cow_level = false;
+	var vendor_act;
+	var vendor_name;
+	var min_gold_percent;
+	var min_gold;
+
+	min_gold_percent =
+		TDW_BOT_ConfigureList["tdw.bot.gamble.gold.percent.min.start"];
+	min_gold_percent = (D2JSP_UTIL_GEN_TypeOfNumber(min_gold_percent) &&
+		(min_gold_percent > 0) && (min_gold_percent <= 100)) ? min_gold_percent :
+		90;
+	min_gold         = D2JSP_ITEM_MyGoldMax() * (min_gold_percent / 100);
+
+	TDW_BOT_Log.logInfo("Mininum percentage of total gold for gambling is " +
+		min_gold_percent + "% of " + D2JSP_ITEM_MyGoldMax() + " (" +
+		min_gold + " gold).");
+
+	if (D2JSP_ITEM_MyGoldTotal() < min_gold) {
+		TDW_BOT_Log.logInfo("Current gold total is " + D2JSP_ITEM_MyGoldTotal() +
+			" --- going to pick garbage in the Cow Level...");
+		TDW_BOT_GP_Run();
+		did_cow_level = true;
+		if (D2JSP_ITEM_MyGoldTotal() < min_gold) {
+			TDW_BOT_Log.logInfo("Current total gold (" + D2JSP_ITEM_MyGoldTotal() +
+			") is still less than the specified percentage for gambling (" +
+			min_gold_percent + "%) ... exiting to continue in another game...");
+			return;
+		}
+	}
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Fix-up the desired vendor act...
+	// //////////////////////////////////////////////////////////////////////
+	vendor_act = TDW_BOT_ContextList["tdw.bot.gamble.vendor.act"];
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(vendor_act)) ||
+		(vendor_act < 1) || (vendor_act > 5)) {
+		TDW_BOT_Log.logWarning("Invalid gambling vendor act specified ('" +
+			vendor_act + "') --- will find another vendor...");
+		vendor_act = 5;
+	}
+	else if (!D2JSP_QUEST_IsStartedAct(vendor_act))
+		TDW_BOT_Log.logWarning("The specified gambling vendor act ('" +
+			vendor_act + "') is invalid because you have not yet started Act " +
+			vendor_act + " --- will find another vendor...");
+	for ( ; vendor_act; vendor_act--) {
+		if (D2JSP_QUEST_IsStartedAct(vendor_act))
+			break;
+	}
+	if (!vendor_act)
+		vendor_act = 1;
+	if (vendor_act != TDW_BOT_ContextList["tdw.bot.gamble.vendor.act"]) {
+		TDW_BOT_Log.logInfo("New gambling vendor act is Act " + vendor_act + ".");
+		TDW_BOT_ContextList["tdw.bot.gamble.vendor.act"] = vendor_act;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	var vendor_data = TDW_BOT_BG_GotoGamblingVendor(vendor_act);
+
+	vendor_act  = vendor_data[0];
+	vendor_name = vendor_data[1];
+
+	if (!vendor_name)
+		return;
+
+	var return_code = TDW_BOT_BG_Gamble(vendor_act, vendor_name);
+
+	if (!return_code) {
+		TDW_BOT_Log.logInfo("Have only " + D2JSP_ITEM_MyGoldTotal() +
+			" gold remaining.");
+		if (did_cow_level)
+			TDW_BOT_Log.logInfo("Exiting to find a Cow game to garbage-pick.");
+		else {
+			TDW_BOT_Log.logInfo("Will now attempt to garbage-pick the Cow Level.");
+			TDW_BOT_GP_Run();
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_BG_Finish()
+{
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_BG_Gamble(vendor_act, vendor_name)
+{
+	while (true) {
+		var npc_obj;
+		for (var count_1 = 0; count_1 < 3; count_1++) {
+			if ((npc_obj = D2JSP_NPC_Gamble(vendor_name)) != null)
+				break;
+		}
+		if (!npc_obj) {
+			TDW_BOT_Log.logError("Unable to gamble with NPC " + vendor_name + ".");
+			return(-1);
+		}
+		var ispec_list = D2JSP_ITEM_GetItemListForParent(vendor_name);
+		while (ispec_list.length) {
+			var this_obj = ispec_list[0].findItemExpected("just located on " +
+				vendor_name + "'s gamble screen");
+			if (this_obj) {
+				var isf_result = TDW_ISF_Cfg_Gamble.evalItemForPickup(this_obj,
+					ISF_EVAL_FLAG_RETURN_SOURCE_INFO);
+				if (isf_result[0]) {
+					// ////////// Provisional code until core provides gamble cost.
+					while (true) {
+						TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN +
+							"Would gamble the " + this_obj.name + " ---> " +
+							TDW_ISF_Cfg_Gamble.getSpecString(isf_result[1]));
+						for (var count_1 = 0; count_1 < 100; count_1++) {
+							if (!ispec_list[0].findItem(1, 10))
+								break;
+							delay(100);
+						}
+						if (!ispec_list[0].findItem(1, 10))
+							break;
+					}
+					// //////////
+				}
+			}
+			ispec_list.shift();
+		}
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		delay(50);
+		me.cancel(1);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_BG_GotoGamblingVendor(vendor_act)
+{
+	var npc_name;
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Final resolution of the gambling vendor for the act in question. Note
+	// that as both Anya and Nihlathak can be absent from Harrogath, we may
+	// have to step back to Act 4 in order to gamble...
+	// //////////////////////////////////////////////////////////////////////
+	var npc_name = D2JSP_NPC_MoveToVendorType(D2JSP_NPC_VENDOR_GAMBLE_1,
+		vendor_act);
+	if ((!npc_name) && (vendor_act == 5)) {
+		TDW_BOT_Log.logWarning("Unable to locate a gambling vendor for Act " +
+			vendor_act + " --- re-trying for Act 4...");
+		vendor_act = 4;
+		npc_name = D2JSP_NPC_MoveToVendorType(D2JSP_NPC_VENDOR_GAMBLE_1,
+			vendor_act);
+		if (npc_name)
+			TDW_BOT_Log.logInfo("Gambling will take place in Act 4 with " +
+				npc_name + ".");
+	}
+	if (!npc_name)
+		TDW_BOT_Log.logError("Unable to locate a gambling vendor for Act " +
+			vendor_act + "!!!");
+	// //////////////////////////////////////////////////////////////////////
+
+	return([vendor_act, npc_name]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function inputlineHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

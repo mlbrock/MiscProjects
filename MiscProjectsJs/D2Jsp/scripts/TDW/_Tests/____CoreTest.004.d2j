@@ -1,0 +1,75 @@
+/*
+	___CoreTest.004.d2j
+
+	Symptoms    : 
+
+		Never finishes reading the file. Just quietly... stops.
+
+	Tested under :
+
+		D2X Product and D2 Loader for
+			24 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			25 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			26 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	var return_code;
+	var file_name   = "output/____CoreTest.004.txt";
+	var line_count  = 0;
+	var max_count   = 1000;
+	var inter_count = 100;
+	var inter_line  = "********************************************************"+
+							"********************************************************"+
+							"********************************************************";
+	var file_handle;
+	var count_1;
+	var count_2;
+
+	if (!(file_handle = fileOpen(file_name, 1))) {
+		print("ERROR: Unable to open '" + file_name + "' for writing.");
+		return_code = -1;
+	}
+	else {
+		for (count_1 = 0; count_1 < max_count; count_1++) {
+			file_handle.writeLine("Entry number " + (count_1 + 1));
+			for (count_2 = 0; count_2 < inter_count; count_2++)
+				file_handle.writeLine(inter_line);
+/*
+			file_handle.close();
+			if (!(file_handle = fileOpen(file_name, 2))) {
+				print("ERROR: Unable to re-open '" + file_name + "' for appending.");
+				return_code = -1;
+				break;
+			}
+*/
+			if (count_1 && (!(count_1 % 100)))
+				me.overhead("Lines: " + (count_1 * inter_count));
+		}
+		if (file_handle) {
+			print("Closing file '" + file_name + "'...");
+			file_handle.close();
+		}
+	}
+
+	if (!return_code) {
+		print("Lines written: " + (max_count * inter_count));
+		if (!(file_handle = fileOpen(file_name, 0))) {
+			print("ERROR: Unable to open '" + file_name + "' for reading.");
+			return_code = -1;
+		}
+		else {
+			while (!file_handle.eof) {
+				var tmp_line = file_handle.readLine();
+				line_count++;
+				if (!(line_count % 1000))
+					me.overhead("Lines read: " + line_count);
+			}
+			file_handle.close();
+			print("Lines read   : " + line_count);
+		}
+	}
+
+	print("End of test.");
+}
+

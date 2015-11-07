@@ -1,0 +1,16 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_Inventory.d2l");
+
+function main()
+{
+	print("Waiting for game load to complete...");
+	D2JSP_UTIL_GEN_CheckGameReady();
+	print("Ready.");
+
+	TDW_INV_WriteToFile("output/TDW_Inventory.Consolidated.csv", true, false);
+
+	TDW_INV_SPACE_WriteToFile("output/TDW_InventorySpace.Consolidated.csv",
+		true, false));
+}
+

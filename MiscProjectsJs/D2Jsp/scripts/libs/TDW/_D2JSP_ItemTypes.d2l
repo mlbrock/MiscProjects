@@ -1,0 +1,723 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Item Type Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_ItemTypes.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion item type constants.
+//
+// Revison History : 2002-12-11 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_ItemTypes_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_ItemTypes_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant item type values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMTYPE_NO00 =   0;
+var D2JSP_ITEMTYPE_NO01 =   1;
+var D2JSP_ITEMTYPE_SHIE =   2;
+var D2JSP_ITEMTYPE_TORS =   3;
+var D2JSP_ITEMTYPE_GOLD =   4;
+var D2JSP_ITEMTYPE_BOWQ =   5;
+var D2JSP_ITEMTYPE_XBOQ =   6;
+var D2JSP_ITEMTYPE_PLAY =   7;
+var D2JSP_ITEMTYPE_HERB =   8;
+var D2JSP_ITEMTYPE_POTI =   9;
+var D2JSP_ITEMTYPE_RING =  10;
+var D2JSP_ITEMTYPE_ELIX =  11;
+var D2JSP_ITEMTYPE_AMUL =  12;
+var D2JSP_ITEMTYPE_CHAR =  13;
+var D2JSP_ITEMTYPE_NU14 =  14;
+var D2JSP_ITEMTYPE_BOOT =  15;
+var D2JSP_ITEMTYPE_GLOV =  16;
+var D2JSP_ITEMTYPE_NU17 =  17;
+var D2JSP_ITEMTYPE_BOOK =  18;
+var D2JSP_ITEMTYPE_BELT =  19;
+var D2JSP_ITEMTYPE_GEM  =  20;
+var D2JSP_ITEMTYPE_TORC =  21;
+var D2JSP_ITEMTYPE_SCRO =  22;
+var D2JSP_ITEMTYPE_NU23 =  23;
+var D2JSP_ITEMTYPE_SCEP =  24;
+var D2JSP_ITEMTYPE_WAND =  25;
+var D2JSP_ITEMTYPE_STAF =  26;
+var D2JSP_ITEMTYPE_BOW  =  27;
+var D2JSP_ITEMTYPE_AXE  =  28;
+var D2JSP_ITEMTYPE_CLUB =  29;
+var D2JSP_ITEMTYPE_SWOR =  30;
+var D2JSP_ITEMTYPE_HAMM =  31;
+var D2JSP_ITEMTYPE_KNIF =  32;
+var D2JSP_ITEMTYPE_SPEA =  33;
+var D2JSP_ITEMTYPE_POLE =  34;
+var D2JSP_ITEMTYPE_XBOW =  35;
+var D2JSP_ITEMTYPE_MACE =  36;
+var D2JSP_ITEMTYPE_HELM =  37;
+var D2JSP_ITEMTYPE_TPOT =  38;
+var D2JSP_ITEMTYPE_QUES =  39;
+var D2JSP_ITEMTYPE_BODY =  40;
+var D2JSP_ITEMTYPE_KEY  =  41;
+var D2JSP_ITEMTYPE_TKNI =  42;
+var D2JSP_ITEMTYPE_TAXE =  43;
+var D2JSP_ITEMTYPE_JAVE =  44;
+var D2JSP_ITEMTYPE_WEAP =  45;
+var D2JSP_ITEMTYPE_MELE =  46;
+var D2JSP_ITEMTYPE_MISS =  47;
+var D2JSP_ITEMTYPE_THRO =  48;
+var D2JSP_ITEMTYPE_COMB =  49;
+var D2JSP_ITEMTYPE_ARMO =  50;
+var D2JSP_ITEMTYPE_SHLD =  51;
+var D2JSP_ITEMTYPE_MISC =  52;
+var D2JSP_ITEMTYPE_SOCK =  53;
+var D2JSP_ITEMTYPE_SECO =  54;
+var D2JSP_ITEMTYPE_ROD  =  55;
+var D2JSP_ITEMTYPE_MISL =  56;
+var D2JSP_ITEMTYPE_BLUN =  57;
+var D2JSP_ITEMTYPE_JEWL =  58;
+var D2JSP_ITEMTYPE_CLAS =  59;
+var D2JSP_ITEMTYPE_AMAZ =  60;
+var D2JSP_ITEMTYPE_BARB =  61;
+var D2JSP_ITEMTYPE_NECR =  62;
+var D2JSP_ITEMTYPE_PALA =  63;
+var D2JSP_ITEMTYPE_SORC =  64;
+var D2JSP_ITEMTYPE_ASSN =  65;
+var D2JSP_ITEMTYPE_DRUI =  66;
+var D2JSP_ITEMTYPE_H2H  =  67;
+var D2JSP_ITEMTYPE_ORB  =  68;
+var D2JSP_ITEMTYPE_HEAD =  69;
+var D2JSP_ITEMTYPE_ASHD =  70;
+var D2JSP_ITEMTYPE_PHLM =  71;
+var D2JSP_ITEMTYPE_PELT =  72;
+var D2JSP_ITEMTYPE_CLOA =  73;
+var D2JSP_ITEMTYPE_RUNE =  74;
+var D2JSP_ITEMTYPE_CIRC =  75;
+var D2JSP_ITEMTYPE_HPOT =  76;
+var D2JSP_ITEMTYPE_MPOT =  77;
+var D2JSP_ITEMTYPE_RPOT =  78;
+var D2JSP_ITEMTYPE_SPOT =  79;
+var D2JSP_ITEMTYPE_APOT =  80;
+var D2JSP_ITEMTYPE_WPOT =  81;
+var D2JSP_ITEMTYPE_SCHA =  82;
+var D2JSP_ITEMTYPE_MCHA =  83;
+var D2JSP_ITEMTYPE_LCHA =  84;
+var D2JSP_ITEMTYPE_ABOW =  85;
+var D2JSP_ITEMTYPE_ASPE =  86;
+var D2JSP_ITEMTYPE_AJAV =  87;
+var D2JSP_ITEMTYPE_H2H2 =  88;
+var D2JSP_ITEMTYPE_MBOQ =  89;
+var D2JSP_ITEMTYPE_MXBQ =  90;
+var D2JSP_ITEMTYPE_GEM0 =  91;
+var D2JSP_ITEMTYPE_GEM1 =  92;
+var D2JSP_ITEMTYPE_GEM2 =  93;
+var D2JSP_ITEMTYPE_GEM3 =  94;
+var D2JSP_ITEMTYPE_GEM4 =  95;
+var D2JSP_ITEMTYPE_GEMA =  96;
+var D2JSP_ITEMTYPE_GEMD =  97;
+var D2JSP_ITEMTYPE_GEME =  98;
+var D2JSP_ITEMTYPE_GEMR =  99;
+var D2JSP_ITEMTYPE_GEMS = 100;
+var D2JSP_ITEMTYPE_GEMT = 101;
+var D2JSP_ITEMTYPE_GEMZ = 102;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMTYPE_MINIMUM = D2JSP_ITEMTYPE_NO00;
+var D2JSP_ITEMTYPE_MAXIMUM = D2JSP_ITEMTYPE_GEMZ;
+var D2JSP_ITEMTYPE_COUNT   = (D2JSP_ITEMTYPE_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps item type numbers to names.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMTYPE_TypeToNameList = new Array(D2JSP_ITEMTYPE_COUNT);
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_NO00] = "NO00";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_NO01] = "NO01";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SHIE] = "shie";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_TORS] = "tors";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GOLD] = "gold";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BOWQ] = "bowq";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_XBOQ] = "xboq";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_PLAY] = "play";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_HERB] = "herb";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_POTI] = "poti";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_RING] = "ring";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ELIX] = "elix";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_AMUL] = "amul";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_CHAR] = "char";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_NU14] = "NU14";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BOOT] = "boot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GLOV] = "glov";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_NU17] = "NU17";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BOOK] = "book";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BELT] = "belt";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEM]  = "gem";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_TORC] = "torc";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SCRO] = "scro";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_NU23] = "NU23";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SCEP] = "scep";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_WAND] = "wand";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_STAF] = "staf";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BOW]  = "bow";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_AXE]  = "axe";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_CLUB] = "club";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SWOR] = "swor";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_HAMM] = "hamm";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_KNIF] = "knif";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SPEA] = "spea";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_POLE] = "pole";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_XBOW] = "xbow";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MACE] = "mace";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_HELM] = "helm";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_TPOT] = "tpot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_QUES] = "ques";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BODY] = "body";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_KEY]  = "key";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_TKNI] = "tkni";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_TAXE] = "taxe";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_JAVE] = "jave";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_WEAP] = "weap";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MELE] = "mele";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MISS] = "miss";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_THRO] = "thro";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_COMB] = "comb";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ARMO] = "armo";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SHLD] = "shld";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MISC] = "misc";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SOCK] = "sock";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SECO] = "seco";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ROD]  = "rod";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MISL] = "misl";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BLUN] = "blun";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_JEWL] = "jewl";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_CLAS] = "clas";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_AMAZ] = "amaz";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_BARB] = "barb";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_NECR] = "necr";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_PALA] = "pala";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SORC] = "sorc";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ASSN] = "assn";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_DRUI] = "drui";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_H2H]  = "h2h";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ORB]  = "orb";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_HEAD] = "head";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ASHD] = "ashd";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_PHLM] = "phlm";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_PELT] = "pelt";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_CLOA] = "cloa";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_RUNE] = "rune";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_CIRC] = "circ";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_HPOT] = "hpot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MPOT] = "mpot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_RPOT] = "rpot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SPOT] = "spot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_APOT] = "apot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_WPOT] = "wpot";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_SCHA] = "scha";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MCHA] = "mcha";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_LCHA] = "lcha";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ABOW] = "abow";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_ASPE] = "aspe";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_AJAV] = "ajav";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_H2H2] = "h2h2";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MBOQ] = "mboq";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_MXBQ] = "mxbq";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEM0] = "gem0";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEM1] = "gem1";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEM2] = "gem2";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEM3] = "gem3";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEM4] = "gem4";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEMA] = "gema";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEMD] = "gemd";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEME] = "geme";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEMR] = "gemr";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEMS] = "gems";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEMT] = "gemt";
+D2JSP_ITEMTYPE_TypeToNameList[D2JSP_ITEMTYPE_GEMZ] = "gemz";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps item type names to numbers.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMTYPE_NameToTypeList = new Array(D2JSP_ITEMTYPE_COUNT);
+D2JSP_ITEMTYPE_NameToTypeList["NO00"] = D2JSP_ITEMTYPE_NO00;
+D2JSP_ITEMTYPE_NameToTypeList["NO01"] = D2JSP_ITEMTYPE_NO01;
+D2JSP_ITEMTYPE_NameToTypeList["shie"] = D2JSP_ITEMTYPE_SHIE;
+D2JSP_ITEMTYPE_NameToTypeList["tors"] = D2JSP_ITEMTYPE_TORS;
+D2JSP_ITEMTYPE_NameToTypeList["gold"] = D2JSP_ITEMTYPE_GOLD;
+D2JSP_ITEMTYPE_NameToTypeList["bowq"] = D2JSP_ITEMTYPE_BOWQ;
+D2JSP_ITEMTYPE_NameToTypeList["xboq"] = D2JSP_ITEMTYPE_XBOQ;
+D2JSP_ITEMTYPE_NameToTypeList["play"] = D2JSP_ITEMTYPE_PLAY;
+D2JSP_ITEMTYPE_NameToTypeList["herb"] = D2JSP_ITEMTYPE_HERB;
+D2JSP_ITEMTYPE_NameToTypeList["poti"] = D2JSP_ITEMTYPE_POTI;
+D2JSP_ITEMTYPE_NameToTypeList["ring"] = D2JSP_ITEMTYPE_RING;
+D2JSP_ITEMTYPE_NameToTypeList["elix"] = D2JSP_ITEMTYPE_ELIX;
+D2JSP_ITEMTYPE_NameToTypeList["amul"] = D2JSP_ITEMTYPE_AMUL;
+D2JSP_ITEMTYPE_NameToTypeList["char"] = D2JSP_ITEMTYPE_CHAR;
+D2JSP_ITEMTYPE_NameToTypeList["NU14"] = D2JSP_ITEMTYPE_NU14;
+D2JSP_ITEMTYPE_NameToTypeList["boot"] = D2JSP_ITEMTYPE_BOOT;
+D2JSP_ITEMTYPE_NameToTypeList["glov"] = D2JSP_ITEMTYPE_GLOV;
+D2JSP_ITEMTYPE_NameToTypeList["NU17"] = D2JSP_ITEMTYPE_NU17;
+D2JSP_ITEMTYPE_NameToTypeList["book"] = D2JSP_ITEMTYPE_BOOK;
+D2JSP_ITEMTYPE_NameToTypeList["belt"] = D2JSP_ITEMTYPE_BELT;
+D2JSP_ITEMTYPE_NameToTypeList["gem"]  = D2JSP_ITEMTYPE_GEM;
+D2JSP_ITEMTYPE_NameToTypeList["torc"] = D2JSP_ITEMTYPE_TORC;
+D2JSP_ITEMTYPE_NameToTypeList["scro"] = D2JSP_ITEMTYPE_SCRO;
+D2JSP_ITEMTYPE_NameToTypeList["NU23"] = D2JSP_ITEMTYPE_NU23;
+D2JSP_ITEMTYPE_NameToTypeList["scep"] = D2JSP_ITEMTYPE_SCEP;
+D2JSP_ITEMTYPE_NameToTypeList["wand"] = D2JSP_ITEMTYPE_WAND;
+D2JSP_ITEMTYPE_NameToTypeList["staf"] = D2JSP_ITEMTYPE_STAF;
+D2JSP_ITEMTYPE_NameToTypeList["bow"]  = D2JSP_ITEMTYPE_BOW;
+D2JSP_ITEMTYPE_NameToTypeList["axe"]  = D2JSP_ITEMTYPE_AXE;
+D2JSP_ITEMTYPE_NameToTypeList["club"] = D2JSP_ITEMTYPE_CLUB;
+D2JSP_ITEMTYPE_NameToTypeList["swor"] = D2JSP_ITEMTYPE_SWOR;
+D2JSP_ITEMTYPE_NameToTypeList["hamm"] = D2JSP_ITEMTYPE_HAMM;
+D2JSP_ITEMTYPE_NameToTypeList["knif"] = D2JSP_ITEMTYPE_KNIF;
+D2JSP_ITEMTYPE_NameToTypeList["spea"] = D2JSP_ITEMTYPE_SPEA;
+D2JSP_ITEMTYPE_NameToTypeList["pole"] = D2JSP_ITEMTYPE_POLE;
+D2JSP_ITEMTYPE_NameToTypeList["xbow"] = D2JSP_ITEMTYPE_XBOW;
+D2JSP_ITEMTYPE_NameToTypeList["mace"] = D2JSP_ITEMTYPE_MACE;
+D2JSP_ITEMTYPE_NameToTypeList["helm"] = D2JSP_ITEMTYPE_HELM;
+D2JSP_ITEMTYPE_NameToTypeList["tpot"] = D2JSP_ITEMTYPE_TPOT;
+D2JSP_ITEMTYPE_NameToTypeList["ques"] = D2JSP_ITEMTYPE_QUES;
+D2JSP_ITEMTYPE_NameToTypeList["body"] = D2JSP_ITEMTYPE_BODY;
+D2JSP_ITEMTYPE_NameToTypeList["key"]  = D2JSP_ITEMTYPE_KEY;
+D2JSP_ITEMTYPE_NameToTypeList["tkni"] = D2JSP_ITEMTYPE_TKNI;
+D2JSP_ITEMTYPE_NameToTypeList["taxe"] = D2JSP_ITEMTYPE_TAXE;
+D2JSP_ITEMTYPE_NameToTypeList["jave"] = D2JSP_ITEMTYPE_JAVE;
+D2JSP_ITEMTYPE_NameToTypeList["weap"] = D2JSP_ITEMTYPE_WEAP;
+D2JSP_ITEMTYPE_NameToTypeList["mele"] = D2JSP_ITEMTYPE_MELE;
+D2JSP_ITEMTYPE_NameToTypeList["miss"] = D2JSP_ITEMTYPE_MISS;
+D2JSP_ITEMTYPE_NameToTypeList["thro"] = D2JSP_ITEMTYPE_THRO;
+D2JSP_ITEMTYPE_NameToTypeList["comb"] = D2JSP_ITEMTYPE_COMB;
+D2JSP_ITEMTYPE_NameToTypeList["armo"] = D2JSP_ITEMTYPE_ARMO;
+D2JSP_ITEMTYPE_NameToTypeList["shld"] = D2JSP_ITEMTYPE_SHLD;
+D2JSP_ITEMTYPE_NameToTypeList["misc"] = D2JSP_ITEMTYPE_MISC;
+D2JSP_ITEMTYPE_NameToTypeList["sock"] = D2JSP_ITEMTYPE_SOCK;
+D2JSP_ITEMTYPE_NameToTypeList["seco"] = D2JSP_ITEMTYPE_SECO;
+D2JSP_ITEMTYPE_NameToTypeList["rod"]  = D2JSP_ITEMTYPE_ROD;
+D2JSP_ITEMTYPE_NameToTypeList["misl"] = D2JSP_ITEMTYPE_MISL;
+D2JSP_ITEMTYPE_NameToTypeList["blun"] = D2JSP_ITEMTYPE_BLUN;
+D2JSP_ITEMTYPE_NameToTypeList["jewl"] = D2JSP_ITEMTYPE_JEWL;
+D2JSP_ITEMTYPE_NameToTypeList["clas"] = D2JSP_ITEMTYPE_CLAS;
+D2JSP_ITEMTYPE_NameToTypeList["amaz"] = D2JSP_ITEMTYPE_AMAZ;
+D2JSP_ITEMTYPE_NameToTypeList["barb"] = D2JSP_ITEMTYPE_BARB;
+D2JSP_ITEMTYPE_NameToTypeList["necr"] = D2JSP_ITEMTYPE_NECR;
+D2JSP_ITEMTYPE_NameToTypeList["pala"] = D2JSP_ITEMTYPE_PALA;
+D2JSP_ITEMTYPE_NameToTypeList["sorc"] = D2JSP_ITEMTYPE_SORC;
+D2JSP_ITEMTYPE_NameToTypeList["assn"] = D2JSP_ITEMTYPE_ASSN;
+D2JSP_ITEMTYPE_NameToTypeList["drui"] = D2JSP_ITEMTYPE_DRUI;
+D2JSP_ITEMTYPE_NameToTypeList["h2h"]  = D2JSP_ITEMTYPE_H2H;
+D2JSP_ITEMTYPE_NameToTypeList["orb"]  = D2JSP_ITEMTYPE_ORB;
+D2JSP_ITEMTYPE_NameToTypeList["head"] = D2JSP_ITEMTYPE_HEAD;
+D2JSP_ITEMTYPE_NameToTypeList["ashd"] = D2JSP_ITEMTYPE_ASHD;
+D2JSP_ITEMTYPE_NameToTypeList["phlm"] = D2JSP_ITEMTYPE_PHLM;
+D2JSP_ITEMTYPE_NameToTypeList["pelt"] = D2JSP_ITEMTYPE_PELT;
+D2JSP_ITEMTYPE_NameToTypeList["cloa"] = D2JSP_ITEMTYPE_CLOA;
+D2JSP_ITEMTYPE_NameToTypeList["rune"] = D2JSP_ITEMTYPE_RUNE;
+D2JSP_ITEMTYPE_NameToTypeList["circ"] = D2JSP_ITEMTYPE_CIRC;
+D2JSP_ITEMTYPE_NameToTypeList["hpot"] = D2JSP_ITEMTYPE_HPOT;
+D2JSP_ITEMTYPE_NameToTypeList["mpot"] = D2JSP_ITEMTYPE_MPOT;
+D2JSP_ITEMTYPE_NameToTypeList["rpot"] = D2JSP_ITEMTYPE_RPOT;
+D2JSP_ITEMTYPE_NameToTypeList["spot"] = D2JSP_ITEMTYPE_SPOT;
+D2JSP_ITEMTYPE_NameToTypeList["apot"] = D2JSP_ITEMTYPE_APOT;
+D2JSP_ITEMTYPE_NameToTypeList["wpot"] = D2JSP_ITEMTYPE_WPOT;
+D2JSP_ITEMTYPE_NameToTypeList["scha"] = D2JSP_ITEMTYPE_SCHA;
+D2JSP_ITEMTYPE_NameToTypeList["mcha"] = D2JSP_ITEMTYPE_MCHA;
+D2JSP_ITEMTYPE_NameToTypeList["lcha"] = D2JSP_ITEMTYPE_LCHA;
+D2JSP_ITEMTYPE_NameToTypeList["abow"] = D2JSP_ITEMTYPE_ABOW;
+D2JSP_ITEMTYPE_NameToTypeList["aspe"] = D2JSP_ITEMTYPE_ASPE;
+D2JSP_ITEMTYPE_NameToTypeList["ajav"] = D2JSP_ITEMTYPE_AJAV;
+D2JSP_ITEMTYPE_NameToTypeList["h2h2"] = D2JSP_ITEMTYPE_H2H2;
+D2JSP_ITEMTYPE_NameToTypeList["mboq"] = D2JSP_ITEMTYPE_MBOQ;
+D2JSP_ITEMTYPE_NameToTypeList["mxbq"] = D2JSP_ITEMTYPE_MXBQ;
+D2JSP_ITEMTYPE_NameToTypeList["gem0"] = D2JSP_ITEMTYPE_GEM0;
+D2JSP_ITEMTYPE_NameToTypeList["gem1"] = D2JSP_ITEMTYPE_GEM1;
+D2JSP_ITEMTYPE_NameToTypeList["gem2"] = D2JSP_ITEMTYPE_GEM2;
+D2JSP_ITEMTYPE_NameToTypeList["gem3"] = D2JSP_ITEMTYPE_GEM3;
+D2JSP_ITEMTYPE_NameToTypeList["gem4"] = D2JSP_ITEMTYPE_GEM4;
+D2JSP_ITEMTYPE_NameToTypeList["gema"] = D2JSP_ITEMTYPE_GEMA;
+D2JSP_ITEMTYPE_NameToTypeList["gemd"] = D2JSP_ITEMTYPE_GEMD;
+D2JSP_ITEMTYPE_NameToTypeList["geme"] = D2JSP_ITEMTYPE_GEME;
+D2JSP_ITEMTYPE_NameToTypeList["gemr"] = D2JSP_ITEMTYPE_GEMR;
+D2JSP_ITEMTYPE_NameToTypeList["gems"] = D2JSP_ITEMTYPE_GEMS;
+D2JSP_ITEMTYPE_NameToTypeList["gemt"] = D2JSP_ITEMTYPE_GEMT;
+D2JSP_ITEMTYPE_NameToTypeList["gemz"] = D2JSP_ITEMTYPE_GEMZ;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps item type numbers to textual descriptions.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMTYPE_TypeToTextList = new Array(D2JSP_ITEMTYPE_COUNT);
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_NO00] = "None 0";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_NO01] = "None 1";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SHIE] = "Shield";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_TORS] = "Armor";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GOLD] = "Gold";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BOWQ] = "Bow Quiver";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_XBOQ] = "Crossbow Quiver";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_PLAY] = "Player Body Part";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_HERB] = "Herb";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_POTI] = "Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_RING] = "Ring";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ELIX] = "Elixir";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_AMUL] = "Amulet";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_CHAR] = "Charm";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_NU14] = "Not Used 14";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BOOT] = "Boots";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GLOV] = "Gloves";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_NU17] = "Not Used 17";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BOOK] = "Book";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BELT] = "Belt";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEM]  = "Gem";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_TORC] = "Torch";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SCRO] = "Scroll";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_NU23] = "Not Used 23";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SCEP] = "Scepter";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_WAND] = "Wand";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_STAF] = "Staff";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BOW]  = "Bow";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_AXE]  = "Axe";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_CLUB] = "Club";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SWOR] = "Sword";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_HAMM] = "Hammer";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_KNIF] = "Knife";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SPEA] = "Spear";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_POLE] = "Polearm";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_XBOW] = "Crossbow";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MACE] = "Mace";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_HELM] = "Helm";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_TPOT] = "Missile Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_QUES] = "Quest";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BODY] = "Body Part";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_KEY]  = "Key";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_TKNI] = "Throwing Knife";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_TAXE] = "Throwing Axe";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_JAVE] = "Javelin";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_WEAP] = "Weapon";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MELE] = "Melee Weapon";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MISS] = "Missile Weapon";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_THRO] = "Thrown Weapon";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_COMB] = "Combo Weapon";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ARMO] = "Any Armor";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SHLD] = "Any Shield";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MISC] = "Miscellaneous";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SOCK] = "Socket Filler";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SECO] = "Second Hand";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ROD]  = "Staves And Rods";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MISL] = "Missile";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BLUN] = "Blunt";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_JEWL] = "Jewel";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_CLAS] = "Class Specific";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_AMAZ] = "Amazon Item";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_BARB] = "Barbarian Item";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_NECR] = "Necromancer Item";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_PALA] = "Paladin Item";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SORC] = "Sorceress Item";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ASSN] = "Assassin Item";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_DRUI] = "Druid Item";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_H2H]  = "Hand to Hand";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ORB]  = "Orb";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_HEAD] = "Voodoo Heads";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ASHD] = "Auric Shields";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_PHLM] = "Primal Helm";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_PELT] = "Pelt";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_CLOA] = "Cloak";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_RUNE] = "Rune";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_CIRC] = "Circlet";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_HPOT] = "Healing Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MPOT] = "Mana Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_RPOT] = "Rejuv Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SPOT] = "Stamina Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_APOT] = "Antidote Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_WPOT] = "Thawing Potion";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_SCHA] = "Small Charm";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MCHA] = "Medium Charm";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_LCHA] = "Large Charm";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ABOW] = "Amazon Bow";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_ASPE] = "Amazon Spear";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_AJAV] = "Amazon Javelin";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_H2H2] = "Hand to Hand 2";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MBOQ] = "Magic Bow Quiv";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_MXBQ] = "Magic Xbow Quiv";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEM0] = "Chipped Gem";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEM1] = "Flawed Gem";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEM2] = "Standard Gem";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEM3] = "Flawless Gem";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEM4] = "Perfect Gem";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEMA] = "Amethyst";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEMD] = "Diamond";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEME] = "Emerald";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEMR] = "Ruby";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEMS] = "Sapphire";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEMT] = "Topaz";
+D2JSP_ITEMTYPE_TypeToTextList[D2JSP_ITEMTYPE_GEMZ] = "Skull";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMTYPE_TextToTypeList = new Array();
+for (var count_1 = 0; count_1 < D2JSP_ITEMTYPE_TypeToTextList.length; count_1++)
+	D2JSP_ITEMTYPE_TextToTypeList[D2JSP_ITEMTYPE_TypeToTextList[count_1].
+		toLowerCase()] = count_1;
+D2JSP_ITEMTYPE_TextToTypeList["stave"]        = D2JSP_ITEMTYPE_ROD;
+D2JSP_ITEMTYPE_TextToTypeList["rod"]          = D2JSP_ITEMTYPE_ROD;
+D2JSP_ITEMTYPE_TextToTypeList["voodoo head"]  = D2JSP_ITEMTYPE_HEAD;
+D2JSP_ITEMTYPE_TextToTypeList["auric shield"] = D2JSP_ITEMTYPE_ASHD;
+
+/*
+D2JSP_ITEMTYPE_TextToTypeList["none 0"]           = D2JSP_ITEMTYPE_NO00;
+D2JSP_ITEMTYPE_TextToTypeList["none 1"]           = D2JSP_ITEMTYPE_NO01;
+D2JSP_ITEMTYPE_TextToTypeList["shield"]           = D2JSP_ITEMTYPE_SHIE;
+D2JSP_ITEMTYPE_TextToTypeList["armor"]            = D2JSP_ITEMTYPE_TORS;
+D2JSP_ITEMTYPE_TextToTypeList["gold"]             = D2JSP_ITEMTYPE_GOLD;
+D2JSP_ITEMTYPE_TextToTypeList["bow quiver"]       = D2JSP_ITEMTYPE_BOWQ;
+D2JSP_ITEMTYPE_TextToTypeList["crossbow quiver"]  = D2JSP_ITEMTYPE_XBOQ;
+D2JSP_ITEMTYPE_TextToTypeList["player body part"] = D2JSP_ITEMTYPE_PLAY;
+D2JSP_ITEMTYPE_TextToTypeList["herb"]             = D2JSP_ITEMTYPE_HERB;
+D2JSP_ITEMTYPE_TextToTypeList["potion"]           = D2JSP_ITEMTYPE_POTI;
+D2JSP_ITEMTYPE_TextToTypeList["ring"]             = D2JSP_ITEMTYPE_RING;
+D2JSP_ITEMTYPE_TextToTypeList["elixir"]           = D2JSP_ITEMTYPE_ELIX;
+D2JSP_ITEMTYPE_TextToTypeList["amulet"]           = D2JSP_ITEMTYPE_AMUL;
+D2JSP_ITEMTYPE_TextToTypeList["charm"]            = D2JSP_ITEMTYPE_CHAR;
+D2JSP_ITEMTYPE_TextToTypeList["not used 14"]      = D2JSP_ITEMTYPE_NU14;
+D2JSP_ITEMTYPE_TextToTypeList["boots"]            = D2JSP_ITEMTYPE_BOOT;
+D2JSP_ITEMTYPE_TextToTypeList["gloves"]           = D2JSP_ITEMTYPE_GLOV;
+D2JSP_ITEMTYPE_TextToTypeList["not used 17"]      = D2JSP_ITEMTYPE_NU17;
+D2JSP_ITEMTYPE_TextToTypeList["book"]             = D2JSP_ITEMTYPE_BOOK;
+D2JSP_ITEMTYPE_TextToTypeList["belt"]             = D2JSP_ITEMTYPE_BELT;
+D2JSP_ITEMTYPE_TextToTypeList["gem"]              = D2JSP_ITEMTYPE_GEM;
+D2JSP_ITEMTYPE_TextToTypeList["torch"]            = D2JSP_ITEMTYPE_TORC;
+D2JSP_ITEMTYPE_TextToTypeList["scroll"]           = D2JSP_ITEMTYPE_SCRO;
+D2JSP_ITEMTYPE_TextToTypeList["not used 23"]      = D2JSP_ITEMTYPE_NU23;
+D2JSP_ITEMTYPE_TextToTypeList["scepter"]          = D2JSP_ITEMTYPE_SCEP;
+D2JSP_ITEMTYPE_TextToTypeList["wand"]             = D2JSP_ITEMTYPE_WAND;
+D2JSP_ITEMTYPE_TextToTypeList["staff"]            = D2JSP_ITEMTYPE_STAF;
+D2JSP_ITEMTYPE_TextToTypeList["bow"]              = D2JSP_ITEMTYPE_BOW;
+D2JSP_ITEMTYPE_TextToTypeList["axe"]              = D2JSP_ITEMTYPE_AXE;
+D2JSP_ITEMTYPE_TextToTypeList["club"]             = D2JSP_ITEMTYPE_CLUB;
+D2JSP_ITEMTYPE_TextToTypeList["sword"]            = D2JSP_ITEMTYPE_SWOR;
+D2JSP_ITEMTYPE_TextToTypeList["hammer"]           = D2JSP_ITEMTYPE_HAMM;
+D2JSP_ITEMTYPE_TextToTypeList["knife"]            = D2JSP_ITEMTYPE_KNIF;
+D2JSP_ITEMTYPE_TextToTypeList["spear"]            = D2JSP_ITEMTYPE_SPEA;
+D2JSP_ITEMTYPE_TextToTypeList["polearm"]          = D2JSP_ITEMTYPE_POLE;
+D2JSP_ITEMTYPE_TextToTypeList["crossbow"]         = D2JSP_ITEMTYPE_XBOW;
+D2JSP_ITEMTYPE_TextToTypeList["mace"]             = D2JSP_ITEMTYPE_MACE;
+D2JSP_ITEMTYPE_TextToTypeList["helm"]             = D2JSP_ITEMTYPE_HELM;
+D2JSP_ITEMTYPE_TextToTypeList["missile potion"]   = D2JSP_ITEMTYPE_TPOT;
+D2JSP_ITEMTYPE_TextToTypeList["quest"]            = D2JSP_ITEMTYPE_QUES;
+D2JSP_ITEMTYPE_TextToTypeList["body part"]        = D2JSP_ITEMTYPE_BODY;
+D2JSP_ITEMTYPE_TextToTypeList["key"]              = D2JSP_ITEMTYPE_KEY;
+D2JSP_ITEMTYPE_TextToTypeList["throwing knife"]   = D2JSP_ITEMTYPE_TKNI;
+D2JSP_ITEMTYPE_TextToTypeList["throwing axe"]     = D2JSP_ITEMTYPE_TAXE;
+D2JSP_ITEMTYPE_TextToTypeList["javelin"]          = D2JSP_ITEMTYPE_JAVE;
+D2JSP_ITEMTYPE_TextToTypeList["weapon"]           = D2JSP_ITEMTYPE_WEAP;
+D2JSP_ITEMTYPE_TextToTypeList["melee weapon"]     = D2JSP_ITEMTYPE_MELE;
+D2JSP_ITEMTYPE_TextToTypeList["missile weapon"]   = D2JSP_ITEMTYPE_MISS;
+D2JSP_ITEMTYPE_TextToTypeList["thrown weapon"]    = D2JSP_ITEMTYPE_THRO;
+D2JSP_ITEMTYPE_TextToTypeList["combo weapon"]     = D2JSP_ITEMTYPE_COMB;
+D2JSP_ITEMTYPE_TextToTypeList["any armor"]        = D2JSP_ITEMTYPE_ARMO;
+D2JSP_ITEMTYPE_TextToTypeList["any shield"]       = D2JSP_ITEMTYPE_SHLD;
+D2JSP_ITEMTYPE_TextToTypeList["miscellaneous"]    = D2JSP_ITEMTYPE_MISC;
+D2JSP_ITEMTYPE_TextToTypeList["socket filler"]    = D2JSP_ITEMTYPE_SOCK;
+D2JSP_ITEMTYPE_TextToTypeList["second hand"]      = D2JSP_ITEMTYPE_SECO;
+D2JSP_ITEMTYPE_TextToTypeList["staves and rods"]  = D2JSP_ITEMTYPE_ROD;
+D2JSP_ITEMTYPE_TextToTypeList["missile"]          = D2JSP_ITEMTYPE_MISL;
+D2JSP_ITEMTYPE_TextToTypeList["blunt"]            = D2JSP_ITEMTYPE_BLUN;
+D2JSP_ITEMTYPE_TextToTypeList["jewel"]            = D2JSP_ITEMTYPE_JEWL;
+D2JSP_ITEMTYPE_TextToTypeList["class specific"]   = D2JSP_ITEMTYPE_CLAS;
+D2JSP_ITEMTYPE_TextToTypeList["amazon item"]      = D2JSP_ITEMTYPE_AMAZ;
+D2JSP_ITEMTYPE_TextToTypeList["barbarian item"]   = D2JSP_ITEMTYPE_BARB;
+D2JSP_ITEMTYPE_TextToTypeList["necromancer item"] = D2JSP_ITEMTYPE_NECR;
+D2JSP_ITEMTYPE_TextToTypeList["paladin item"]     = D2JSP_ITEMTYPE_PALA;
+D2JSP_ITEMTYPE_TextToTypeList["sorceress item"]   = D2JSP_ITEMTYPE_SORC;
+D2JSP_ITEMTYPE_TextToTypeList["assassin item"]    = D2JSP_ITEMTYPE_ASSN;
+D2JSP_ITEMTYPE_TextToTypeList["druid item"]       = D2JSP_ITEMTYPE_DRUI;
+D2JSP_ITEMTYPE_TextToTypeList["hand to hand"]     = D2JSP_ITEMTYPE_H2H;
+D2JSP_ITEMTYPE_TextToTypeList["orb"]              = D2JSP_ITEMTYPE_ORB;
+D2JSP_ITEMTYPE_TextToTypeList["voodoo heads"]     = D2JSP_ITEMTYPE_HEAD;
+D2JSP_ITEMTYPE_TextToTypeList["auric shields"]    = D2JSP_ITEMTYPE_ASHD;
+D2JSP_ITEMTYPE_TextToTypeList["primal helm"]      = D2JSP_ITEMTYPE_PHLM;
+D2JSP_ITEMTYPE_TextToTypeList["pelt"]             = D2JSP_ITEMTYPE_PELT;
+D2JSP_ITEMTYPE_TextToTypeList["cloak"]            = D2JSP_ITEMTYPE_CLOA;
+D2JSP_ITEMTYPE_TextToTypeList["rune"]             = D2JSP_ITEMTYPE_RUNE;
+D2JSP_ITEMTYPE_TextToTypeList["circlet"]          = D2JSP_ITEMTYPE_CIRC;
+D2JSP_ITEMTYPE_TextToTypeList["healing potion"]   = D2JSP_ITEMTYPE_HPOT;
+D2JSP_ITEMTYPE_TextToTypeList["mana potion"]      = D2JSP_ITEMTYPE_MPOT;
+D2JSP_ITEMTYPE_TextToTypeList["rejuv potion"]     = D2JSP_ITEMTYPE_RPOT;
+D2JSP_ITEMTYPE_TextToTypeList["stamina potion"]   = D2JSP_ITEMTYPE_SPOT;
+D2JSP_ITEMTYPE_TextToTypeList["antidote potion"]  = D2JSP_ITEMTYPE_APOT;
+D2JSP_ITEMTYPE_TextToTypeList["thawing potion"]   = D2JSP_ITEMTYPE_WPOT;
+D2JSP_ITEMTYPE_TextToTypeList["small charm"]      = D2JSP_ITEMTYPE_SCHA;
+D2JSP_ITEMTYPE_TextToTypeList["medium charm"]     = D2JSP_ITEMTYPE_MCHA;
+D2JSP_ITEMTYPE_TextToTypeList["large charm"]      = D2JSP_ITEMTYPE_LCHA;
+D2JSP_ITEMTYPE_TextToTypeList["amazon bow"]       = D2JSP_ITEMTYPE_ABOW;
+D2JSP_ITEMTYPE_TextToTypeList["amazon spear"]     = D2JSP_ITEMTYPE_ASPE;
+D2JSP_ITEMTYPE_TextToTypeList["amazon javelin"]   = D2JSP_ITEMTYPE_AJAV;
+D2JSP_ITEMTYPE_TextToTypeList["hand to hand 2"]   = D2JSP_ITEMTYPE_H2H2;
+D2JSP_ITEMTYPE_TextToTypeList["magic bow quiv"]   = D2JSP_ITEMTYPE_MBOQ;
+D2JSP_ITEMTYPE_TextToTypeList["magic xbow quiv"]  = D2JSP_ITEMTYPE_MXBQ;
+D2JSP_ITEMTYPE_TextToTypeList["chipped gem"]      = D2JSP_ITEMTYPE_GEM0;
+D2JSP_ITEMTYPE_TextToTypeList["flawed gem"]       = D2JSP_ITEMTYPE_GEM1;
+D2JSP_ITEMTYPE_TextToTypeList["standard gem"]     = D2JSP_ITEMTYPE_GEM2;
+D2JSP_ITEMTYPE_TextToTypeList["flawless gem"]     = D2JSP_ITEMTYPE_GEM3;
+D2JSP_ITEMTYPE_TextToTypeList["perfect gem"]      = D2JSP_ITEMTYPE_GEM4;
+D2JSP_ITEMTYPE_TextToTypeList["amethyst"]         = D2JSP_ITEMTYPE_GEMA;
+D2JSP_ITEMTYPE_TextToTypeList["diamond"]          = D2JSP_ITEMTYPE_GEMD;
+D2JSP_ITEMTYPE_TextToTypeList["emerald"]          = D2JSP_ITEMTYPE_GEME;
+D2JSP_ITEMTYPE_TextToTypeList["ruby"]             = D2JSP_ITEMTYPE_GEMR;
+D2JSP_ITEMTYPE_TextToTypeList["sapphire"]         = D2JSP_ITEMTYPE_GEMS;
+D2JSP_ITEMTYPE_TextToTypeList["topaz"]            = D2JSP_ITEMTYPE_GEMT;
+D2JSP_ITEMTYPE_TextToTypeList["skull"]            = D2JSP_ITEMTYPE_GEMZ;
+*/
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_TypeIsValid(item_type_number)
+{
+	return(((item_type_number >= D2JSP_ITEMTYPE_MINIMUM) &&
+		(item_type_number <= D2JSP_ITEMTYPE_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_NameIsValid(item_type_name)
+{
+	return((typeof(D2JSP_ITEMTYPE_NameToTypeList[item_type_name.
+		toLowerCase()]) != "undefined") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_TypeToName(item_type_number)
+{
+	return((D2JSP_ITEMTYPE_TypeIsValid(item_type_number)) ?
+		D2JSP_ITEMTYPE_TypeToNameList[item_type_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_TypeToText(item_type_number)
+{
+	return((D2JSP_ITEMTYPE_TypeIsValid(item_type_number)) ?
+		D2JSP_ITEMTYPE_TypeToTextList[item_type_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_NameToType(item_type_name)
+{
+	return((D2JSP_ITEMTYPE_NameIsValid(item_type_name.toLowerCase())) ?
+		D2JSP_ITEMTYPE_NameToTypeList[item_type_name.toLowerCase()] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_NameToText(item_type_name)
+{
+	
+	return((D2JSP_ITEMTYPE_NameIsValid(item_type_name)) ?
+		D2JSP_ITEMTYPE_TypeToText(D2JSP_ITEMTYPE_NameToType(item_type_name)) :
+		"*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_TextIsValid(item_text_name)
+{
+	return((typeof(D2JSP_ITEMTYPE_TextToTypeList[item_text_name.
+		toLowerCase()]) != "undefined") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_TextToType(item_text_name)
+{
+	return((D2JSP_ITEMTYPE_TextIsValid(item_text_name)) ?
+		D2JSP_ITEMTYPE_TextToTypeList[item_text_name.toLowerCase()] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_TextToName(item_text_name)
+{
+	return((D2JSP_ITEMTYPE_TextIsValid(item_text_name)) ?
+		D2JSP_ITEMTYPE_TypeToName(D2JSP_ITEMTYPE_TextToType(item_text_name)) : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_ItemTypes_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output\\RegressionTest._D2JSP_ItemTypes.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_ItemTypes.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	if (file_handle) {
+		D2JSP_ITEMTYPE_TEST_WriteSep(file_handle);
+		D2JSP_ITEMTYPE_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Complete Item Type List");
+		D2JSP_ITEMTYPE_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_ITEMTYPE_COUNT; count_1++) {
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_ITEMTYPE_TypeToName(count_1) + "\t" +
+				D2JSP_ITEMTYPE_TypeToText(count_1));
+		}
+		D2JSP_ITEMTYPE_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMTYPE_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+
+// ////////////////////////////////////////////////////////////////////////////
+
+

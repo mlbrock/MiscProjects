@@ -1,0 +1,2374 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Basic Support Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Basic.d2l
+//
+// File Version    : 01.00.00
+//
+// File Description: Contains utility routines for use both in-game and
+//							out-of-game.
+//
+// Revison History : 2004-01-01 --- Creation from library routines for which
+//							implementation began 2002-11-19.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2004, Michael L. Brock. All rights reserved.
+//                   Portions from previous copyrighted work (c) 2002 - 2004.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_Basic_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_Basic_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// A reference to the JavaScript global object.
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_GlobalObjectRef = this;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_LastError = me.lasterror;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (typeof(TDW_BASIC_IncludeOnceHash) == "undefined") {
+	var TDW_BASIC_IncludeOnceHash                  = new Array();
+	TDW_BASIC_IncludeOnceHash["TDW/TDW_Basic.d2l"] = [new Date(), null];
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+function includeonce(file_name)
+{
+	file_name = file_name.replace(/\\+/g, "/");
+	file_name = file_name.replace(/\/+/g, "/");
+	file_name = file_name.replace(/^\s+|\s+$/g, "");
+
+	if (!(file_name in TDW_BASIC_IncludeOnceHash)) {
+//print("INCLUDING: " + file_name);
+		TDW_BASIC_IncludeOnceHash[file_name] = [new Date(), null];
+		include(file_name);
+		TDW_BASIC_IncludeOnceHash[file_name][1] = new Date();
+	}
+// CODE NOTE: For testing...
+//	else
+//		print("MULTIPLE INCLUDE ATTEMPT'" + file_name + "' was ignored.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Ripped-off from Scavenger's multi-bot...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_COLOR_BASE_WHITE  = 0;
+var TDW_BASIC_COLOR_BASE_RED    = 1;
+var TDW_BASIC_COLOR_BASE_GREEN  = 2;
+var TDW_BASIC_COLOR_BASE_BLUE   = 3;
+var TDW_BASIC_COLOR_BASE_GOLD   = 4;
+var TDW_BASIC_COLOR_BASE_GRAY   = 5;
+var TDW_BASIC_COLOR_BASE_BLACK  = 6;
+var TDW_BASIC_COLOR_BASE_GOLD2  = 7;
+var TDW_BASIC_COLOR_BASE_ORANGE = 8;
+var TDW_BASIC_COLOR_BASE_YELLOW = 9;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Ripped-off from Scavenger's multi-bot...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_COLOR_WHITE  = "ÿc" + TDW_BASIC_COLOR_BASE_WHITE;
+var TDW_BASIC_COLOR_RED    = "ÿc" + TDW_BASIC_COLOR_BASE_RED;
+var TDW_BASIC_COLOR_GREEN  = "ÿc" + TDW_BASIC_COLOR_BASE_GREEN;
+var TDW_BASIC_COLOR_BLUE   = "ÿc" + TDW_BASIC_COLOR_BASE_BLUE;
+var TDW_BASIC_COLOR_GOLD   = "ÿc" + TDW_BASIC_COLOR_BASE_GOLD;
+var TDW_BASIC_COLOR_GRAY   = "ÿc" + TDW_BASIC_COLOR_BASE_GRAY;
+var TDW_BASIC_COLOR_BLACK  = "ÿc" + TDW_BASIC_COLOR_BASE_BLACK;
+var TDW_BASIC_COLOR_GOLD2  = "ÿc" + TDW_BASIC_COLOR_BASE_GOLD2;
+var TDW_BASIC_COLOR_ORANGE = "ÿc" + TDW_BASIC_COLOR_BASE_ORANGE;
+var TDW_BASIC_COLOR_YELLOW = "ÿc" + TDW_BASIC_COLOR_BASE_YELLOW;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// The defined logging levels...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_LOG_Level_MINUTIAE =  0;
+var TDW_BASIC_LOG_Level_DEBUG    =  1;
+var TDW_BASIC_LOG_Level_DETAIL   =  2;
+var TDW_BASIC_LOG_Level_INFO     =  3;
+var TDW_BASIC_LOG_Level_PICKUP   =  4;
+var TDW_BASIC_LOG_Level_EVALUATE =  5;
+var TDW_BASIC_LOG_Level_DISCARD  =  6;
+var TDW_BASIC_LOG_Level_KEEP     =  7;
+var TDW_BASIC_LOG_Level_WARNING  =  8;
+var TDW_BASIC_LOG_Level_ERROR    =  9;
+var TDW_BASIC_LOG_Level_FATAL    = 10;
+var TDW_BASIC_LOG_Level_CHICKEN  = 11;
+var TDW_BASIC_LOG_Level_HOSTILE  = 12;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// The names of the logging levels...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_LOG_LevelList = [
+	"MINUTIAE",
+	"DEBUG   ",
+	"DETAIL  ",
+	"INFO    ",
+	"PICKUP  ",
+	"EVALUATE",
+	"DISCARD ",
+	"KEEP    ",
+	"WARNING ",
+	"ERROR   ",
+	"FATAL   ",
+	"CHICKEN ",
+	"HOSTILE "
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_LOG_RegistrationList = new Array();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_RealmList = [
+	"*/INVALID/*",
+	"uswest.battle.net",
+	"useast.battle.net",
+	"asia.battle.net",
+	"europe.battle.net"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Symbolic constants for three game difficulty levels...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_DIFF_NORMAL		= 0;
+var TDW_BASIC_DIFF_NIGHTMARE	= 1;
+var TDW_BASIC_DIFF_HELL			= 2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Text names for three game difficulty levels...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_GameDifficulty = [
+	"Normal",
+	"Nightmare",
+	"Hell"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetDifficultyName(diff)
+{
+	return(((diff >= 0) && (diff < TDW_BASIC_GameDifficulty.length)) ?
+		TDW_BASIC_GameDifficulty[diff] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_LogGlobalSymbols(log_obj)
+{
+	var symbol_count = 0;
+
+	log_obj = TDW_BASIC_LOG_SelectALog(log_obj);
+
+	log_obj.emitSep();
+	log_obj.emitSep();
+	log_obj.emitComment("Log of All Current Global Symbols");
+	log_obj.emitSep();
+
+	for (var this_prop in TDW_BASIC_GlobalObjectRef)
+		log_obj.logInfoQuiet(TDW_BASIC_FORMAT_RJust(++symbol_count, 8) + ": " +
+			this_prop);
+
+	log_obj.emitSep();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_CloneObject(source_obj)
+{
+	var destination_obj;
+	var this_property;
+
+
+	if (source_obj == null)
+		destination_obj = null;
+	else {
+		destination_obj = new source_obj.constructor();
+//		if (typeof(source_obj[this_property]) == "object") {
+		if (source_obj instanceof Boolean)
+			destination_obj = new Boolean(source_obj);
+		else if (source_obj instanceof Date)
+			destination_obj = new Date(source_obj.valueOf());
+		else if (source_obj instanceof String)
+			destination_obj = new String(source_obj);
+		else if (typeof(source_obj) == "object") {
+			for (this_property in source_obj)
+				destination_obj[this_property] = 
+					(typeof(source_obj[this_property]) == "object") ?
+					TDW_BASIC_GEN_CloneObject(source_obj[this_property]) :
+					source_obj[this_property];
+		}
+		else
+			destination_obj = source_obj;
+	}
+
+	return(destination_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_CompareNumeric(datum_1, datum_2)
+{
+	return(datum_1 - datum_2);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_CompareLength(datum_1, datum_2)
+{
+	return(datum_1.length - datum_2.length);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_CompareIgnoreCase(datum_1, datum_2)
+{
+	return((datum_1.toLowerCase() < datum_2.toLowerCase()) ? -1 :
+		((datum_1.toLowerCase() > datum_2.toLowerCase()) ? 1 : 0));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_CompareDistanceElements(ele_1, ele_2)
+{
+	return(TDW_BASIC_GEN_CompareNumeric(ele_1[0], ele_2[0]));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_HashedArrayHasElements(in_hash)
+{
+	for (var this_prop in in_hash)
+		return(true);
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_CountHashElements(in_hash)
+{
+	var out_count = 0;
+	var this_one;
+
+	for (this_one in in_hash)
+		out_count++;
+
+	return(out_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_UniqueArray(in_array)
+{
+	var out_array  = new Array();
+	var hash_array = new Array();
+	var this_one;
+
+	for (this_one = 0; this_one < in_array.length; this_one++)
+		hash_array[in_array[this_one] + ""] = in_array[this_one];
+
+	for (this_one in hash_array)
+		out_array.push(hash_array[this_one]);
+
+	return(out_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_UniqueArrayI(in_array)
+{
+	var out_array  = new Array();
+	var hash_array = new Array();
+	var this_one;
+
+	for (this_one = 0; this_one < in_array.length; this_one++)
+		hash_array[(in_array[this_one] + "").toLowerCase()] = in_array[this_one];
+
+	for (this_one in hash_array)
+		out_array.push(hash_array[this_one]);
+
+	return(out_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ArrayIndexedToHashedShallow(in_array)
+{
+	var hash_array = new Array();
+	var this_one;
+
+	for (this_one = 0; this_one < in_array.length; this_one++)
+		hash_array[(in_array[this_one] + "")] = in_array[count_1];
+
+	return(hash_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ArrayIndexedToHashedDeep(in_array)
+{
+	var hash_array = new Array();
+	var this_one;
+
+	for (this_one = 0; this_one < in_array.length; this_one++)
+		hash_array[(in_array[this_one] + "")] =
+			TDW_BASIC_GEN_CloneObject(in_array[count_1]);
+
+	return(hash_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ArrayHashedKeysToIndexedShallow(in_array)
+{
+	var index_array = new Array();
+	var this_one;
+
+	for (this_one in in_array)
+		index_array.push(this_one);
+
+	return(index_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ArrayHashedKeysToIndexedDeep(in_array)
+{
+	var index_array = new Array();
+	var this_one;
+
+	for (this_one in in_array)
+		index_array.push(TDW_BASIC_GEN_CloneObject(this_one));
+
+	return(index_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ArrayHashedValuesToIndexedShallow(in_array)
+{
+	var index_array = new Array();
+	var this_one;
+
+	for (this_one in in_array)
+		index_array.push(in_array[this_one]);
+
+	return(index_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ArrayHashedValuesToIndexedDeep(in_array)
+{
+	var index_array = new Array();
+	var this_one;
+
+	for (this_one in in_array)
+		index_array.push(TDW_BASIC_GEN_CloneObject(in_array[this_one]));
+
+	return(index_array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfUndefined(in_data)
+{
+	return((typeof(in_data) == "undefined") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfBoolean(in_data)
+{
+	return(((typeof(in_data) == "boolean") || (typeof(in_data) == "number")) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfNumber(in_data)
+{
+	return((typeof(in_data) == "number") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfSInt(in_data)
+{
+	return((TDW_BASIC_GEN_TypeOfNumber(in_data) &&
+		(in_data == ((in_data >= 0) ? Math.floor(in_data) : Math.ceil(in_data))))?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfUInt(in_data)
+{
+	return((TDW_BASIC_GEN_TypeOfNumber(in_data) &&
+		(in_data == Math.floor(in_data))) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfString(in_data)
+{
+	return(((in_data instanceof String) || (typeof(in_data) == "string")) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfObject(in_data)
+{
+	return((typeof(in_data) == "object") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfFunction(in_data)
+{
+	return((typeof(in_data) == "function") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfArray(in_data)
+{
+	return(in_data instanceof Array);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfArrayIndexed(in_data)
+{
+	return(TDW_BASIC_GEN_TypeOfArray(in_data) && ("length" in in_data) &&
+		TDW_BASIC_GEN_TypeOfNumber(in_data.length));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfArrayHashed(in_data)
+{
+/*
+	if (TDW_BASIC_GEN_TypeOfArrayIndexed(in_data) && (!in_data.length)) {
+		for (var this_prop in in_data)
+			return(true);
+	}
+
+	return(false);
+*/
+	if (TDW_BASIC_GEN_TypeOfArray(in_data)) {
+		for (var this_prop in in_data)
+			return(true);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfStringEmpty(in_data)
+{
+	return((TDW_BASIC_GEN_TypeOfString(in_data) && (in_data == "")) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfStringNotEmpty(in_data)
+{
+	return((TDW_BASIC_GEN_TypeOfString(in_data) && (in_data != "")) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_TypeOfCoord(in_data)
+{
+	return((TDW_BASIC_GEN_TypeOfArrayIndexed(in_data) &&
+		(in_data.length == 2) && TDW_BASIC_GEN_TypeOfNumber(in_data[0]) &&
+		TDW_BASIC_GEN_TypeOfNumber(in_data[1])) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_IsValidJSName(in_text)
+{
+	return((TDW_BASIC_GEN_TypeOfStringNotEmpty(in_text) &&
+		(in_text.match(/^[A-Za-z_]+[A-Za-z0-9_]*$/) != null)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ExpandArgs(in_arguments, first_index)
+{
+	var out_arguments = new Array();
+
+	in_arguments = (TDW_BASIC_GEN_TypeOfArrayIndexed(in_arguments)) ?
+		in_arguments : ((in_arguments != null) ? [in_arguments] : (new Array()));
+	first_index  = (TDW_BASIC_GEN_TypeOfNumber(first_index) &&
+		(first_index > -1)) ? first_index : 0;
+
+	for (var count_1 = first_index; count_1 < in_arguments.length; count_1++) {
+		if (TDW_BASIC_GEN_TypeOfArrayHashed(in_arguments[count_1]))
+			out_arguments = out_arguments.concat(TDW_BASIC_GEN_ExpandArgs(
+				TDW_BASIC_GEN_ArrayHashedKeysToIndexedShallow(
+				in_arguments[count_1])));
+		else if (TDW_BASIC_GEN_TypeOfArrayIndexed(in_arguments[count_1]))
+			out_arguments = out_arguments.concat(
+				TDW_BASIC_GEN_ExpandArgs(in_arguments[count_1]));
+		else
+			out_arguments.push(in_arguments[count_1]);
+	}
+
+	return(out_arguments);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Just attempts to progress the linear congruential generator a bit further
+// on its path based upon:
+//		1) The specifics of the user realm, account, and character names. Which
+//			is good if you're running multiple bots.
+//		2) The current number of milliseconds in the time of day --- changes
+//			frequently, of course...
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_SeedRandomNumbers()
+{
+	var name_list = [me.realm, me.account, me.name];
+	var this_date;
+	var this_max;
+	var count_1;
+	var count_2;
+
+	this_date = new Date();
+	this_max  = rnd(0, (this_date.valueOf() % 1000));
+	for (count_1 = 0; count_1 < this_max; count_1++)
+		rnd(0, 1);
+
+	for (count_1 = 0; count_1 < name_list.length; count_1++) {
+		name_length = name_list[count_1].length;
+		for (count_2 = 0; count_2 < name_list[count_1].length; count_2++)
+			rnd(0, (name_list[count_1].charCodeAt(count_2) % 256));
+	}
+
+	this_date = new Date();
+	rnd(0, (this_date.valueOf() % 1000));
+	this_max  = rnd(0, (this_date.valueOf() % 1000));
+	for (count_1 = 0; count_1 < this_max; count_1++)
+		rnd(0, 1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_FuzzyDelay(in_delay_ms, fuzz_percent)
+{
+	var fuzz_actual;
+	var delay_ms;
+
+	if ((!arguments.length) || (in_delay_ms < 1))
+		in_delay_ms = 10;
+
+	if ((arguments.length < 2) || (fuzz_percent < 1)) {
+		fuzz_percent = (in_delay_ms / 10);
+		fuzz_percent = (fuzz_percent < 1) ? 1 : fuzz_percent;
+	}
+
+	fuzz_actual = Math.floor(in_delay_ms * (fuzz_percent / 100));
+	fuzz_actual = (fuzz_actual >= 1) ? fuzz_actual : 1;
+
+	delay_ms    = in_delay_ms + (rnd(0, fuzz_actual) * [-1, 0, 1][rnd(0, 2)]);
+
+	delay(Math.abs(delay_ms));
+
+	return(Math.abs(delay_ms));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_RandomRange(low_num, high_num)
+{
+	low_num  = (low_num < 0)  ? Math.ceil(low_num)  : Math.floor(low_num);
+	high_num = (high_num < 0) ? Math.ceil(high_num) : Math.floor(high_num);
+
+	if (low_num == high_num)
+		return(low_num);
+	else if (low_num > high_num) {
+		tmp_num  = low_num;
+		low_num  = high_num;
+		high_num = tmp_num;
+	}
+
+	return(low_num + Math.floor(Math.random() *
+		Math.abs((high_num + 1) - low_num)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetRandomString(out_length, char_set_string)
+{
+	if (out_length < 1)
+		return("");
+
+	char_set_string = (TDW_BASIC_GEN_TypeOfStringNotEmpty(char_set_string)) ?
+		char_set_string :
+		"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+	var out_string = "";
+
+	for ( ; out_length; out_length--)
+		out_string += char_set_string.charAt(rnd(0, char_set_string.length - 1));
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetRandomStringLower(out_length)
+{
+	return(TDW_BASIC_GetRandomString(out_length, "abcdefghijklmnopqrstuvwxyz"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetRandomStringUpper(out_length)
+{
+	return(TDW_BASIC_GetRandomString(out_length, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetRandomStringDigits(out_length)
+{
+	return(TDW_BASIC_GetRandomString(out_length, "0123456789"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_IsValidIPAddress(ip_address)
+{
+	if (TDW_BASIC_GEN_TypeOfStringNotEmpty(ip_address)) {
+		var quad_match = ip_address.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+		if (quad_match && (quad_match.length == 5)) {
+			for (var count_1 = 1; count_1 < 5; count_1++) {
+				if ((!TDW_BASIC_FORMAT_IsDigit(quad_match[count_1])) ||
+					(parseInt(quad_match[count_1], 10) > 255))
+					return(false);
+			}
+			return(true);
+		}
+	}
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_CleanFileName(file_name)
+{
+	file_name = file_name.replace(/\\+/g, "/");
+	file_name = file_name.replace(/\/+/g, "/");
+	file_name = file_name.replace(/^\s+|\s+$/g, "");
+
+	return(file_name);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ReadFile(file_name)
+{
+	var line_list = null;
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 0)) != null) {
+		line_list = new Array();
+		while (!file_handle.eof)
+			line_list.push(file_handle.readLine());
+		file_handle.close();
+	}
+
+	return(line_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_WriteFile(file_name, line_data)
+{
+/*
+	var return_code = -1;
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 1)) != null) {
+		for (var count_1 = 0; count_1 < line_data.length; count_1++)
+			file_handle.writeLine(line_data[count_1]);
+		file_handle.close();
+		return_code = 0;
+	}
+
+	return(return_code);
+*/
+	var return_code = -1;
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 1)) != null) {
+		TDW_BASIC_GEN_EmitToFileHandle(file_handle, line_data);
+		file_handle.close();
+		return_code = 0;
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_AppendFile(file_name, line_data)
+{
+/*
+	var return_code = -1;
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 2)) != null) {
+		if (TDW_BASIC_GEN_TypeOfArrayIndexed(line_data)) {
+			for (var count_1 = 0; count_1 < line_data.length; count_1++)
+				file_handle.writeLine(line_data[count_1]);
+		}
+		else if (TDW_BASIC_GEN_TypeOfArrayHashed(line_data)) {
+			for (var this_prop in line_data)
+				file_handle.writeLine(this_prop + " = " + line_data[this_prop]);
+		}
+		else
+			file_handle.writeLine(line_data);
+		file_handle.close();
+		return_code = 0;
+	}
+
+	return(return_code);
+*/
+	var return_code = -1;
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 2)) != null) {
+		TDW_BASIC_GEN_EmitToFileHandle(file_handle, line_data);
+		file_handle.close();
+		return_code = 0;
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_EmitToFileHandle(file_handle, line_data)
+{
+	if (file_handle) {
+		if (TDW_BASIC_GEN_TypeOfArrayIndexed(line_data)) {
+			for (var count_1 = 0; count_1 < line_data.length; count_1++)
+				file_handle.writeLine(line_data[count_1]);
+		}
+		else if (TDW_BASIC_GEN_TypeOfArrayHashed(line_data)) {
+			for (var this_prop in line_data)
+				file_handle.writeLine(this_prop + " = " + line_data[this_prop]);
+		}
+		else
+			file_handle.writeLine(line_data);
+		file_handle.close();
+		return_code = 0;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_FileExists(file_name)
+{
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 0)) != null) {
+		file_handle.close();
+		return(true);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_MakeUniqueFileName(file_base)
+{
+	var file_name;
+
+	file_base = (TDW_BASIC_GEN_TypeOf(file_base)) ? file_base : "";
+
+	while (true) {
+		file_name = file_base + "_____TMP_FILE." + me.realm + "." + me.account +
+			"." + me.name + "." + getMyPID() + "." + (new Date()).valueOf() + "." +
+			rnd(0, 1000);
+		if (!TDW_BASIC_GEN_FileExists(file_name))
+			return(file_name);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_GCDelay()
+{
+	delay(10);
+	runGC();
+	delay(10);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_Delay()
+{
+	delay(10);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_RealmToNumber(in_realm)
+{
+	for (count_1 = 0; count_1 < TDW_BASIC_RealmList.length; count_1++) {
+		if (in_realm.toLowerCase() == TDW_BASIC_RealmList[count_1])
+			return(count_1);
+	}
+
+	if (in_realm.indexOf(".battle.net") == -1)
+		return(TDW_BASIC_GEN_RealmToNumber(in_realm + ".battle.net"));
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_NumberToRealm(in_realm)
+{
+	return((TDW_BASIC_GEN_TypeOfNumber(in_realm) && (in_realm >= 0) &&
+		(in_realm < TDW_BASIC_RealmList.length)) ?
+		TDW_BASIC_RealmList[in_realm] : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ParseRealmToNumber(in_realm)
+{
+	if (TDW_BASIC_GEN_TypeOfNumber(in_realm) ||
+		TDW_BASIC_FORMAT_IsDigit(in_realm)) {
+		if ((in_realm >= 0) && (in_realm < TDW_BASIC_RealmList.length))
+			return(parseInt(in_realm, 10));
+	}
+	else if (TDW_BASIC_GEN_TypeOfString(in_realm))
+		return(TDW_BASIC_GEN_RealmToNumber(in_realm));
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_ParseRealmToName(in_realm)
+{
+	var realm_number = TDW_BASIC_GEN_ParseRealmToNumber(in_realm);
+
+	return((realm_number != -1) ? TDW_BASIC_RealmList[realm_number] : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetWindowTitle()
+{
+	return((parseFloat(me.version) >= 0.3709) ? me.windowtitle : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_CCITT_CalculateTable(ascii_value)
+{
+	var accumulator = 0;
+
+	ascii_value <<= 8;
+
+	for (var count_1 = 8; count_1 > 0; count_1--) {
+		if ((ascii_value ^ accumulator) & 0x8000)
+			accumulator = (accumulator << 1) ^ 0x1021;
+		else
+			accumulator <<= 1;
+		ascii_value <<= 1;
+	}
+
+	return(accumulator);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BASIC_CCITT_Table = new Array(256);
+for (count_1 = 0; count_1 < 256; count_1++)
+	TDW_BASIC_CCITT_Table[count_1] = TDW_BASIC_CCITT_CalculateTable(count_1);
+delete count_1;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_CCITT_GetForString(ascii_string)
+{
+	var out_crc = 0;
+
+	for (var count_1 = 0; count_1 < ascii_string.length; count_1++)
+		out_crc = (out_crc << 8) ^
+			TDW_BASIC_CCITT_Table[(out_crc >> 8) ^ ascii_string.charCodeAt(count_1)];
+
+	return(out_crc);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_CCITT_GetForArray(ascii_array)
+{
+	var out_crc = 0;
+
+	for (var count_1 = 0; count_1 < ascii_array.length; count_1++)
+		out_crc = (out_crc << 8) ^
+			TDW_BASIC_CCITT_Table[(out_crc >> 8) ^ ascii_array[count_1]];
+
+	return(out_crc);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetCallStack()
+{
+	return(TDW_BASIC_GetCallStackInternal());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GetCallStackInternal()
+{
+	var call_stack = new Array();
+	var caller     = TDW_BASIC_GetCallStack.caller;
+	var last_func  = null;
+
+	while (caller) {
+		var func_name = TDW_BASIC_FORMAT_FunctionToName(caller);
+//TDW_BASIC_LOG_GetALog().logInfo("TDW_BASIC_GetCallStackInternal() = " + func_name);
+		if (call_stack.length && (last_func == call_stack[call_stack.length - 1]))
+			;
+		else {
+			last_func = func_name;
+			call_stack.push(func_name + "()");
+		}
+		caller = caller.caller;
+	}
+
+	return(call_stack);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_LogCallStack(log_obj, remove_depth, prefix)
+{
+	log_obj = TDW_BASIC_LOG_SelectALog(log_obj);
+
+	var call_stack = TDW_BASIC_GetCallStack();
+
+	call_stack.splice(0, (remove_depth > 0) ? (remove_depth + 1) : 1);
+
+	prefix = (TDW_BASIC_GEN_TypeOfStringNotEmpty(prefix)) ? (prefix + ": ") : "";
+
+	while (call_stack.length)
+		log_obj.logInfo("CALL STACK TRACE: " + prefix + call_stack.shift());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_OneSpace(in_string)
+{
+	in_string += "";
+
+	return(in_string.replace(/\s+/g, " "));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_NoSpace(in_string)
+{
+	in_string += "";
+
+	return(in_string.replace(/\s+/g, ""));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_LowerCase(in_string)
+{
+	in_string += "";
+
+	return(in_string.toLowerCase());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_UpperCase(in_string)
+{
+	in_string += "";
+
+	return(in_string.toUpperCase());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_InitCaps(in_string)
+{
+	in_string += "";
+	in_string  = in_string.toLowerCase();
+
+	var string_length = in_string.length;
+	var start_index   = 0;
+	var out_string    = "";
+	var this_index;
+
+	in_string += "";
+
+	while (start_index < string_length) {
+		var this_char = in_string.charAt(start_index);
+		if ((!start_index) &&
+			("abcdefghijklmnopqrstuvwxyz".indexOf(this_char) > -1))
+			out_string += this_char.toUpperCase();
+		else if (" \t\r\n\f~`!@#$%^&*()-_+={[}]\"':;<.>./?".
+			indexOf(this_char) > -1) {
+			out_string += this_char;
+			start_index++;
+			this_char = in_string.charAt(start_index);
+			if ("abcdefghijklmnopqrstuvwxyz".indexOf(this_char) > -1)
+				out_string += this_char.toUpperCase();
+			else
+				out_string += this_char;
+		}
+		else
+			out_string += this_char;
+		start_index++;
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_LTrim(in_string)
+{
+	in_string += "";
+
+	return(in_string.replace(/^\s+/, ""));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_RTrim(in_string)
+{
+	in_string += "";
+
+	return(in_string.replace(/\s+$/, ""));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_Trim(in_string)
+{
+	in_string += "";
+
+	return(in_string.replace(/^\s+|\s+$/g, ""));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_LJust(in_string, in_width, fill_char)
+{
+/*
+	var tmp_fill_char;
+	var tmp_string;
+
+	tmp_fill_char = ((typeof(fill_char) != "string") || (!fill_char.length)) ?
+		" " : fill_char.toString(fill_char.charCodeAt(0, 1));
+
+	if (in_width <= 0)
+		return("");
+	else {
+		tmp_string = TDW_BASIC_FORMAT_Trim(in_string + "");
+		if (tmp_string.length > in_width)
+			return(tmp_string.substr(0, in_width));
+		else if (tmp_string.length < in_width) {
+			var tmp_array = new Array((in_width - tmp_string.length) + 1);
+			return(tmp_string + tmp_array.join(tmp_fill_char));
+		}
+		return(tmp_string);
+	}
+*/
+	return(TDW_BASIC_FORMAT_RPad(TDW_BASIC_FORMAT_Trim(in_string),
+		in_width, fill_char));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_RJust(in_string, in_width, fill_char)
+{
+/*
+	var tmp_fill_char;
+	var tmp_string;
+
+	tmp_fill_char = ((typeof(fill_char) != "string") || (!fill_char.length)) ?
+		" " : fill_char.toString(fill_char.charCodeAt(0, 1));
+
+	if (in_width <= 0)
+		return("");
+	else {
+		tmp_string = TDW_BASIC_FORMAT_Trim(in_string + "");
+		if (tmp_string.length > in_width)
+			return(tmp_string.substr(0, in_width));
+		else if (tmp_string.length < in_width) {
+			var tmp_array = new Array((in_width - tmp_string.length) + 1);
+			return(tmp_array.join(tmp_fill_char) + tmp_string);
+		}
+		return(tmp_string);
+	}
+*/
+	return(TDW_BASIC_FORMAT_LPad(TDW_BASIC_FORMAT_Trim(in_string),
+		in_width, fill_char));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_LPad(in_string, in_width, fill_char)
+{
+	var tmp_fill_char;
+	var tmp_string;
+
+	tmp_fill_char = ((typeof(fill_char) != "string") || (!fill_char.length)) ?
+		" " : fill_char.toString(fill_char.charCodeAt(0, 1));
+
+	if (in_width <= 0)
+		return("");
+	else {
+		tmp_string = in_string + "";
+		if (tmp_string.length > in_width)
+			return(tmp_string.substr(0, in_width));
+		else if (tmp_string.length < in_width) {
+			var tmp_array = new Array((in_width - tmp_string.length) + 1);
+			return(tmp_array.join(tmp_fill_char) + tmp_string);
+		}
+		return(tmp_string);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_RPad(in_string, in_width, fill_char)
+{
+	var tmp_fill_char;
+	var tmp_string;
+
+	tmp_fill_char = ((typeof(fill_char) != "string") || (!fill_char.length)) ?
+		" " : fill_char.toString(fill_char.charCodeAt(0, 1));
+
+	if (in_width <= 0)
+		return("");
+	else {
+		tmp_string = in_string + "";
+		if (tmp_string.length > in_width)
+			return(tmp_string.substr(0, in_width));
+		else if (tmp_string.length < in_width) {
+			var tmp_array = new Array((in_width - tmp_string.length) + 1);
+			return(tmp_string + tmp_array.join(tmp_fill_char));
+		}
+		return(tmp_string);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_Center(in_string, in_width, fill_char)
+{
+	if (in_width <= 0)
+		return("");
+
+	in_string = TDW_BASIC_FORMAT_Trim(in_string + "");
+
+	if (in_width < in_string.length)
+		return(in_string.substr(0, in_width));
+	else if (in_width > in_string.length) {
+		var pad_length = Math.floor((in_width - in_string.length) / 2)
+		if (pad_length)
+			in_string = TDW_BASIC_FORMAT_LJust(in_string,
+				pad_length + in_string.length, fill_char);
+		return(TDW_BASIC_FORMAT_LPad(in_string, in_width, fill_char));
+	}
+
+	return(in_string)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_RepeatString(in_string, in_count)
+{
+	var out_string = "";
+
+	for (var count_1 = 0; count_1 < in_count; count_1++)
+		out_string += in_string;
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_ZeroFill(in_string, in_width)
+{
+	return(TDW_BASIC_FORMAT_RJust(in_string + "", in_width, "0"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_IsBoolean(in_string)
+{
+	in_string += "";
+
+	return(((in_string == "0") || (in_string == "1") ||
+		(in_string.toLowerCase() == "true") ||
+		(in_string.toLowerCase() == "false")) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_IsDigit(in_string)
+{
+	in_string += "";
+
+	return((in_string.match(/^\d+$/)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_IsInteger(in_string)
+{
+	in_string += "";
+
+	if (TDW_BASIC_FORMAT_IsDigit(in_string))
+		return(true);
+	else if ((in_string.length > 1) && 
+		((in_string.charAt(0) == "-") || (in_string.charAt(0) == "+")))
+		return(TDW_BASIC_FORMAT_IsDigit(in_string.substr(1)));
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_StringCount(in_string, search_string)
+{
+	var string_count = 0;
+	var current_pos  = 0;
+
+	if (search_string > "") {
+		while ((current_pos =
+			in_string.indexOf(search_string, current_pos)) > -1) {
+			string_count++;
+			current_pos++;
+		}
+	}
+
+	return(string_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_FindFirst(in_string, search_list)
+{
+	var found_index = Number.MAX_VALUE;
+	var count_1;
+	var this_index;
+
+	for (count_1 = 0; count_1 < search_list.length; count_1++) {
+		if (((this_index = in_string.indexOf(search_list[count_1])) > -1) &&
+			(this_index < found_index))
+			found_index = this_index;
+	}
+
+	return((found_index == Number.MAX_VALUE) ? -1 : found_index);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_FORMAT_FunctionToName(in_func)
+{
+	var func_name = null;
+
+	if (in_func == null)
+		func_name = null;
+	else if (TDW_BASIC_GEN_TypeOfFunction(in_func)) {
+		func_name = TDW_BASIC_FORMAT_Trim(
+			TDW_BASIC_FORMAT_OneSpace(in_func + ""));
+		func_name = TDW_BASIC_FORMAT_Trim(func_name.substr(8));
+		func_name = TDW_BASIC_FORMAT_Trim(
+			func_name.substr(0, func_name.indexOf("(")));
+	}
+	else if (TDW_BASIC_GEN_TypeOfString(in_func))
+		func_name = in_func;
+	else if (TDW_BASIC_GEN_TypeOfObject(in_func) &&
+		("constructor" in in_func))
+		func_name = TDW_BASIC_FORMAT_FunctionToName(in_func.constructor);
+
+	return(func_name);		
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_DATE_ToSmallDate(in_date)
+{
+	var string_date;
+
+	in_date = ((!arguments.length) || (typeof(in_date) != "object")) ?
+		(new Date()) : in_date;
+
+	string_date = in_date.toString();
+
+	return(
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getFullYear(),     4) + "-" +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getMonth() + 1,    2) + "-" +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getDate(),         2) + " " +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getHours(),        2) + ":" +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getMinutes(),      2) + ":" +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getSeconds(),      2) + "." +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getMilliseconds(), 3)
+	);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_DATE_ToSmallDateSimple(in_date)
+{
+	var string_date;
+
+	in_date = ((!arguments.length) || (typeof(in_date) != "object")) ?
+		(new Date()) : in_date;
+
+	string_date = in_date.toString();
+
+	return(
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getFullYear(),     4) +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getMonth() + 1,    2) +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getDate(),         2) + "." +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getHours(),        2) +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getMinutes(),      2) +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getSeconds(),      2) + "." +
+		TDW_BASIC_FORMAT_ZeroFill(in_date.getMilliseconds(), 3)
+	);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// The TDW_BASIC_Log object constructor...
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_Log(file_name, lead_text, level_file, level_screen,
+	no_log_screen, no_append_flag)
+{
+	var log_date = new Date();
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Fix parameters...
+	// //////////////////////////////////////////////////////////////////////
+	file_name      = (!arguments.length || (typeof(file_name) != "string")) ?
+		"" : file_name;
+  lead_text       = ((arguments.length < 2) || (typeof(lead_text) != "string")||
+		(lead_text == "")) ? "D2JSP" : TDW_BASIC_FORMAT_Trim(lead_text);
+	level_file     = ((typeof(level_file) != "number") || (level_file < 0) ||
+		(level_file > TDW_BASIC_LOG_Level_HOSTILE)) ?
+		TDW_BASIC_LOG_Level_DETAIL : level_file;
+	level_screen   = ((typeof(level_screen) != "number") || (level_screen < 0) ||
+		(level_screen > TDW_BASIC_LOG_Level_HOSTILE)) ?
+		TDW_BASIC_LOG_Level_INFO : level_screen;
+	level_file     = (level_file >= level_screen) ? level_file : level_screen;
+	no_log_screen  = (no_log_screen) ? true : false;
+	no_append_flag = (no_append_flag) ? true : false;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Object data.
+	// //////////////////////////////////////////////////////////////////////
+	this.file_name        = new String(file_name);
+	this.lead_text        = new String(lead_text);
+	this.level_file       = level_file;
+	this.level_screen     = level_screen;
+	this.file_handle      = null;
+	this.log_screen       = (no_log_screen) ? false : true;
+	this.no_append_flag   = no_append_flag;
+	this.synchronous_mode = false;
+	this.reg_key          = TDW_BASIC_FORMAT_ZeroFill(log_date.valueOf(), 16) +
+		" " + this.file_name;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Object methods.
+	// //////////////////////////////////////////////////////////////////////
+	this.logMinutiae    = TDW_BASIC_LOG_logMinutiae;
+	this.logDebug       = TDW_BASIC_LOG_logDebug;
+	this.logDetail      = TDW_BASIC_LOG_logDetail;
+	this.logInfo        = TDW_BASIC_LOG_logInfo;
+	this.logInfoQuiet   = TDW_BASIC_LOG_logInfoQuiet;
+	this.logPickup      = TDW_BASIC_LOG_logPickup;
+	this.logEvaluate    = TDW_BASIC_LOG_logEvaluate;
+	this.logDiscard     = TDW_BASIC_LOG_logDiscard;
+	this.logKeep        = TDW_BASIC_LOG_logKeep;
+	this.logWarning     = TDW_BASIC_LOG_logWarning;
+	this.logError       = TDW_BASIC_LOG_logError;
+	this.logFatal       = TDW_BASIC_LOG_logFatal;
+	this.logChicken     = TDW_BASIC_LOG_logChicken;
+	this.logHostile     = TDW_BASIC_LOG_logHostile;
+	this.logAny         = TDW_BASIC_LOG_logAny;
+	this.writeLine      = TDW_BASIC_LOG_writeLine;
+	this.closeLog       = TDW_BASIC_LOG_closeLog;
+	this.flushLog       = TDW_BASIC_LOG_flushLog;
+	this.doSyncMode     = TDW_BASIC_LOG_doSyncMode;
+	this.syncModeOff    = TDW_BASIC_LOG_syncModeOff;
+	this.syncModeOn     = TDW_BASIC_LOG_syncModeOn;
+	this.setSyncMode    = TDW_BASIC_LOG_setSyncMode;
+	this.screenOff      = TDW_BASIC_LOG_screenOff;
+	this.screenOn       = TDW_BASIC_LOG_screenOn;
+	this.emitSep        = TDW_BASIC_LOG_emitSep;
+	this.emitComment    = TDW_BASIC_LOG_emitComment;
+	this.getLevelFile   = TDW_BASIC_LOG_getLevelFile;
+	this.getLevelScreen = TDW_BASIC_LOG_getLevelScreen;
+	this.setLevelFile   = TDW_BASIC_LOG_setLevelFile;
+	this.setLevelScreen = TDW_BASIC_LOG_setLevelScreen;
+	this.toString       = TDW_BASIC_LOG_toString;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Open the log file, if one was specified...
+	// //////////////////////////////////////////////////////////////////////
+	if (file_name != "") {
+		if ((this.file_handle = fileOpen(this.file_name,
+			(this.no_append_flag) ? 1 : 2)) != null) {
+			this.emitSep();
+			this.emitSep();
+			this.emitComment("Log Output Started " + log_date.toString());
+			this.emitSep();
+			TDW_BASIC_LOG_RegistrationList[this.reg_key] = this;
+		}
+		// Wait one millisecond to ensure log registration keys have different
+		// timestamps...
+		delay(1);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Method implementations...
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logMinutiae(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_MINUTIAE,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logDebug(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_DEBUG,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logDetail(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_DETAIL,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logInfo(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_INFO,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logInfoQuiet(debug_message, debug_time)
+	{
+		var old_screen_state = this.screenOff();
+
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_INFO,
+			debug_time);
+
+		if (old_screen_state)
+			this.screenOn();
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logPickup(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_PICKUP,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logEvaluate(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_EVALUATE,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logDiscard(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_DISCARD,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logKeep(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_KEEP,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logWarning(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_WARNING,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logError(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_ERROR,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logFatal(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_FATAL,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logChicken(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_CHICKEN,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logHostile(debug_message, debug_time)
+	{
+		this.logAny(debug_message, TDW_BASIC_LOG_Level_HOSTILE,
+			debug_time);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_logAny(in_debug_message, debug_level, debug_time)
+	{
+		var count_1;
+		var log_time;
+		var log_level;
+		var debug_message;
+		var file_message;
+
+		if ((!TDW_BASIC_GEN_TypeOfString(in_debug_message)) &&
+			TDW_BASIC_GEN_TypeOfArrayIndexed(in_debug_message)) {
+			log_level = ((arguments.length < 2) ||
+				(TDW_BASIC_LOG_LevelList[debug_level] == null)) ?
+				TDW_BASIC_LOG_Level_INFO : debug_level;
+			if ((log_level >= this.level_file) ||
+				((log_level >= this.level_screen) && this.log_screen)) {
+				log_time = ((arguments.length < 3) ||
+					(!(debug_time instanceof Date))) ? new Date() : debug_time;
+				for (count_1 = 0; count_1 < in_debug_message.length; count_1++)
+					this.logAny(in_debug_message[count_1], debug_level,
+						debug_time);
+			}
+		}
+		else {
+			debug_message = in_debug_message + "";
+			if (this.file_handle != null) {
+				if (this.level_screen < this.level_file)
+					this.level_file = this.level_screen;
+				log_level = ((arguments.length < 2) ||
+					(TDW_BASIC_LOG_LevelList[debug_level] == null)) ?
+					TDW_BASIC_LOG_Level_INFO : debug_level;
+				if (log_level >= this.level_file) {
+					log_time = ((arguments.length < 3) ||
+						(!(debug_time instanceof Date))) ? new Date() : debug_time;
+					file_message = debug_message.replace(/\xff+(c\d)/g, "");
+					this.file_handle.writeLine(TDW_BASIC_DATE_ToSmallDate(log_time)+
+						" " + TDW_BASIC_LOG_LevelList[log_level] + " " +
+						this.lead_text + " " + file_message);
+					this.doSyncMode();
+				}
+				if ((log_level >= this.level_screen) && this.log_screen)
+					print(debug_message);
+			}
+			else if (this.log_screen) {
+				log_level = ((arguments.length < 2) ||
+					(TDW_BASIC_LOG_LevelList[debug_level] == null)) ?
+					TDW_BASIC_LOG_Level_INFO : debug_level;
+				if (log_level >= this.level_screen)
+					print(debug_message);
+			}
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_writeLine(in_debug_message)
+	{
+		if ((!TDW_BASIC_GEN_TypeOfString(in_debug_message)) &&
+			TDW_BASIC_GEN_TypeOfArrayIndexed(in_debug_message)) {
+			for (var count_1 = 0; count_1 < in_debug_message.length; count_1++)
+				this.writeLine(in_debug_message[count_1]);
+		}
+		else {
+			var debug_message = in_debug_message + "";
+			var file_message  = debug_message.replace(/\xff+(c\d)/g, "");
+			this.file_handle.writeLine(file_message);
+			this.doSyncMode();
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_closeLog()
+	{
+		var log_date = new Date();
+
+		if (this.file_handle != null) {
+			this.emitSep();
+			this.emitComment("Log Output Stopped " + log_date.toString());
+			this.emitSep();
+			this.emitSep();
+			this.file_handle.writeLine("");
+			this.file_handle.close();
+			this.file_handle = null;
+			delete TDW_BASIC_LOG_RegistrationList[this.reg_key];
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_flushLog()
+	{
+/*
+	CODE NOTE: For use in cores before 0.31.
+		if (this.file_name != "") {
+			if (this.file_handle != null)
+				this.file_handle.close();
+			this.file_handle = fileOpen(this.file_name, 2);
+		}
+*/
+		if ((this.file_name != "") && (this.file_handle != null))
+			this.file_handle.flush();
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_doSyncMode()
+	{
+		if (this.synchronous_mode)
+			this.flushLog();
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_syncModeOff()
+	{
+/*
+		var old_state = this.synchronous_mode;
+
+		this.synchronous_mode = false;
+
+		return(old_state);
+*/
+		return(this.setSyncMode(false));
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_syncModeOn()
+	{
+/*
+		var old_state = this.synchronous_mode;
+
+		this.synchronous_mode = true;
+
+		return(old_state);
+*/
+		return(this.setSyncMode(true));
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_setSyncMode(sync_mode)
+	{
+		var old_state = this.synchronous_mode;
+
+		this.synchronous_mode = (sync_mode) ? true : false;
+
+		return(old_state);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_screenOff()
+	{
+		var old_state = this.log_screen;
+
+		this.log_screen = false;
+
+		return(old_state);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_screenOn()
+	{
+		var old_state = this.log_screen;
+
+		this.log_screen = true;
+
+		return(old_state);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_emitSep(fill_char)
+	{
+		var tmp_char;
+
+		tmp_char = ((arguments.length < 1) || (typeof(fill_char) != "string") ||
+			(fill_char == "")) ? "/" :
+			fill_char.toString(fill_char.charCodeAt(0, 1));
+	
+		if (this.file_handle != null) {
+			this.file_handle.writeLine(
+				TDW_BASIC_FORMAT_RJust("", 4 + 1 + 2 + 1 + 2, tmp_char) + " " +
+				TDW_BASIC_FORMAT_RJust("", 2 + 1 + 2 + 1 + 2 + 1 + 3, tmp_char) +
+				" "+ TDW_BASIC_FORMAT_RJust("", TDW_BASIC_LOG_LevelList[0].length,
+				tmp_char) + " " +
+				TDW_BASIC_FORMAT_RJust("", this.lead_text.length, tmp_char) +
+				" " + TDW_BASIC_FORMAT_RJust("", 75, tmp_char));
+			this.doSyncMode();
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_emitComment(in_comment)
+	{
+		in_comment = ((!arguments.length) || (typeof(in_comment) != "string")) ?
+			"" : in_comment;
+	
+		if (this.file_handle != null) {
+			this.file_handle.writeLine(
+				TDW_BASIC_FORMAT_RJust("", 4 + 1 + 2 + 1 + 2, " ") + " " +
+				TDW_BASIC_FORMAT_RJust("", 2 + 1 + 2 + 1 + 2 + 1 + 3, " ") + " "+
+				TDW_BASIC_FORMAT_RJust("",
+				TDW_BASIC_LOG_LevelList[0].length, " ") + " " +
+				TDW_BASIC_FORMAT_RJust("", this.lead_text.length, " ") + " " +
+				"// " + in_comment);
+			this.doSyncMode();
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_getLevelFile()
+	{
+		return(this.level_file);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_getLevelScreen()
+	{
+		return(this.level_screen);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_setLevelFile(new_level)
+	{
+		var old_level;
+
+		old_level       = this.level_file;
+		this.level_file = ((new_level >= 0) &&
+			(new_level <= TDW_BASIC_LOG_Level_HOSTILE)) ? new_level : old_level;
+	
+		return(old_level);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_setLevelScreen(new_level)
+	{
+		var old_level;
+	
+		old_level         = this.level_screen;
+		this.level_screen = ((new_level >= 0) &&
+			(new_level <= TDW_BASIC_LOG_Level_HOSTILE)) ? new_level : old_level;
+	
+		return(old_level);
+	}
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_BASIC_LOG_toString()
+	{
+		return("D2JSP Log File '" + this.file_name + "' current state = " +
+			((this.file_handle != null) ? "OPEN" : "CLOSED"));
+	}
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// All logs are registered with a singleton. This function retrieves from that
+// singleton a handle to the most-recently registered log object which is still
+// open (if one exists).
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_LOG_GetLastLog()
+{
+	var last_log     = null;
+	var last_log_key = "";
+	var this_prop;
+
+	for (this_prop in TDW_BASIC_LOG_RegistrationList) {
+		if (this_prop > last_log_key) {
+			last_log_key = this_prop;
+			last_log     = TDW_BASIC_LOG_RegistrationList[this_prop];
+		}
+	}
+
+	return(last_log);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// All logs are registered with a singleton. This function retrieves from that
+// singleton a handle to the most-recently registered log object if one exists.
+// If one does not, it constructs a default log object which logs only to the
+// screen.
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_LOG_GetALog()
+{
+	var out_log;
+
+	return(((out_log = TDW_BASIC_LOG_GetLastLog()) != null) ? out_log :
+		(new TDW_BASIC_Log()));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_LOG_SelectALog(log_obj)
+{
+	return((log_obj instanceof TDW_BASIC_Log) ? log_obj :
+		TDW_BASIC_LOG_GetALog());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_Wait(iter_count, iter_time)
+{
+	TDW_BASIC_GEN_WaitForTrue(iter_count, iter_time, "false");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_WaitForTrue(iter_count, iter_time, cond_func,
+	cond_param)
+{
+	return(TDW_BASIC_GEN_WaitForBooleanAction(true, iter_count, iter_time,
+		cond_func, cond_param));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_WaitForFalse(iter_count, iter_time, cond_func,
+	cond_param)
+{
+	return(TDW_BASIC_GEN_WaitForBooleanAction(false, iter_count, iter_time,
+		cond_func, cond_param));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_WaitForTrueAction(iter_count, iter_time, cond_func,
+	cond_param, action_func, action_param)
+{
+	return(TDW_BASIC_GEN_WaitForBooleanAction(true, iter_count, iter_time,
+		cond_func, cond_param, action_func, action_param));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_WaitForFalseAction(iter_count, iter_time, cond_func,
+	cond_param, action_func, action_param)
+{
+	return(TDW_BASIC_GEN_WaitForBooleanAction(false, iter_count, iter_time,
+		cond_func, cond_param, action_func, action_param));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_GEN_WaitForBooleanAction(wait_bool, iter_count, iter_time,
+	cond_func, cond_param, action_func, action_param)
+{
+	var return_code = false;
+	var this_iter;
+	var other_bool;
+
+	wait_bool  = (wait_bool) ? true : false;
+	other_bool = (wait_bool) ? true : false;
+	iter_count = (iter_count >= 0) ? iter_count : 1;
+	iter_time  = (iter_time  > 1) ? iter_time  : 10;
+	this_iter  = 0;
+
+	if (typeof(cond_func) == "function") {
+		while ((!iter_count) || (this_iter < iter_count)) {
+			if (((cond_func(cond_param)) ? true : false) == other_bool) {
+				return_code = true;
+				break;
+			}
+			delay(iter_time);
+			this_iter++;
+		}
+	}
+	else if (typeof(cond_func) == "string") {
+		while ((!iter_count) || (this_iter < iter_count)) {
+			if (((eval(cond_func)) ? true : false) == other_bool) {
+				return_code = true;
+				break;
+			}
+			delay(iter_time);
+			this_iter++;
+		}
+	}
+	else
+		return(TDW_BASIC_GEN_WaitForBooleanAction(wait_bool, iter_count,
+			iter_time, "\"" + cond_func + "\"", cond_param, action_func,
+			action_param));
+
+	if (typeof(action_func) == "function")
+		action_func(wait_bool, return_code, action_param);
+	else if (typeof(action_func) == "string")
+		eval(action_func);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_CTX_Context(context_name, basic_list, default_list,
+	config_list, log_obj)
+{
+	// //////////////////////////////////////////////////////////////////////
+	// The name of the context...
+	this.__NAME__  = (TDW_BASIC_GEN_TypeOfStringNotEmpty(context_name)) ?
+		context_name : "TDW Bot Configuration";
+	// For the pushing/popping of properties...
+	this.__STACK__ = new Array();
+	// //////////////////////////////////////////////////////////////////////
+
+	log_obj = TDW_BASIC_LOG_SelectALog(log_obj);
+
+	// //////////////////////////////////////////////////////////////////////
+	// Set all configuration properties to the basic configuration...
+	if (TDW_BASIC_GEN_TypeOfArrayHashed(basic_list)) {
+		for (var this_prop in basic_list) {
+			if (!TDW_BASIC_CTX_IsPrivateName(this_prop))
+				this[this_prop] = TDW_BASIC_GEN_CloneObject(basic_list[this_prop]);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Now add in any defaults specified...
+	if (TDW_BASIC_GEN_TypeOfArrayHashed(default_list)) {
+		for (var this_prop in default_list) {
+			if (!TDW_BASIC_CTX_ContextCheckType(this_prop,
+				basic_list[this_prop], default_list[this_prop], log_obj))
+				this[this_prop] = TDW_BASIC_GEN_CloneObject(default_list[this_prop]);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Update for those properties specified by the user...
+	if (TDW_BASIC_GEN_TypeOfArrayHashed(config_list)) {
+		for (var this_prop in config_list) {
+			if (!TDW_BASIC_CTX_ContextCheckType(this_prop,
+				default_list[this_prop], config_list[this_prop], log_obj))
+				this[this_prop] = TDW_BASIC_GEN_CloneObject(config_list[this_prop]);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// Once we clean-up, the object's construction is complete.
+	runGC();
+
+	// //////////////////////////////////////////////////////////////////////
+	// Sets the context name.
+	this.setContextName = function(context_name) {
+		var old_name = this.__NAME__;
+
+		this.__NAME__  = (TDW_BASIC_GEN_TypeOfStringNotEmpty(context_name)) ?
+			context_name : "TDW Bot Configuration";
+
+		return(old_name);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Adds the specified property to the context.
+	this.addProperty    = function(prop_name, prop_value) {
+		var return_flag = false;
+		var log_obj     = TDW_BASIC_LOG_GetALog();
+
+		if (prop_name in this)
+			log_obj.logWarning("The property name '" + prop_name +
+				"' is already in this context.");
+		else {
+			log_obj.logDetail("CTX: Added property '" + prop_name +
+				"': (Value = " + this.valueToString(prop_value) + ")");
+			this[prop_name] = prop_value;
+			return_flag     = true;
+		}
+
+		return(return_flag);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Removes the specified property from the context.
+	this.removeProperty = function(prop_name) {
+		var return_flag = false;
+		var log_obj     = TDW_BASIC_LOG_GetALog();
+
+		if (!TDW_BASIC_GEN_TypeOfString(prop_name))
+			log_obj.logWarning("Property name is not a string.");
+		else if (TDW_BASIC_CTX_IsPrivateName(prop_name))
+			log_obj.logWarning("The property name '" + prop_name +
+				"' may not be removed.");
+		else if (!(prop_name in this))
+			log_obj.logWarning("The property name '" + prop_name +
+				"' is not in this context.");
+		else {
+			log_obj.logDetail("CTX: Removed property '" + prop_name +
+				"': (Value = " + this.valueToString(this[prop_name]) + ")");
+			delete this[prop_name];
+			return_flag = true;
+		}
+
+		return(return_flag);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Pushes the specified property.
+	this.pushProperty   = function(prop_name, prop_value) {
+		var return_flag = false;
+		var log_obj     = TDW_BASIC_LOG_GetALog();
+
+		if (!TDW_BASIC_GEN_TypeOfString(prop_name))
+			log_obj.logWarning("Property name is not a string.");
+		else if (!TDW_BASIC_GEN_TypeOfStringNotEmpty(prop_name))
+			log_obj.logWarning("Property name is an empty string.");
+		else if (TDW_BASIC_CTX_IsPrivateName(prop_name))
+			log_obj.logWarning("The property name '" + prop_name +
+				"' may not be pushed.");
+		else if (!(prop_name in this))
+			log_obj.logWarning("The property name '" + prop_name +
+				"' is not in this context.");
+		else if (!TDW_BASIC_CTX_ContextCheckType(prop_name,
+			this[prop_name], prop_value, log_obj)) {
+			if (!(prop_name in this.__STACK__))
+				this.__STACK__[prop_name] = new Array();
+			log_obj.logDetail("CTX: Pushed a value for property '" +
+				prop_name + "': (current stack depth = " +
+				(this.__STACK__[prop_name].length + 1) + ")");
+			log_obj.logDetail("CTX: Old value = {" +
+				this.valueToString(this[prop_name]) + "}");
+			this.__STACK__[prop_name].push(this[prop_name]);
+			this[prop_name] = TDW_BASIC_GEN_CloneObject(prop_value);
+			log_obj.logDetail("CTX: New value = {" +
+				this.valueToString(prop_value) + "}");
+			return_flag = true;
+		}
+
+		return(return_flag);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Pops the specified property.
+	this.popProperty    = function(prop_name) {
+		var return_flag = false;
+		var log_obj     = TDW_BASIC_LOG_GetALog();
+
+		if (!TDW_BASIC_GEN_TypeOfString(prop_name))
+			log_obj.logWarning("Property name is not a string.");
+		else if (!TDW_BASIC_GEN_TypeOfStringNotEmpty(prop_name))
+			log_obj.logWarning("Property name is an empty string.");
+		else if (TDW_BASIC_CTX_IsPrivateName(prop_name))
+			log_obj.logWarning("The property name '" + prop_name +
+				"' may not be popped.");
+		else if (!(prop_name in this.__STACK__))
+			log_obj.logWarning("The property name '" + prop_name +
+				"' has not been pushed.");
+		else {
+			log_obj.logDetail("CTX: Popped a value for property '" +
+				prop_name + "': (current stack depth = " +
+				(this.__STACK__[prop_name].length - 1) + ")");
+			log_obj.logDetail("CTX: Old value = {" +
+				this.valueToString(this[prop_name]) + "}");
+			this[prop_name] = this.__STACK__[prop_name].pop();
+			if (!this.__STACK__[prop_name].length)
+				delete this.__STACK__[prop_name];
+			log_obj.logDetail("CTX: New value = {" +
+				this.valueToString(this[prop_name]) + "}");
+			return_flag = true;
+		}
+
+		return(return_flag);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Converts a property value to a human-readable string.
+	this.valueToString  = function(prop_value) {
+		if (TDW_BASIC_GEN_TypeOfFunction(prop_value))
+			return(TDW_BASIC_FORMAT_FunctionToName(prop_value));
+		else if (TDW_BASIC_GEN_TypeOfArrayIndexed(prop_value))
+			return("[" + prop_value + "]");
+		else if (TDW_BASIC_GEN_TypeOfArrayHashed(prop_value)) {
+			var tmp_string = "";
+			for (var this_prop in prop_value)
+				tmp_string += ((tmp_string == "") ? "[" : ",") +
+					"{" + this_prop + "=" + prop_value[this_prop] + "}";
+			return(tmp_string + "]");
+		}
+		else
+			return(prop_value + "");
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Emits the context properties to the specified log in quiet mode...
+	this.toLog          = function(log_obj) {
+		log_obj = TDW_BASIC_LOG_SelectALog(log_obj);
+
+		// Setup for logging the config:
+		//		1) Find the maximum property name length to be used.
+		//		2) Accumulate a list of config param names for sorting.
+		var max_length = 0;
+		var name_list  = new Array();
+		for (var this_prop in this) {
+			if (!TDW_BASIC_CTX_IsPrivateName(this_prop)) {
+				if (this_prop.length > max_length)
+					max_length = this_prop.length;
+				name_list.push(this_prop);
+			}
+		}
+		name_list.sort(TDW_BASIC_GEN_CompareIgnoreCase);
+		// Write the configuration to the log (but not the screen)...
+		log_obj.logInfoQuiet(TDW_BASIC_FORMAT_RJust("", 75, "="));
+		log_obj.logInfoQuiet(TDW_BASIC_FORMAT_RJust("", 75, "="));
+		log_obj.logInfoQuiet(this.__NAME__);
+		log_obj.logInfoQuiet(TDW_BASIC_FORMAT_RJust("", 75, "="));
+		for (var count_1 = 0; count_1 < name_list.length; count_1++) {
+			var this_prop = name_list[count_1];
+			log_obj.logInfoQuiet(TDW_BASIC_FORMAT_LJust(this_prop, max_length) +
+				": " + this.valueToString(this[this_prop]));
+		}
+		log_obj.logInfoQuiet(TDW_BASIC_FORMAT_RJust("", 75, "="));
+		log_obj.flushLog();
+	}
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// User not permitted to use any of the context private variable or method
+//	names...
+function TDW_BASIC_CTX_IsPrivateName(in_text)
+{
+	return(((in_text == "__NAME__")  || (in_text == "__STACK__")     ||
+		(in_text == "setContextName") || (in_text == "addProperty")   ||
+		(in_text == "removeProperty") || (in_text == "pushProperty")  ||
+		(in_text == "popProperty")    || (in_text == "valueToString") ||
+		(in_text == "toLog")) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BASIC_CTX_ContextCheckType(prop_name, default_item, config_item,
+	log_obj)
+{
+	var return_code = 0;
+
+	log_obj = TDW_BASIC_LOG_SelectALog(log_obj);
+
+	if (TDW_BASIC_CTX_IsPrivateName(prop_name)) {
+		log_obj.logWarning("The property name '" + prop_name +
+			"' may not be used.");
+		return_code = -1;
+	}
+	else if (typeof(default_item) != "undefined") {
+		if (typeof(config_item) != typeof(default_item)) {
+			log_obj.logWarning("Configuration item name '" + prop_name +
+				"' was ignored because its type (" + typeof(config_item) +
+				") does not match that of the default configuration (" +
+				typeof(default_item) + ").");
+			return_code = -1;
+		}
+		else if (TDW_BASIC_GEN_TypeOfArray(default_item)) {
+			if (TDW_BASIC_GEN_TypeOfArrayIndexed(default_item) &&
+				(!TDW_BASIC_GEN_TypeOfArrayIndexed(config_item))) {
+				log_obj.logWarning("Configuration item name '" + prop_name +
+					"' was ignored because the its type does not match that of " +
+					"the default configuration (indexed array).");
+				return_code = -1;
+			}
+			if (TDW_BASIC_GEN_TypeOfArrayHashed(default_item) &&
+				(!TDW_BASIC_GEN_TypeOfArrayHashed(config_item)) &&
+				config_item.length) {
+				log_obj.logWarning("Configuration item name '" + prop_name +
+					"' was ignored because the its type does not match that of " +
+					"the default configuration (hashed array).");
+				return_code = -1;
+			}
+			else if (TDW_BASIC_GEN_TypeOfArrayIndexed(default_item) &&
+				TDW_BASIC_GEN_TypeOfArrayIndexed(config_item)) {
+				if (default_item.length && config_item.length &&
+					(typeof(default_item[0]) != typeof(config_item[0]))) {
+					log_obj.logWarning("Configuration item name '" + prop_name +
+						"' was ignored because the type of the first element in " +
+						"its indexed array (" + typeof(config_item[0]) +
+						") does not match that of the default configuration (" +
+						typeof(default_item[0]) + ").");
+					return_code = -1;
+				}
+			}
+		}
+		else if (TDW_BASIC_GEN_TypeOfBoolean(default_item) &&
+			(!TDW_BASIC_GEN_TypeOfBoolean(config_item))) {
+			log_obj.logWarning("Configuration item name '" + prop_name +
+				"' was ignored because its type does not match that of the " +
+				"default configuration (boolean).");
+			return_code = -1;
+		}
+		else if (TDW_BASIC_GEN_TypeOfNumber(default_item) &&
+			(!TDW_BASIC_GEN_TypeOfNumber(config_item))) {
+			log_obj.logWarning("Configuration item name '" + prop_name +
+				"' was ignored because its type does not match that of the " +
+				"default configuration (number).");
+			return_code = -1;
+		}
+		else if (TDW_BASIC_GEN_TypeOfString(default_item) &&
+			(!TDW_BASIC_GEN_TypeOfString(config_item))) {
+			log_obj.logWarning("Configuration item name '" + prop_name +
+				"' was ignored because its type does not match that of the " +
+				"default configuration (string).");
+			return_code = -1;
+		}
+		else if (TDW_BASIC_GEN_TypeOfFunction(default_item) &&
+			(!TDW_BASIC_GEN_TypeOfFunction(config_item))) {
+			log_obj.logWarning("Configuration item name '" + prop_name +
+				"' was ignored because its type does not match that of the " +
+				"default configuration (function).");
+			return_code = -1;
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+TDW_BASIC_IncludeOnceHash["TDW/TDW_Basic.d2l"][1] = new Date();
+
+} // if (typeof(TDW_INCLUDE_GUARD_Basic_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+var TEST_FileHandle = null;
+function main()
+{
+	var file_name = "output/RegressionTest.TDW_Basic.d2l.txt";
+
+	print("Writing 'TDW_Basic.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	if ((TEST_FileHandle = fileOpen(file_name, 1)) != null) {
+		TEST_TDW_BASIC_LOG_LogTest();
+		TEST_FileHandle.writeLine(TDW_BASIC_FORMAT_RepeatString("=", 78));
+		TEST_FileHandle.writeLine(TDW_BASIC_FORMAT_RepeatString("=", 78));
+		TEST_FileHandle.writeLine("CCITT Table:");
+		TEST_FileHandle.writeLine(TDW_BASIC_FORMAT_RepeatString("=", 78));
+		for (var count_1 = 0; count_1 < TDW_BASIC_CCITT_Table.length; count_1++)
+			TEST_FileHandle.writeLine(TDW_BASIC_FORMAT_ZeroFill(count_1, 3) +
+				" : 0x" + TDW_BASIC_FORMAT_ZeroFill(
+				TDW_BASIC_CCITT_Table[count_1].toString(16), 4));
+		TEST_FileHandle.writeLine(TDW_BASIC_FORMAT_RepeatString("=", 78));
+		TEST_FileHandle.writeLine("");
+		TEST_FileHandle.close();
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Stopping");
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_TDW_BASIC_LOG_LogTest()
+{
+	var this_prop;
+	var tmp_log;
+	var my_log_1;
+	var my_log_2;
+
+	tmp_log = TDW_BASIC_LOG_GetALog();
+	tmp_log.logInfo("TDW_BASIC_LOG_GetALog() test 1");
+
+	my_log_1 =
+		new TDW_BASIC_Log("output/RegressionTest.TDW_Basic.LOG.1.log");
+
+	tmp_log = TDW_BASIC_LOG_GetALog();
+	tmp_log.logInfo("TDW_BASIC_LOG_GetALog() test 2");
+
+	my_log_2 =
+		new TDW_BASIC_Log("output/RegressionTest.TDW_Basic.LOG.2.log");
+
+	tmp_log = TDW_BASIC_LOG_GetALog();
+	tmp_log.logInfo("TDW_BASIC_LOG_GetALog() test 3");
+
+	my_log_1.logInfo("Line #1");
+	my_log_1.logInfo("Line #2", new Date(0));
+	my_log_1.logMinutiae("Line #3");
+	my_log_1.closeLog();
+
+	tmp_log = TDW_BASIC_LOG_GetALog();
+	tmp_log.logInfo("TDW_BASIC_LOG_GetALog() test 4");
+
+	my_log_2.closeLog();
+
+	tmp_log = TDW_BASIC_LOG_GetALog();
+	tmp_log.logInfo("TDW_BASIC_LOG_GetALog() test 5");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_CRC()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+function Call_XXX(value)
+{
+	Call_YYY();
+}
+
+function Call_YYY()
+{
+	TDW_BASIC_LogCallStack();
+}
+

@@ -1,0 +1,43 @@
+var log_name   = "output/________TDW_OOG.log";
+var log_handle = fileOpen(log_name, 2);
+log_handle.writeLine("=======================================================");
+log_handle.writeLine("Include start");
+include("TDW/TDW_OOG_Utility.d2l");
+log_handle.writeLine("Include complete");
+
+delay(2000);
+
+function main()
+{
+var tmp_log = new TDW_BASIC_Log("_OOG Test/Dump.ControlsData.log");
+
+	var file_name_base = "_OOG Test/Dump.";
+	var file_name      = file_name_base + "ControlsData.txt"
+	var counter        = 0;
+
+	// Set any existing file to be empty...
+	var file_handle = fileOpen(file_name, 1);
+	file_handle.close();
+	
+	while (true) {
+		log_handle.writeLine("Dump start");
+		TDW_OOG_DumpControls(file_name, TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE);
+		log_handle.writeLine("Dump complete");
+		var counter_name = file_name_base + counter + ".txt";
+		log_handle.writeLine("OOG file name = " + counter_name);
+		var file_handle = fileOpen(counter_name, 1);
+		log_handle.writeLine("OOG file open return value = " + file_handle);
+		log_handle.writeLine("Counter = " + counter);
+		counter++;
+		log_handle.writeLine("Counter = " + counter);
+		file_handle.close();
+		log_handle.writeLine("File handle closed");
+		log_handle.writeLine("Delay start");
+		delay(10000);
+//		delay(3000);
+//		delay(1000);
+		log_handle.writeLine("Delay complete");
+	}
+}
+
+

@@ -1,0 +1,4383 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Common Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Common.d2l
+//
+// File Version    : 01.00.00
+//
+// File Description: Contains D2JSP utility routines.
+//
+// Revison History : 2002-11-19 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Common_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Common_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_Move.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// Used with <npc-obj>.spectype
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_SPEC_TYPE_NONE         = 0x0000;
+var D2JSP_NPC_SPEC_TYPE_SUPER_UNIQUE = 0x0001;
+var D2JSP_NPC_SPEC_TYPE_CHAMPION     = 0x0002;
+var D2JSP_NPC_SPEC_TYPE_BOSS         = 0x0004;
+var D2JSP_NPC_SPEC_TYPE_MINION       = 0x0008;
+
+var D2JSP_NPC_SPEC_TYPE_MASK         = D2JSP_NPC_SPEC_TYPE_SUPER_UNIQUE |
+													D2JSP_NPC_SPEC_TYPE_CHAMPION     |
+													D2JSP_NPC_SPEC_TYPE_BOSS         |
+													D2JSP_NPC_SPEC_TYPE_MINION;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_SpecTypeList = [
+	D2JSP_NPC_SPEC_TYPE_NONE,
+	D2JSP_NPC_SPEC_TYPE_SUPER_UNIQUE,
+	D2JSP_NPC_SPEC_TYPE_CHAMPION,
+	D2JSP_NPC_SPEC_TYPE_BOSS,
+	D2JSP_NPC_SPEC_TYPE_MINION
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_SpecTypeName = new Array();
+D2JSP_NPC_SpecTypeName[D2JSP_NPC_SPEC_TYPE_NONE]         = "none";
+D2JSP_NPC_SpecTypeName[D2JSP_NPC_SPEC_TYPE_SUPER_UNIQUE] = "super unique";
+D2JSP_NPC_SpecTypeName[D2JSP_NPC_SPEC_TYPE_CHAMPION]     = "champion";
+D2JSP_NPC_SpecTypeName[D2JSP_NPC_SPEC_TYPE_BOSS]         = "boss";
+D2JSP_NPC_SpecTypeName[D2JSP_NPC_SPEC_TYPE_MINION]       = "minion";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_USEMENU_TALK				  = 0x0D35;
+var D2JSP_NPC_USEMENU_TRADE           = 0x0D44;
+var D2JSP_NPC_USEMENU_TRADE_REPAIR    = 0x0D06;
+var D2JSP_NPC_USEMENU_IMBUE           = 0x0FB1;
+var D2JSP_NPC_USEMENU_GAMBLE          = 0x0D46;
+var D2JSP_NPC_USEMENU_HIRE            = 0x0D45;
+var D2JSP_NPC_USEMENU_GO_EAST         = 0x0D36;
+var D2JSP_NPC_USEMENU_GO_WEST         = 0x0D37;
+var D2JSP_NPC_USEMENU_IDENTIFY_ITEMS  = 0x0FB4;
+var D2JSP_NPC_USEMENU_SAIL_EAST       = 0x0D38;
+var D2JSP_NPC_USEMENU_SAIL_WEST       = 0x0D39;
+var D2JSP_NPC_USEMENU_RESURRECT_MERC  = 0x1507;
+var D2JSP_NPC_USEMENU_GO_TO_HARROGATH = 0x58D2;
+var D2JSP_NPC_USEMENU_ADD_SOCKETS     = 0x58DC;
+var D2JSP_NPC_USEMENU_PERSONALIZE     = 0x58DD;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_UseMenuList = new Array();
+D2JSP_NPC_UseMenuList[0x0D35] = "Talk";
+D2JSP_NPC_UseMenuList[0x0D44] = "Trade";
+D2JSP_NPC_UseMenuList[0x0D06] = "Trade/Repair";
+D2JSP_NPC_UseMenuList[0x0FB1] = "Imbue";
+D2JSP_NPC_UseMenuList[0x0D46] = "Gamble";
+D2JSP_NPC_UseMenuList[0x0D45] = "Hire";
+D2JSP_NPC_UseMenuList[0x0D36] = "Go East";
+D2JSP_NPC_UseMenuList[0x0D37] = "Go West";
+D2JSP_NPC_UseMenuList[0x0FB4] = "Identify Items";
+D2JSP_NPC_UseMenuList[0x0D38] = "Sail East";
+D2JSP_NPC_UseMenuList[0x0D39] = "Sail West";
+D2JSP_NPC_UseMenuList[0x1507] = "Resurrect Merc";
+D2JSP_NPC_UseMenuList[0x58D2] = "Travel to Harrogath";
+D2JSP_NPC_UseMenuList[0x58DC] = "Add Sockets";
+D2JSP_NPC_UseMenuList[0x58DD] = "Personalize";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_SHOP_ITEM_REPAIR = 0;
+var D2JSP_NPC_SHOP_ITEM_SELL   = 1;
+var D2JSP_NPC_SHOP_ITEM_BUY    = 2;
+var D2JSP_NPC_SHOP_ITEM_FILL   = 3;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_COST_ITEM_BUY    = 0;
+var D2JSP_NPC_COST_ITEM_SELL   = 1;
+var D2JSP_NPC_COST_ITEM_REPAIR = 2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_VENDOR_HEAL     = 0;
+var D2JSP_NPC_VENDOR_REPAIR   = 1;
+var D2JSP_NPC_VENDOR_SCROLL   = 2;
+var D2JSP_NPC_VENDOR_POT      = 3;
+var D2JSP_NPC_VENDOR_KEY      = 4;
+var D2JSP_NPC_VENDOR_REVIVE   = 5;
+var D2JSP_NPC_VENDOR_GAMBLE_1 = 6;
+var D2JSP_NPC_VENDOR_GAMBLE_2 = 7;
+var D2JSP_NPC_VENDOR_MINIMUM  = D2JSP_NPC_VENDOR_HEAL;
+var D2JSP_NPC_VENDOR_MAXIMUM  = D2JSP_NPC_VENDOR_GAMBLE_2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_VENDOR_VendorTypeList = new Array();
+D2JSP_NPC_VENDOR_VendorTypeList["heal"]      = D2JSP_NPC_VENDOR_HEAL;
+D2JSP_NPC_VENDOR_VendorTypeList["healing"]   = D2JSP_NPC_VENDOR_HEAL;
+D2JSP_NPC_VENDOR_VendorTypeList["health"]    = D2JSP_NPC_VENDOR_HEAL;
+D2JSP_NPC_VENDOR_VendorTypeList["life"]      = D2JSP_NPC_VENDOR_HEAL;
+D2JSP_NPC_VENDOR_VendorTypeList["mana"]      = D2JSP_NPC_VENDOR_HEAL;
+D2JSP_NPC_VENDOR_VendorTypeList["repair"]    = D2JSP_NPC_VENDOR_REPAIR;
+D2JSP_NPC_VENDOR_VendorTypeList["repairs"]   = D2JSP_NPC_VENDOR_REPAIR;
+D2JSP_NPC_VENDOR_VendorTypeList["repairing"] = D2JSP_NPC_VENDOR_REPAIR;
+D2JSP_NPC_VENDOR_VendorTypeList["scroll"]    = D2JSP_NPC_VENDOR_SCROLL;
+D2JSP_NPC_VENDOR_VendorTypeList["scrolls"]   = D2JSP_NPC_VENDOR_SCROLL;
+D2JSP_NPC_VENDOR_VendorTypeList["tome"]      = D2JSP_NPC_VENDOR_SCROLL;
+D2JSP_NPC_VENDOR_VendorTypeList["tomes"]     = D2JSP_NPC_VENDOR_SCROLL;
+D2JSP_NPC_VENDOR_VendorTypeList["pot"]       = D2JSP_NPC_VENDOR_POT;
+D2JSP_NPC_VENDOR_VendorTypeList["pots"]      = D2JSP_NPC_VENDOR_POT;
+D2JSP_NPC_VENDOR_VendorTypeList["potion"]    = D2JSP_NPC_VENDOR_POT;
+D2JSP_NPC_VENDOR_VendorTypeList["potions"]   = D2JSP_NPC_VENDOR_POT;
+D2JSP_NPC_VENDOR_VendorTypeList["key"]       = D2JSP_NPC_VENDOR_KEY;
+D2JSP_NPC_VENDOR_VendorTypeList["keys"]      = D2JSP_NPC_VENDOR_KEY;
+D2JSP_NPC_VENDOR_VendorTypeList["revive"]    = D2JSP_NPC_VENDOR_REVIVE;
+D2JSP_NPC_VENDOR_VendorTypeList["gamble"]    = D2JSP_NPC_VENDOR_GAMBLE_1;
+D2JSP_NPC_VENDOR_VendorTypeList["gambling"]  = D2JSP_NPC_VENDOR_GAMBLE_1;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_VENDOR_VendorList = [
+	["Akara",	"Charsi", "Akara",   "Akara",	   "Akara",	   "Kashya",    "Gheed",   "Gheed"    ],
+	["Fara",    "Fara",   "Drognan", "Lysander", "Lysander", "Greiz",     "Elzix",   "Elzix"    ],
+	["Ormus",   "Hratli", "Ormus",   "Ormus",    "Hratli",   "Asheara",   "Alkor",   "Alkor"    ],
+	["Jamella", "Halbu",  "Jamella", "Jamella",  "Jamella",  "Tyrael",    "Jamella", "Jamella"  ],
+	["Malah",   "Larzuk", "Malah",   "Malah",    "Malah",    "Qual-Kehk", "Anya",    "Nihlathak"]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_VENDOR_VendorHash = new Array();
+for (var count_1 = 0; count_1 < D2JSP_NPC_VENDOR_VendorList.length; count_1++) {
+	for (var count_2 = 0; count_2 < D2JSP_NPC_VENDOR_VendorList[count_1].length;
+		count_2++)
+		D2JSP_NPC_VENDOR_VendorHash[D2JSP_NPC_VENDOR_VendorList[count_1][count_2].
+			toLowerCase()] = D2JSP_NPC_VENDOR_VendorList[count_1][count_2];
+}
+delete count_2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_MainHash = new Array();
+for (var this_prop in D2JSP_NPC_VENDOR_VendorHash)
+	D2JSP_NPC_MainHash[this_prop] = D2JSP_NPC_VENDOR_VendorHash[this_prop];
+D2JSP_NPC_MainHash["warriv"]        = "Warriv";
+D2JSP_NPC_MainHash["kashya"]        = "Kashya";
+D2JSP_NPC_MainHash["deckard cain"]  = "Deckard Cain";
+D2JSP_NPC_MainHash["flavie"]        = "Flavie";
+D2JSP_NPC_MainHash["jerhyn"]        = "Jerhyn";
+D2JSP_NPC_MainHash["kaelan"]        = "Kaelan";
+D2JSP_NPC_MainHash["atma"]          = "Atma";
+D2JSP_NPC_MainHash["geglash"]       = "Geglash";
+D2JSP_NPC_MainHash["meshif"]        = "Meshif";
+D2JSP_NPC_MainHash["natalya"]       = "Natalya";
+D2JSP_NPC_MainHash["iron wolf"]     = "Iron Wolf";
+D2JSP_NPC_MainHash["hadriel"]       = "Hadriel";
+D2JSP_NPC_MainHash["dark wanderer"] = "Dark Wanderer";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_AllHash = new Array();
+for (var this_prop in D2JSP_NPC_MainHash)
+	D2JSP_NPC_AllHash[this_prop] = D2JSP_NPC_MainHash[this_prop];
+D2JSP_NPC_AllHash["injured barbarian 1 -not xlated call ken "] = "Injured Barbarian 1 -not xlated call ken ";
+D2JSP_NPC_AllHash["injured barbarian 2 -not xlated call ken "] = "Injured Barbarian 2 -not xlated call ken ";
+D2JSP_NPC_AllHash["injured barbarian 3 -not xlated call ken "] = "Injured Barbarian 3 -not xlated call ken ";
+D2JSP_NPC_AllHash["injured barbarian 1 -not xlated call ken"]  = "Injured Barbarian 1 -not xlated call ken ";
+D2JSP_NPC_AllHash["injured barbarian 2 -not xlated call ken"]  = "Injured Barbarian 2 -not xlated call ken ";
+D2JSP_NPC_AllHash["injured barbarian 3 -not xlated call ken"]  = "Injured Barbarian 3 -not xlated call ken ";
+D2JSP_NPC_AllHash["combatant"]                                 = "Combatant";
+D2JSP_NPC_AllHash["barbarian captive"]                         = "Barbarian Captive";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_MinionHash = new Array();
+D2JSP_NPC_MinionHash["grizzly"]             = "Grizzly";
+D2JSP_NPC_MinionHash["raven"]               = "Raven";
+D2JSP_NPC_MinionHash["vine creature"]       = "Vine Creature";
+D2JSP_NPC_MinionHash["cycle of life"]       = "Cycle of Life";
+D2JSP_NPC_MinionHash["plague poppy"]        = "Plague Poppy";
+D2JSP_NPC_MinionHash["oak sage"]            = "Oak Sage";
+D2JSP_NPC_MinionHash["spirit of barbs"]     = "Spirit of Barbs";
+D2JSP_NPC_MinionHash["heart of wolverine"]  = "Heart of Wolverine";
+D2JSP_NPC_MinionHash["dire wolf"]           = "Dire Wolf";
+D2JSP_NPC_MinionHash["spirit wolf"]         = "Spirit Wolf";
+D2JSP_NPC_MinionHash["clay golem"]          = "Clay Golem";
+D2JSP_NPC_MinionHash["blood golem"]         = "Blood Golem";
+D2JSP_NPC_MinionHash["fire golem"]          = "Fire Golem";
+D2JSP_NPC_MinionHash["iron golem"]          = "Iron Golem";
+D2JSP_NPC_MinionHash["necroskeleton"]       = "Necroskeleton";
+D2JSP_NPC_MinionHash["necromage"]           = "Necromage";
+D2JSP_NPC_MinionHash["shadow warrior"]      = "Shadow Warrior";
+D2JSP_NPC_MinionHash["shadow master"]       = "Shadow Master";
+D2JSP_NPC_MinionHash["decoy"]               = "Decoy";
+D2JSP_NPC_MinionHash["valkyrie"]            = "Valkyrie";
+//D2JSP_NPC_MinionHash["hydra"]               = "Hydra";
+D2JSP_NPC_MinionHash["death sentry"]        = "Death Sentry";
+D2JSP_NPC_MinionHash["lightning sentry"]    = "Lightning Sentry";
+D2JSP_NPC_MinionHash["inferno sentry"]      = "Inferno Sentry";
+D2JSP_NPC_MinionHash["wake of fire"]        = "Wake of Fire";
+D2JSP_NPC_MinionHash["charged bolt sentry"] = "Charged Bolt Sentry";
+//D2JSP_NPC_MinionHash["blade sentinel"]      = "Blade Sentinel";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_NotAttackableHash = new Array();
+D2JSP_NPC_NotAttackableHash["an evil force"]  = "an evil force";
+D2JSP_NPC_NotAttackableHash["hydra"]          = "Hydra";
+D2JSP_NPC_NotAttackableHash["blade sentinel"] = "Blade Sentinel";
+D2JSP_NPC_NotAttackableHash["a trap"]         = "a Trap";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_NotAttackableHashMode14 = new Array();
+D2JSP_NPC_NotAttackableHashMode14["stygian watcher"]  = "Stygian Watcher";
+D2JSP_NPC_NotAttackableHashMode14["water watcher"]    = "Water Watcher";
+D2JSP_NPC_NotAttackableHashMode14["river stalker"]    = "River Stalker";
+D2JSP_NPC_NotAttackableHashMode14["carrion bird"]     = "Carrion Bird";
+D2JSP_NPC_NotAttackableHashMode14["winged nightmare"] = "Winged Nightmare";
+D2JSP_NPC_NotAttackableHashMode14["undead scavenger"] = "Undead Scavenger";
+D2JSP_NPC_NotAttackableHashMode14["hell buzzard"]     = "Hell Buzzard";
+var D2JSP_NPC_NotAttackableHashMode01 = new Array();
+D2JSP_NPC_NotAttackableHashMode01["stygian watcher"]  = "Stygian Watcher";
+D2JSP_NPC_NotAttackableHashMode01["water watcher"]    = "Water Watcher";
+D2JSP_NPC_NotAttackableHashMode01["river stalker"]    = "River Stalker";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_AttackableStationary = new Array();
+D2JSP_NPC_AttackableStationary[371 + ""] = "Lightning Spire";
+D2JSP_NPC_AttackableStationary[372 + ""] = "Fire Tower";
+D2JSP_NPC_AttackableStationary[273 + ""] = "Gargoyle Trap";
+D2JSP_NPC_AttackableStationary[326 + ""] = "Firebolt Trap";
+D2JSP_NPC_AttackableStationary[327 + ""] = "Horizontal Missile Trap";
+D2JSP_NPC_AttackableStationary[328 + ""] = "Vertical Missile Trap";
+D2JSP_NPC_AttackableStationary[329 + ""] = "Poison Cloud Trap";
+D2JSP_NPC_AttackableStationary[330 + ""] = "Lightning Trap";
+D2JSP_NPC_AttackableStationary[354 + ""] = "Melee Trap";
+D2JSP_NPC_AttackableStationary[369 + ""] = "Nova Trap";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_ActBossHash = new Array();
+D2JSP_NPC_ActBossHash["andariel"] = "Andariel";
+D2JSP_NPC_ActBossHash["duriel"]   = "Duriel";
+D2JSP_NPC_ActBossHash["mephisto"] = "Mephisto";
+D2JSP_NPC_ActBossHash["diablo"]   = "Diablo";
+D2JSP_NPC_ActBossHash["baal"]     = "Baal";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_SuperUniqueHash = new Array();
+D2JSP_NPC_SuperUniqueHash["bishibosh"]                = "Bishibosh";
+D2JSP_NPC_SuperUniqueHash["bonebreak"]                = "Bonebreak";
+D2JSP_NPC_SuperUniqueHash["coldcrow"]                 = "Coldcrow";
+D2JSP_NPC_SuperUniqueHash["rakanishu"]                = "Rakanishu";
+D2JSP_NPC_SuperUniqueHash["treehead woodfist"]        = "Treehead WoodFist";
+D2JSP_NPC_SuperUniqueHash["griswold"]                 = "Griswold";
+D2JSP_NPC_SuperUniqueHash["the countess"]             = "The Countess";
+D2JSP_NPC_SuperUniqueHash["pitspawn fouldog"]         = "Pitspawn Fouldog";
+D2JSP_NPC_SuperUniqueHash["flamespike the crawler"]   = "Flamespike the Crawler";
+D2JSP_NPC_SuperUniqueHash["boneash"]                  = "Boneash";
+D2JSP_NPC_SuperUniqueHash["radament"]                 = "Radament";
+D2JSP_NPC_SuperUniqueHash["bloodwitch the wild"]      = "Bloodwitch the Wild";
+D2JSP_NPC_SuperUniqueHash["fangskin"]                 = "Fangskin";
+D2JSP_NPC_SuperUniqueHash["beetleburst"]              = "Beetleburst";
+D2JSP_NPC_SuperUniqueHash["leatherarm"]               = "Leatherarm";
+D2JSP_NPC_SuperUniqueHash["coldworm the burrower"]    = "Coldworm the Burrower";
+D2JSP_NPC_SuperUniqueHash["fire eye"]                 = "Fire Eye";
+D2JSP_NPC_SuperUniqueHash["dark elder"]               = "Dark Elder";
+D2JSP_NPC_SuperUniqueHash["the summoner"]             = "The Summoner";
+D2JSP_NPC_SuperUniqueHash["ancient kaa the soulless"] = "Ancient Kaa the Soulless";
+D2JSP_NPC_SuperUniqueHash["the smith"]                = "The Smith";
+D2JSP_NPC_SuperUniqueHash["web mage the burning"]     = "Web Mage the Burning";
+D2JSP_NPC_SuperUniqueHash["witch doctor endugu"]      = "Witch Doctor Endugu";
+D2JSP_NPC_SuperUniqueHash["stormtree"]                = "Stormtree";
+D2JSP_NPC_SuperUniqueHash["sarina the battlemaid"]    = "Sarina the Battlemaid";
+D2JSP_NPC_SuperUniqueHash["icehawk riftwing"]         = "Icehawk Riftwing";
+D2JSP_NPC_SuperUniqueHash["ismail vilehand"]          = "Ismail Vilehand";
+D2JSP_NPC_SuperUniqueHash["geleb flamefinger"]        = "Geleb Flamefinger";
+D2JSP_NPC_SuperUniqueHash["bremm sparkfist"]          = "Bremm Sparkfist";
+D2JSP_NPC_SuperUniqueHash["toorc icefist"]            = "Toorc Icefist";
+D2JSP_NPC_SuperUniqueHash["wyand voidfinger"]         = "Wyand Voidfinger";
+D2JSP_NPC_SuperUniqueHash["maffer dragonhand"]        = "Maffer Dragonhand";
+D2JSP_NPC_SuperUniqueHash["winged death"]             = "Winged Death";
+D2JSP_NPC_SuperUniqueHash["the tormentor"]            = "The Tormentor";
+D2JSP_NPC_SuperUniqueHash["taintbreeder"]             = "Taintbreeder";
+D2JSP_NPC_SuperUniqueHash["riftwraith the cannibal"]  = "Riftwraith the Cannibal";
+D2JSP_NPC_SuperUniqueHash["infector of souls"]        = "Infector of Souls";
+D2JSP_NPC_SuperUniqueHash["lord de seis"]             = "Lord De Seis";
+D2JSP_NPC_SuperUniqueHash["grand vizier of chaos"]    = "Grand Vizier of Chaos";
+D2JSP_NPC_SuperUniqueHash["the cow king"]             = "The Cow King";
+D2JSP_NPC_SuperUniqueHash["corpsefire"]               = "Corpsefire";
+D2JSP_NPC_SuperUniqueHash["the feature creep"]        = "The Feature Creep";
+D2JSP_NPC_SuperUniqueHash["thresh socket"]            = "Thresh Socket";
+D2JSP_NPC_SuperUniqueHash["talic"]                    = "Talic the Defender";
+D2JSP_NPC_SuperUniqueHash["korlic"]                   = "Korlic the Protector";
+D2JSP_NPC_SuperUniqueHash["madawc"]                   = "Madawc the Guardian";
+D2JSP_NPC_SuperUniqueHash["talic the defender"]       = "Talic the Defender";
+D2JSP_NPC_SuperUniqueHash["korlic the protector"]     = "Korlic the Protector";
+D2JSP_NPC_SuperUniqueHash["madawc the guardian"]      = "Madawc the Guardian";
+D2JSP_NPC_SuperUniqueHash["axe dweller"]              = "Axe Dweller";
+D2JSP_NPC_SuperUniqueHash["bonesaw breaker"]          = "Bonesaw Breaker";
+D2JSP_NPC_SuperUniqueHash["dac farren"]               = "Dac Farren";
+D2JSP_NPC_SuperUniqueHash["megaflow rectifier"]       = "Megaflow Rectifier";
+D2JSP_NPC_SuperUniqueHash["eyeback unleashed"]        = "Eyeback Unleashed";
+D2JSP_NPC_SuperUniqueHash["threash socket"]           = "Threash Socket";
+D2JSP_NPC_SuperUniqueHash["pindleskin"]               = "Pindleskin";
+D2JSP_NPC_SuperUniqueHash["snapchip shatter"]         = "Snapchip Shatter";
+D2JSP_NPC_SuperUniqueHash["anodized elite"]           = "Anodized Elite";
+D2JSP_NPC_SuperUniqueHash["vinvear molech"]           = "Vinvear Molech";
+D2JSP_NPC_SuperUniqueHash["sharp tooth sayer"]        = "Sharp Tooth Sayer";
+D2JSP_NPC_SuperUniqueHash["magma torquer"]            = "Magma Torquer";
+D2JSP_NPC_SuperUniqueHash["blaze ripper"]             = "Blaze Ripper";
+D2JSP_NPC_SuperUniqueHash["frozenstein"]              = "Frozenstein";
+D2JSP_NPC_SuperUniqueHash["nihlathak"]                = "Nihlathak";
+D2JSP_NPC_SuperUniqueHash["colenzo the annihilator"]  = "Colenzo the Annihilator";
+D2JSP_NPC_SuperUniqueHash["achmel the cursed"]        = "Achmel the Cursed";
+D2JSP_NPC_SuperUniqueHash["bartuc the bloody"]        = "Bartuc the Bloody";
+D2JSP_NPC_SuperUniqueHash["ventar the unholy"]        = "Ventar the Unholy";
+D2JSP_NPC_SuperUniqueHash["lister the tormentor"]     = "Lister the Tormentor";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_NPC_SUEnemyHash = new Array();
+D2JSP_NPC_SUEnemyHash["Corpsefire"]               = D2JSP_AREA_DEN_OF_EVIL;
+D2JSP_NPC_SUEnemyHash["Bishibosh"]                = D2JSP_AREA_COLD_PLAINS;
+D2JSP_NPC_SUEnemyHash["Coldcrow"]                 = D2JSP_AREA_CAVE_LEVEL_1;
+D2JSP_NPC_SUEnemyHash["Blood Raven"]              = D2JSP_AREA_BURIAL_GROUNDS;
+D2JSP_NPC_SUEnemyHash["Bonebreaker"]              = D2JSP_AREA_CRYPT;
+D2JSP_NPC_SUEnemyHash["Treehead Woodfist"]        = D2JSP_AREA_DARK_WOOD;
+D2JSP_NPC_SUEnemyHash["Rakanishu"]                = D2JSP_AREA_STONY_FIELD;
+D2JSP_NPC_SUEnemyHash["Griswold"]                 = D2JSP_AREA_TRISTRAM;
+D2JSP_NPC_SUEnemyHash["The Countess"]             = D2JSP_AREA_TOWER_CELLAR_LEVEL_5;
+D2JSP_NPC_SUEnemyHash["Bone Ash"]                 = D2JSP_AREA_CATHEDRAL;
+D2JSP_NPC_SUEnemyHash["The Smith"]                = D2JSP_AREA_BARRACKS;
+D2JSP_NPC_SUEnemyHash["Pitspawn Fouldog"]         = D2JSP_AREA_JAIL_LEVEL_2;
+D2JSP_NPC_SUEnemyHash["Andariel"]                 = D2JSP_AREA_CATACOMBS_LEVEL_4;
+D2JSP_NPC_SUEnemyHash["The Cow King"]             = D2JSP_AREA_MOO_MOO_FARM;
+D2JSP_NPC_SUEnemyHash["Radament"]                 = D2JSP_AREA_A2_SEWERS_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Creeping Feature"]         = D2JSP_AREA_STONY_TOMB_LEVEL_2;
+D2JSP_NPC_SUEnemyHash["Bloodwitch the Wild"]      = D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Beetleburst"]              = D2JSP_AREA_FAR_OASIS;
+D2JSP_NPC_SUEnemyHash["Dark Elder"]               = D2JSP_AREA_LOST_CITY;
+D2JSP_NPC_SUEnemyHash["Coldworm the Burrower"]    = D2JSP_AREA_MAGGOT_LAIR_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Fangskin"]                 = D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2;
+D2JSP_NPC_SUEnemyHash["Fire Eye"]                 = D2JSP_AREA_PALACE_CELLAR_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["The Summoner"]             = D2JSP_AREA_ARCANE_SANCTUARY;
+D2JSP_NPC_SUEnemyHash["Ancient Kaa the Soulless"] = null;
+D2JSP_NPC_SUEnemyHash["Duriel"]                   = D2JSP_AREA_DURIELS_LAIR;
+D2JSP_NPC_SUEnemyHash["Sszark the Burning"]       = D2JSP_AREA_SPIDER_CAVERN;
+D2JSP_NPC_SUEnemyHash["Witch Doctor Endugu"]      = D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Icehawk Riftwing"]         = D2JSP_AREA_A3_SEWERS_LEVEL_1;
+D2JSP_NPC_SUEnemyHash["Stormtree"]                = D2JSP_AREA_LOWER_KURAST;
+D2JSP_NPC_SUEnemyHash["Battlemaid Sarina"]        = D2JSP_AREA_RUINED_TEMPLE;
+D2JSP_NPC_SUEnemyHash["Ismail Vilehand"]          = D2JSP_AREA_TRAVINCAL;
+D2JSP_NPC_SUEnemyHash["Geleb Flamefinger"]        = D2JSP_AREA_TRAVINCAL;
+D2JSP_NPC_SUEnemyHash["Toorc Icefist"]            = D2JSP_AREA_TRAVINCAL;
+D2JSP_NPC_SUEnemyHash["Bremm Sparkfist"]          = D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Wyand Voidbringer"]        = D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Maffer Dragonhand"]        = D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Mephisto"]                 = D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3;
+D2JSP_NPC_SUEnemyHash["Izual"]                    = D2JSP_AREA_PLAINS_OF_DESPAIR;
+D2JSP_NPC_SUEnemyHash["Hephasto The Armorer"]     = D2JSP_AREA_RIVER_OF_FLAME;
+D2JSP_NPC_SUEnemyHash["Infector of Souls"]        = D2JSP_AREA_CHAOS_SANCTUM;
+D2JSP_NPC_SUEnemyHash["Lord De Seis"]             = D2JSP_AREA_CHAOS_SANCTUM;
+D2JSP_NPC_SUEnemyHash["Grand Vizier of Chaos"]    = D2JSP_AREA_CHAOS_SANCTUM;
+D2JSP_NPC_SUEnemyHash["Diablo"]                   = D2JSP_AREA_CHAOS_SANCTUM;
+D2JSP_NPC_SUEnemyHash["Dac Farren"]               = D2JSP_AREA_BLOODY_FOOTHILLS;
+D2JSP_NPC_SUEnemyHash["Shenk the Overseer"]       = D2JSP_AREA_BLOODY_FOOTHILLS;
+D2JSP_NPC_SUEnemyHash["Eldritch the Rectifier"]   = D2JSP_AREA_RIGID_HIGHLANDS;
+D2JSP_NPC_SUEnemyHash["Thresh Socket"]            = D2JSP_AREA_RIGID_HIGHLANDS;
+D2JSP_NPC_SUEnemyHash["Eyeback the Unleashed"]    = D2JSP_AREA_RIGID_HIGHLANDS;
+D2JSP_NPC_SUEnemyHash["Sharptooth Slayer"]        = D2JSP_AREA_ARREAT_PLATEAU;
+D2JSP_NPC_SUEnemyHash["Frozenstein"]              = D2JSP_AREA_CELLAR_OF_PITY;
+D2JSP_NPC_SUEnemyHash["Bonesaw Breaker"]          = D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2;
+D2JSP_NPC_SUEnemyHash["Pindleskin"]               = D2JSP_AREA_NIHLATHAKS_TEMPLE;
+D2JSP_NPC_SUEnemyHash["Nihlathak"]                = D2JSP_AREA_HALLS_OF_VAUGHT;
+D2JSP_NPC_SUEnemyHash["Snapchip Shatter"]         = D2JSP_AREA_GLACIAL_CAVES_LEVEL_2;
+D2JSP_NPC_SUEnemyHash["Talic"]                    = D2JSP_AREA_ROCKY_SUMMIT;
+D2JSP_NPC_SUEnemyHash["Korlic"]                   = D2JSP_AREA_ROCKY_SUMMIT;
+D2JSP_NPC_SUEnemyHash["Madawc"]                   = D2JSP_AREA_ROCKY_SUMMIT;
+D2JSP_NPC_SUEnemyHash["Colenzo the Annihilator"]  = D2JSP_AREA_THRONE_OF_DESTRUCTION;
+D2JSP_NPC_SUEnemyHash["Achmel the Cursed"]        = D2JSP_AREA_THRONE_OF_DESTRUCTION;
+D2JSP_NPC_SUEnemyHash["Bartuc the Bloody"]        = D2JSP_AREA_THRONE_OF_DESTRUCTION;
+D2JSP_NPC_SUEnemyHash["Ventar the Unholy"]        = D2JSP_AREA_THRONE_OF_DESTRUCTION;
+D2JSP_NPC_SUEnemyHash["Lister the Tormentor"]     = D2JSP_AREA_THRONE_OF_DESTRUCTION;
+D2JSP_NPC_SUEnemyHash["Baal"]                     = D2JSP_AREA_THE_WORLDSTONE_CHAMBER;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Create the basic abbreviations from the names...
+D2JSP_NPC_SUEnemyHashSynonym = new Array();
+for (var this_prop in D2JSP_NPC_SUEnemyHash) {
+	tmp_name = this_prop;
+	tmp_name = D2JSP_UTIL_FORMAT_OneSpace(D2JSP_UTIL_FORMAT_Trim(tmp_name));
+	D2JSP_NPC_SUEnemyHashSynonym[tmp_name] = this_prop;
+	tmp_list = tmp_name.split(/[\s]/);
+	if (tmp_list.length > 1) {
+		for (var count_1 = 0; count_1 < tmp_list.length; ) {
+			if ((tmp_list[count_1] == "the") || (tmp_list[count_1] == "of"))
+				tmp_list.splice(count_1, 1);
+			else {
+				D2JSP_NPC_SUEnemyHashSynonym[tmp_list[count_1]] = this_prop;
+				count_1++;
+			}
+		}
+		D2JSP_NPC_SUEnemyHashSynonym[tmp_list.join(" ")] = this_prop;
+		if (tmp_list.length > 2) {
+			for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+				for (var count_2 = (count_1 + 1); count_2 < tmp_list.length;
+					count_2++) {
+					D2JSP_NPC_SUEnemyHashSynonym[tmp_list[count_1] + " " +
+						tmp_list[count_2]] = this_prop;
+				}
+			}
+		}
+	}
+}
+delete this_prop;
+delete tmp_name;
+delete tmp_list;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Add in some common abbreviations...
+D2JSP_NPC_SUEnemyHashSynonym["Bish"]                 = "Bishibosh";
+D2JSP_NPC_SUEnemyHashSynonym["Bloodraven"]           = "Blood Raven";
+D2JSP_NPC_SUEnemyHashSynonym["Raka"]                 = "Rakanishu";
+D2JSP_NPC_SUEnemyHashSynonym["Rak"]                  = "Rakanishu";
+D2JSP_NPC_SUEnemyHashSynonym["Gris"]                 = "Griswold";
+D2JSP_NPC_SUEnemyHashSynonym["Griz"]                 = "Griswold";
+D2JSP_NPC_SUEnemyHashSynonym["Andy"]                 = "Andariel";
+D2JSP_NPC_SUEnemyHashSynonym["Andi"]                 = "Andariel";
+D2JSP_NPC_SUEnemyHashSynonym["Rada"]                 = "Radament";
+D2JSP_NPC_SUEnemyHashSynonym["Radi"]                 = "Radament";
+D2JSP_NPC_SUEnemyHashSynonym["Radamant"]             = "Radament";
+D2JSP_NPC_SUEnemyHashSynonym["Beetle"]               = "Beetleburst";
+D2JSP_NPC_SUEnemyHashSynonym["Duri"]                 = "Duriel";
+D2JSP_NPC_SUEnemyHashSynonym["Dury"]                 = "Duriel";
+D2JSP_NPC_SUEnemyHashSynonym["Meph"]                 = "Mephisto";
+D2JSP_NPC_SUEnemyHashSynonym["Mephi"]                = "Mephisto";
+D2JSP_NPC_SUEnemyHashSynonym["Mephy"]                = "Mephisto";
+D2JSP_NPC_SUEnemyHashSynonym["Izzy"]                 = "Izual";
+D2JSP_NPC_SUEnemyHashSynonym["Izzi"]                 = "Izual";
+D2JSP_NPC_SUEnemyHashSynonym["Heph"]                 = "Hephasto The Armorer";
+D2JSP_NPC_SUEnemyHashSynonym["Big D"]                = "Diablo";
+D2JSP_NPC_SUEnemyHashSynonym["Bigd"]                 = "Diablo";
+D2JSP_NPC_SUEnemyHashSynonym["Shrenk the Overseer"]  = "Shenk the Overseer";
+D2JSP_NPC_SUEnemyHashSynonym["Shrenk Overseer"]      = "Shenk the Overseer";
+D2JSP_NPC_SUEnemyHashSynonym["Shrenk"]               = "Shenk the Overseer";
+D2JSP_NPC_SUEnemyHashSynonym["Pindle"]               = "Pindleskin";
+D2JSP_NPC_SUEnemyHashSynonym["Pindy"]                = "Pindleskin";
+D2JSP_NPC_SUEnemyHashSynonym["Pindi"]                = "Pindleskin";
+D2JSP_NPC_SUEnemyHashSynonym["Talic the Defender"]   = "Talic";
+D2JSP_NPC_SUEnemyHashSynonym["Talic Defender"]       = "Talic";
+D2JSP_NPC_SUEnemyHashSynonym["Defender"]             = "Talic";
+D2JSP_NPC_SUEnemyHashSynonym["Korlic the Protector"] = "Korlic";
+D2JSP_NPC_SUEnemyHashSynonym["Korlic Protector"]     = "Korlic";
+D2JSP_NPC_SUEnemyHashSynonym["Protector"]            = "Korlic";
+D2JSP_NPC_SUEnemyHashSynonym["Madawc the Guardian"]  = "Madawc";
+D2JSP_NPC_SUEnemyHashSynonym["Madawc Guardian"]      = "Madawc";
+D2JSP_NPC_SUEnemyHashSynonym["Guardian"]             = "Madawc";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+for (var this_prop in D2JSP_NPC_SUEnemyHashSynonym)
+	D2JSP_NPC_SUEnemyHashSynonym[this_prop.toLowerCase()] =
+		D2JSP_NPC_SUEnemyHashSynonym[this_prop];
+delete this_prop;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_COMM_DoorClassIdList = [
+	 13,
+	 14,
+	 15,
+	 16,
+	 23,
+	 24,
+	 27,
+	 47,
+	 62,
+	 63,
+	 64,
+	 74,
+	 75,
+	 25,
+	 91,
+	 92,
+	 98,
+	 99,
+	153,
+	229,
+	230,
+	290,
+	291,
+	292,
+	293,
+	294,
+	295,
+	508,
+	547,
+	564
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetCurrentBeltCapacity()
+{
+//TDW_BOT_Log.syncModeOn();
+	var iter_data = D2JSP_OBJ_IterateItem(null, D2JSP_OBJ_FilterIsMyBelt,
+		D2JSP_OBJ_ActionStop, null, D2JSP_MODE_ITEM_EQUIPPED_SELF_OR_MERC);
+
+/*
+if (iter_data[D2JSP_OBJ_ACTION_COUNT])
+	TDW_BOT_Log.logInfo("***** D2JSP_COMM_GetCurrentBeltCapacity(): " +
+		"code=" + iter_data[D2JSP_OBJ_LAST_OBJECT].code +
+		", name=" + iter_data[D2JSP_OBJ_LAST_OBJECT].name +
+		", fname=" + iter_data[D2JSP_OBJ_LAST_OBJECT].fname);
+*/
+
+	return((iter_data[D2JSP_OBJ_ACTION_COUNT]) ?
+		D2JSP_COMM_GetBeltDimensions(iter_data[D2JSP_OBJ_LAST_OBJECT]) : [4, 1]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetBeltDimensions(item_obj)
+{
+	if (D2JSP_UTIL_GEN_TypeOfString(item_obj)) {
+		if ((item_obj in D2JSP_ITEM_ItemList) &&
+			(D2JSP_ITEM_ItemList[item_obj][D2JSP_ITEM_ELEMENT_ITEMTYPE] ==
+			"belt")) {
+/*
+TDW_BOT_Log.logInfo("***** D2JSP_COMM_GetBeltDimensions(): = " +
+	(((item_obj == "lbl") || (item_obj == "vbl")) ? "[4, 2]" :
+	(((item_obj == "mbl") || (item_obj == "tbl")) ? "[4, 2]" : "[4, 4]")));
+*/
+			if ((item_obj == "lbl") || (item_obj == "vbl"))
+				return([4, 2]);
+			else if ((item_obj == "mbl") || (item_obj == "tbl"))
+				return([4, 3]);
+			else
+				return([4, 4]);
+		}
+	}
+	else if (D2JSP_UTIL_GEN_TypeOfObject(item_obj) &&
+		(item_obj.type == D2JSP_OBJ_TYPE_ITEM) &&
+		(D2JSP_ITEM_GetItemType(item_obj) == D2JSP_ITEMTYPE_BELT))
+		return(D2JSP_COMM_GetBeltDimensions(item_obj.code));
+
+	return([0, 0]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetTrashInInventoryHash()
+{
+	var trash_list = D2JSP_COMM_GetTrashInInventoryList();
+	var trash_hash = new Array();
+
+	for (var count_1 = 0; count_1 < trash_list.length; count_1++) {
+		if (!(trash_list[count_1][0] in trash_hash))
+			trash_hash[trash_list[count_1][0]] = 1;
+		else
+			trash_hash[trash_list[count_1][0]]++;
+	}
+
+	return(trash_hash);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetTrashInInventoryList()
+{
+	var callback_data = [D2JSP_ITEM_BeltCellUpgrades, new Array()];
+
+	D2JSP_OBJ_IterateItem(callback_data, D2JSP_COMM_GetTrashInInventoryList_Filter,
+		null, null, D2JSP_MODE_ITEM_IN_INVENTORY);
+
+	runGC();
+
+	return(callback_data[1]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetTrashInInventoryList_Filter(this_obj, callback_data)
+{
+	if (D2JSP_OBJ_FilterParentMe(this_obj, callback_data) &&
+		(this_obj.code in callback_data[0]) &&
+		(this_obj.mode != D2JSP_MODE_ITEM_IN_BELT) &&
+		(D2JSP_ITEM_CONT_ItemContainer(this_obj) ==
+		D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+		callback_data[1].push([this_obj.code, new D2JSP_ITEM_Spec(this_obj)]);
+		return(true);
+	}
+	else
+		return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_DiscardItem(in_obj)
+{
+	return((!D2JSP_COMM_ClickItemToCursor(in_obj)) ?
+		D2JSP_COMM_DiscardItemFromCursor() : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_DiscardItemFromCursor()
+{
+	var log_obj  = D2JSP_UTIL_LOG_GetALog();
+	var this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+		D2JSP_MODE_ITEM_ON_CURSOR);
+
+	if (!this_obj) {
+		log_obj.logError("Unable to discard the item on the cursor because the " +
+			"cursor is empty.");
+		return(-1);
+	}
+
+	// Tell the core to drop the item...
+	this_obj.cancel();
+
+	// A wee delay to let the server know what's up...
+	D2JSP_UTIL_GEN_FuzzyDelay(100);
+
+	// Now wait for it to get there.
+	D2JSP_UTIL_GEN_CheckCursor(1000, 10);
+
+	// We've got a serious problem if we can't clear the cursor.
+	if (D2JSP_UTIL_GEN_ClearCursor(true, log_obj)) {
+		log_obj.logError("Unable to clear cursor of a discarded item.");
+		return(-1);
+	}
+
+	delay(100);
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_ClickItemToCursor(in_obj)
+{
+	var in_obj_gid  = in_obj.gid;
+	var in_obj_code = in_obj.code;
+	var in_obj_name = in_obj.name;
+	var this_obj;
+
+	if (in_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+		return(0);
+
+/*
+	for (var count_1 = 0; count_1 < 10; count_1++) {
+		clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, in_obj);
+		delay(100);
+		for (var count_2 = 0; count_2 < 4; count_2++) {
+			this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+				D2JSP_MODE_ITEM_ON_CURSOR);
+			if (this_obj && (this_obj.gid == in_obj_gid))
+				break;
+			delay(250);
+		}
+		runGC();
+		if (this_obj && (this_obj.gid == in_obj_gid))
+			break;
+	}
+*/
+	for (var count_1 = 0; count_1 < 200; count_1++) {
+		clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, in_obj);
+		delay(50);
+		if (in_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+			break;
+		delay(250);
+		if (in_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+			break;
+	}
+
+	this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null, D2JSP_MODE_ITEM_ON_CURSOR);
+
+	if ((!this_obj) || (this_obj.gid != in_obj_gid)) {
+		D2JSP_UTIL_LOG_GetALog().logError("Unable to click button " +
+			D2JSP_ITEM_CLICK_BUTTON_LEFT + " to move item (code = " + in_obj_code +
+			", name = " + in_obj_name+ ") to the cursor.");
+		return(-1);
+	}
+
+	delay(100);
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_ClickItemToXYLocation(button, in_x, in_y, location)
+{
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(button)) || (button < 0) ||
+		(button > 3)) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid button (" + button +
+			") --- expected one of 0, 1, 2, or 3.");
+		return(-1);
+	}
+
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(location)) ||
+		((location != 0) && (location != 2) && (location != 3) &&
+		(location != 4) && (location != 5))) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid location (" + location +
+			") --- expected one of 0, 2, 3, 4, or 5.");
+		return(-1);
+	}
+
+	var max_coords;
+
+	if (location == D2JSP_ITEM_CLICK_CONTAINER_INVENTORY)
+		max_coords =
+			[D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_INVENTORY][2],
+			 D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_INVENTORY][3]];
+	// Same as inventory.
+	else if (location == D2JSP_ITEM_CLICK_CONTAINER_PLAYER_TRADE)
+		max_coords =
+			[D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_INVENTORY][2],
+			 D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_INVENTORY][3]];
+	else if (location ==  2)
+		max_coords = [10, 4];
+	else if (location == D2JSP_ITEM_CLICK_CONTAINER_CUBE)
+		max_coords =
+			[D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_CUBE][2],
+			 D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_CUBE][3]];
+	else if (location == D2JSP_ITEM_CLICK_CONTAINER_STASH)
+		max_coords =
+			[D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_STASH][2],
+			 D2JSP_ITEM_CONT_SourceData[D2JSP_ITEM_CONT_SRC_STASH][3]];
+	else if (location == D2JSP_ITEM_CLICK_CONTAINER_BELT)
+		max_coords = D2JSP_COMM_GetCurrentBeltCapacity();
+	else {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid location (" + location +
+			") --- expected one of 0, 1, 2, 3, 4, or 5.");
+		return(-1);
+	}
+
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(in_x)) || (in_x < 0) ||
+		(in_x >= max_coords[0])) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid X-coordinate for location " +
+			location + " (" + in_x + ") --- valid range is 0 to " +
+			(max_coords[0] - 1) + ", inclusive.");
+		return(-1);
+	}
+		
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(in_y)) || (in_y < 0) ||
+		(in_y >= max_coords[1])) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid Y-coordinate for location " +
+			location + " (" + in_y + ") --- valid range is 0 to " +
+			(max_coords[1] - 1) + ", inclusive.");
+		return(-1);
+	}
+
+	var this_obj;
+
+/*
+	for (var count_1 = 0; count_1 < 50; count_1++) {
+		this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+			D2JSP_MODE_ITEM_ON_CURSOR);
+		if (this_obj);
+			break;
+		delay(100);
+	}
+*/
+
+	this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null, D2JSP_MODE_ITEM_ON_CURSOR);
+
+	if (!this_obj) {
+		D2JSP_UTIL_LOG_GetALog().logError("Unable to click button " + button +
+			" to X-Y coordinate [" + in_x + ", " + in_y + "] in container " +
+			"location " + location + "because there is nothing on the cursor.");
+		return(-1);
+	}
+
+	var this_obj_gid = this_obj.gid;
+
+	for (var count_1 = 0; count_1 < 50; count_1++) {
+		clickItem(button, in_x, in_y, location);
+		delay(100);
+//		for (var count_2 = 0; count_2 < 4; count_2++) {
+		for (var count_2 = 0; count_2 < (4 * 5); count_2++) {
+			this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+				D2JSP_MODE_ITEM_ON_CURSOR);
+			if ((!this_obj) || (this_obj.gid != this_obj_gid))
+				break;
+//			delay(50);
+			delay(10);
+		}
+		if ((!this_obj) || (this_obj.gid != this_obj_gid))
+			break;
+	}
+
+/*
+	for (var count_1 = 0; count_1 < 200; count_1++) {
+		clickItem(button, in_x, in_y, location);
+		delay(50);
+		this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+			D2JSP_MODE_ITEM_ON_CURSOR);
+		if ((!this_obj) || (this_obj.gid != this_obj_gid))
+			break;
+		delay(250);
+		if ((!this_obj) || (this_obj.gid != this_obj_gid))
+			break;
+	}
+*/
+
+	this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null, D2JSP_MODE_ITEM_ON_CURSOR);
+
+	if (this_obj && (this_obj.gid == this_obj_gid)) {
+		D2JSP_UTIL_LOG_GetALog().logError("Unable to click button " + button +
+			" to move item (code = " + this_obj.code + ", name = " + this_obj.name+
+			") to X-Y coordinate [" + in_x + ", " + in_y + "] in container " +
+			"location " + location + " because the item remains on the cursor.");
+		return(-1);
+	}
+
+	delay(100);
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetMyMaxLife()
+{
+if (parseFloat(me.version) < 0.3518)
+	return(parseInt((me.getStat(D2JSP_STAT_MAXHP) >> 8) *
+		(1 + me.getStat(D2JSP_STAT_ITEM_MAXHP_PERCENT) / 100)));
+else
+//	return(parseInt(me.getStat(D2JSP_STAT_MAXHP) >> 8));
+	return(me.hpmax);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetMyMaxMana()
+{
+if (parseFloat(me.version) < 0.3518)
+	return(parseInt((me.getStat(D2JSP_STAT_MAXMANA) >> 8) *
+		(1 + (me.getStat(D2JSP_STAT_ITEM_MAXMANA_PERCENT) / 100))));
+else
+//	return(parseInt(me.getStat(D2JSP_STAT_MAXMANA) >> 8));
+	return(me.mpmax);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+if ((parseFloat(me.version) >= 0.3518) && (parseFloat(me.version) < 0.3610)) {
+	function FakePlayerObjMe()
+	{
+		this.name = me.name;
+		this.gid  = me.gid;
+		this.area = me.area;
+		this.x    = me.x;
+		this.y    = me.y;
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_IsInMyParty(player_name)
+{
+// For broken 0.3520
+if ((parseFloat(me.version) >= 0.3518) && (parseFloat(me.version) < 0.3610))
+	return((player_name == me.name) ? (new FakePlayerObjMe()) : null);
+else {
+//	var party_obj  = getParty(me.gid);
+	var party_obj  = getParty();
+	if (party_obj) {
+		var my_partyid = party_obj.partyid;
+		if (player_name == me.name)
+			return(party_obj);
+		if (party_obj) {
+			do {
+				if (party_obj.name == player_name)
+					return(((party_obj.partyid == my_partyid) &&
+						(my_partyid != 65535)) ? party_obj : null);
+			} while (party_obj && party_obj.getNext());
+		}
+	}
+	return(null);
+}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_IsMyPartyInMyArea()
+{
+if ((parseFloat(me.version) >= 0.3518) && (parseFloat(me.version) < 0.3610))
+	return(true);
+else {
+//	var party_obj  = getParty(me.gid);
+	var party_obj  = getParty();
+
+	if (party_obj) {
+		var my_partyid = party_obj.partyid;
+		var my_area    = me.area;
+		if (party_obj) {
+			do {
+				if ((party_obj.partyid == my_partyid) && (my_partyid != 65535) &&
+					(party_obj.name != me.name) && (party_obj.area != my_area))
+					return(false);
+			} while (party_obj && party_obj.getNext());
+		}
+	}
+
+	return(true);
+}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetMyPartyPlayerNameList()
+{
+if ((parseFloat(me.version) >= 0.3518) && (parseFloat(me.version) < 0.3610))
+	return([me.name]);
+else {
+	var party_list = new Array();
+//	var party_obj  = getParty(me.gid);
+	var party_obj  = getParty();
+
+	if (party_obj) {
+		var my_partyid = party_obj.partyid;
+		if (party_obj) {
+			do {
+				if ((party_obj.partyid == my_partyid) &&
+					((my_partyid != 65535) || (party_obj.name == me.name)))
+					party_list.push(party_obj.name);
+			} while (party_obj && party_obj.getNext());
+		}
+	}
+
+	return(party_list);
+}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetMyPartyPlayerCount()
+{
+	return(D2JSP_COMM_GetMyPartyPlayerNameList().length);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetPlayerByName(player_name)
+{
+if ((parseFloat(me.version) >= 0.3518) && (parseFloat(me.version) < 0.3610))
+	return(null);
+else {
+//	var party_obj = getParty(me.gid);
+	var party_obj = getParty();
+
+	if (player_name == me.name)
+		return(party_obj);
+
+	if (party_obj) {
+		do {
+			if (party_obj.name == player_name)
+				return(party_obj);
+		} while (party_obj && party_obj.getNext());
+	}
+
+	return(null);
+}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetPlayerNameList()
+{
+if ((parseFloat(me.version) >= 0.3518) && (parseFloat(me.version) < 0.3610))
+	return([me.name]);
+else {
+	var party_list = new Array();
+//	var party_obj  = getParty(me.gid);
+	var party_obj  = getParty();
+
+	if (party_obj) {
+		var my_partyid = party_obj.partyid;
+		if (party_obj) {
+			do {
+				party_list.push(party_obj.name);
+			} while (party_obj && party_obj.getNext());
+		}
+	}
+
+	return(party_list);
+}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetPlayerCount()
+{
+	return(D2JSP_COMM_GetPlayerNameList().length);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CountIdleCairnStones()
+{
+	var unopened_count = 0;
+	var count_1;
+
+	for (count_1 = 0; count_1 < TDW_MOVE_Act1_CairnStones.length; count_1++) {
+		target_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT,
+			TDW_MOVE_Act1_CairnStones[count_1]);
+		if (target_obj && (target_obj.mode == D2JSP_MODE_OBJECT_IDLE))
+			unopened_count++;
+	}
+
+	return(unopened_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetIdleCairnStone()
+{
+	var unopened_count = 0;
+	var count_1;
+
+	for (count_1 = 0; count_1 < TDW_MOVE_Act1_CairnStones.length; count_1++) {
+		target_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT,
+			TDW_MOVE_Act1_CairnStones[count_1]);
+		if (target_obj && (target_obj.mode == D2JSP_MODE_OBJECT_IDLE))
+			return(target_obj);
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CheckForCorpse(player_name)
+{
+	var results_data;
+
+	player_name  = ((arguments.length < 1) || (player_name == null)) ? me.name :
+		player_name;
+
+	results_data = D2JSP_OBJ_IteratePlayer(null, null,
+		D2JSP_OBJ_ActionStop, player_name, D2JSP_MODE_PLAYER_DEAD);
+
+	return(results_data[D2JSP_OBJ_LAST_OBJECT]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_PickupForCorpse()
+{
+	var count_1;
+	var count_2;
+	var my_corpse;
+
+	if (!(my_corpse = D2JSP_COMM_CheckForCorpse()))
+		return(0);
+
+	if ((me.area != my_corpse.area) && (!D2JSP_AREA_IsTown(my_corpse.area))) {
+		D2JSP_UTIL_LOG_GetALog().logError("Unable to pickup corpse because it " +
+			"is in the wild!!! You must perform manual corpse recovery.");
+		return(-1);
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logInfo("Attempting to collect your corpse...");
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		if (myDist(my_corpse.x, my_corpse.y) > 5) {
+			if (D2JSP_AREA_IsTown(my_corpse.area))
+				TDW_MOVE_TownMove(my_corpse.act, "corpsespot");
+			if (myDist(my_corpse.x, my_corpse.y) > 5)
+				TDW_MOVE_MoveToObject(my_corpse);
+		}
+		D2JSP_UTIL_InteractObject(my_corpse);
+		for (count_2 = 0; count_2 < 1000; count_2++) {
+			if (!(my_corpse = D2JSP_COMM_CheckForCorpse()))
+				break;
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+		}
+		if (!(my_corpse = D2JSP_COMM_CheckForCorpse()))
+			break;
+	}
+
+	if (!D2JSP_COMM_CheckForCorpse()) {
+		D2JSP_UTIL_LOG_GetALog().logInfo("Your corpse has been collected.");
+		return(0);
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logError("Unable to pickup corpse!!!");
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_ExcessGoldToStash()
+{
+	var return_code = 0;
+	var gold_move   = D2JSP_ITEM_CanMoveExcessGoldToStash();
+	var stash_obj;
+
+	if (gold_move) {
+		D2JSP_UTIL_LOG_GetALog().logInfo("Moving " + gold_move +
+			" gold to the stash.");
+		if ((stash_obj = D2JSP_COMM_InteractWithStash()) != null) {
+			var old_gold_on_me = me.getStat(D2JSP_STAT_GOLD);
+			gold(gold_move, D2JSP_ITEM_GOLD_MOVE_INV_TO_STASH);
+			D2JSP_COMM_CancelUIMenu(stash_obj);
+			for (var count_1 = 0; count_1 < 50; count_1++) {
+				if (old_gold_on_me != me.getStat(D2JSP_STAT_GOLD))
+					break;
+				delay(100);
+			}
+//			D2JSP_COMM_CancelUIMenu(stash_obj);
+			D2JSP_UTIL_GEN_CancelObject(stash_obj);
+			D2JSP_UTIL_LOG_GetALog().logInfo("Moved " + gold_move +
+				" gold to the stash.");
+		}
+		else {
+			D2JSP_UTIL_LOG_GetALog().
+				logWarning("Unable to interact with the stash.");
+			return_code = -1;
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetUIMenuStatusList(ui_menu_list)
+{
+	var current_ui_menu_list = new Array();
+
+	ui_menu_list = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(ui_menu_list)) ?
+		ui_menu_list : D2JSP_UTIL_UI_CancelList;
+
+	for (var count_1 = 0; count_1 < ui_menu_list.length; count_1++) {
+		if (getUIFlag(ui_menu_list[count_1]))
+			current_ui_menu_list.push(ui_menu_list[count_1]);
+	}
+
+	return(current_ui_menu_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetALocalTome(tome_name)
+{
+	var tome_obj = null;
+	var results_data;
+
+	if (D2JSP_ITEM_IsValidTomeCode(tome_name)) {
+		results_data = D2JSP_OBJ_IterateItem(me.name,
+			"((D2JSP_OBJ_FilterParent(this_obj, callback_data) && " +
+			"(D2JSP_ITEM_CONT_ItemContainer(this_obj) == " +
+			"D2JSP_ITEM_CONT_SRC_INVENTORY)) ? true : false)",
+			D2JSP_OBJ_ActionStop, tome_name);
+		if (results_data[D2JSP_OBJ_ACTION_COUNT])
+			tome_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+	}
+	else
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid tome specified for scroll " +
+			"empty determination (" + tome_name + ").");
+
+	return(tome_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetALocalTomeNotEmpty(tome_name)
+{
+	var tome_obj = null;
+	var results_data;
+
+	if (D2JSP_ITEM_IsValidTomeCode(tome_name)) {
+		results_data = D2JSP_OBJ_IterateItem(me.name,
+			"((D2JSP_OBJ_FilterParent(this_obj, callback_data) && " +
+			"(D2JSP_ITEM_CONT_ItemContainer(this_obj) == " +
+			"D2JSP_ITEM_CONT_SRC_INVENTORY) && " +
+			"(this_obj.getStat(D2JSP_STAT_QUANTITY) > 0)) ? true : false)",
+			D2JSP_OBJ_ActionStop, tome_name);
+		if (results_data[D2JSP_OBJ_ACTION_COUNT])
+			tome_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+	}
+	else
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid tome specified for scroll " +
+			"object location (" + tome_name + ").");
+
+	return(tome_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetALocalScroll(scroll_name)
+{
+	var scroll_obj = null;
+	var results_data;
+
+	if (D2JSP_ITEM_IsValidScrollCode(scroll_name)) {
+		results_data = D2JSP_OBJ_IterateItem(me.name,
+			"((D2JSP_OBJ_FilterParent(this_obj, callback_data) && " +
+			"(D2JSP_ITEM_CONT_ItemContainer(this_obj) == " +
+			"D2JSP_ITEM_CONT_SRC_INVENTORY)) ? true : false)",
+			D2JSP_OBJ_ActionStop, scroll_name);
+		if (results_data[D2JSP_OBJ_ACTION_COUNT])
+			scroll_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+	}
+	else
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid scroll specified for " +
+			"object location (" + scroll_name + ").");
+
+	return(scroll_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Counts only tomes in inventory.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CountTomesNotFull(tome_name)
+{
+	return(D2JSP_COMM_CountTomesLessThan(tome_name, 20));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Counts only tomes in inventory.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CountTomesEmpty(tome_name)
+{
+	return(D2JSP_COMM_CountTomesLessThan(tome_name, 1));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Counts only tomes in inventory.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CountTomesLessThan(tome_name, test_count)
+{
+	var results_data;
+
+	if ((tome_name != "ibk") && (tome_name != "tbk")) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid tome specified for scroll " +
+			"not full determination (" + tome_name + ").");
+		return(0);
+	}
+
+	test_count = ((arguments.length < 2) || (test_count < 1)) ? 20 : test_count;
+
+	results_data = D2JSP_OBJ_IterateItem(me.name,
+		"((D2JSP_OBJ_FilterParent(this_obj, callback_data) && " +
+		"(D2JSP_ITEM_CONT_ItemContainer(this_obj) == " +
+		"D2JSP_ITEM_CONT_SRC_INVENTORY) && " +
+		"(this_obj.getStat(D2JSP_STAT_QUANTITY) < " + test_count +
+		")) ? true : false)", null, tome_name);
+
+	return(results_data[D2JSP_OBJ_ACTION_COUNT]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Counts only keys in inventory.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CountKeysNotFull()
+{
+	return(D2JSP_COMM_CountKeysLessThan(12));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Counts only keys in inventory.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CountKeysLessThan(test_count)
+{
+	var results_data;
+
+	test_count = ((!arguments.length) || (test_count < 1)) ? 12 : test_count;
+
+	results_data = D2JSP_OBJ_IterateItem(me.name,
+		"((D2JSP_OBJ_FilterParent(this_obj, callback_data) && " +
+		"(D2JSP_ITEM_CONT_ItemContainer(this_obj) == " +
+		"D2JSP_ITEM_CONT_SRC_INVENTORY) && " +
+		"(this_obj.getStat(D2JSP_STAT_QUANTITY) < " + test_count +
+		")) ? true : false)", null, "key");
+
+	return(results_data[D2JSP_OBJ_ACTION_COUNT]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetWorstIBK()
+{
+	return(D2JSP_COMM_GetWorstTome("ibk"))
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetWorstTBK()
+{
+	return(D2JSP_COMM_GetWorstTome("tbk"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetWorstTome(tome_name)
+{
+	return((D2JSP_ITEM_IsValidTomeCode(tome_name)) ?
+		D2JSP_COMM_GetWorstItem(tome_name, 21) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetWorstKey()
+{
+	return(D2JSP_COMM_GetWorstItem("key", 13));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetWorstItem(item_code, best_count)
+{
+	if ((item_code == "ibk") || (item_code == "tbk") || (item_code == "key")) {
+		var found_count = 0;
+		var worst_count = best_count;
+		var worst_x     = null;
+		var worst_y     = null;
+		var this_obj    = getUnit(D2JSP_UTIL_GETUNIT_ITEM, item_code);
+		var this_parent;
+		if (this_obj) {
+			do {
+				this_parent = this_obj.getParent();
+				if (this_parent && (this_parent.name == me.name) &&
+					(D2JSP_ITEM_CONT_ItemContainer(this_obj) == 
+					D2JSP_ITEM_CONT_SRC_INVENTORY) &&
+					(this_obj.getStat(D2JSP_STAT_QUANTITY) <= worst_count)) {
+					worst_count = this_obj.getStat(D2JSP_STAT_QUANTITY);
+					worst_x     = this_obj.x;
+					worst_y     = this_obj.y;
+					found_count++;
+				}
+			} while (this_obj && this_obj.getNext(item_code));
+		}
+		if (found_count) {
+			this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, item_code);
+			if (this_obj) {
+				do {
+					this_parent = this_obj.getParent();
+					if (this_parent && (this_parent.name == me.name) &&
+						(D2JSP_ITEM_CONT_ItemContainer(this_obj) == 
+						D2JSP_ITEM_CONT_SRC_INVENTORY) &&
+						(worst_count == this_obj.getStat(D2JSP_STAT_QUANTITY)) &&
+						(worst_x == this_obj.x) &&
+						(worst_y == this_obj.y))
+						return(this_obj);
+				} while (this_obj && this_obj.getNext(item_code));
+			}
+		}
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_InteractWithStash()
+{
+	var stash_obj;
+
+	if ((stash_obj = D2JSP_COMM_MoveToStash()) != null)
+		D2JSP_COMM_InteractWithStashBasic(stash_obj);
+
+	return(stash_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_InteractWithStashBasic(stash_obj)
+{
+	if (!stash_obj)
+		stash_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank");
+
+	if (stash_obj) {
+		D2JSP_UTIL_InteractObject(stash_obj);
+		for (var count_1 = 0; count_1 < 300; count_1++) {
+			D2JSP_UTIL_LOG_GetALog().
+				logDebug("D2JSP_COMM_InteractWithStashBasic(): " +
+				"Requested interact() with the stash.");
+			D2JSP_UTIL_GEN_FuzzyDelay(100);
+			for (var count_2 = 0; count_2 < 40; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_STASH)) {
+					D2JSP_UTIL_LOG_GetALog().
+						logDebug("D2JSP_COMM_InteractWithStashBasic(): "+
+						"Requested interact() with the stash has been confirmed.");
+					return(stash_obj);
+				}
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_STASH)) {
+				D2JSP_UTIL_LOG_GetALog().
+					logDebug("D2JSP_COMM_InteractWithStashBasic(): " +
+					"Requested interact() with the stash seems to have " +
+					"failed. Will attempt to re-acquire the stash object.");
+//				D2JSP_UTIL_GEN_FuzzyDelay(250);
+//				D2JSP_COMM_CancelUIMenu(stash_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_UTIL_GEN_CancelObject(stash_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (count_1 && (!(count_1 % 3))) {
+					D2JSP_UTIL_LOG_GetALog().
+						logInfo("D2JSP_COMM_InteractWithStashBasic(): " +
+						"Randomizing location before attempt to re-acquire the " +
+						"stash object.");
+					delay(1000);
+					TDW_MOVE_RandomizeLocation(me.x, me.y, 10, 10);
+					delay(1000);
+					if ((stash_obj = D2JSP_COMM_MoveToStash()) == null)
+						return(null);
+					delay(1000);
+				}
+				else if (!(stash_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank")))
+					return(null);
+				D2JSP_UTIL_InteractObject(stash_obj);
+			}
+		}
+		D2JSP_UTIL_GEN_FuzzyDelay(500);
+	}
+
+	D2JSP_NPC_CancelUIMenu(stash_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+
+	D2JSP_UTIL_LOG_GetALog().logError("D2JSP_COMM_InteractWithStashBasic(): " +
+		"Requested interact() with the stash seems to have failed. Giving up.");
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_MoveToStash()
+{
+	var stash_obj = null;
+
+	if (D2JSP_AREA_IsTown()) {
+		stash_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank");
+		if ((!stash_obj) || (myDist(stash_obj.x, stash_obj.y) > 5))
+			TDW_MOVE_COMPAT_TownMove("stash");
+		if ((stash_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank"))) {
+			if (myDist(stash_obj.x, stash_obj.y) > 5)
+				TDW_MOVE_MoveToObject(stash_obj);
+		}
+	}
+
+	return(stash_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CancelStash()
+{
+	var this_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank");
+
+	if (this_obj)
+		D2JSP_UTIL_GEN_CancelObject(this_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_InteractWithCube()
+{
+	var cube_obj;
+
+	if ((cube_obj = D2JSP_COMM_MoveToCube()) != null)
+		D2JSP_COMM_InteractWithCubeBasic(cube_obj);
+
+	return(cube_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_InteractWithCubeBasic(cube_obj)
+{
+	if (!cube_obj)
+		cube_obj = D2JSP_COMM_MoveToCube();
+
+	if (cube_obj) {
+//		D2JSP_UTIL_InteractObject(cube_obj);
+		clickItem(D2JSP_ITEM_CLICK_BUTTON_RIGHT, cube_obj);
+		for (var count_1 = 0; count_1 < 300; count_1++) {
+			D2JSP_UTIL_LOG_GetALog().
+				logDebug("D2JSP_COMM_InteractWithCubeBasic(): " +
+				"Requested interact() with the Horadric Cube.");
+			D2JSP_UTIL_GEN_FuzzyDelay(100);
+			for (var count_2 = 0; count_2 < 40; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_CUBE)) {
+					D2JSP_UTIL_LOG_GetALog().
+						logDebug("D2JSP_COMM_InteractWithCubeBasic(): " +
+						"Requested interact() with the Horadric Cube has been " +
+						"confirmed.");
+					return(cube_obj);
+				}
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_CUBE)) {
+				D2JSP_UTIL_LOG_GetALog().
+					logDebug("D2JSP_COMM_InteractWithCubeBasic(): " +
+					"Requested interact() with the Horadric Cube seems to have " +
+					"failed. Will attempt to re-acquire the Horadric Cube object.");
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_UTIL_GEN_CancelObject(cube_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (count_1 && (!(count_1 % 3))) {
+					D2JSP_UTIL_LOG_GetALog().
+						logInfo("D2JSP_COMM_InteractWithCubeBasic(): " +
+						"Randomizing location before attempt to re-acquire the " +
+						"Horadric Cube object.");
+					delay(1000);
+					TDW_MOVE_RandomizeLocation(me.x, me.y, 10, 10);
+					delay(1000);
+					if ((cube_obj = D2JSP_COMM_MoveToCube()) == null)
+						return(null);
+					delay(1000);
+				}
+				else if (!(cube_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT,
+					"Horadric Cube")))
+					return(null);
+				D2JSP_UTIL_InteractObject(cube_obj);
+			}
+		}
+		D2JSP_UTIL_GEN_FuzzyDelay(500);
+	}
+
+	D2JSP_NPC_CancelUIMenu(cube_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+
+	D2JSP_UTIL_LOG_GetALog().logError("D2JSP_COMM_InteractWithCubeBasic(): " +
+		"Requested interact() with the Horadric Cube seems to have failed. " +
+		"Giving up.");
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_MoveToCube()
+{
+	var cube_obj = D2JSP_ITEM_HasHoradricCube();
+
+	if (cube_obj) {
+		if (D2JSP_AREA_IsTown()) {
+			if (cube_obj.itemloc == D2JSP_ITEMLOC_STASH) {
+				if (D2JSP_COMM_InteractWithStash())
+					cube_obj = D2JSP_ITEM_HasHoradricCube();
+				else
+					cube_obj = null;
+			}
+		}
+		else if (cube_obj.itemloc != D2JSP_ITEMLOC_INVENTORY)
+			cube_obj = null;
+	}
+
+	return(cube_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CancelCube()
+{
+	var this_obj = D2JSP_ITEM_HasHoradricCube();
+
+	if (this_obj)
+		D2JSP_UTIL_GEN_CancelObject(this_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_MakeHoradricStaff()
+{
+	var return_code   = -1;
+	var log_obj       = D2JSP_UTIL_LOG_GetALog();
+	var cube_location = D2JSP_ITEM_HoradricCubeLocation();
+
+	if (D2JSP_QUEST_IsStartedAct(3))
+		log_obj.logInfo("You can not make the Horadric Staff because you have " +
+			"started Act 3.");
+	else if (D2JSP_ITEM_HasHoradricStaff())
+		log_obj.logInfo("You can not make the Horadric Staff because you " +
+			"already have it.");
+	else if (!D2JSP_ITEM_HasStaffOfKings())
+		log_obj.logInfo("You can not make the Horadric Staff because you do " +
+			"not have the Staff of Kings.");
+	else if (!D2JSP_ITEM_HasViperAmulet())
+		log_obj.logInfo("You can not make the Horadric Staff because you do " +
+			"not have the Viper Amulet.");
+	else if (!D2JSP_ITEM_HasHoradricCube())
+		log_obj.logInfo("You can not make the Horadric Staff because you do " +
+			"not have a Horadric Cube.");
+	else if ((cube_location == D2JSP_ITEMLOC_STASH) && (!D2JSP_AREA_IsTown()))
+		log_obj.logInfo("You can not make the Horadric Staff because the " +
+			"Horadric Cube is in the Stash and you are not in town.");
+	else {
+		if (D2JSP_ITEM_CONT_CountAvailableSpaces(D2JSP_ITEM_CONT_SRC_CUBE) < 12)
+			D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_CUBE);
+		if (D2JSP_ITEM_CONT_CountAvailableSpaces(D2JSP_ITEM_CONT_SRC_CUBE) < 12)
+			log_obj.logError("Unable to clear the Cube of items.");
+		else if ((cube_location == D2JSP_ITEMLOC_STASH) &&
+			(D2JSP_COMM_InteractWithStash() == null))
+			log_obj.logError("Unable to interact with the Stash.");
+		else {
+			if (!D2JSP_ITEM_CONT_ItemMove(D2JSP_ITEM_HasStaffOfKings(),
+				D2JSP_ITEM_CONT_BuildMapList(), D2JSP_ITEM_CONT_SRC_CUBE))
+				log_obj.logError("Unable to move the " +
+					D2JSP_ITEM_HasStaffOfKings().name + " to the Cube.");
+			else if (!D2JSP_ITEM_CONT_ItemMove(D2JSP_ITEM_HasViperAmulet(),
+				D2JSP_ITEM_CONT_BuildMapList(), D2JSP_ITEM_CONT_SRC_CUBE))
+				log_obj.logError("Unable to move the " +
+					D2JSP_ITEM_HasViperAmulet().name + " to the Cube.");
+			else if (!D2JSP_COMM_InteractWithCube())
+				log_obj.logError("Unable to interact with the Cube.");
+			else {
+				while (D2JSP_ITEM_HasStaffOfKings().itemloc != D2JSP_ITEMLOC_CUBE)
+					delay(100);
+				while (D2JSP_ITEM_HasViperAmulet().itemloc != D2JSP_ITEMLOC_CUBE)
+					delay(100);
+				for (count_1 = 0; count_1 < 10; count_1++) {
+					transmute();
+					for (var count_2 = 0; count_2 < 10; count_2++) {
+						if (D2JSP_ITEM_HasHoradricStaff())
+							break;
+						delay(250);
+					}
+					if (D2JSP_ITEM_HasHoradricStaff())
+						break;
+					delay(1000);
+					D2JSP_COMM_CancelCube();
+					delay(250);
+					D2JSP_COMM_InteractWithCube();
+					delay(1000);
+				}
+				if (D2JSP_ITEM_HasHoradricStaff()) {
+					log_obj.logInfo("I've transmuted the " + 
+						D2JSP_ITEM_HasHoradricStaff().name + "!");
+					if (!D2JSP_ITEM_CONT_HasAvailableSpace(1, 4,
+						D2JSP_ITEM_CONT_SRC_INVENTORY))
+						D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_INVENTORY,
+							1, 4, "tbk");
+					D2JSP_ITEM_CONT_ItemMove(D2JSP_ITEM_HasHoradricStaff(),
+						D2JSP_ITEM_CONT_BuildMapList(),
+						D2JSP_ITEM_CONT_SRC_INVENTORY);
+					return_code = 0;
+				}
+				else
+					log_obj.logError("Unable to transmute the " +
+						D2JSP_ITEM_HasStaffOfKings().name + " and the " +
+						D2JSP_ITEM_HasViperAmulet().name +
+						" into the Horadric Staff.");
+				D2JSP_COMM_CancelCube();
+			}
+			if (cube_location == D2JSP_ITEMLOC_STASH) {
+				var stash_obj;
+				if ((stash_obj = D2JSP_COMM_InteractWithStash()) != null)
+					D2JSP_COMM_CancelStash();
+			}
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_InsertStaffIntoOrifice()
+{
+	var return_code = -1;
+	var staff_obj   = D2JSP_ITEM_HasHoradricStaff();
+	var log_obj     = D2JSP_UTIL_LOG_GetALog();
+	var orifice_obj;
+
+	if (!staff_obj)
+		log_obj.logError("You don't have the Horadric Staff.");
+	else if (staff_obj.itemloc != D2JSP_ITEMLOC_INVENTORY)
+		log_obj.logError("The Horadric Staff is not in your " +
+			"inventory.");
+	else if (D2JSP_QUEST_IsStartedAct(3))
+		log_obj.logError("You can not insert the Horadric " +
+			"Staff into the Orifice because you have completed this quest.");
+	else if ((orifice_obj = D2JSP_COMM_InteractWithOrifice()) != null) {
+		delay(1000);
+		for (var count_1 = 0; count_1 < 200; count_1++) {
+			clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, staff_obj);
+			delay(50);
+			if (staff_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+				break;
+			delay(250);
+			if (staff_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+				break;
+		}
+		if (staff_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR) {
+			delay(1000);
+			submitItem();
+			while (D2JSP_ITEM_HasHoradricStaff())
+				delay(500);
+			delay(1000);
+			log_obj.logInfo("The Horadric Staff has been inserted into the " +
+				"Orifice.");
+			return_code = 0;
+		}
+		else
+			log_obj.logError("Unable to move the Horadric Staff to the cursor.");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_InteractWithOrifice()
+{
+	var log_obj     = D2JSP_UTIL_LOG_GetALog();
+	var orifice_obj = null;
+
+	if (me.act != 2)
+		log_obj.logError("Unable to interact with Orifice because you are not " +
+			"in Act 2.");
+	else if (me.area != getRoom(0).correcttomb)
+		log_obj.logError("Unable to interact with Orifice because you are not " +
+			"in the True Tomb of Tal Rasha.");
+	else if ((getRoom(0).number < 460) || (getRoom(0).number > 463))
+		log_obj.logError("Unable to interact with Orifice because you are not " +
+			"in the Orifice Room.");
+	else if ((orifice_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, 152)) == null)
+		log_obj.logError("Unable to interact with Orifice because it can not " +
+			"located.");
+	else {
+		TDW_MOVE_MoveToObject(orifice_obj);
+		D2JSP_UTIL_InteractObject(orifice_obj);
+		for (var count_1 = 0; count_1 < 50; count_1++) {
+			log_obj.logDebug("D2JSP_COMM_InteractWithOrifice(): " +
+				"Requested interact() with the Orifice.");
+			D2JSP_UTIL_GEN_FuzzyDelay(100);
+			for (var count_2 = 0; count_2 < 40; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_SPECIAL_MENU)) {
+					log_obj.logDebug("D2JSP_COMM_InteractWithOrifice(): "+
+						"Requested interact() with the Orifice has been confirmed.");
+					return(orifice_obj);
+				}
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_SPECIAL_MENU)) {
+				log_obj.logDebug("D2JSP_COMM_InteractWithOrifice(): " +
+					"Requested interact() with the Orifice seems to have " +
+					"failed. Will attempt to re-acquire the Orifice object.");
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_UTIL_GEN_CancelObject(orifice_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (count_1 && (!(count_1 % 3))) {
+					D2JSP_UTIL_LOG_GetALog().
+						logInfo("D2JSP_COMM_InteractWithOrifice(): " +
+						"Randomizing location before attempt to re-acquire the " +
+						"Orifice object.");
+					delay(1000);
+					TDW_MOVE_RandomizeLocation(me.x, me.y, 10, 10);
+					delay(1000);
+					orifice_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, 152);
+					if (orifice_obj)
+						TDW_MOVE_MoveToObject(orifice_obj);
+					delay(1000);
+				}
+				if ((orifice_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, 152)) == null) {
+					log_obj.logError("Unable to interact with Orifice because it " +
+						"can not re-located.");
+					return(null);
+				}
+				D2JSP_UTIL_InteractObject(orifice_obj);
+			}
+			D2JSP_UTIL_GEN_FuzzyDelay(500);
+		}
+	}
+
+	log_obj.logError("Attempt to interact with the Orifice failed.");
+
+	return(null)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_ClearContainer(container_src, x_size, y_size, exclude_list,
+	skip_list)
+{
+	var return_code   = -1;
+	var log_obj       = D2JSP_UTIL_LOG_GetALog();
+	var target_list   = new Array();
+	var move_count    = 0;
+	var no_move_count = 0;
+	var exclude_count = 0;
+
+	log_obj.logDebug("D2JSP_COMM_ClearContainer(" + container_src + ", " +
+		x_size + ", " + y_size + ", [" + exclude_list + "], [" + skip_list + "])");
+
+	if (!D2JSP_ITEM_CONT_IsValid(container_src))
+		log_obj.logError("Invalid container source (" + container_src + ").");
+	else if ((container_src == D2JSP_ITEM_CONT_SRC_CUBE) &&
+		(!D2JSP_ITEM_HasHoradricCube()))
+		log_obj.logError("Container source was specified as the Horadric Cube, " +
+			"but you don't have a Cube.");
+	else if ((container_src == D2JSP_ITEM_CONT_SRC_CUBE) &&
+		(!D2JSP_AREA_IsTown()) &&
+		(D2JSP_ITEM_HoradricCubeLocation() == D2JSP_ITEMLOC_STASH))
+		log_obj.logError("Container source was specified as the Horadric Cube, " +
+			"but the Cube is in the Stash and you are not in town.");
+	else if ((container_src == D2JSP_ITEM_CONT_SRC_STASH) &&
+		(!D2JSP_AREA_IsTown()))
+		log_obj.logError("Container source was specified as the Stash, but " +
+			"you're not in town.");
+	else if ((container_src == D2JSP_ITEM_CONT_SRC_INVENTORY) &&
+		(!D2JSP_AREA_IsTown()) && ((!D2JSP_ITEM_HasHoradricCube()) ||
+		(D2JSP_ITEM_HoradricCubeLocation() == D2JSP_ITEMLOC_STASH)))
+		log_obj.logError("Container source was specified as the inventory, but " +
+			"neither a Cube nor the Stash is available.");
+	else {
+		return_code = 0;
+		if (container_src == D2JSP_ITEM_CONT_SRC_CUBE)
+			target_list.push(D2JSP_ITEM_CONT_SRC_INVENTORY);
+		else {
+			if (container_src == D2JSP_ITEM_CONT_SRC_STASH)
+				target_list.push(D2JSP_ITEM_CONT_SRC_INVENTORY);
+			if (D2JSP_ITEM_HasHoradricCube() && (D2JSP_AREA_IsTown() ||
+				(D2JSP_ITEM_HoradricCubeLocation() == D2JSP_ITEMLOC_INVENTORY)))
+				target_list.push(D2JSP_ITEM_CONT_SRC_CUBE);
+		}
+		if (D2JSP_AREA_IsTown()) {
+			if (container_src != D2JSP_ITEM_CONT_SRC_STASH)
+				target_list.unshift(D2JSP_ITEM_CONT_SRC_STASH);
+			if (!D2JSP_COMM_InteractWithStash()) {
+				log_obj.logError("Failed to interact with the Stash.");
+				return_code = -1;
+			}
+		}
+	}
+
+	if (return_code)
+		return(return_code);
+
+	if ((x_size == null) || (x_size < 1) ||
+		(x_size > D2JSP_ITEM_CONT_SourceData[container_src][2]) ||
+		(y_size == null) || (y_size < 1) ||
+		(y_size > D2JSP_ITEM_CONT_SourceData[container_src][3])) {
+		x_size = 0;
+		y_size = 0;
+	}
+
+	var exclude_hash  = new Array();
+	if (D2JSP_UTIL_GEN_TypeOfArrayHashed(exclude_list))
+		exclude_hash = exclude_list;
+	else if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(exclude_list)) {
+		for (var count_1 = 0; count_1 < exclude_list.length; count_1++)
+			exclude_hash[exclude_list[count_1]] = true;
+	}
+
+	log_obj.logDebug("D2JSP_COMM_ClearContainer(): Specified container is " +
+		container_src + " (" + D2JSP_ITEM_CONT_SourceData[container_src][0] +
+		").");
+	log_obj.logDebug("D2JSP_COMM_ClearContainer(): Number of destination " +
+		"target containers: " + target_list.length + ".");
+	for (var count_1 = 0; count_1 < target_list.length; count_1++)
+		log_obj.logDebug("D2JSP_COMM_ClearContainer(): >>> Destination target " +
+			"container number " + count_1 + ": " + target_list[count_1] + " (" +
+			D2JSP_ITEM_CONT_SourceData[target_list[count_1]][0] + ").");
+	log_obj.logDebug("D2JSP_COMM_ClearContainer(): Desired X-size: " + x_size);
+	log_obj.logDebug("D2JSP_COMM_ClearContainer(): Desired X-size: " + y_size);
+	log_obj.logDebug("D2JSP_COMM_ClearContainer(): Exclude List:");
+	for (var this_prop in exclude_hash)
+		log_obj.logDebug("D2JSP_COMM_ClearContainer(): >>> " + this_prop);
+
+	var skip_hash = new Array();
+	if (D2JSP_UTIL_GEN_TypeOfArrayHashed(skip_list))
+		skip_hash = skip_list;
+	else if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(exclude_list)) {
+		for (var count_1 = 0; count_1 < skip_list.length; count_1++)
+			skip_hash[skip_list[count_1]] = true;
+	}
+
+	while (true) {
+		if (x_size && D2JSP_ITEM_CONT_HasAvailableSpace(x_size, y_size,
+			container_src))
+			break;
+		var this_count = 0;
+		var this_item  = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+		if (this_item) {
+			do {
+				var this_parent = this_item.getParent();
+				if (this_parent && (this_parent.name == me.name) &&
+					(this_item.mode == D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE) &&
+					(this_item.itemloc ==
+					D2JSP_ITEM_CONT_SourceData[container_src][1])) {
+					var skip_key = this_item.code + "|" + this_item.itemloc +
+						"|" + this_item.x + "|" + this_item.y;
+					if (this_item.code == "box") {
+						if (!(skip_key in skip_hash))
+							log_obj.logInfo("Not moving the " +
+								D2JSP_ITEM_ColorItemFixFName(this_item) + " from the " +
+								D2JSP_ITEM_CONT_SourceData[container_src][0] + ".");
+						skip_hash[skip_key] = true;
+					}
+					else if (this_item.code in exclude_hash) {
+						if (!(skip_key in skip_hash))
+							log_obj.logInfo("The " +
+								D2JSP_ITEM_ColorItemFixFName(this_item) + " is " +
+								"excluded from participating in the move from the " +
+								D2JSP_ITEM_CONT_SourceData[container_src][0] + ".");
+						skip_hash[skip_key] = true;
+					}
+					else if (!(skip_key in skip_hash)) {
+						var container_map_list = D2JSP_ITEM_CONT_BuildMapList();
+						var dest               = null;
+						var fixed_name         = D2JSP_ITEM_ColorItemFixFName(this_item);
+						this_count++;
+						for (var count_1 = 0;
+							count_1 < target_list.length; count_1++) {
+							log_obj.logDetail("Will attempt to move the " + 
+								fixed_name + " from the " +
+								D2JSP_ITEM_CONT_SourceData[container_src][0] +
+								" to the " +
+								D2JSP_ITEM_CONT_SourceData[target_list[count_1]][0] +
+								".");
+							if ((container_src == D2JSP_ITEM_CONT_SRC_CUBE) ||
+								(target_list[count_1] == D2JSP_ITEM_CONT_SRC_CUBE))
+								D2JSP_COMM_InteractWithCube();
+							dest = D2JSP_ITEM_CONT_ItemMove(this_item,
+								 container_map_list, target_list[count_1]);
+							if ((container_src == D2JSP_ITEM_CONT_SRC_CUBE) ||
+								(target_list[count_1] == D2JSP_ITEM_CONT_SRC_CUBE))
+								D2JSP_COMM_CancelCube();
+							if (dest) {
+								log_obj.logInfo("Moved the " + fixed_name +
+									" from the " +
+									D2JSP_ITEM_CONT_SourceData[container_src][0] +
+									" to the " +
+									D2JSP_ITEM_CONT_SourceData[target_list[count_1]]
+										[0] + ".");
+								move_count++;
+								break;
+							}
+						}
+						skip_hash[skip_key] = true;
+						if (dest)
+							break;
+						else {
+							log_obj.logWarning("Unable to move the " + fixed_name +
+								" from the " +
+								D2JSP_ITEM_CONT_SourceData[container_src][0] + ".");
+							no_move_count++;
+						}
+					}
+				}
+			} while (this_item && this_item.getNext());
+		}
+		if (!this_count)
+			break;
+	}
+
+	if ((container_src == D2JSP_ITEM_CONT_SRC_CUBE) ||
+		(target_list[count_1] == D2JSP_ITEM_CONT_SRC_CUBE))
+		D2JSP_COMM_CancelCube();
+
+	if (D2JSP_AREA_IsTown())
+		D2JSP_COMM_CancelStash();
+
+	log_obj.logInfo("Moved " + move_count + " item" +
+		((move_count != 1) ? "s" : "") + " from the " +
+		D2JSP_ITEM_CONT_SourceData[container_src][0] + ".");
+
+	if (no_move_count)
+		log_obj.logInfo("Was unable to move " + no_move_count + " item" +
+			((no_move_count != 1) ? "s" : "") + " from the " +
+			D2JSP_ITEM_CONT_SourceData[container_src][0] + ".");
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_CancelUIMenu(this_obj, ui_menu_list)
+{
+	var ui_menu_value = null;
+	var count_1;
+	var count_2;
+
+	if (this_obj && (this_obj instanceof Object) && ("type" in this_obj)) {
+		ui_menu_list = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(ui_menu_list)) ?
+			ui_menu_list : D2JSP_UTIL_UI_CancelList;
+		for (count_1 = 0; count_1 < ui_menu_list.length; count_1++) {
+			if (getUIFlag(ui_menu_list[count_1])) {
+				for (count_2 = 0; count_2 < 20; count_2++) {
+					if ((this_obj.type == D2JSP_OBJ_TYPE_PLAYER) ||
+						(this_obj.type == D2JSP_OBJ_TYPE_NPC)) {
+						D2JSP_UTIL_GEN_CancelNPC(this_obj);
+						delay(50);
+						me.cancel(1);
+					}
+					else {
+						D2JSP_UTIL_GEN_CancelObject(this_obj);
+						delay(50);
+						me.cancel(0);
+					}
+//					delay(50);
+					if (!getUIFlag(ui_menu_list[count_1]))
+						break;
+				}
+				ui_menu_value = ui_menu_list[count_1];
+//				break;
+			}
+		}
+	}
+
+	return(ui_menu_value);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_DurabilityData(count, low_dura_max, low_dura_now,
+	high_dura_max, high_dura_now, low_percent, high_percent)
+{
+	this.count         = count;
+	this.low_dura_max  = low_dura_max;
+	this.low_dura_now  = low_dura_now;
+	this.high_dura_max = high_dura_max;
+	this.high_dura_now = high_dura_now;
+	this.low_percent   = low_percent;
+	this.high_percent  = high_percent;
+
+	this.toString      = D2JSP_COMM_DurabilityData_toString;
+
+	function D2JSP_COMM_DurabilityData_toString() {
+		return("count=" + this.count +
+			",  low_dura_max=" + this.low_dura_max +
+			", low_dura_now=" + this.low_dura_now +
+			", high_dura_max=" + this.high_dura_max +
+			", high_dura_now=" + this.high_dura_now +
+			", low_percent=" + this.low_percent + 
+			", high_percent=" + this.high_percent);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_GetDurabilityData()
+{
+	var count         = 0;
+	var low_dura_max  = Number.MAX_VALUE;
+	var low_dura_now  = Number.MAX_VALUE;
+	var high_dura_max = Number.MIN_VALUE;
+	var high_dura_now = Number.MIN_VALUE;
+	var low_percent   = Number.MAX_VALUE;
+	var high_percent  = Number.MIN_VALUE;
+	var item_obj      = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+									D2JSP_MODE_ITEM_EQUIPPED_SELF_OR_MERC);
+
+	if (item_obj) {
+		do {
+			var this_parent = item_obj.getParent();
+			if (this_parent && (this_parent.name == me.name) &&
+				item_obj.getStat(D2JSP_STAT_MAXDURABILITY) &&
+				((parseFloat(me.version) < 0.3518) ||
+				(!item_obj.getStat(D2JSP_STAT_ITEM_INDESTRUCTIBLE)))) {
+				var percent   = (item_obj.getStat(D2JSP_STAT_DURABILITY) /
+					item_obj.getStat(D2JSP_STAT_MAXDURABILITY)) * 100;
+				low_dura_max  = Math.min(item_obj.getStat(D2JSP_STAT_MAXDURABILITY),
+					low_dura_max);
+				low_dura_now  = Math.min(item_obj.getStat(D2JSP_STAT_DURABILITY),
+					low_dura_now);
+				high_dura_max = Math.max(item_obj.getStat(D2JSP_STAT_MAXDURABILITY),
+					high_dura_max);
+				high_dura_now = Math.max(item_obj.getStat(D2JSP_STAT_DURABILITY),
+					high_dura_now);
+				low_percent   = Math.min(percent, low_percent);
+				high_percent  = Math.max(percent, high_percent);
+				count++;
+//D2JSP_UTIL_LOG_GetALog().logInfo("EQUIPPED: " + item_obj.name);
+			}
+		} while (item_obj &&
+			item_obj.getNext(null, D2JSP_MODE_ITEM_EQUIPPED_SELF_OR_MERC));
+	}
+
+	return(new D2JSP_COMM_DurabilityData(count, low_dura_max, low_dura_now,
+		high_dura_max, high_dura_now, low_percent, high_percent));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetSpecTypeName(npc_obj)
+{
+	if (parseFloat(me.version) < 0.3525)
+		return("*UNKNOWN*");
+	else if (!(npc_obj.spectype & D2JSP_NPC_SPEC_TYPE_MASK))
+		return(D2JSP_NPC_SpecTypeName[D2JSP_NPC_SPEC_TYPE_NONE]);
+
+	var out_string = "";
+
+	for (var count_1 = 0; count_1 < D2JSP_NPC_SpecTypeList.length; count_1++) {
+		if (npc_obj.spectype & D2JSP_NPC_SpecTypeList[count_1])
+			out_string += ((out_string == "") ? "" : " | ") +
+				D2JSP_NPC_SpecTypeName[D2JSP_NPC_SpecTypeList[count_1]];
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetColdLengthPercent(npc_obj)
+{
+	return(D2JSP_UTIL_GetBaseStatMonster(npc_obj,
+		(!me.diff) ? D2JSP_BASE_MONSTATS_COLDEFFECT :
+		((me.diff == 1) ? D2JSP_BASE_MONSTATS_COLDEFFECTN :
+		D2JSP_BASE_MONSTATS_COLDEFFECTH)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_Attibutes(diff, stats, enchants, states)
+{
+	this.diff     = ((diff == null) || (diff < 0)) ? 0 : diff;
+	this.stats    =
+		D2JSP_NPC_AttibuteParseList(stats, D2JSP_STAT_ParseToNumber);
+	this.enchants =
+		D2JSP_NPC_AttibuteParseList(enchants, D2JSP_ENCHANT_ParseToNumber);
+	this.states   =
+		D2JSP_NPC_AttibuteParseList(states, D2JSP_STATE_ParseToNumber)
+
+	this.check        = D2JSP_NPC_Attibutes_check;
+	this.checkNPC     = D2JSP_NPC_Attibutes_checkNPC;
+	this.checkCluster = D2JSP_NPC_Attibutes_checkCluster;
+	this.toList       = D2JSP_NPC_Attibutes_toList;
+	this.toStringList = D2JSP_NPC_Attibutes_toStringList;
+	this.toString     = D2JSP_NPC_Attibutes_toString;
+
+	function D2JSP_NPC_Attibutes_check(in_object) {
+		return((in_object instanceof TDW_BOT_ATTACK_Cluster) ?
+			this.checkCluster(in_object) : this.checkNPC(in_object));
+	}
+
+	function D2JSP_NPC_Attibutes_checkNPC(in_npc) {
+		if (!(this.stats.length + this.enchants.length + this.states.length))
+			return(null);
+
+		for (var count_1 = 0; count_1 < this.stats.length; count_1++) {
+			if (!in_npc.getStat(this.stats[count_1]))
+				return(null);
+		}
+
+		for (var count_1 = 0; count_1 < this.enchants.length; count_1++) {
+			if (!in_npc.getEnchant(this.enchants[count_1]))
+				return(null);
+		}
+
+		for (var count_1 = 0; count_1 < this.states.length; count_1++) {
+			if (!in_npc.getState(this.states[count_1]))
+				return(null);
+		}
+
+		return(this);
+	}
+
+	function D2JSP_NPC_Attibutes_checkCluster(in_cluster) {
+		if (!(this.stats.length + this.enchants.length + this.states.length))
+			return(null);
+
+		for (var count_1 = 0; count_1 < this.stats.length; count_1++) {
+			if (!in_cluster.stats[this.stats[count_1]])
+				return(null);
+		}
+
+		for (var count_1 = 0; count_1 < this.enchants.length; count_1++) {
+			if (!in_cluster.enchants[this.enchants[count_1]])
+				return(null);
+		}
+
+		for (var count_1 = 0; count_1 < this.states.length; count_1++) {
+			if (!in_cluster.states[this.states[count_1]])
+				return(null);
+		}
+
+		return(this);
+	}
+
+	function D2JSP_NPC_Attibutes_toList() {
+		return(this.enchants.concat(this.states));
+	}
+
+	function D2JSP_NPC_Attibutes_toStringList() {
+		var out_list = new Array();
+
+		for (var count_1 = 0; count_1 < this.enchants.length; count_1++)
+			out_list.push(D2JSP_ENCHANT_EnchantToName(this.enchants[count_1]))
+
+		for (var count_1 = 0; count_1 < this.states.length; count_1++)
+			out_list.push(D2JSP_STATE_StateToName(this.states[count_1]));
+
+		return(out_list);
+	}
+
+	function D2JSP_NPC_Attibutes_toString() {
+		return(this.toStringList().join(" && "));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_AttibutesList()
+{
+	this.list         = new Array();
+
+	this.addAttr      = D2JSP_NPC_AttibutesList_addAttr;
+	this.check        = D2JSP_NPC_AttibutesList_check;
+	this.checkNPC     = D2JSP_NPC_AttibutesList_checkNPC;
+	this.checkCluster = D2JSP_NPC_AttibutesList_checkCluster;
+
+	function D2JSP_NPC_AttibutesList_addAttr(diff, stats, enchants, states) {
+		if (diff instanceof D2JSP_NPC_Attibutes)
+			this.list.push(diff);
+		else
+			this.list.push(new D2JSP_NPC_Attibutes(diff, stats, enchants, states));
+	}
+
+	function D2JSP_NPC_AttibutesList_check(in_object) {
+		return((in_object instanceof TDW_BOT_ATTACK_Cluster) ?
+			this.checkCluster(in_object) : this.checkNPC(in_object));
+	}
+
+	function D2JSP_NPC_AttibutesList_checkNPC(in_npc) {
+		var count_1;
+		var this_attr;
+
+		for (count_1 = 0; count_1 < this.list.length; count_1++) {
+			this_attr = this.list[count_1];
+			if (this_attr.checkNPC(in_npc))
+				return(this_attr);
+		}
+
+		return(null);
+	}
+
+	function D2JSP_NPC_AttibutesList_checkCluster(in_cluster) {
+		var count_1;
+		var this_attr;
+
+		for (count_1 = 0; count_1 < this.list.length; count_1++) {
+			this_attr = this.list[count_1];
+			if (this_attr.checkCluster(in_cluster))
+				return(this_attr);
+		}
+
+		return(null);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_AttibuteParseList(attribute_list, parse_func)
+{
+	var out_list = new Array();
+	var tmp_list = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(attribute_list)) ?
+		attribute_list : [attribute_list];
+
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		var attribute = D2JSP_NPC_AttibuteParse(tmp_list[count_1], parse_func);
+		if (attribute != null)
+			out_list.push(attribute);
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_AttibuteParse(attribute, parse_func)
+{
+	var tmp_number = parse_func(attribute);
+
+	return((tmp_number != -1) ? tmp_number : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_IsAVendor(in_npc)
+{
+	return((D2JSP_UTIL_GEN_TypeOfString(in_npc) && (in_npc != "") &&
+		(in_npc.toLowerCase() in D2JSP_NPC_VENDOR_VendorHash)) ? true :
+		((D2JSP_UTIL_GEN_TypeOfObject(in_npc) && (name in in_npc) &&
+		D2JSP_UTIL_GEN_TypeOfString(in_npc.name)) ?
+		D2JSP_NPC_IsAVendor(in_npc.name) : false));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_IsEnemy(npc_unit)
+{
+//	var merc_name = D2JSP_NPC_GetMercName();
+
+/*
+	if ((!D2JSP_UTIL_GEN_TypeOfObject(npc_unit)) ||
+		(!("name" in npc_unit)) || (!("mode" in npc_unit)) ||
+		(!D2JSP_UTIL_GEN_TypeOfString(npc_unit.name)) ||
+		(!D2JSP_UTIL_GEN_TypeOfNumber(npc_unit.mode)))
+		return(false);
+	else if ((npc_unit.mode == D2JSP_MODE_NPC_DEATH) ||
+		(npc_unit.mode == D2JSP_MODE_NPC_DEAD) || (!npc_unit.hp))
+		return(false);
+*/
+	if (npc_unit.owner == me.gid)
+		return(false);
+	else if ((npc_unit.mode == D2JSP_MODE_NPC_DEATH) ||
+		(npc_unit.mode == D2JSP_MODE_NPC_DEAD) || (!npc_unit.hp))
+		return(false);
+	else if ((npc_unit.name == "Catapult") && (!npc_unit.getStat(D2JSP_STAT_LEVEL)))
+		return(false);
+	else if ((npc_unit.name == "Izual") && (npc_unit.classid == 406))
+		return(false);
+	else if ((npc_unit.name == "Mind Maw the Slasher") &&
+		(npc_unit.area == D2JSP_AREA_TRAVINCAL))
+		return(false);
+	else if (npc_unit.classid == 408)		// Hadriel in the RoF.
+		return(false);
+/*
+	// No longer works for player NPCs in 1.10...
+	else if (npc_unit.getStat(D2JSP_STAT_ALIGNMENT) == 2)
+		return(true);
+*/
+	else if (npc_unit.name.toLowerCase() in D2JSP_NPC_AllHash)
+		return(false);
+	else {
+		var this_parent = npc_unit.getParent();
+		if ((this_parent == me.name) ||
+			((npc_unit.name == "an evil force") && D2JSP_AREA_IsTown()) ||
+			(npc_unit.name.toLowerCase() in D2JSP_NPC_AllHash))
+			return(false);
+		if (npc_unit.name.toLowerCase() in D2JSP_NPC_MinionHash) {
+			if ((!this_parent) || ((this_parent.name != "") &&
+				(!getPlayerFlag(me.gid, this_parent.gid, 8))))
+				return(false);
+		}
+		if (this_parent && (this_parent.name != "") &&
+			(!getPlayerFlag(me.gid, this_parent.gid, 8)))
+			return(false);
+	}
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_IsEnemyStationary(npc_unit)
+{
+	return(((npc_unit.classid + "") in D2JSP_NPC_AttackableStationary) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_IsEnemyAttackable(npc_unit)
+{
+/*
+	return((D2JSP_NPC_IsEnemy(npc_unit) &&
+		(!(npc_unit.name.toLowerCase() in D2JSP_NPC_NotAttackableHash)) &&
+		((!(npc_unit.name.toLowerCase() in D2JSP_NPC_NotAttackableHashMode14)) ||
+		(npc_unit.mode != D2JSP_MODE_NPC_SEQUENCE))) ? true : false);
+*/
+	if (!D2JSP_NPC_IsEnemy(npc_unit))
+		return(false);
+	else if ((npc_unit.mode == D2JSP_MODE_NPC_DEATH) ||
+		(npc_unit.mode == D2JSP_MODE_NPC_DEAD) || (!npc_unit.hp))
+		return(false);
+	else if (npc_unit.name.toLowerCase() in D2JSP_NPC_NotAttackableHash)
+		return(false);
+	else if ((npc_unit.name.toLowerCase() in D2JSP_NPC_NotAttackableHashMode14) &&
+		(npc_unit.mode == D2JSP_MODE_NPC_SEQUENCE))
+		return(false);
+	else if ((npc_unit.name.toLowerCase() in D2JSP_NPC_NotAttackableHashMode01) &&
+		(npc_unit.mode == D2JSP_MODE_NPC_STANDING_STILL))
+		return(false);
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_IsEnemyAttackableHere(npc_unit)
+{
+	return(((!D2JSP_AREA_IsTown()) && D2JSP_NPC_IsEnemyAttackable(npc_unit) &&
+		((npc_unit.name != "Baal") ||
+		(me.area == D2JSP_AREA_THE_WORLDSTONE_CHAMBER))) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_ShouldAttackEnemy(npc_unit)
+{
+/*
+	return((D2JSP_NPC_IsEnemyAttackableHere(npc_unit) &&
+		(npc_unit.name != "Lightning Spire")) ? true : false);
+*/
+	return((D2JSP_NPC_IsEnemyAttackableHere(npc_unit) &&
+		(!((npc_unit.classid + "") in D2JSP_NPC_AttackableStationary))) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_ShouldAvoidEnemy(npc_unit)
+{
+	if (!D2JSP_NPC_IsEnemy(npc_unit))
+		return(false);
+	else if ((npc_unit.mode == D2JSP_MODE_NPC_DEATH) ||
+		(npc_unit.mode == D2JSP_MODE_NPC_DEAD) || (!npc_unit.hp))
+		return(false);
+	else if ((npc_unit.name.toLowerCase() in D2JSP_NPC_NotAttackableHashMode14) &&
+		(npc_unit.mode == D2JSP_MODE_NPC_SEQUENCE))
+		return(false);
+	else if ((npc_unit.name.toLowerCase() in D2JSP_NPC_NotAttackableHashMode01) &&
+		(npc_unit.mode == D2JSP_MODE_NPC_STANDING_STILL))
+		return(false);
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_ShouldAvoidEnemyHere(npc_unit)
+{
+	return(((!D2JSP_AREA_IsTown()) && D2JSP_NPC_ShouldAvoidEnemy(npc_unit) &&
+		((npc_unit.name != "Baal") ||
+		(me.area == D2JSP_AREA_THE_WORLDSTONE_CHAMBER))) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_PLAYER_IsEnemy(player_unit)
+{
+	return((getPlayerFlag(me.gid, player_unit.gid, 8)) ? true : false)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_PLAYER_IsEnemyStationary(player_unit)
+{
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_PLAYER_IsEnemyAttackable(player_unit)
+{
+//	return(D2JSP_PLAYER_IsEnemy(player_unit));
+
+	return((D2JSP_PLAYER_IsEnemy(player_unit) &&
+		(player_unit.mode != D2JSP_MODE_PLAYER_DEATH) &&
+		(player_unit.mode != D2JSP_MODE_PLAYER_DEAD)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_PLAYER_IsEnemyAttackableHere(player_unit)
+{
+	return(((!D2JSP_AREA_IsTown()) &&
+		D2JSP_PLAYER_IsEnemyAttackable(player_unit)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_PLAYER_ShouldAttackEnemy(player_unit)
+{
+	return(D2JSP_PLAYER_IsEnemyAttackable(player_unit));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_PLAYER_ShouldAvoidEnemy(player_unit)
+{
+	return(D2JSP_PLAYER_IsEnemyAttackable(player_unit));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_PLAYER_ShouldAvoidEnemyHere(player_unit)
+{
+	return(D2JSP_PLAYER_IsEnemyAttackableHere(player_unit));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_COMM_EnemyLinkage = [
+	[D2JSP_PLAYER_IsEnemy,						D2JSP_NPC_IsEnemy],
+	[D2JSP_PLAYER_IsEnemyStationary,			D2JSP_NPC_IsEnemyStationary],
+	[D2JSP_PLAYER_IsEnemyAttackable,			D2JSP_NPC_IsEnemyAttackable],
+	[D2JSP_PLAYER_IsEnemyAttackableHere,	D2JSP_NPC_IsEnemyAttackableHere],
+	[D2JSP_PLAYER_ShouldAttackEnemy,			D2JSP_NPC_ShouldAttackEnemy],
+	[D2JSP_PLAYER_ShouldAvoidEnemy,			D2JSP_NPC_ShouldAvoidEnemy],
+	[D2JSP_PLAYER_ShouldAvoidEnemyHere,		D2JSP_NPC_ShouldAvoidEnemyHere]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_IsEnemy(enemy_unit)
+{
+	return(((enemy_unit.type == D2JSP_UTIL_GETUNIT_PLAYER) ||
+		(enemy_unit.type == D2JSP_UTIL_GETUNIT_NPC)) ?
+		D2JSP_COMM_EnemyLinkage[0][enemy_unit.type](enemy_unit) : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_IsEnemyStationary(enemy_unit)
+{
+	return(((enemy_unit.type == D2JSP_UTIL_GETUNIT_PLAYER) ||
+		(enemy_unit.type == D2JSP_UTIL_GETUNIT_NPC)) ?
+		D2JSP_COMM_EnemyLinkage[1][enemy_unit.type](enemy_unit) : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_IsEnemyAttackable(enemy_unit)
+{
+	return(((enemy_unit.type == D2JSP_UTIL_GETUNIT_PLAYER) ||
+		(enemy_unit.type == D2JSP_UTIL_GETUNIT_NPC)) ?
+		D2JSP_COMM_EnemyLinkage[2][enemy_unit.type](enemy_unit) : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_IsEnemyAttackableHere(enemy_unit)
+{
+	return(((enemy_unit.type == D2JSP_UTIL_GETUNIT_PLAYER) ||
+		(enemy_unit.type == D2JSP_UTIL_GETUNIT_NPC)) ?
+		D2JSP_COMM_EnemyLinkage[3][enemy_unit.type](enemy_unit) : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_ShouldAttackEnemy(enemy_unit)
+{
+	return(((enemy_unit.type == D2JSP_UTIL_GETUNIT_PLAYER) ||
+		(enemy_unit.type == D2JSP_UTIL_GETUNIT_NPC)) ?
+		D2JSP_COMM_EnemyLinkage[4][enemy_unit.type](enemy_unit) : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_ShouldAvoidEnemy(enemy_unit)
+{
+	return(((enemy_unit.type == D2JSP_UTIL_GETUNIT_PLAYER) ||
+		(enemy_unit.type == D2JSP_UTIL_GETUNIT_NPC)) ?
+		D2JSP_COMM_EnemyLinkage[5][enemy_unit.type](enemy_unit) : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_COMM_ShouldAvoidEnemyHere(enemy_unit)
+{
+	return(((enemy_unit.type == D2JSP_UTIL_GETUNIT_PLAYER) ||
+		(enemy_unit.type == D2JSP_UTIL_GETUNIT_NPC)) ?
+		D2JSP_COMM_EnemyLinkage[6][enemy_unit.type](enemy_unit) : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GoEastWithWarriv()
+{
+	return(D2JSP_NPC_ChangeActByNPC(1, 2, "Warriv", D2JSP_NPC_USEMENU_GO_EAST));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GoWestWithWarriv()
+{
+	return(D2JSP_NPC_ChangeActByNPC(2, 1, "Warriv", D2JSP_NPC_USEMENU_GO_WEST));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_SailEastWithMeshif()
+{
+	return(D2JSP_NPC_ChangeActByNPC(2, 3, "Meshif",
+		D2JSP_NPC_USEMENU_SAIL_EAST));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_SailWestWithMeshif()
+{
+	return(D2JSP_NPC_ChangeActByNPC(3, 2, "Meshif",
+		D2JSP_NPC_USEMENU_SAIL_WEST));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GoToHarrogathWithTyrael()
+{
+	var npc_obj = D2JSP_NPC_InteractWithNPC("Tyrael");
+
+	if (npc_obj)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_HARROGATH, "*", 10, 100, true);
+		if (me.act == 5)
+			return(0);
+	}
+
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		D2JSP_NPC_ChangeActByNPC(4, 5, "Tyrael",
+			D2JSP_NPC_USEMENU_GO_TO_HARROGATH, 1);
+		if (me.act == 5)
+			return(0);
+	}
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_ChangeActByNPC(start_act, end_act, npc_name, use_menu_code,
+	try_count)
+{
+	var npc_obj;
+	var return_code = -1;
+
+	try_count = (D2JSP_UTIL_GEN_TypeOfNumber(try_count) && (try_count > 0)) ?
+		try_count : 300;
+
+	if (!D2JSP_NPC_UseMenuList[use_menu_code])
+		return(-2);
+
+	TDW_MOVE_ReturnToTown();
+
+	if (me.act != start_act)
+		TDW_MOVE_COMPAT_TownMove(start_act, "waypoint");
+
+	for (var count_1 = 0; count_1 < try_count; count_1++) {
+		if ((npc_obj = D2JSP_NPC_InteractWithNPC(npc_name)) != null) {
+			D2JSP_UTIL_LOG_GetALog().logInfo("Attempting to " +
+				D2JSP_NPC_UseMenuList[use_menu_code] + " with NPC " +
+				npc_name + ".");
+			npc_obj.useMenu(use_menu_code);
+			for (var count_2 = 0; count_2 < 40; count_2++) {
+				if (me.act == end_act) {
+					D2JSP_UTIL_LOG_GetALog().logInfo("Transited from Act " +
+						start_act + " to Act " + end_act + " with NPC " +
+						npc_name + ".");
+					delay(500);
+					return(0);
+				}
+				delay(50);
+			}
+			D2JSP_UTIL_LOG_GetALog().logWarning("Attempt to " +
+				D2JSP_NPC_UseMenuList[use_menu_code] + " with NPC " +
+				npc_name + " failed" + ((count_1 < 9) ? " --- re-trying." : "."));
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+			D2JSP_NPC_CancelUIMenu(npc_obj);
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(1000);
+		}
+		else
+			delay(1000);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FinalizeAct1()
+{
+	var return_code = 0;
+	var npc_obj;
+
+	TDW_MOVE_ReturnToTown();
+
+	if (me.act != 1)
+		TDW_MOVE_WaypointUseInTown(D2JSP_AREA_ROGUE_ENCAMPMENT);
+
+	if (!(return_code = D2JSP_NPC_GoEastWithWarriv())) {
+		var npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, "Jerhyn");
+		if (npc_obj) {
+			if (myDist(npc_obj.x, npc_obj.y) < 15) {
+				for (var count_1 = 0; count_1 < 5; count_1++) {
+					TDW_MOVE_MoveToObject(npc_obj);
+					if (myDist(npc_obj.x, npc_obj.y) < 5)
+						break;
+				}
+			}
+			if ((npc_obj = D2JSP_NPC_InteractWithNPC("Jerhyn")) != null)
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FinalizeAct2()
+{
+	var return_code = 0;
+	var npc_obj;
+
+	TDW_MOVE_ReturnToTown();
+
+	if (me.act != 2)
+		TDW_MOVE_WaypointUseInTown(D2JSP_AREA_LUT_GHOLEIN);
+
+	if ((npc_obj = D2JSP_NPC_InteractWithNPC("Drognan")) != null)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	if ((npc_obj = D2JSP_NPC_InteractWithNPC("Jerhyn")) != null)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	if (!(return_code = D2JSP_NPC_SailEastWithMeshif())) {
+		var npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, "Hratli");
+		if (npc_obj) {
+			if (myDist(npc_obj.x, npc_obj.y) < 15) {
+				for (var count_1 = 0; count_1 < 5; count_1++) {
+					TDW_MOVE_MoveToObject(npc_obj);
+					if (myDist(npc_obj.x, npc_obj.y) < 5)
+						break;
+				}
+			}
+			if ((npc_obj = D2JSP_NPC_InteractWithNPC("Hratli")) != null)
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FinalizeAct3()
+{
+	var return_code = 0;
+	var npc_obj;
+
+	if (me.area == D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3) {
+		var this_map = new oMap();
+		this_map.InitializeMap();
+		var path_list = this_map.FindPath(me.x, me.y, 17591, 8069, 5,
+			mlREDUCEWALK, mlASTAR, 4, 1);
+		while (path_list.length) {
+			TDW_MOVE_MoveToXY(path_list[0].x, path_list[0].y);
+			path_list.shift();
+		}
+		TDW_MOVE_LookForAndTakePortal(0, "", 10);
+	}
+
+	TDW_MOVE_ReturnToTown();
+
+	if (me.act != 4)
+		TDW_MOVE_WaypointUseInTown(D2JSP_AREA_THE_PANDEMONIUM_FORTRESS);
+
+	if (me.area == D2JSP_AREA_THE_PANDEMONIUM_FORTRESS) {
+		var npc_obj = D2JSP_NPC_InteractWithNPC("Tyrael", 3);
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FinalizeAct4()
+{
+	var return_code;
+	var npc_obj;
+
+	TDW_MOVE_ReturnToTown();
+
+	if (me.act != 4)
+		TDW_MOVE_WaypointUseInTown(D2JSP_AREA_THE_PANDEMONIUM_FORTRESS);
+
+	if (!(return_code = D2JSP_NPC_GoToHarrogathWithTyrael())) {
+		if ((npc_obj = D2JSP_NPC_InteractWithNPC("Malah")) != null)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FinalizeAct5()
+{
+	var return_code = 0;
+	var npc_obj;
+
+	TDW_MOVE_ReturnToTown();
+
+	if (me.act != 5)
+		TDW_MOVE_WaypointUseInTown(D2JSP_AREA_HARROGATH);
+
+	for (var count_1 = 0; count_1 < 2; count_1++) {
+		if ((npc_obj = D2JSP_NPC_InteractWithNPC("Malah")) != null)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		delay(1000);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_PurchaseIBK()
+{
+	return(D2JSP_NPC_PurchaseTome("ibk"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_PurchaseTBK()
+{
+	return(D2JSP_NPC_PurchaseTome("tbk"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_PurchaseTome(tome_name)
+{
+	var return_code;
+	var npc_name;
+	var npc_obj;
+	var move_to_npc;
+	var error_text;
+
+	if ((tome_name != "ibk") && (tome_name != "tbk")) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid tome specified for purchase ("+
+			tome_name + ").");
+		return(-1);
+	}
+	else if (!D2JSP_ITEM_CONT_FindSpace(1, 2, D2JSP_ITEM_CONT_BuildMapList(),
+		D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+		D2JSP_UTIL_LOG_GetALog().logError("No space in inventory for tomes");
+		return(-1);
+	}
+		
+	npc_name = D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_SCROLL);
+
+//	return(D2JSP_NPC_PurchaseFromVendor(npc_name, tome_name));
+	if (!(return_code = D2JSP_NPC_PurchaseFromVendor(npc_name, tome_name))) {
+		D2JSP_UTIL_LOG_GetALog().logInfo("Purchased a tome of " + tome_name +
+			" from " + npc_name + ".");
+		return_code = D2JSP_NPC_FillTome(tome_name);
+	}
+	else
+		D2JSP_UTIL_LOG_GetALog().logError("Attempt to purchase a tome of " +
+			tome_name + " from " + npc_name + " failed.");
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillIBK()
+{
+	return(D2JSP_NPC_FillTome("ibk"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillTBK()
+{
+	return(D2JSP_NPC_FillTome("tbk"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillTomesAll()
+{
+	var return_code;
+
+	if (!(return_code = D2JSP_NPC_FillTome("ibk")))
+		return_code = D2JSP_NPC_FillTome("tbk");
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillTome(tome_name)
+{
+	var return_code;
+	var npc_name;
+	var npc_obj;
+
+	npc_name = D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_SCROLL);
+
+	if (arguments.length < 1) {
+		if (!(return_code = D2JSP_NPC_FillTome("ibk")))
+			return_code = D2JSP_NPC_FillTome("tbk");
+		return(return_code);
+	}
+	else if ((tome_name != "ibk") && (tome_name != "tbk")) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid tome specified for filling (" +
+			tome_name + ").");
+		return(-1);
+	}
+
+	if (!D2JSP_COMM_CountTomesNotFull(tome_name))
+		return(0);
+
+	return_code = D2JSP_NPC_FillTomeBasic(tome_name);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillTomeBasic(tome_name)
+{
+	var return_code = 0;
+	var tomes_not_full;
+	var npc_name;
+	var npc_obj;
+	var scroll_name;
+	var count_1;
+	var count_2;
+	var results_data;
+	var this_obj;
+	var shop_return_code;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): Entered " +
+		"function.");
+
+	if ((tome_name != "ibk") && (tome_name != "tbk")) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid tome specified for filling (" +
+			tome_name + ").");
+		return(-1);
+	}
+		
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): Counting " +
+		"tomes of type '" + tome_name + "' which are not full.");
+
+	if (!(tomes_not_full = D2JSP_COMM_CountTomesNotFull(tome_name)))
+		return(0);
+
+	scroll_name = (tome_name == "tbk") ? "tsc" : "isc";
+	npc_name    = D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_SCROLL);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): Will " +
+		"attempt to purchase " + scroll_name + " from " + npc_name + ".");
+
+	if ((return_code = D2JSP_NPC_MoveToNPC(npc_name)) != 0)
+		return(return_code);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): Moving to " +
+		npc_name + ".");
+
+	if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+		return(-1);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): Getting " +
+		"an object reference to " + npc_name + ".");
+
+	do {
+		D2JSP_UTIL_LOG_GetALog().logDebug("Attempting to fill a tome with " +
+			"item code '" + tome_name + "' from " + npc_name + ".");
+		for (count_1 = 0; count_1 < 100; count_1++) {
+			D2JSP_UTIL_InteractObject(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+				"Requested interact() with " + npc_name + ".");
+			for (count_2 = 0; count_2 < 20; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_NPC_MENU))
+					break;
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_NPC_MENU)) {
+				D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+					"Unable to confirm interact() with " + npc_name + ".");
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_NPC_CancelUIMenu(npc_obj);
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+					return(-1);
+				continue;
+			}
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+				"interact() with " + npc_name + " confirmed.");
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+				"Attempting to enter trade with " + npc_name + ".");
+			npc_obj.useMenu(D2JSP_NPC_GetUseMenuTradeCommand(npc_obj));
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+				"Requested useMenu() for trade with " + npc_name + ".");
+			for (count_2 = 0; count_2 < 20; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_SHOP))
+					break;
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_SHOP)) {
+				D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+					"Unable to confirm useMenu() for trade with " + npc_name + ".");
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_COMM_CancelUIMenu(npc_obj);
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+					return(-1);
+				D2JSP_UTIL_GEN_FuzzyDelay(1000);
+			}
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+				"useMenu() for trade with " + npc_name + " confirmed.");
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			for (count_2 = 0; count_2 < 100; count_2++) {
+				results_data = D2JSP_OBJ_IterateItem(npc_name,
+					D2JSP_OBJ_FilterParent, D2JSP_OBJ_ActionStop, scroll_name);
+				if (results_data[D2JSP_OBJ_ACTION_COUNT])
+					break;
+				delay(50);
+			}
+			if (results_data[D2JSP_OBJ_ACTION_COUNT]) {
+				this_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+				for (count_2 = 0; count_2 < 50; count_2++) {
+					if ((shop_return_code = this_obj.shop(npc_obj,
+						D2JSP_NPC_SHOP_ITEM_FILL)) == 1)
+						break;
+					delay(50);
+				}
+			}
+			if (results_data[D2JSP_OBJ_ACTION_COUNT] && (shop_return_code == 1))
+				break;
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillTomeBasic(): " +
+				"Attempt to fill tome from " + npc_name + " failed.");
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_COMM_CancelUIMenu(npc_obj);
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+				return(-1);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+		if (results_data[D2JSP_OBJ_ACTION_COUNT] && (shop_return_code == 1))
+			D2JSP_UTIL_LOG_GetALog().logInfo("Filled a tome with " +
+				"item code '" + tome_name + "' from " + npc_name + ".");
+		else {
+			D2JSP_UTIL_LOG_GetALog().logError("Attempt to fill '" + tome_name +
+				"' with '" + scroll_name + "' failed.");
+			return_code = -1;
+			break;
+		}
+		tomes_not_full--;
+		D2JSP_UTIL_GEN_FuzzyDelay(1000);
+	} while (tomes_not_full);
+
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+	D2JSP_COMM_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(100);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_PurchaseKey()
+{
+	var return_code;
+	var npc_name;
+	var npc_obj;
+	var move_to_npc;
+	var error_text;
+
+	if (!D2JSP_ITEM_CONT_FindSpace(1, 1, D2JSP_ITEM_CONT_BuildMapList(),
+		D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+		D2JSP_UTIL_LOG_GetALog().logError("No space in inventory for keys");
+		return(-1);
+	}
+		
+	npc_name = D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_KEY);
+
+//	return(D2JSP_NPC_PurchaseFromVendor(npc_name, "key"));
+	if (!(return_code = D2JSP_NPC_PurchaseFromVendor(npc_name, "key"))) {
+		D2JSP_UTIL_LOG_GetALog().logInfo("Purchased a key from " + npc_name + ".");
+		return_code = D2JSP_NPC_FillKey();
+	}
+	else
+		D2JSP_UTIL_LOG_GetALog().logError("Attempt to purchase a key from " +
+			npc_name + " failed.");
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillKey()
+{
+	var return_code;
+	var npc_name;
+	var npc_obj;
+
+	npc_name = D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_KEY);
+
+	if (!D2JSP_COMM_CountKeysNotFull())
+		return(0);
+
+	return_code = D2JSP_NPC_FillKeyBasic();
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillKeyBasic()
+{
+	var return_code = 0;
+	var keys_not_full;
+	var npc_name;
+	var npc_obj;
+	var count_1;
+	var count_2;
+	var results_data;
+	var this_obj;
+	var shop_return_code;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): Entered " +
+		"function.");
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): Counting " +
+		"keys which are not full.");
+
+	if (!(keys_not_full = D2JSP_COMM_CountKeysNotFull()))
+		return(0);
+
+	npc_name = D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_KEY);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): Will " +
+		"attempt to purchase keys from " + npc_name + ".");
+
+	if ((return_code = D2JSP_NPC_MoveToNPC(npc_name)) != 0)
+		return(return_code);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): Moving to " +
+		npc_name + ".");
+
+	if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+		return(-1);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): Getting " +
+		"an object reference to " + npc_name + ".");
+
+	do {
+		D2JSP_UTIL_LOG_GetALog().logDebug("Attempting to fill a key from " +
+			npc_name + ".");
+		for (count_1 = 0; count_1 < 100; count_1++) {
+			D2JSP_UTIL_InteractObject(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+				"Requested interact() with " + npc_name + ".");
+			for (count_2 = 0; count_2 < 20; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_NPC_MENU))
+					break;
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_NPC_MENU)) {
+				D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+					"Unable to confirm interact() with " + npc_name + ".");
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_COMM_CancelUIMenu(npc_obj);
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+					return(-1);
+				continue;
+			}
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+				"interact() with " + npc_name + " confirmed.");
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+				"Attempting to enter trade with " + npc_name + ".");
+			npc_obj.useMenu(D2JSP_NPC_GetUseMenuTradeCommand(npc_obj));
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+				"Requested useMenu() for trade with " + npc_name + ".");
+			for (count_2 = 0; count_2 < 20; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_SHOP))
+					break;
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_SHOP)) {
+				D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+					"Unable to confirm useMenu() for trade with " + npc_name + ".");
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_COMM_CancelUIMenu(npc_obj);
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+					return(-1);
+				continue;
+			}
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+				"useMenu() for trade with " + npc_name + " confirmed.");
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			for (count_2 = 0; count_2 < 100; count_2++) {
+				results_data = D2JSP_OBJ_IterateItem(npc_name,
+					D2JSP_OBJ_FilterParent, D2JSP_OBJ_ActionStop, "key");
+				if (results_data[D2JSP_OBJ_ACTION_COUNT])
+					break;
+				delay(50);
+			}
+			if (results_data[D2JSP_OBJ_ACTION_COUNT]) {
+				this_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+				for (count_2 = 0; count_2 < 50; count_2++) {
+					if ((shop_return_code = this_obj.shop(npc_obj,
+						D2JSP_NPC_SHOP_ITEM_FILL)) == 1)
+						break;
+					delay(50);
+				}
+			}
+			if (results_data[D2JSP_OBJ_ACTION_COUNT] && (shop_return_code == 1))
+				break;
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_FillKeyBasic(): " +
+				"Attempt to fill key from " + npc_name + " failed.");
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_COMM_CancelUIMenu(npc_obj);
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+				return(-1);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+		if (results_data[D2JSP_OBJ_ACTION_COUNT] && (shop_return_code == 1))
+			D2JSP_UTIL_LOG_GetALog().logInfo("Filled a key from " + npc_name + ".");
+		else {
+			D2JSP_UTIL_LOG_GetALog().logError("Attempt to fill a key failed.");
+			return_code = -1;
+			break;
+		}
+		keys_not_full--;
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+	} while (keys_not_full);
+
+	D2JSP_UTIL_GEN_FuzzyDelay(50);
+	D2JSP_COMM_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(50);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_FillAll()
+{
+	var return_code;
+
+	if (!(return_code = D2JSP_NPC_FillTomesAll())) {
+		if (D2JSP_COMM_CountKeysLessThan(12))
+			return_code = D2JSP_NPC_FillKey();
+		else if (!D2JSP_COMM_CountKeysLessThan(13))
+			return_code = D2JSP_NPC_PurchaseKey();
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_ReviveMercenary(npc_name)
+{
+	var log_obj  = D2JSP_UTIL_LOG_GetALog();
+	var merc_obj = null;
+	var npc_obj;
+
+var old_log_level = log_obj.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	merc_obj = D2JSP_NPC_GetMercObj();
+
+	if ((merc_obj != null) && merc_obj.hp &&
+		(merc_obj.mode != D2JSP_MODE_NPC_DEATH) &&
+		(merc_obj.mode != D2JSP_MODE_NPC_DEAD))
+{
+log_obj.setLevelFile(old_log_level);
+		return(merc_obj);
+}
+	else if (parseFloat(me.version) > 0.3520) {
+		var merc_name = getLocaleString(me.mercnamestr);
+		var merc_cost = me.mercrevive;
+		if (merc_cost > D2JSP_ITEM_MyGoldTotal()) {
+			log_obj.logError("Unable to revive mercenary " +
+				merc_name + " because doing so requires " + merc_cost +
+				" gold, and you have only " + D2JSP_ITEM_MyGoldTotal() + " gold.");
+log_obj.setLevelFile(old_log_level);
+			return(null);
+		}
+		log_obj.logInfo("Will revive mercenary " + merc_name +
+			" at a cost of " + merc_cost + " gold.");
+	}
+
+	npc_name = (arguments.length && (npc_name != null) &&
+		D2JSP_UTIL_GEN_TypeOfString(npc_name) && (npc_name != "")) ? npc_name :
+	D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_REVIVE);
+
+	for (var count_1 = 0; count_1 < 10; count_1++) {
+		if ((npc_obj = D2JSP_NPC_InteractWithNPC(npc_name)) != null) {
+			merc_obj = D2JSP_NPC_GetMercObj();
+			if ((merc_obj == null) || (!merc_obj.hp) ||
+				(merc_obj.mode == D2JSP_MODE_NPC_DEATH) ||
+				(merc_obj.mode == D2JSP_MODE_NPC_DEAD)) {
+				delay(1000);
+				npc_obj.useMenu(D2JSP_NPC_USEMENU_RESURRECT_MERC);
+				delay(1000);
+				for (var count_2 = 0; count_2 < 10; count_2++) {
+					if (D2JSP_NPC_GetMercObj() != null)
+						break;
+					log_obj.logWarning("Wait " + (count_2 + 1) + " of 10 for " +
+						"mercenary resurrection failed.");
+					delay(1000);
+				}
+				D2JSP_NPC_CancelUIMenu(npc_obj);
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+/*
+				if ((merc_obj = D2JSP_NPC_GetMercObj()) != null) {
+					if ((!merc_obj.hp) || (merc_obj.mode == D2JSP_MODE_NPC_DEATH) ||
+						(merc_obj.mode == D2JSP_MODE_NPC_DEAD))
+						merc_obj = null;
+				}
+*/
+				//	The delay between merc resurrection and the merc's health
+				//	being updated is noticable, even in human time. So we assume
+				//	that the merc will be given full health when the server gets
+				//	around to updating us.
+				//	The delay(1000) gives a bit of time before we return. This is
+				//	because the invoking code may interrogate the merc's health.
+				if ((merc_obj = D2JSP_NPC_GetMercObj()) != null) {
+					for (var count_2 = 0; count_2 < 10; count_2++) {
+						if (merc_obj.hp == merc_obj.hpmax)
+							break;
+						delay(100);
+					}
+log_obj.setLevelFile(old_log_level);
+					return(merc_obj);
+				}
+			}
+		}
+		else {
+			log_obj.logInfo("Will re-try in 10 seconds...");
+			delay(10000);
+		}
+	}
+
+log_obj.setLevelFile(old_log_level);
+
+	return(merc_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_Heal(npc_name)
+{
+	var npc_obj;
+
+	npc_name = (arguments.length && (npc_name != null) &&
+		D2JSP_UTIL_GEN_TypeOfString(npc_name) && (npc_name != "")) ? npc_name :
+		D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_HEAL);
+
+	if ((npc_obj = D2JSP_NPC_InteractWithNPC(npc_name)) != null) {
+		D2JSP_NPC_CancelUIMenu(npc_obj);
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	}
+
+
+	return(npc_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_RepairAll(npc_name)
+{
+	var npc_obj;
+	var return_code;
+
+	npc_name = (arguments.length && (npc_name != null) &&
+		D2JSP_UTIL_GEN_TypeOfString(npc_name) && (npc_name != "")) ? npc_name :
+		D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_REPAIR);
+
+	if ((npc_obj = D2JSP_NPC_TradeWithNPC(npc_name)) != null) {
+		D2JSP_UTIL_LOG_GetALog().logInfo("Attempting to repair all items with " +
+			"NPC " + npc_name + ".");
+		return_code = npc_obj.repair();
+		D2JSP_UTIL_LOG_GetALog().logInfo("Repair all attempt with NPC " +
+			npc_name + " returned " + return_code + ".");
+		D2JSP_UTIL_GEN_FuzzyDelay(250);
+		D2JSP_NPC_CancelUIMenu(npc_obj);
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		D2JSP_UTIL_GEN_FuzzyDelay(1000);
+	}
+
+	return(npc_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_RepairItem(item_obj, npc_name)
+{
+	var npc_obj = null;
+	var return_code;
+
+	npc_name = ((arguments.length > 1) && (npc_name != null) &&
+		D2JSP_UTIL_GEN_TypeOfString(npc_name) && (npc_name != "")) ? npc_name :
+		D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_REPAIR);
+
+	if ((npc_obj = D2JSP_NPC_TradeWithNPC(npc_name)) != null) {
+D2JSP_UTIL_LOG_GetALog().logWarning("Repair of individual items is broken in " +
+	" the d2jsp core. Use repair all instead.");
+		D2JSP_UTIL_LOG_GetALog().logInfo("Attempting to repair item " +
+			D2JSP_ITEM_FixFName(item_obj) + " with NPC " + npc_name + ".");
+		return_code = item_obj.shop(npc_obj, D2JSP_NPC_SHOP_ITEM_REPAIR);
+		D2JSP_UTIL_LOG_GetALog().logInfo("Repair of item " +
+			D2JSP_ITEM_FixFName(item_obj) + " attempt with NPC " + npc_name +
+			" returned " + return_code + ".");
+		D2JSP_UTIL_GEN_FuzzyDelay(250);
+		D2JSP_NPC_CancelUIMenu(npc_obj);
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		D2JSP_UTIL_GEN_FuzzyDelay(1000);
+	}
+
+	return(npc_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_PurchaseFromVendor(npc_name, item_name)
+{
+	var npc_obj;
+	var count_1;
+	var count_2;
+	var results_data;
+	var this_obj;
+	var shop_return_code;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_PurchaseFromVendor(): " +
+		"About to try to enter trade with NPC " + npc_name + ".");
+
+	if ((npc_obj = D2JSP_NPC_TradeWithNPC(npc_name)) == null)
+		return(-1);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_PurchaseFromVendor(): " +
+		"Should be in trade with " + npc_name + ".");
+
+//	D2JSP_UTIL_GEN_FuzzyDelay(500);
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		results_data = D2JSP_OBJ_IterateItem(npc_name, D2JSP_OBJ_FilterParent,
+			D2JSP_OBJ_ActionStop, item_name);
+		if (results_data[D2JSP_OBJ_ACTION_COUNT]) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_PurchaseFromVendor(): "+
+				"Found item " + item_name + " in " + npc_name + "'s inventory.");
+			this_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+			var item_cost = this_obj.getItemCost(D2JSP_NPC_COST_ITEM_BUY,
+				npc_obj.classid);
+			if (item_cost > D2JSP_ITEM_MyGoldTotal()) {
+				D2JSP_UTIL_LOG_GetALog().logError("Unable to purchase " +
+					this_obj.name + " from " + npc_name + ": The item costs " +
+					item_cost + " gold, but you have only " +
+					D2JSP_ITEM_MyGoldTotal() + " gold.");
+				return(-1);
+			}
+			for (count_2 = 0; count_2 < 50; count_2++) {
+				if ((shop_return_code = this_obj.shop(npc_obj,
+					D2JSP_NPC_SHOP_ITEM_BUY)) == 1) {
+					D2JSP_UTIL_LOG_GetALog().logDebug(
+						"D2JSP_NPC_PurchaseFromVendor(): " + item_name +
+						".shop() returned 1");
+					D2JSP_UTIL_GEN_FuzzyDelay(50);
+					D2JSP_NPC_CancelUIMenu(npc_obj);
+					D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+					D2JSP_UTIL_GEN_FuzzyDelay(1000);
+					return(0);
+				}
+				delay(100);
+			}
+		}
+		D2JSP_UTIL_GEN_FuzzyDelay(100);
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logWarning("Attempt to trade with " + npc_name +
+		" to purchase " + item_name + " failed.");
+
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+	D2JSP_NPC_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_SellToVendor(npc_name, item_obj)
+{
+	var npc_obj;
+	var count_1;
+	var count_2;
+	var results_data;
+	var shop_return_code;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_SellToVendor(): " +
+		"About to try to enter trade with NPC " + npc_name + ".");
+
+	if ((npc_obj = D2JSP_NPC_TradeWithNPC(npc_name)) == null)
+		return(-1);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_SellToVendor(): " +
+		"Should be in trade with " + npc_name + ".");
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		results_data = D2JSP_OBJ_IterateItem(npc_name, D2JSP_OBJ_FilterParent,
+			D2JSP_OBJ_ActionStop);
+		if (results_data[D2JSP_OBJ_ACTION_COUNT]) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_SellToVendor(): "+
+				"Found items in " + npc_name + "'s inventory.");
+			var sell_price = item_obj.getItemCost(D2JSP_NPC_COST_ITEM_SELL);
+			for (count_2 = 0; count_2 < 50; count_2++) {
+				if ((shop_return_code = item_obj.shop(npc_obj,
+					D2JSP_NPC_SHOP_ITEM_SELL)) == 1) {
+					D2JSP_UTIL_GEN_FuzzyDelay(50);
+					D2JSP_UTIL_LOG_GetALog().logDebug(
+						"D2JSP_NPC_SellToVendor(): " + item_obj.name +
+						".shop() returned 1 --- sell price = " + sell_price + ".");
+					D2JSP_UTIL_LOG_GetALog().logInfo("Sold " +
+						D2JSP_ITEM_ColorItemFixFName(item_obj) + " to NPC " +
+						npc_name + " (sell price = " + sell_price + ").");
+					D2JSP_NPC_CancelUIMenu(npc_obj);
+					D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+					D2JSP_UTIL_GEN_FuzzyDelay(1000);
+					return(0);
+				}
+				delay(100);
+			}
+		}
+		D2JSP_UTIL_GEN_FuzzyDelay(100);
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logWarning("Attempt to trade with " + npc_name +
+		" to sell " + item_obj.name + " failed.");
+
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+	D2JSP_NPC_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_SellToVendorBasic(npc_name, item_obj)
+{
+	var entered_trade = false;
+	var npc_obj;
+	var count_1;
+	var count_2;
+	var results_data;
+	var shop_return_code;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_SellToVendorBasic(): " +
+		"About to try to enter trade with NPC " + npc_name + ".");
+
+	npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, npc_name);
+
+	if ((!npc_obj) || (myDist(npc_obj.x, npc_obj.y) > 5) ||
+		(!getUIFlag(D2JSP_UTIL_UI_SHOP))) {
+		if ((npc_obj = D2JSP_NPC_TradeWithNPC(npc_name)) == null)
+			return(-1);
+		entered_trade = true;
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_SellToVendorBasic(): " +
+		"Should be in trade with " + npc_name + ".");
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		results_data = D2JSP_OBJ_IterateItem(npc_name, D2JSP_OBJ_FilterParent,
+			D2JSP_OBJ_ActionStop);
+		if (results_data[D2JSP_OBJ_ACTION_COUNT]) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_SellToVendorBasic(): "+
+				"Found items in " + npc_name + "'s inventory.");
+			var sell_price = item_obj.getItemCost(D2JSP_NPC_COST_ITEM_SELL);
+			for (count_2 = 0; count_2 < 50; count_2++) {
+				if ((shop_return_code = item_obj.shop(npc_obj,
+					D2JSP_NPC_SHOP_ITEM_SELL)) == 1) {
+					D2JSP_UTIL_GEN_FuzzyDelay(50);
+					D2JSP_UTIL_LOG_GetALog().logDebug(
+						"D2JSP_NPC_SellToVendorBasic(): " + item_obj.name +
+						".shop() returned 1 --- sell price = " + sell_price + ".");
+					D2JSP_UTIL_LOG_GetALog().logInfo("Sold " +
+						D2JSP_ITEM_ColorItemFixFName(item_obj) + " to NPC " +
+						npc_name + " (sell price = " + sell_price + ").");
+					if (entered_trade) {
+						D2JSP_NPC_CancelUIMenu(npc_obj);
+						D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+					}
+					D2JSP_UTIL_GEN_FuzzyDelay(250);
+					return(0);
+				}
+				delay(100);
+			}
+		}
+		D2JSP_UTIL_GEN_FuzzyDelay(100);
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logWarning("Attempt to trade with " + npc_name +
+		" to sell " + item_obj.name + " failed.");
+
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+	D2JSP_NPC_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_Gamble(npc_name)
+{
+	var return_code;
+	var npc_obj;
+	var count_1;
+	var count_2;
+	var results_data;
+
+	if ((return_code = D2JSP_NPC_MoveToNPC(npc_name)) != 0)
+		return(null);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_Gamble(): " +
+		"Move to NPC " + npc_name + " done.");
+
+	if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+		return(null);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_Gamble(): " +
+		"Have an NPC object for " + npc_name + ".");
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		D2JSP_UTIL_InteractObject(npc_obj);
+		D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_Gamble(): " +
+			"Requested interact() with " + npc_name + ".");
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+		for (count_2 = 0; count_2 < 40; count_2++) {
+			if (getUIFlag(D2JSP_UTIL_UI_NPC_MENU))
+				break;
+			delay(50);
+		}
+		if (!getUIFlag(D2JSP_UTIL_UI_NPC_MENU)) {
+			D2JSP_UTIL_LOG_GetALog().logWarning("D2JSP_NPC_Gamble(): " +
+				"Requested interact() with " + npc_name + " seems to have " +
+				"failed. Will attempt to re-acquire the NPC object.");
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_COMM_CancelUIMenu(npc_obj);
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+				return(null);
+			continue;
+		}
+		D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_Gamble(): " +
+			"interact() with " + npc_name + " confirmed.");
+		D2JSP_UTIL_GEN_FuzzyDelay(500);
+		D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_Gamble(): " +
+			"Attempting to enter gamble with " + npc_name + ".");
+		npc_obj.useMenu(D2JSP_NPC_USEMENU_GAMBLE);
+		D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_Gamble(): " +
+			"Requested useMenu() for gamble with " + npc_name + ".");
+		for (count_2 = 0; count_2 < 100; count_2++) {
+			if (getUIFlag(D2JSP_UTIL_UI_SHOP))
+				break;
+			delay(50);
+		}
+		if (!getUIFlag(D2JSP_UTIL_UI_SHOP)) {
+			D2JSP_UTIL_LOG_GetALog().logWarning("D2JSP_NPC_Gamble(): " +
+				"Requested gamble with " + npc_name + " seems to have " +
+				"failed. Will attempt to re-acquire the NPC object.");
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			D2JSP_COMM_CancelUIMenu(npc_obj);
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+				return(null);
+			continue;
+		}
+		D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_Gamble(): " +
+			"useMenu() for gamble with " + npc_name + " confirmed.");
+		D2JSP_UTIL_GEN_FuzzyDelay(500);
+		for (count_2 = 0; count_2 < 100; count_2++) {
+			results_data = D2JSP_OBJ_IterateItem(npc_name, D2JSP_OBJ_FilterParent,
+				D2JSP_OBJ_ActionStop);
+			if (results_data[D2JSP_OBJ_ACTION_COUNT])
+				break;
+			delay(50);
+		}
+		if (results_data[D2JSP_OBJ_ACTION_COUNT])
+			return(npc_obj);
+		D2JSP_UTIL_LOG_GetALog().logWarning("D2JSP_NPC_Gamble(): " +
+			"Unable to locate any items in the " + npc_name + " gamble screen. " +
+			"Will attempt to re-acquire the NPC object.");
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+		D2JSP_COMM_CancelUIMenu(npc_obj);
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+		if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+			return(null);
+		D2JSP_UTIL_GEN_FuzzyDelay(1000);
+	}
+
+	if (!results_data[D2JSP_OBJ_ACTION_COUNT])
+		D2JSP_UTIL_LOG_GetALog().logWarning("Attempt to gamble with " + npc_name +
+			" failed.");
+
+	D2JSP_UTIL_GEN_FuzzyDelay(50);
+	D2JSP_NPC_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(50);
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_TradeWithNPC(npc_name)
+{
+	var return_code;
+	var npc_obj;
+	var count_1;
+	var count_2;
+	var results_data;
+
+	for (count_1 = 0; count_1 < 100; count_1++) {
+		if ((npc_obj = D2JSP_NPC_InteractWithNPC(npc_name)) != null) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_TradeWithNPC(): " +
+				"interact() with " + npc_name + " confirmed.");
+			D2JSP_UTIL_GEN_FuzzyDelay(100);
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_TradeWithNPC(): " +
+				"Attempting to enter trade with " + npc_name + ".");
+			npc_obj.useMenu(D2JSP_NPC_GetUseMenuTradeCommand(npc_obj));
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_TradeWithNPC(): " +
+				"Requested useMenu() for trade with " + npc_name + ".");
+			for (count_2 = 0; count_2 < 40; count_2++) {
+				if (getUIFlag(D2JSP_UTIL_UI_SHOP))
+					break;
+				delay(50);
+			}
+			if (!getUIFlag(D2JSP_UTIL_UI_SHOP)) {
+				D2JSP_UTIL_LOG_GetALog().logWarning("D2JSP_NPC_TradeWithNPC(): " +
+					"Requested trade with " + npc_name + " seems to have " +
+					"failed. Will attempt to re-acquire the NPC object.");
+				D2JSP_UTIL_GEN_FuzzyDelay(50);
+			}
+			else {
+				D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_TradeWithNPC(): " +
+					"useMenu() for trade with " + npc_name + " confirmed.");
+				D2JSP_UTIL_GEN_FuzzyDelay(100);
+				for (count_2 = 0; count_2 < 20; count_2++) {
+					results_data = D2JSP_OBJ_IterateItem(npc_name,
+						D2JSP_OBJ_FilterParent, D2JSP_OBJ_ActionStop);
+					if (results_data[D2JSP_OBJ_ACTION_COUNT])
+						return(npc_obj);
+					delay(100);
+				}
+				D2JSP_UTIL_LOG_GetALog().logWarning("D2JSP_NPC_TradeWithNPC(): " +
+					"Unable to locate any items in the " + npc_name + " trade " +
+					"screen. Will attempt to re-acquire the NPC object.");
+				D2JSP_UTIL_GEN_FuzzyDelay(50);
+			}
+		}
+		if (npc_obj) {
+			D2JSP_COMM_CancelUIMenu(npc_obj);
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		}
+		D2JSP_UTIL_GEN_FuzzyDelay(250);
+//		D2JSP_UTIL_GEN_FuzzyDelay(1000);
+	}
+
+	if (!results_data[D2JSP_OBJ_ACTION_COUNT])
+		D2JSP_UTIL_LOG_GetALog().logWarning("Attempt to trade with " + npc_name +
+			" failed.");
+
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+	D2JSP_NPC_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_InteractWithNPC(npc_name, try_count)
+{
+	var return_code;
+	var npc_obj;
+
+	try_count = (D2JSP_UTIL_GEN_TypeOfNumber(try_count) && (try_count > 0)) ?
+		try_count : 300;
+
+	if ((return_code = D2JSP_NPC_MoveToNPC(npc_name)) != 0)
+		return(null);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_InteractWithNPC(): " +
+		"Move to NPC " + npc_name + " done.");
+
+	if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+		return(null);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_InteractWithNPC(): " +
+		"Have an NPC object for " + npc_name + ".");
+
+	for (var count_1 = 0; count_1 < try_count; count_1++) {
+		D2JSP_UTIL_InteractObject(npc_obj);
+		D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_InteractWithNPC(): " +
+			"Requested interact() with " + npc_name + ".");
+		D2JSP_UTIL_GEN_FuzzyDelay(100);
+		for (var count_2 = 0; count_2 < 40; count_2++) {
+			if (getUIFlag(D2JSP_UTIL_UI_NPC_MENU)) {
+				D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_InteractWithNPC(): "+
+					"Requested interact() with " + npc_name + " has been confirmed.");
+				return(npc_obj);
+			}
+			delay(50);
+		}
+		if (!getUIFlag(D2JSP_UTIL_UI_NPC_MENU)) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_InteractWithNPC(): " +
+				"Requested interact() with " + npc_name + " seems to have " +
+				"failed. Will attempt to re-acquire the NPC object.");
+			D2JSP_UTIL_GEN_FuzzyDelay(1000);
+			D2JSP_COMM_CancelUIMenu(npc_obj);
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+			if (count_1 && (!(count_1 % 3))) {
+				D2JSP_UTIL_LOG_GetALog().logInfo("D2JSP_NPC_InteractWithNPC(): " +
+					"Randomizing location before attempt to re-acquire NPC " +
+					npc_name + ".");
+				delay(3000);
+				TDW_MOVE_RandomizeLocation(me.x, me.y, 10, 10);
+				delay(3000);
+				if ((return_code = D2JSP_NPC_MoveToNPC(npc_name)) != 0)
+					return(null);
+				delay(3000);
+			}
+			if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+				return(null);
+		}
+	}
+
+	D2JSP_NPC_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(250);
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_InteractWithNPCLoop(npc_name, iter_count)
+{
+	var npc_obj;
+	var count_1;
+	var count_2;
+	var count_3;
+	var log_obj;
+
+	log_obj    = D2JSP_UTIL_LOG_GetALog();
+
+	iter_count = ((arguments.length < 2) ||
+		(!D2JSP_UTIL_GEN_TypeOfNumber(iter_count)) || (iter_count < 1)) ? 3 :
+		iter_count;
+
+	log_obj.logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+		"Beginning iteraction attempt number 1 of " + iter_count + " with NPC " +
+		npc_name + ".");
+
+/*
+	if ((npc_obj = D2JSP_NPC_InteractWithNPC(npc_name)) == null)
+		return(null);
+
+	log_obj.logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+		"Looping iteraction number 1 of " + iter_count + " with NPC " +
+		npc_name + " done.");
+
+	if (iter_count == 1) {
+		log_obj.logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+			"All 1 looping iteractions with NPC " + npc_name + " done.");
+		return(npc_obj);
+	}
+*/
+
+	if ((return_code = D2JSP_NPC_MoveToNPC(npc_name)) != 0)
+		return(null);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+		"Move to NPC " + npc_name + " done.");
+
+	if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+		return(null);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+		"Have an NPC object for " + npc_name + ".");
+
+	for (count_1 = 0; count_1 < iter_count; count_1++) {
+		for (count_2 = 0; count_2 < 10; count_2++) {
+			log_obj.logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+				"Beginning interactation attempt number " + (count_1 + 1) + " of " +
+				iter_count + " with NPC " + npc_name + ".");
+			D2JSP_UTIL_InteractObject(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+			for (count_3 = 0; count_3 < 40; count_3++) {
+				if (getUIFlag(D2JSP_UTIL_UI_NPC_MENU)) {
+					log_obj.logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+						"Looping iteraction number " + (count_1 + 1) + " of " +
+						iter_count + " with NPC " + npc_name + " done.");
+					break;
+				}
+				delay(50);
+			}
+			if (getUIFlag(D2JSP_UTIL_UI_NPC_MENU))
+				break;
+			if (!getUIFlag(D2JSP_UTIL_UI_NPC_MENU)) {
+				D2JSP_UTIL_LOG_GetALog().logWarning("D2JSP_NPC_InteractWithNPCLoop(): " +
+					"Requested interact() with " + npc_name + " seems to have " +
+					"failed. Will attempt to re-acquire the NPC object.");
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				D2JSP_COMM_CancelUIMenu(npc_obj);
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(250);
+				if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+					return(null);
+			}
+		}
+		if (getUIFlag(D2JSP_UTIL_UI_NPC_MENU) && (count_1 == (iter_count - 1))) {
+			log_obj.logDebug("D2JSP_NPC_InteractWithNPCLoop(): " +
+				"All " + iter_count + " looping iteractions with NPC " + npc_name +
+				" done.");
+			return(npc_obj);
+		}
+		D2JSP_NPC_CancelUIMenu(npc_obj);
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		D2JSP_UTIL_GEN_FuzzyDelay(250);
+	}
+
+	D2JSP_NPC_CancelUIMenu(npc_obj);
+	D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	D2JSP_UTIL_GEN_FuzzyDelay(50);
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_MoveToNPC(npc_name)
+{
+	var town_move_has_npc = TDW_MOVE_COMPAT_TownMoveHasNPC(me.act, npc_name);
+	var npc_obj;
+	var move_to_npc;
+
+	if (!D2JSP_AREA_IsTown())
+		move_to_npc = true;
+/*
+	else if (typeof(_townpoints[me.act - 1][npc_name.toLowerCase()]) ==
+		"undefined")
+*/
+	else if (town_move_has_npc)
+		move_to_npc = true;
+	else if ((npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, npc_name)) &&
+		(myDist(npc_obj.x, npc_obj.y) < 5))
+		move_to_npc = false;
+	else
+		move_to_npc = true;
+
+	if (move_to_npc == true) {
+		npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, npc_name);
+//		if (npc_name.toLowerCase() in _townpoints[me.act - 1]) {
+		if (town_move_has_npc) {
+			if (!npc_obj) {
+				TDW_MOVE_COMPAT_TownMove(npc_name);
+				delay(50);
+				npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, npc_name);
+			}
+			if (npc_obj && (myDist(npc_obj.x, npc_obj.y) > 5)) {
+				if (myDist(npc_obj.x, npc_obj.y) <= 10)
+					TDW_MOVE_MoveToObject(npc_obj);
+				else {
+					TDW_MOVE_COMPAT_TownMove(npc_name);
+					delay(50);
+				}
+				delay(10);
+			}
+		}
+		else if (npc_obj && (myDist(npc_obj.x, npc_obj.y) > 5)) {
+			TDW_MOVE_MoveToObject(npc_obj);
+			delay(10);
+		}
+		if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+			return(-1);
+		var npc_dist = myDist(npc_obj.x, npc_obj.y);
+		if (npc_dist > 5) {
+			if ((npc_dist <= 10) || (!town_move_has_npc))
+				TDW_MOVE_MoveToObject(npc_obj);
+			else {
+				TDW_MOVE_COMPAT_TownMove(npc_name);
+				delay(50);
+				if (myDist(npc_obj.x, npc_obj.y) > 5)
+					TDW_MOVE_MoveToObject(npc_obj);
+			}
+		}
+		return(0);
+	}
+
+	if (!(npc_obj = D2JSP_NPC_GetNPC(npc_name)))
+		return(-1);
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetNPC(npc_name)
+{
+	var npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, npc_name);
+
+	if (!npc_obj)
+		D2JSP_UTIL_LOG_GetALog().logError("Unable to locate " + npc_name + ".");
+
+	return(npc_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetUseMenuTradeCommand(npc_info)
+{
+	var npc_name;
+
+	if (D2JSP_UTIL_GEN_TypeOfObject(npc_info))
+		npc_name = npc_info.name.toLowerCase();
+	else if (D2JSP_UTIL_GEN_TypeOfString(npc_info))
+		npc_name = npc_info.toLowerCase();
+	else
+		return(-1);
+
+	return(((npc_name == "charsi") || (npc_name == "fara") ||
+		(npc_name == "hratli") || (npc_name == "halbu") ||
+		(npc_name == "larzuk")) ? D2JSP_NPC_USEMENU_TRADE_REPAIR :
+		D2JSP_NPC_USEMENU_TRADE);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_CancelUIMenu(npc_obj)
+{
+	return(D2JSP_COMM_CancelUIMenu(npc_obj, D2JSP_UTIL_UI_NPCList));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetCurrentHPNominal(npc_obj)
+{
+	return(((npc_obj instanceof Object) && ("hp" in npc_obj) &&
+		("hpmax" in npc_obj)) ? Math.round((npc_obj.hp / 128) * npc_obj.hpmax) :
+		0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetMercIsLiving()
+{
+	var merc_obj = D2JSP_NPC_GetMercObj();
+
+	return((merc_obj && merc_obj.hp && (merc_obj.mode != D2JSP_MODE_NPC_DEATH) &&
+		(merc_obj.mode != D2JSP_MODE_NPC_DEAD)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetMercName()
+{
+	var merc_obj = D2JSP_NPC_GetMercObj();
+
+	return((merc_obj) ? merc_obj.name : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetMercObj()
+{
+	var results_data = D2JSP_OBJ_IterateNPC(null, D2JSP_OBJ_FilterParentMe,
+		D2JSP_OBJ_ActionStop);
+
+	return((results_data[D2JSP_OBJ_ACTION_COUNT]) ?
+		results_data[D2JSP_OBJ_LAST_OBJECT] : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_ReviveMercenaryVendorType(vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ? D2JSP_NPC_ReviveMercenary(npc_name) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_HealVendorType(vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ? D2JSP_NPC_Heal(npc_name) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_RepairAllVendorType(vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ? D2JSP_NPC_RepairAll(npc_name) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_RepairItemVendorType(item_obj, vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ? D2JSP_NPC_RepairItem(item_obj, npc_name) :
+		null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_PurchaseFromVendorType(item_name, vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ?
+		D2JSP_NPC_PurchaseFromVendor(npc_name, item_name) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GambleWithVendorType(vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ? D2JSP_NPC_Gamble(npc_name) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_TradeWithVendorType(vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ? D2JSP_NPC_TradeWithNPC(npc_name) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_InteractWithVendorType(vendor_type, vendor_act)
+{
+	var npc_name;
+
+	npc_name = D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act);
+
+	return((npc_name != null) ? D2JSP_NPC_InteractWithNPC(npc_name) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_MoveToVendorType(vendor_type, vendor_act)
+{
+	var npc_name;
+
+	vendor_act = (arguments.length > 1) ? vendor_act : me.act;
+	npc_name   = D2JSP_NPC_GetVendorNameFromType(vendor_type, vendor_act);
+
+	if (npc_name) {
+		if ((me.act == vendor_act) ||
+			TDW_MOVE_COMPAT_TownMove(vendor_act, "waypoint")) {
+			if ((return_code = D2JSP_NPC_MoveToNPC(npc_name)) &&
+				(D2JSP_NPC_VENDOR_VendorTypeList[vendor_type.toLowerCase()] ==
+				D2JSP_NPC_VENDOR_GAMBLE_1) && (vendor_act == 5)) {
+				D2JSP_UTIL_LOG_GetALog().logInfo("Will try " +
+					D2JSP_NPC_VENDOR_VendorList[vendor_act - 1]
+					[D2JSP_NPC_VENDOR_GAMBLE_2] + " instead.");
+				return_code = D2JSP_NPC_MoveToNPC(
+					D2JSP_NPC_VENDOR_VendorList[vendor_act - 1]
+					[D2JSP_NPC_VENDOR_GAMBLE_2]);
+			}
+		}
+		if (return_code)
+			npc_name = null;
+	}
+
+	return(npc_name);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_NPC_GetVendorNameFromType(vendor_type, vendor_act)
+{
+	vendor_act = (arguments.length > 1) ? vendor_act : me.act;
+
+	if ((vendor_act >= 1) && (vendor_act <= 5)) {
+		if (D2JSP_UTIL_GEN_TypeOfString(vendor_type) &&
+			(vendor_type.toLowerCase() in D2JSP_NPC_VENDOR_VendorTypeList))
+				return(D2JSP_NPC_VENDOR_VendorList[vendor_act - 1][
+					D2JSP_NPC_VENDOR_VendorTypeList[vendor_type.toLowerCase()]]);
+		else if (D2JSP_UTIL_GEN_TypeOfNumber(vendor_type) &&
+			(vendor_type >= D2JSP_NPC_VENDOR_MINIMUM) &&
+			(vendor_type <= D2JSP_NPC_VENDOR_MAXIMUM))
+			return(D2JSP_NPC_VENDOR_VendorList[vendor_act - 1][vendor_type]);
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Common_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main()
+{
+	print("...waiting " + (2000 / 1000) +
+		" seconds for game load to complete...");
+	delay(2000);
+
+	var return_code = 0;
+	var MyLog       = new D2JSP_UTIL_Log("output/RegressionTest._D2JSP_Common.txt");
+
+MyLog.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+MyLog.syncModeOn();
+
+var return_code = D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_CUBE);
+print("D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_CUBE) = " + return_code);
+print("STOPPING");
+stop();
+
+MyLog.logInfo(D2JSP_COMM_GetDurabilityData());
+print("STOPPING");
+stop();
+
+	MyLog.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+	MyLog.syncModeOn();
+
+	var iteration_count = 0;
+
+	while (true) {
+		var tome_obj;
+		while ((tome_obj = D2JSP_COMM_GetALocalTome("ibk")) != null) {
+			for (count_2 = 0; count_2 < 200; count_2++) {
+				clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, tome_obj);
+				if (tome_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+					break;
+				delay(50);
+			}
+			if (tome_obj.mode != D2JSP_MODE_ITEM_ON_CURSOR) {
+				MyLog.logError("Unable to move the " + tome_obj.name +
+					" to the cursor.");
+				return_code = -1;
+				break;
+			}
+			tome_obj.cancel();
+			D2JSP_UTIL_GEN_FuzzyDelay(100);
+			D2JSP_UTIL_GEN_CheckCursor(1000, 10);
+		}
+		if (return_code)
+			break;
+		if (D2JSP_NPC_PurchaseIBK()) {
+			MyLog.logError("Unable to purchase a " + D2JSP_ITEM_CodeToName("ibk") +
+				".");
+			return_code = -1;
+			break;
+		}
+		if (D2JSP_NPC_FillTome("ibk")) {
+			MyLog.logError("Unable to fill a " + D2JSP_ITEM_CodeToName("ibk") +
+				".");
+			return_code = -1;
+			break;
+		}
+		if (++iteration_count == 10) {
+			iteration_count = 0;
+			print("Sleeping 5 seconds...");
+			delay(5000);
+		}
+	}
+	
+	MyLog.closeLog();
+
+	print("Stopping");
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+

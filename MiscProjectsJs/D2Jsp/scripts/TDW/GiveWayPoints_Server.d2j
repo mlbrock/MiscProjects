@@ -1,0 +1,225 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+includeonce("TDW/TDW_BotSupport.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+// The number of waypoints, exclusive of towns.
+const D2J_GWPS_S_TPScrollCountNeeded = (8 + 8 + 8 + 2 + 8);
+
+// If you want all your chars to have Anya's portal (as I do), you'll set
+// the below variable to 'true'. Important because you can get the Nihlathak
+// quest while standing in another area if partied with someone.
+var D2J_GWPS_S_SkipHallsOfPain    = true;
+
+// How long we'll wait (in seconds) to transport from one waypoint to the next.
+var D2J_GWPS_S_WaitForTransport   =  3;
+
+// We'll give our clients this long (in seconds) to use the portal to the
+// waypoint. If they aren't using the automated client, increase it.
+var D2J_GWPS_S_PerWayPointTimeOut = 15;
+
+// This value (also in seconds) is used instead of the variable
+// 'D2J_GWPS_S_PerWayPointTimeOut' when first changing acts. If your clients
+// aren't using the automated client, increase it.
+var D2J_GWPS_S_PerActTimeOut      = 35;
+
+function main()
+{
+D2J_GWPS_S_PerWayPointTimeOut = 60;
+D2J_GWPS_S_PerActTimeOut      = 180;
+	me.randommove   = true;
+	me.autoparty    = true;
+	me.autoquitonpk = true;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+//	Sc_TownMoveSetting("show_errors", true);
+
+	if ((me.act != 1) || (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT)) {
+		if (!Sc_InTown(me))
+			Sc_GotoTown();
+		TDW_MOVE_COMPAT_TownMove(1, "portalspot");
+		if ((me.act != 1) || (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT))
+			D2J_GWPS_S_ErrorExit("Unable to get to the Rouge Encampment Way Point!");
+	}
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_FILL_ALL, null))
+		D2J_GWPS_S_ErrorExit("Unable to complete town logic.");
+
+	if (D2J_GWPS_S_CheckTBK())
+		D2J_GWPS_S_ErrorExit("Please purchase two full Tomes of Townportal.");
+
+	D2J_GWPS_S_WaitForParty();
+
+	TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+
+	D2J_GWPS_S_DoWayPoints();
+}
+
+function D2J_GWPS_S_WaitForParty()
+{
+	var this_player;
+
+	while (true) {
+		D2JSP_UTIL_BNET_OverheadSafe("Waiting for a client player...");
+		this_player = getUnit(D2JSP_UTIL_GETUNIT_PLAYER);
+		do {
+			if (this_player && (this_player.name != me.name)) {
+				print("Another player (" + this_player.name + ") found!");
+				print("Waiting 10 seconds to begin waypoint serving...");
+				delay(10000);
+				return(0);
+			}
+		} while (this_player && this_player.getNext());
+		delay(1000);
+	}
+}
+
+function D2J_GWPS_S_DoWayPoints()
+{
+	var last_act = me.act;
+	var return_code;
+	var time_out;
+	var count_1;
+	var count_2;
+	var count_3;
+	var target_area;
+
+//D2J_GWPS_S_PerWayPointTimeOut = 2;
+//D2J_GWPS_S_PerActTimeOut      = 3;
+	for (count_1 = 0; count_1 < D2JSP_WayPoints.length; count_1++) {
+		for (count_2 = 1; count_2 < D2JSP_WayPoints[count_1].length; count_2++) {
+//count_2 = D2JSP_WayPoints[count_1].length - 1;
+			target_area = D2JSP_WayPoints[count_1][count_2];
+			if (D2JSP_AREA_IsTown(target_area))
+				continue;
+			if ((target_area == D2JSP_AREA_HALLS_OF_DEATHS_CALLING) &&
+				D2J_GWPS_S_SkipHallsOfPain) {
+				print("Skipping the Halls of Pain waypoint.");
+				delay(200);
+				continue;
+			}
+			if (!(return_code = TDW_MOVE_WaypointUse(target_area,
+				D2J_GWPS_S_WaitForTransport))) {
+				print("Arrived.");
+				time_out = (me.act == last_act) ? D2J_GWPS_S_PerWayPointTimeOut :
+					D2J_GWPS_S_PerActTimeOut;
+				last_act = me.act;
+				if (D2J_GWPS_S_UseTBK())
+					D2J_GWPS_S_InLoopFailure("Failed to open a town portal.");
+				say("You have " + time_out + " seconds to take this waypoint.");
+				delay(1000);
+				for (count_3 = (time_out - 1); count_3; count_3--) {
+					if (count_3 <= 5)
+						say(count_3);
+					else if (!(count_3 % 5))
+						say(count_3 + " seconds to take this waypoint.");
+					delay(1000);
+				}
+				say("0");
+			}
+			else if (return_code == 1) {
+				say("I guess I don't have this waypoint!");
+				delay(200);
+				say("Sorry about that...");
+			}
+			else
+				D2J_GWPS_S_InLoopFailure("Failed to find and use a waypoint.");
+		}
+	}
+
+	if (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT) {
+		say("All done. Attempting to return to the Rogue Encampment...");
+		TDW_MOVE_WaypointUse(D2JSP_AREA_ROGUE_ENCAMPMENT,
+			D2J_GWPS_S_WaitForTransport);
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+		TDW_MOVE_WaypointCancel();
+		TDW_MOVE_COMPAT_TownMove(1, "portalspot");
+	}
+	else
+		say("All done.");
+}
+
+function D2J_GWPS_S_CheckTBK() {
+	var return_code = -1;
+	var tbk_count   = 0;
+	var tsc_count   = 0;
+	var tbk         = getUnit(D2JSP_UTIL_GETUNIT_ITEM, "tbk",
+								D2JSP_MODE_ITEM_IN_INVENTORY);
+
+	if (tbk) {
+		do {
+			print("Book of Town Portal: " + tbk.getStat(D2JSP_STAT_QUANTITY));
+			tbk_count++;
+			tsc_count += tbk.getStat(D2JSP_STAT_QUANTITY);
+		} while (tbk.getNext("tbk", D2JSP_MODE_ITEM_IN_INVENTORY));
+	}
+
+	if (!tbk_count)
+		print("Couldn't find a Tome of Townportal in inventory.");
+	else if (tsc_count < D2J_GWPS_S_TPScrollCountNeeded)
+		print("Number of scrolls in Tomes of Townportal in inventory (" +
+			tsc_count + ") is less than the minimum required for this script (" +
+			D2J_GWPS_S_TPScrollCountNeeded + ")");
+	else
+		return_code = 0;
+
+	return(return_code);
+}
+
+function D2J_GWPS_S_UseTBK()
+{
+	var tbk_count = 0;
+	var tsc_count = 0;
+	var tbk       = getUnit(D2JSP_UTIL_GETUNIT_ITEM, "tbk",
+							D2JSP_MODE_ITEM_IN_INVENTORY);
+
+	if (D2JSP_AREA_IsTown(me.area))
+		return(0);
+
+	if (tbk) {
+		do {
+			if (tbk.getStat(D2JSP_STAT_QUANTITY)) {
+				tbk.interact(1);
+				return(0);
+			}
+			tbk_count++;
+			tsc_count += tbk.getStat(D2JSP_STAT_QUANTITY);
+		} while (tbk.getNext("tbk", D2JSP_MODE_ITEM_IN_INVENTORY));
+	}
+
+	if (!tbk_count)
+		print("Couldn't find a Tome of Townportal in inventory.");
+	else if (!tsc_count)
+		print("There are no scrolls in Tomes of Townportal in inventory!");
+
+	return(-1);
+}
+
+function D2J_GWPS_S_InLoopFailure(error_text)
+{
+	print("Unable to continue: " + error_text);
+
+	if (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT) {
+		print(">>> Attempting to return to the Rogue Encampment...");
+		TDW_MOVE_WaypointUse(D2JSP_AREA_ROGUE_ENCAMPMENT,
+			D2J_GWPS_S_WaitForTransport);
+	}
+
+	D2J_GWPS_S_ErrorExit(">>> Execution now ceasing: " + error_text);
+}
+
+function D2J_GWPS_S_ErrorExit(error_text)
+{
+	say(error_text);
+	delay(500);
+	say("Aborting...");
+	delay(1000);
+	stop();
+}
+

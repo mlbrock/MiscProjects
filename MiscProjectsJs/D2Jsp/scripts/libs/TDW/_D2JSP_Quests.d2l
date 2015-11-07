@@ -1,0 +1,785 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Quest Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Quests.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion quests constants and logic.
+//
+// Revison History : 2003-03-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Quests_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Quests_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+
+// Very much data-driven in the hope 1.10 doesn't break it (too much).
+
+/*
+	Word 32/Bit 0=Set when the Dark Wanderer transforms in Act 3
+
+A1/Q6/B3=Someone entered Catacombs 1, 2 or 3
+
+	A2/Q4/B7=Tried to enter Palace? Spoke to Kaelan? --- needs confirmation.
+
+	A2/Q2/B3=Happened when I spoke with Cain at the same time as A2/Q2/B6
+	A2/Q2/B6=Happened when I spoke with Cain at the same time as A2/Q2/B3
+
+A2/Q4/B8=Spoke with Kaelan, he admits to Palace.
+A2/Q4/B3=Spoke with Jerhyn, brings up Palace problems.
+	A2/Q4/B4=Exited town after........................
+
+	A2/Q5/B2=Summoner quest initiated by finding the Summoner
+
+	A3/Q2/B4=When Gidbinn is picked up (in addition to B2 and others)
+	A3/Q2/B5=When Gidbinn is picked up (in addition to B2 and others)
+	A3/Q2/B9=When Gidbinn is picked up (in addition to B2 and others)
+
+	A3/Q3/B11=Khalim's relics transmuted into Khalim's Will --- Cleared when the Quest Log is opened???
+
+	A3/Q5/B3=Enter Travincal
+
+	A3/Q6/B5=Entered Durance 1 (check others)
+
+	A4/Q1/B3 & A4/Q2/B3 were both set upon taking the WP to the City of the Damned. Check other WP and TPs.
+								A4/Q1/B3 is cleared when you kill Izual
+								A4/Q2/B3 is cleared when you destroy the Soulstone
+
+	A4/Q3/B3=Entered the Chaos Sanctuary (maybe just the pentagram; check)
+				Cleared when you kill Diablo
+
+	----------------------
+	A5/Q1/B3 ---> Exited town since quest was given
+
+	A5/Q2/B3=Entered Frigid Highlands --- cleared when quest is complete
+
+	A5/Q3/B3=Entered Crystalline Passage --- check other places and access methods.
+
+	A5/Q4/B3=Set when you enter Nihlathank's Temple --- check leaving town and access methods.
+
+	A5/Q5/B3=Set in the Ancient's way --- check leaving town and access methods.
+*/
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Symbolic names for the acts...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_ACT_1						= 0;
+var D2JSP_QUEST_ACT_2						= 1;
+var D2JSP_QUEST_ACT_3						= 2;
+var D2JSP_QUEST_ACT_4						= 3;
+var D2JSP_QUEST_ACT_5						= 4;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Symbolic names for the various quests in an act...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_QUEST_ACT_START			= 0;
+var D2JSP_QUEST_QUEST_ACT_INTRO			= 1;
+var D2JSP_QUEST_QUEST_1						= 2;
+var D2JSP_QUEST_QUEST_2						= 3;
+var D2JSP_QUEST_QUEST_3						= 4;
+var D2JSP_QUEST_QUEST_4						= 5;
+var D2JSP_QUEST_QUEST_5						= 6;
+var D2JSP_QUEST_QUEST_6						= 7;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//	Symbolic names for the quest bits...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_BIT_COMPLETED								=  0;
+var D2JSP_QUEST_BIT_REWARD_PENDING						=  1;
+var D2JSP_QUEST_BIT_NPC_GIVEN								=  2;
+var D2JSP_QUEST_BIT_EXITED_TOWN_SINCE_START			=  3;
+var D2JSP_QUEST_BIT_04										=  4;
+var D2JSP_QUEST_BIT_05										=  5;
+var D2JSP_QUEST_BIT_06										=  6;
+var D2JSP_QUEST_BIT_07										=  7;
+var D2JSP_QUEST_BIT_08										=  8;
+var D2JSP_QUEST_BIT_09										=  9;
+var D2JSP_QUEST_BIT_10										= 10;
+var D2JSP_QUEST_BIT_11										= 11;
+var D2JSP_QUEST_BIT_COMPLETED_SEEN_SWIRLY				= 12;
+var D2JSP_QUEST_BIT_COMPLETED_CURRENT_GAME			= 13;
+var D2JSP_QUEST_BIT_CANT_COMPLETE_QUEST				= 14;
+var D2JSP_QUEST_BIT_15										= 15;
+var D2JSP_QUEST_BIT_A1_Q1_ENTER_DEN						=  4;
+var D2JSP_QUEST_BIT_A1_Q2_ENTER_BURIAL					=  4;
+var D2JSP_QUEST_BIT_A1_Q3_PICKED_UP_SCROLL			=  3;
+var D2JSP_QUEST_BIT_A1_Q3_ACTIVATED_CAIRN_STONES	=  4;
+var D2JSP_QUEST_BIT_A1_Q3_COW_LEVEL						= 10;
+var D2JSP_QUEST_BIT_A1_Q3_CAIN_DONE_BY_ROGUES		= 14;
+var D2JSP_QUEST_BIT_A1_Q4_TOME_READ						=  2;
+var D2JSP_QUEST_BIT_A1_Q4_ENTERED_TOWER				=  6;
+var D2JSP_QUEST_BIT_A1_Q4_ENTERED_TOWER_LEVEL_5		=  4;
+var D2JSP_QUEST_BIT_A1_Q5_PICKUP_MALUS					=  6;
+var D2JSP_QUEST_BIT_A1_Q6_ENTERED_CATACOMBS_4		=  4;
+var D2JSP_QUEST_BIT_A2_Q1_FOUND_RADAMENT				=  4;
+var D2JSP_QUEST_BIT_A2_Q1_BOOK_AVAILABLE				=  5;
+var D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_AMULET			=  4;
+var D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_STAFF				=  5;
+var D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_CUBE				=  6;
+var D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_STAFF_HORADRIC	= 10;
+var D2JSP_QUEST_BIT_A2_Q2_MAKE_STAFF_HORADRIC		= 11;
+var D2JSP_QUEST_BIT_A2_Q3_SUN_GOES_OUT					=  2;
+var D2JSP_QUEST_BIT_A2_Q3_TALK_DROGNAN_SUN			=  3;
+var D2JSP_QUEST_BIT_A2_Q4_ENTERED_ARCANE				=  5;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_TYRAEL					=  3;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_JERHYN					=  4;
+var D2JSP_QUEST_BIT_A2_Q6_KILL_DURIEL					=  5;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_ATMA						=  6;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_WARRIV					=  7;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_DROGNAN					=  8;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_LYSANDER				=  9;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_CAIN						= 10;
+var D2JSP_QUEST_BIT_A2_Q6_TALK_FARA						= 11;
+var D2JSP_QUEST_BIT_A3_Q1_TALK_CAIN_FIGURINE			=  2;
+var D2JSP_QUEST_BIT_A3_Q1_TALK_CAIN_BIRD				=  4;
+var D2JSP_QUEST_BIT_A3_Q1_USED_POTION_OF_LIFE		=  5;
+var D2JSP_QUEST_BIT_A3_Q1_FOUND_FIGURINE				=  6;
+var D2JSP_QUEST_BIT_A3_Q2_PICKUP_GIDBINN				=  2;
+var D2JSP_QUEST_BIT_A3_Q2_GAVE_GIDBINN_TO_ORMUS		=  6;
+var D2JSP_QUEST_BIT_A3_Q2_HRATLI_GIVES_QUEST			=  3;
+var D2JSP_QUEST_BIT_A3_Q2_SPOKE_TO_ASHEARA			=  7;
+var D2JSP_QUEST_BIT_A3_Q2_RECEIVED_MAGIC_RING		=  8;
+var D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_EYE		=  3;
+var D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_BRAIN	=  4;
+var D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_FLAIL	=  5;
+var D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_HEART	=  6;
+var D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_WILL		=  7;
+var D2JSP_QUEST_BIT_A3_Q3_TRANSMUTE_FLAIL				= 11;
+var D2JSP_QUEST_BIT_A3_Q5_KILLED_COUNCIL				=  4;
+var D2JSP_QUEST_BIT_A3_Q6_ENTERED_DURANCE_3			=  9;
+var D2JSP_QUEST_BIT_A3_Q6_KILLED_MEPHISTO				= 11;
+var D2JSP_QUEST_BIT_A4_Q1_TALK_IZUAL_GHOST			=  5;
+var D2JSP_QUEST_BIT_A4_Q3_TALK_CAIN						=  8;
+var D2JSP_QUEST_BIT_A4_Q3_TALK_TYRAEL					=  9;
+var D2JSP_QUEST_BIT_A5_Q1_LARZUK_OFFERS_SOCKET		=  5;
+var D2JSP_QUEST_BIT_A5_Q2_RESCUED_SOLDIERS_5			=  4;
+var D2JSP_QUEST_BIT_A5_Q2_RESCUED_SOLDIERS_15		=  5;
+var D2JSP_QUEST_BIT_A5_Q3_READ_SCROLL					=  7;
+var D2JSP_QUEST_BIT_A5_Q3_MALAH_GAVE_SCROLL			=  8;
+var D2JSP_QUEST_BIT_A5_Q3_ANYA_GAVE_QUEST_REWARD	=  9;
+var D2JSP_QUEST_BIT_A5_Q4_ENTERED_NIHLATHAK_TEMPLE =  3;
+var D2JSP_QUEST_BIT_A5_Q4_ANYA_WILL_PERSONALIZE		=  4;
+var D2JSP_QUEST_BIT_A5_Q5_KILLED_ANCIENTS				=  4;
+var D2JSP_QUEST_BIT_A5_Q5_TALK_LARZUK					=  5;
+var D2JSP_QUEST_BIT_A5_Q5_TALK_CAIN						=  6;
+var D2JSP_QUEST_BIT_A5_Q5_TALK_ANYA						=  7;
+var D2JSP_QUEST_BIT_A5_Q5_TALK_MALAH					=  8;
+var D2JSP_QUEST_BIT_A5_Q5_TALK_QUAL_KEHK				=  9;
+var D2JSP_QUEST_BIT_A5_Q6_TALK_LARZUK					=  4;
+var D2JSP_QUEST_BIT_A5_Q6_TALK_CAIN						=  5;
+var D2JSP_QUEST_BIT_A5_Q6_TALK_MALAH					=  6;
+var D2JSP_QUEST_BIT_A5_Q6_TALK_TYRAEL					=  7;
+var D2JSP_QUEST_BIT_A5_Q6_TALK_QUAL_KEHK				=  8;
+var D2JSP_QUEST_BIT_A5_Q6_TALK_ANYA						=  9;
+var D2JSP_QUEST_BIT_A5_Q6_DIFFICULTY_LEVEL_DONE		= 10;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_ACT_COUNT					=  5;
+var D2JSP_QUEST_QUEST_COUNT_INTERNAL	=  8;
+var D2JSP_QUEST_WORD_COUNT					= 48;
+var D2JSP_QUEST_BIT_COUNT					= 16;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_UNKNOWN_STRING			= "*UNKNOWN QUEST BIT*";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//	Maps the quests seen on the game screen to the game quest bit data...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_Map                = new Array(D2JSP_QUEST_ACT_COUNT);
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1] = new Array(D2JSP_QUEST_QUEST_COUNT_INTERNAL);
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_ACT_START] = -1;	// Special
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_ACT_INTRO] =  0;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_1]         =  1;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_2]         =  2;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_3]         =  4;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_4]         =  5;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_5]         =  3;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_6]         =  6;
+
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2] = new Array(D2JSP_QUEST_QUEST_COUNT_INTERNAL);
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_ACT_START] =  7;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_ACT_INTRO] =  8;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_1]         =  9;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_2]         = 10;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_3]         = 11;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_4]         = 12;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_5]         = 13;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6]         = 14;
+
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3] = new Array(D2JSP_QUEST_QUEST_COUNT_INTERNAL);
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_ACT_START] = 15;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_ACT_INTRO] = 16;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_1]         = 20;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_2]         = 19;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_3]         = 18;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_4]         = 17;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_5]         = 21;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_6]         = 22;
+
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_4] = new Array(5);
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_ACT_START] = 23;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_ACT_INTRO] = 24;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_1]         = 25;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_2]         = 27;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_3]         = 26;
+
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5] = new Array(D2JSP_QUEST_QUEST_COUNT_INTERNAL);
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_ACT_START] = 28;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_ACT_INTRO] = 34;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_1]         = 35;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_2]         = 36;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_3]         = 37;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_4]         = 38;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_5]         = 39;
+D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6]         = 40;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps a quest word in the bit array to an game act and game quest...
+// ////////////////////////////////////////////////////////////////////////////
+D2JSP_QUEST_MapReverse = new Array(D2JSP_QUEST_WORD_COUNT);
+for (var count_1 = 0; count_1 < D2JSP_QUEST_Map.length; count_1++) {
+	for (var count_2 = D2JSP_QUEST_QUEST_1;
+		count_2 < D2JSP_QUEST_Map[count_1].length; count_2++)
+		D2JSP_QUEST_MapReverse[D2JSP_QUEST_Map[count_1][count_2]] =
+			[count_1, count_2];
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Quest names
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_NameSpecial = "Move into Act 1";
+var D2JSP_QUEST_Name = new Array(D2JSP_QUEST_WORD_COUNT);
+D2JSP_QUEST_Name[ 0] = "Introduced to Act 1 by Warriv";
+D2JSP_QUEST_Name[ 1] = "Den of Evil";
+D2JSP_QUEST_Name[ 2] = "Sisters' Burial Grounds";
+D2JSP_QUEST_Name[ 3] = "Tools of the Trade";
+D2JSP_QUEST_Name[ 4] = "The Search for Cain";
+D2JSP_QUEST_Name[ 5] = "The Forgotten Tower";
+D2JSP_QUEST_Name[ 6] = "Sisters to the Slaughter";
+D2JSP_QUEST_Name[ 7] = "Move from Act 1 to Act 2";
+D2JSP_QUEST_Name[ 8] = "Introduced to Act 2 by Jerhyn";
+D2JSP_QUEST_Name[ 9] = "Radament's Lair";
+D2JSP_QUEST_Name[10] = "The Horadric Staff";
+D2JSP_QUEST_Name[11] = "Tainted Sun";
+D2JSP_QUEST_Name[12] = "Arcane Sanctuary";
+D2JSP_QUEST_Name[13] = "The Summoner";
+D2JSP_QUEST_Name[14] = "The Seven Tombs";
+D2JSP_QUEST_Name[15] = "Move from Act 2 to Act 3";
+D2JSP_QUEST_Name[16] = "Introduced to Act 3 by Hratli";
+D2JSP_QUEST_Name[17] = "Lam Esen's Tome";
+D2JSP_QUEST_Name[18] = "Khalim's Will";
+D2JSP_QUEST_Name[19] = "Blade of the Old Religion";
+D2JSP_QUEST_Name[20] = "The Golden Bird";
+D2JSP_QUEST_Name[21] = "The Blackened Temple";
+D2JSP_QUEST_Name[22] = "The Guardian";
+D2JSP_QUEST_Name[23] = "Move from Act 3 to Act 4";
+D2JSP_QUEST_Name[24] = "Introduced to Act 4 by Tyrael";
+D2JSP_QUEST_Name[25] = "The Fallen Angel";
+D2JSP_QUEST_Name[26] = "Terror's End";
+D2JSP_QUEST_Name[27] = "Hell's Forge";
+D2JSP_QUEST_Name[28] = "Move from Act 4 to Act 5";
+D2JSP_QUEST_Name[29] = "?Act 4 unknown 2?";
+D2JSP_QUEST_Name[30] = "?Act 4 unknown 3?";
+D2JSP_QUEST_Name[31] = "?Act 4 unknown 4?";
+D2JSP_QUEST_Name[32] = "Dark Wanderer transformation seen in Act 3";
+D2JSP_QUEST_Name[33] = "?Act 4 unknown 6?";
+D2JSP_QUEST_Name[34] = "?Act 4 unknown 7?";
+D2JSP_QUEST_Name[35] = "Siege on Harrogath";
+D2JSP_QUEST_Name[36] = "Rescue on Mount Arreat";
+D2JSP_QUEST_Name[37] = "Prison of Ice";
+D2JSP_QUEST_Name[38] = "Betrayal of Harrogath";
+D2JSP_QUEST_Name[39] = "Rite of Passage";
+D2JSP_QUEST_Name[40] = "Eve of Destruction";
+D2JSP_QUEST_Name[41] = "?Post-Act 5 unknown 1?";
+D2JSP_QUEST_Name[42] = "?Post-Act 5 unknown 2?";
+D2JSP_QUEST_Name[43] = "?Post-Act 5 unknown 3?";
+D2JSP_QUEST_Name[44] = "?Post-Act 5 unknown 4?";
+D2JSP_QUEST_Name[45] = "?Post-Act 5 unknown 5?";
+D2JSP_QUEST_Name[46] = "?Post-Act 5 unknown 6?";
+D2JSP_QUEST_Name[47] = "?Post-Act 5 unknown 7?";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_BasicText = new Array(D2JSP_QUEST_BIT_COUNT);
+for (var count_1 = 0; count_1 < D2JSP_QUEST_BIT_COUNT; count_1++)
+	D2JSP_QUEST_BasicText[count_1] = "*UNKNOWN QUEST BIT*";
+D2JSP_QUEST_BasicText[D2JSP_QUEST_BIT_COMPLETED]               = "Quest completed";
+D2JSP_QUEST_BasicText[D2JSP_QUEST_BIT_REWARD_PENDING]          = "Quest reward is pending";
+D2JSP_QUEST_BasicText[D2JSP_QUEST_BIT_NPC_GIVEN]               = "Have been given the quest by an NPC";
+D2JSP_QUEST_BasicText[D2JSP_QUEST_BIT_EXITED_TOWN_SINCE_START] = "Exited town since quest started";
+D2JSP_QUEST_BasicText[D2JSP_QUEST_BIT_COMPLETED_SEEN_SWIRLY]   = "Have seen the swirly quest thingy";
+D2JSP_QUEST_BasicText[D2JSP_QUEST_BIT_COMPLETED_CURRENT_GAME]  = "Completed quest in current game";
+D2JSP_QUEST_BasicText[D2JSP_QUEST_BIT_CANT_COMPLETE_QUEST]     = "Can't complete quest";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_QUEST_MapSub = new Array(5);
+for (count_1 = 0; count_1 < D2JSP_QUEST_Map.length; count_1++) {
+	D2JSP_QUEST_MapSub[count_1] = new Array(D2JSP_QUEST_Map[count_1].length);
+	for (count_2 = 0; count_2 < D2JSP_QUEST_Map[count_1].length; count_2++) {
+		D2JSP_QUEST_MapSub[count_1][count_2] = new Array(D2JSP_QUEST_BIT_COUNT);
+		for (count_3 = 0; count_3 < D2JSP_QUEST_BIT_COUNT; count_3++)
+			D2JSP_QUEST_MapSub[count_1][count_2][count_3] = D2JSP_QUEST_UNKNOWN_STRING;
+	}
+//	for (var count_2 = D2JSP_QUEST_QUEST_1;
+	for (count_2 = 0; count_2 < D2JSP_QUEST_Map[count_1].length; count_2++) {
+		D2JSP_QUEST_MapSub[count_1][count_2][D2JSP_QUEST_BIT_COMPLETED]               = "Quest completed";
+		D2JSP_QUEST_MapSub[count_1][count_2][D2JSP_QUEST_BIT_REWARD_PENDING]          = "Quest reward is pending";
+		D2JSP_QUEST_MapSub[count_1][count_2][D2JSP_QUEST_BIT_NPC_GIVEN]               = "Have been given the quest by an NPC";
+		D2JSP_QUEST_MapSub[count_1][count_2][D2JSP_QUEST_BIT_EXITED_TOWN_SINCE_START] = "Exited town since quest started";
+		D2JSP_QUEST_MapSub[count_1][count_2][D2JSP_QUEST_BIT_COMPLETED_SEEN_SWIRLY]   = "Have seen the swirly quest thingy";
+		D2JSP_QUEST_MapSub[count_1][count_2][D2JSP_QUEST_BIT_COMPLETED_CURRENT_GAME]  = "Completed quest in current game";
+		D2JSP_QUEST_MapSub[count_1][count_2][D2JSP_QUEST_BIT_CANT_COMPLETE_QUEST]     = "Can't complete quest";
+	}
+}
+delete count_1;
+delete count_2;
+delete count_3;
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A1_Q1_ENTER_DEN]                = "Someone entered the Den of Evil";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A1_Q2_ENTER_BURIAL]             = "Someone entered the Burial Grounds";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A1_Q3_PICKED_UP_SCROLL]         = "Picked-up the Scroll of Inifuss";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A1_Q3_ACTIVATED_CAIRN_STONES]   = "Activated the Cairn Stones";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A1_Q3_COW_LEVEL]                = "Killed the Cow King";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A1_Q3_CAIN_DONE_BY_ROGUES]      = "Cain was rescued by the Rogues";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_4][D2JSP_QUEST_BIT_A1_Q4_TOME_READ]                = "Have read the Moldy Tome";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_4][D2JSP_QUEST_BIT_A1_Q4_ENTERED_TOWER]            = "Entered the Forgotten Tower";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_4][D2JSP_QUEST_BIT_A1_Q4_ENTERED_TOWER_LEVEL_5]    = "Entered the Tower Cellar Level 5";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A1_Q5_PICKUP_MALUS]             = "Have picked up the Horadric Malus";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_1][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A1_Q6_ENTERED_CATACOMBS_4]      = "Someone entered Catacombs Level 4";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A2_Q1_FOUND_RADAMENT]           = "Have located Radament";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A2_Q1_BOOK_AVAILABLE]           = "Book of Skill available for reading";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_AMULET]         = "Cain has spoken about the Amulet of the Viper";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_STAFF]          = "Cain has spoken about the Staff of Kings";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_CUBE]           = "Cain has spoken about the Horadric Cube";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A2_Q2_TALK_CAIN_STAFF_HORADRIC] = "Cain has spoken about the Horadric Staff";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A2_Q2_MAKE_STAFF_HORADRIC]      = "Have transmuted the Horadric Staff";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A2_Q3_SUN_GOES_OUT]             = "The sun has gone out";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A2_Q3_TALK_DROGNAN_SUN]         = "Have spoken to Drognan about the Tainted Sun";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A2_Q4_ENTERED_ARCANE]           = "Someone entered the Arcane Sanctuary";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_TYRAEL]              = "Have spoken with Tyrael in Duriel's Lair";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_JERHYN]              = "Have spoken with Jerhyn after killing Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_KILL_DURIEL]              = "Have killed Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_ATMA]                = "Have spoken with Atma after killing Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_WARRIV]              = "Have spoken with Warriv after killing Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_DROGNAN]             = "Have spoken with Drognan after killing Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_LYSANDER]            = "Have spoken with Lysander after killing Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_CAIN]                = "Have spoken with Cain after killing Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_2][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A2_Q6_TALK_FARA]                = "Have spoken with Fara after killing Duriel";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A3_Q1_TALK_CAIN_FIGURINE]       = "Have spoken to Cain about the Jade Figurine";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A3_Q1_TALK_CAIN_BIRD]           = "Have spoken to Cain about the Golden Bird";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A3_Q1_USED_POTION_OF_LIFE]      = "Set when the Potion of Life is received from Alkor, unset after using";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A3_Q1_FOUND_FIGURINE]           = "Have found the Jade Figurine";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A3_Q2_PICKUP_GIDBINN]           = "Have picked up the Gidbinn";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A3_Q2_GAVE_GIDBINN_TO_ORMUS]    = "Gave Gidbinn to Ormus";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A3_Q2_HRATLI_GIVES_QUEST]       = "Hratli has given the Gidbinn quest";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A3_Q2_SPOKE_TO_ASHEARA]         = "Spoke to Asheara";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A3_Q2_RECEIVED_MAGIC_RING]      = "Received magic ring from Ormus";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_EYE]     = "Spoke to Cain about Khalim's Eye";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_BRAIN]   = "Spoke to Cain about Khalim's Brain";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_FLAIL]   = "Spoke to Cain about Khalim's Flail";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_HEART]   = "Spoke to Cain about Khalim's Heart";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A3_Q3_TALK_CAIN_KHALIM_WILL]    = "Spoke to Cain about Khalim's Will";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A3_Q3_TRANSMUTE_FLAIL]          = "Transmutation of Khalim's Will is in progress";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A3_Q5_KILLED_COUNCIL]           = "Killed the High Council of Tranincal";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A3_Q6_ENTERED_DURANCE_3]        = "Entered Durance 3";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_3][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A3_Q6_KILLED_MEPHISTO]          = "Killed Mephisto";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A4_Q1_TALK_IZUAL_GHOST]         = "Spoke with Izual's Ghost";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A4_Q3_TALK_CAIN]                = "Have spoken with Cain after killing Diablo";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_4][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A4_Q3_TALK_TYRAEL]              = "Have spoken with Tyrael after killing Diablo";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_1][D2JSP_QUEST_BIT_A5_Q1_LARZUK_OFFERS_SOCKET]     = "Larzuk will socket your items";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A5_Q2_RESCUED_SOLDIERS_5]       = "Rescued the first five soldiers";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_2][D2JSP_QUEST_BIT_A5_Q2_RESCUED_SOLDIERS_15]      = "Rescued all fifteen soldiers";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A5_Q3_READ_SCROLL]              = "Have read the Scroll of Resistance";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A5_Q3_ANYA_GAVE_QUEST_REWARD]   = "Have received Anya's quest reward";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_3][D2JSP_QUEST_BIT_A5_Q3_MALAH_GAVE_SCROLL]        = "Have received the Scroll of Resistance from Malah";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_4][D2JSP_QUEST_BIT_A5_Q4_ENTERED_NIHLATHAK_TEMPLE] = "Entered Nihlathak's Temple";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_4][D2JSP_QUEST_BIT_A5_Q4_ANYA_WILL_PERSONALIZE]    = "Anya will personalize an item for you";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A5_Q5_KILLED_ANCIENTS]          = "Killed the Ancients";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A5_Q5_TALK_LARZUK]              = "Have spoken with Larzuk after killing Ancients";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A5_Q5_TALK_CAIN]                = "Have spoken with Cain after killing Ancients";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A5_Q5_TALK_ANYA]                = "Have spoken with Anya after killing Ancients";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A5_Q5_TALK_MALAH]               = "Have spoken with Malah after killing Ancients";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_5][D2JSP_QUEST_BIT_A5_Q5_TALK_QUAL_KEHK]           = "Have spoken with Qual-Kehk after killing Ancients";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A5_Q6_TALK_LARZUK]              = "Have spoken with Larzuk after killing Baal";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A5_Q6_TALK_CAIN]                = "Have spoken with Cain after killing Baal";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A5_Q6_TALK_MALAH]               = "Have spoken with Malah after killing Baal";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A5_Q6_TALK_TYRAEL]              = "Have spoken with Tyrael after killing Baal";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A5_Q6_TALK_QUAL_KEHK]           = "Have spoken with Qual-Kehk after killing Baal";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A5_Q6_TALK_ANYA]                = "Have spoken with Anya after killing Baal";
+D2JSP_QUEST_MapSub[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6][D2JSP_QUEST_BIT_A5_Q6_DIFFICULTY_LEVEL_DONE]    = "Difficulty is completed and title assigned";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsValidAct(in_act)
+{
+	return(((in_act > 0) && (in_act <= D2JSP_QUEST_Map.length)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsValidQuest(in_act, in_quest)
+{
+	return((D2JSP_QUEST_IsValidAct(in_act) && (in_quest > 0) &&
+		(in_quest <= (D2JSP_QUEST_Map[in_act - 1].length - D2JSP_QUEST_QUEST_1)))?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Though acts and quests are numbered starting at 1, bits start at 0.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsValidQuestBit(in_act, in_quest, in_bit)
+{
+	return((D2JSP_QUEST_IsValidQuest(in_act, in_quest) && (in_bit >= 0) &&
+		(in_bit < D2JSP_QUEST_BIT_COUNT)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_AnyBitSet(in_act, in_quest)
+{
+	if (D2JSP_QUEST_IsValidQuest(in_act, in_quest)) {
+		var count_1;
+		for (count_1 = 0; count_1 < D2JSP_QUEST_BIT_COUNT; count_1++) {
+			if (me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1], count_1))
+				return(true);
+		}
+	}
+	else
+		return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestBit(in_act, in_quest, in_bit)
+{
+	return((D2JSP_QUEST_IsValidQuestBit(in_act, in_quest, in_bit)) ?
+		me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1], in_bit) : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestDone(in_act, in_quest)
+{
+	return((D2JSP_QUEST_IsValidQuestBit(in_act, in_quest,
+		D2JSP_QUEST_BIT_COMPLETED)) ?
+		me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1],
+		D2JSP_QUEST_BIT_COMPLETED) : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestCanNotComplete(in_act, in_quest)
+{
+	return((D2JSP_QUEST_IsValidQuestBit(in_act, in_quest,
+		D2JSP_QUEST_BIT_CANT_COMPLETE_QUEST)) ?
+		me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1],
+		D2JSP_QUEST_BIT_CANT_COMPLETE_QUEST) : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestCanComplete(in_act, in_quest)
+{
+	return(((!D2JSP_QUEST_GetQuestDone(in_act, in_quest)) &&
+		(!D2JSP_QUEST_GetQuestCanNotComplete(in_act, in_quest))) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestCompletedInCurrentGame(in_act, in_quest)
+{
+	return((D2JSP_QUEST_IsValidQuestBit(in_act, in_quest,
+		D2JSP_QUEST_BIT_COMPLETED_CURRENT_GAME)) ?
+		me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1],
+		D2JSP_QUEST_BIT_COMPLETED_CURRENT_GAME) : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestWord(in_act, in_quest)
+{
+	if (D2JSP_QUEST_IsValidQuest(in_act, in_quest)) {
+		var quest_word = 0;
+		var count_1;
+		for (count_1 = 0; count_1 < D2JSP_QUEST_BIT_COUNT; count_1++)
+			quest_word |=
+				(me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1], count_1) <<
+				count_1);
+		return(quest_word);
+	}
+	else
+		return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Returns the LSB as the left-most character. If you want the string in the
+// usual binary format (LSB on the right), use the related function
+// D2JSP_QUEST_GetQuestWordStringReverse().
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestWordString(in_act, in_quest)
+{
+	if (D2JSP_QUEST_IsValidQuest(in_act, in_quest)) {
+		var quest_word = "";
+		var count_1;
+		for (count_1 = 0; count_1 < D2JSP_QUEST_BIT_COUNT; count_1++)
+			quest_word +=
+				(me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1], count_1)) ?
+				"1" : "0";
+		return(quest_word);
+	}
+	else
+		return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestWordStringReverse(in_act, in_quest)
+{
+	if (D2JSP_QUEST_IsValidQuest(in_act, in_quest)) {
+		var quest_word = "";
+		var count_1;
+		for (count_1 = D2JSP_QUEST_BIT_COUNT; count_1; ) {
+			count_1--;
+			quest_word +=
+				(me.getQuest(D2JSP_QUEST_Map[in_act - 1][in_quest + 1], count_1)) ?
+				"1" : "0";
+		}
+		return(quest_word);
+	}
+	else
+		return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestText(in_act, in_quest)
+{
+	return((D2JSP_QUEST_IsValidQuest(in_act, in_quest)) ?
+		D2JSP_QUEST_Name[D2JSP_QUEST_Map[in_act - 1][in_quest + 1]] : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestBitText(in_act, in_quest, in_bit)
+{
+	return((D2JSP_QUEST_IsValidQuestBit(in_act, in_quest, in_bit)) ?
+	  D2JSP_QUEST_MapSub[in_act - 1][in_quest + 1][in_bit] : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// These parameters are zero-based and index into the full arrays...
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_GetQuestTextBasic(in_act, in_quest)
+{
+	return(((in_act >= 0) && (in_act < D2JSP_QUEST_Map.length) &&
+		(in_quest >= 0) && (in_quest < D2JSP_QUEST_Map[in_act].length)) ?
+		(((in_act == D2JSP_QUEST_ACT_1) &&
+		(in_quest == D2JSP_QUEST_QUEST_ACT_START)) ? D2JSP_QUEST_NameSpecial :
+		D2JSP_QUEST_Name[D2JSP_QUEST_Map[in_act][in_quest]]) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsStartedQuest(in_act, in_quest)
+{
+	return((D2JSP_QUEST_IsValidQuest(in_act, in_quest) &&
+		D2JSP_QUEST_AnyBitSet(in_act, in_quest)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsCompletedQuest(in_act, in_quest)
+{
+	return((D2JSP_QUEST_IsValidQuest(in_act, in_quest) &&
+		D2JSP_QUEST_GetQuestBit(in_act, in_quest, D2JSP_QUEST_BIT_COMPLETED)) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsStartedAct(in_act)
+{
+	if (D2JSP_QUEST_IsValidAct(in_act)) {
+		if (in_act == 1)
+			return(true);						// Obviously.
+		return((me.getQuest(D2JSP_QUEST_Map[in_act - 1]
+			[D2JSP_QUEST_QUEST_ACT_START], D2JSP_QUEST_BIT_COMPLETED)) ?
+			true : false);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsCompletedAct(in_act)
+{
+	if (D2JSP_QUEST_IsValidAct(in_act)) {
+/*
+	Because one can make Cows after the A5Q6 quest, this shouldn't be used as
+	the determinate of completion.
+		if (in_act == 5)
+			return(D2JSP_QUEST_IsCompletedDifficulty(in_act));
+*/
+		if (in_act == 5)
+			D2JSP_QUEST_IsCompletedQuest(in_act, 6)
+		return(D2JSP_QUEST_IsStartedAct(in_act + 1));
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsIntroducedToAct(in_act)
+{
+	if (D2JSP_QUEST_IsValidAct(in_act))
+		return((me.getQuest(D2JSP_QUEST_Map[in_act - 1]
+			[D2JSP_QUEST_QUEST_ACT_INTRO], D2JSP_QUEST_BIT_COMPLETED)) ?
+			true : false);
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_IsCompletedDifficulty()
+{
+	return((me.getQuest(D2JSP_QUEST_Map[D2JSP_QUEST_ACT_5][D2JSP_QUEST_QUEST_6],
+		D2JSP_QUEST_BIT_A5_Q6_DIFFICULTY_LEVEL_DONE)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_HighestStartedAct()
+{
+	for (var count_1 = 5; count_1; count_1--) {
+		if (D2JSP_QUEST_IsStartedAct(count_1))
+			return(count_1);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_HighestCompletedAct()
+{
+	for (var count_1 = 5; count_1; count_1--) {
+		if (D2JSP_QUEST_IsCompletedAct(count_1))
+			return(count_1);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_QUEST_DumpKeyToFile(file_handle)
+{
+	for (var count_1 = 0; count_1 < D2JSP_QUEST_Name.length; count_1++) {
+		file_handle.writeLine("==== ====== ==== " +
+			D2JSP_UTIL_FORMAT_LJust("", 60, "="));
+		file_handle.writeLine("Word Index:   " + ((count_1 > 9) ? "" : " ") +
+			count_1 + ": " + D2JSP_QUEST_Name[count_1]);
+		file_handle.writeLine("---- ------ ---- " +
+			D2JSP_UTIL_FORMAT_LJust("", 60, "-"));
+		if (D2JSP_QUEST_MapReverse[count_1] != null) {
+			var this_act   = D2JSP_QUEST_MapReverse[count_1][0];
+			var this_quest = D2JSP_QUEST_MapReverse[count_1][1];
+			for (count_2 = 0; count_2 < D2JSP_QUEST_BIT_COUNT; count_2++) {
+				var this_bit = 1 << count_2;
+				for (count_3 = 0; count_3 < D2JSP_QUEST_MapSub.length; count_3++) {
+					if ((D2JSP_QUEST_MapSub[this_act][this_quest][count_2] != null) &&
+						(D2JSP_QUEST_MapSub[this_act][this_quest][count_2] !=
+						D2JSP_QUEST_UNKNOWN_STRING)) {
+						file_handle.writeLine("          : " +
+							D2JSP_UTIL_FORMAT_ZeroFill(this_bit.toString(16), 4) +
+							": " + D2JSP_QUEST_MapSub[this_act][this_quest][count_2]);
+						break;
+					}
+				}
+			}
+		}
+		file_handle.writeLine("==== ====== ==== " +
+			D2JSP_UTIL_FORMAT_LJust("", 60, "="));
+		file_handle.writeLine("");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Quests_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var file_name = "output/RegressionTest._D2JSP_Quests.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_Quests.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	if (file_handle) {
+		D2JSP_QUEST_DumpKeyToFile(file_handle);
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

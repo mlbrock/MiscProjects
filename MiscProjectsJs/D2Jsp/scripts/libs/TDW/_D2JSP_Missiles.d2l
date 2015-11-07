@@ -1,0 +1,157 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Missiles Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Missiles.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion missile constants.
+//
+// Revison History : 2002-10-06 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Missiles_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Missiles_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MISSILE_MINIMUM =   0;
+var D2JSP_MISSILE_MAXIMUM = 643;
+var D2JSP_MISSILE_COUNT   = 644;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MISSILE_Class()
+{
+	this.missile_list          = new Array(D2JSP_MISSILE_COUNT);
+	this.missile_hash_skill_id = new Array();
+	this.build_date            = new Date();
+
+	this.findByLinkedSkill     = D2JSP_MISSILE_Class_findByLinkedSkill;
+	this.toString              = D2JSP_MISSILE_Class_toString;
+
+	for (var count_1 = D2JSP_MISSILE_MINIMUM; count_1 <= D2JSP_MISSILE_MAXIMUM;
+		count_1++) {
+		this.missile_list[count_1] = new Array(D2JSP_BASE_MISSILES_NAMES.length);
+		for (count_2 = 0; count_2 < D2JSP_BASE_MISSILES_NAMES.length; count_2++)
+			this.missile_list[count_1][count_2] =
+				getBaseStat(D2JSP_BASESTAT_MISSILE, count_1, count_2);
+/*
+		if (this.missile_list[count_1][D2JSP_BASE_MISSILES_SKILL])
+			this.missile_hash_skill_id
+				[this.missile_list[count_1][D2JSP_BASE_MISSILES_SKILL]] =
+				this.missile_list[count_1];
+*/
+		// As there can be multiple entries in the missiles.txt MPQ for the
+		//	same skill, we ensure that only the first is picked (has a particular
+		//	problem with the range for the Sorceress Lightning skill (# 49)).
+		if ((this.missile_list[count_1][D2JSP_BASE_MISSILES_SKILL]) &&
+			(!(this.missile_list[count_1][D2JSP_BASE_MISSILES_SKILL] in
+			this.missile_hash_skill_id)))
+			this.missile_hash_skill_id[this.missile_list[count_1]
+				[D2JSP_BASE_MISSILES_SKILL]] = this.missile_list[count_1];
+	}
+
+	function D2JSP_MISSILE_Class_findByLinkedSkill(skill_id) {
+		return(this.missile_hash_skill_id[skill_id + ""]);
+	}
+
+	function D2JSP_MISSILE_Class_toString() {
+		return("D2JSP_MISSILE_Class() object built " + this.build_date +
+			", contains " + this.missile_list.length + " missile base stats.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MISSILE = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MISSILE_Create()
+{
+	if (!D2JSP_MISSILE)
+		D2JSP_MISSILE = new D2JSP_MISSILE_Class();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MISSILE_IsValid(in_missile)
+{
+	return(((in_missile >= D2JSP_MISSILE_MINIMUM) &&
+		(in_missile <= D2JSP_MISSILE_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MISSILE_GetByLinkedSkill(skill_id)
+{
+	D2JSP_MISSILE_Create();
+
+	return(D2JSP_MISSILE.findByLinkedSkill(skill_id));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Missiles_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+includeonce("TDW/_D2JSP_Skills.d2l");
+function main()
+{
+	var file_name = "output/_RegressionTest._D2JSP_Missiles.d2l.txt";
+	var my_log    = new D2JSP_UTIL_Log(file_name, null, null, null, null, true);
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	my_log.logInfo("Writing '_D2JSP_Missiles.d2l' regression test to file '" +
+		file_name + "'...");
+
+	my_log.logInfo("Creating the missile data...");
+	D2JSP_MISSILE_Create();
+	my_log.logInfo("Missile data created.");
+
+	my_log.emitSep("=");
+	my_log.emitSep("=");
+	my_log.logInfo("Skill-to-Missile Linkage List:");
+	my_log.emitSep("=");
+	my_log.logInfo("Skill Id Skill Name                       Missile Range");
+	my_log.logInfo("-------- -------------------------------- -------------");
+	for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+		count_1++) {
+		var this_missile = D2JSP_MISSILE_GetByLinkedSkill(count_1);
+		if (this_missile)
+			my_log.logInfo(D2JSP_UTIL_FORMAT_RJust(count_1, 8) + " " +
+				D2JSP_UTIL_FORMAT_LJust(D2JSP_SKILL_ToSkillName(count_1), 32) + " "+
+				D2JSP_UTIL_FORMAT_RJust(this_missile[D2JSP_BASE_MISSILES_RANGE],13));
+	}
+	my_log.emitSep("=");
+
+	my_log.closeLog();
+
+	print("Regression test complete.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+

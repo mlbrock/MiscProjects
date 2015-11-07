@@ -1,0 +1,262 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+//TDW_BOT_ConfigureList["teleport.step.size"]          = 15;
+//TDW_BOT_ConfigureList["teleport.step.size.max"]      = 120;
+TDW_BOT_ConfigureList["operation.party"]               = true;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var DoNextGame = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	TDW_BBMN_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BBMN_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_BotBaalMinionsNone", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_ContextList["operation.party"] = true;
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+//	TDW_BOT_SUPP_DoMessageDND("talk witcha lata!");
+
+	TDW_BBMN_KillBaalMinions();
+
+	while (!DoNextGame) {
+		me.overhead("!Command me!");
+		delay(500);
+	}
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BBMN_KillBaalMinions()
+{
+	var count_1;
+
+var TDW_RS_ThroneCorner     = [15112, 5005];
+
+var TDW_RS_ThroneTileSpot   = [15089, 5006];
+var TDW_RS_BaalPortalSpot   = [15207, 5886];
+var TDW_RS_MoveToThroneList = [
+//	[15102, 5240],
+//	[15072, 5241],
+//	[15103, 5244],
+//	[15124, 5240],
+//	[15111, 5206],
+//	[15083, 5207],
+//	[15080, 5166],
+//	[15063, 5167],
+//	[15111, 5167],
+//	[15128, 5168],
+//	[15112, 5128],
+//	[15133, 5129],
+//	[15082, 5127],
+//	[15064, 5126],
+//	[15097, 5125],
+//	[15096, 5112],
+//	[15096, 5099],
+//	[15114, 5103],
+//	[15084, 5108],
+//	[15095, 5091],
+	[15094, 5067],
+	[15094, 5044],
+	[15094, 5029],
+	[15075, 5010],
+	[15076, 5039],
+	[15116, 5042],
+	[15109, 5005],
+	[15094, 5031]
+];
+var TDW_RS_MoveAtThroneList = [
+	[15095, 5028],
+	[15077, 5010],
+	[15113, 5011],
+	[15091, 5031],
+	[15093, 5052],
+	[15091, 5026]
+];
+var TDW_RS_FindBaalList = [
+	[15172, 5888],
+	[15168, 5938],
+	[15135, 5943],
+	[15137, 5899],
+	[15092, 5900],
+	[15134, 5948],
+	[15173, 5929],
+	[15171, 5885]
+];
+
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	// //////////////////////////////////////////////////////////////////////
+	// Have to pre-build these explicitly because we don't actually path there.
+	TDW_PATH_CreateArea(D2JSP_AREA_THE_WORLDSTONE_CHAMBER);
+	TDW_PATH_BuildMap(D2JSP_AREA_THE_WORLDSTONE_CHAMBER);
+	// //////////////////////////////////////////////////////////////////////
+
+	if (TDW_BOT_MOVE_WaypointOutbound(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2))
+		return(-1);
+	else if ((return_code = TDW_PATH_GotoTargetArea(
+		D2JSP_AREA_THRONE_OF_DESTRUCTION, access_strategy,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT)))
+		return(return_code);
+
+	D2JSP_UTIL_BNET_OverheadSafe("Clearing Throne area...");
+
+	TDW_BOT_MOVE_TeleportToDestinationList(TDW_RS_MoveToThroneList,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_TARGET);
+
+	for (count_1 = 0; count_1 < TDW_RS_MoveAtThroneList.length; count_1++) {
+		TDW_BOT_MOVE_TeleportToDestination(TDW_RS_MoveAtThroneList[count_1],
+			TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+		if (TDW_ISF_Cfg != null)
+			TDW_BOT_SUPP_MySnagIt([me.x, me.y]);
+		delay(100);
+	}
+
+	TDW_BOT_MOVE_TeleportToDestination(TDW_RS_ThroneCorner,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	D2JSP_UTIL_BNET_SaySafe("Take my TP to kill Baal's Minions.");
+	D2JSP_UTIL_BNET_SaySafe("Waiting 30 seconds for you to take the TP...");
+	delay(30000);
+
+  return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ has expressed hostility towards you.$/i)) {
+		if (TDW_BOT_ContextList["operation.hostility.fight"]) {
+			var player_name = arguments[0].split(/[\s]/)[0];
+			TDW_BOT_AttackNPCSpec.addPlayer(player_name);
+			log_obj.logHostile(D2JSP_UTIL_COLOR_RED + "Player " + player_name +
+				" has gone hostile; you are prepared to duel.");
+		}
+		else if (TDW_BOT_ContextList["operation.quit.on.hostile"]) {
+			log_obj.logHostile(D2JSP_UTIL_COLOR_RED +
+				"********** HOSTILITY EXIT: " + arguments[0]);
+			log_obj.closeLog();
+			quit();								// We're in trouble. REALLY quit()!
+		}
+		else
+			log_obj.logHostile(D2JSP_UTIL_COLOR_RED + "Player " + player_name +
+				" has gone hostile.");
+	}
+	else if (arguments[0].match(/^\S+ is no longer hostile towards you.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (TDW_BOT_AttackNPCSpec.findNPC(player_name)) {
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+			log_obj.logInfo(D2JSP_UTIL_COLOR_YELLOW + "Player " + player_name +
+				" is no longer hostile; you are no longer prepared to duel.");
+		}
+		else
+			log_obj.logInfo(D2JSP_UTIL_COLOR_YELLOW + "Player " + player_name +
+				" is no longer hostile.");
+	}
+	else
+		log_obj.logInfo(arguments[0]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			;
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (arguments[0].
+		match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+	else if (arguments[0].match(/^\S+ dropped due to timeout\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+	else if (arguments[0].toLowerCase() == ">nextgameplz")
+		DoNextGame = true;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+

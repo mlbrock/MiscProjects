@@ -1,0 +1,249 @@
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Special Chests Bot Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BotSpecialChests.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Special Chests Bot Library.
+//
+// Revison History : 2003-05-18 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_BotSpecialChests_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_BotSpecialChests_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_SPECIALCHESTS_FLAG_NONE          = 0x0000;
+var TDW_SPECIALCHESTS_FLAG_BOUNCE_PICKUP = 0x0001;
+
+var TDW_SPECIALCHESTS_FLAG_MASK          =
+	TDW_SPECIALCHESTS_FLAG_NONE |
+	TDW_SPECIALCHESTS_FLAG_BOUNCE_PICKUP;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["tdw.bot.special.chests.area.list"] = [D2JSP_AREA_HELL1, D2JSP_AREA_HELL2, D2JSP_AREA_HELL3];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_SpecialChests_Start(config_list)
+{
+TDW_BOT_ConfigureList["operation.log.level.file"] = D2JSP_UTIL_LOG_Level_MINUTIAE;
+	var init_err_msg = TDW_BOT_SpecialChests_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_SpecialChests_Run();
+
+	TDW_BOT_SpecialChests_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_SpecialChests_Init(config_list)
+{
+	return(TDW_BOT_Init("TDW_BotSpecialChests", null, config_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_SpecialChests_Run(access_strategy, special_chest_flags)
+{
+	TDW_BOT_SpecialChests_Core(
+		TDW_BOT_ContextList["tdw.bot.special.chests.area.list"],
+		access_strategy, special_chest_flags);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_SpecialChests_Core(area_list, access_strategy,
+	special_chest_flags)
+{
+	var chest_list      = new Array();
+	var old_attack_flag = TDW_BOT_AttackNPCSpec.setDoAttackOff();
+
+	if (D2JSP_UTIL_GEN_TypeOfArray(area_list) && area_list.length) {
+		for (var count_1 = 0; count_1 < area_list.length; ) {
+			var this_area = (D2JSP_UTIL_GEN_TypeOfString(area_list[count_1])) ?
+				parseInt(area_list[count_1], 10) : area_list[count_1];
+			if ((this_area != null) && (!D2JSP_AREA_IsValidInGame(this_area))) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Invalid destination area specified (" +
+					area_list[count_1] + ") --- ignored.");
+				area_list.splice(count_1, 1);
+			}
+			else if (D2JSP_AREA_IsTown(this_area)) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Destination area specified for " +
+					"clearance (area number " + this_area + " = " +
+					D2JSP_AREA_AreaToName(this_area) + " is a town --- ignored.");
+				area_list.splice(count_1, 1);
+			}
+			else {
+				var tmp_list = TDW_PATHL_GetSpecialChestListForArea(this_area);
+				if (!tmp_list.length) {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Destination area specified for " +
+						"special chest popping (area number " + this_area + " = " +
+					D2JSP_AREA_AreaToName(this_area) + " does not possess a " +
+					"special chest --- ignored.");
+					area_list.splice(count_1, 1);
+				}
+				else {
+					chest_list = chest_list.concat(tmp_list);
+					count_1++;
+				}
+			}
+		}
+	}
+
+	if ((!D2JSP_UTIL_GEN_TypeOfArray(chest_list)) || (!chest_list.length)) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"No valid destination area(s) specified for which special chests " +
+			"be popped!!!");
+		return(-1);
+	}
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_BOT_AttackNPCSpec = new TDW_BOT_ATTACK_SpecialNPCSpec();
+
+	if (!TDW_MOVE_WaypointAccessDataDoneFlag) {
+		TDW_MOVE_GetMyWayPointAccess();
+		access_strategy.wp_access =
+			D2JSP_UTIL_GEN_CloneObject(TDW_MOVE_WaypointAccessData);
+	}
+
+	if ((!D2JSP_AREA_IsTown(me.area)) ||
+		(me.act != D2JSP_AREA_GetAct(chest_list[0].dst_area)))
+		TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(chest_list[0].dst_area),
+			"waypoint");
+
+	var inited_area_list = TDW_PATH_GetInitedAreas();
+
+	for (var count_1 = 0; count_1 < chest_list.length; count_1++) {
+		var this_chest = chest_list[count_1];
+		if ((me.act == 2) && (this_chest.dst_area == getRoom(0).correcttomb)) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_STATUS, "Target area number " +
+					this_chest.dst_area + " (" +
+					D2JSP_AREA_AreaToName(this_chest.dst_area) + ") skipped " +
+					"because it is the True Tomb of Tal Rasha.");
+			continue;
+		}
+		if (me.act != D2JSP_AREA_GetAct(this_chest.dst_area)) {
+			if (!D2JSP_AREA_IsTown(me.area))
+				TDW_BOT_MOVE_RecoverInTown(false);
+			TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(this_chest.dst_area),
+				"waypoint");
+		}
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_STATUS, "Target area is number " +
+			this_chest.dst_area + " (" +
+			D2JSP_AREA_AreaToName(this_chest.dst_area) + ").");
+		var coord_list =
+			TDW_PATHL_FindSpecialChestListInAreaPresetCoordsList([this_chest]);
+		coord_list = D2JSP_UTIL_PATH_ProgressivePathSort(coord_list);
+		TDW_BOT_CHECK_PrecastChecks();
+		if (TDW_PATH_GotoTargetArea(this_chest.dst_area, access_strategy,
+			TDW_PATHL_AREA_LOAD_FLAG_BASIC |
+			TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX |
+			TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_SRC |
+			TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_DST |
+			TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_SRC |
+			TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_DST |
+			TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA))
+			continue;
+		if (!(special_chest_flags & TDW_SPECIALCHESTS_FLAG_BOUNCE_PICKUP)) {
+			for (var count_2 = 0; count_2 < coord_list.length; count_2++) {
+				if (return_code = access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[count_2]))
+					break;
+				TDW_BOT_SUPP_PopNearbyChests(
+					TDW_BOT_ContextList["mysnagit.pop.chests.radius"]);
+				TDW_BOT_SUPP_MySnagIt(coord_list[count_2]);
+			}
+		}
+		else if (coord_list.length == 1) {
+			if (return_code = access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[0]))
+				continue;
+			TDW_BOT_SUPP_PopNearbyChests(
+				TDW_BOT_ContextList["mysnagit.pop.chests.radius"], coord_list[0]);
+			var adj_coords = new Array();
+			var adj_list   = TDW_PATH_GetAdjacentRoomsByXYPair(coord_list[0]);
+			for (var count_2 = 0; count_2 < adj_list.length; count_2++) {
+				var center = adj_list[count_2].getCenterAccessible();
+				if (center != null) {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_GOTO_XYPAIR, center);
+					TDW_BOT_SUPP_PopNearbyChests(
+						TDW_BOT_ContextList["mysnagit.pop.chests.radius"], center);
+					adj_coords.push(center);
+					if (adj_coords.length == 3)
+						break;
+				}
+			}
+			adj_coords.push(coord_list[0]);
+			adj_coords.reverse();
+			for (var count_2 = 0; count_2 < adj_coords.length; count_2++) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_GOTO_XYPAIR, adj_coords[count_2]);
+				TDW_BOT_SUPP_MySnagIt(adj_coords[count_2]);
+			}
+		}
+		else if (coord_list.length > 1) {
+			for (var count_2 = 0; count_2 < 2; count_2++) {
+				for (var count_3 = 0; count_3 < coord_list.length; count_3++) {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[count_3]);
+					if (!count_2)
+						TDW_BOT_SUPP_PopNearbyChests(
+							TDW_BOT_ContextList["mysnagit.pop.chests.radius"],
+							coord_list[count_3]);
+					else
+						TDW_BOT_SUPP_MySnagIt(coord_list[count_3]);
+				}
+			}
+		}
+		if ((count_1 < (chest_list.length - 1)) &&
+			(me.area != chest_list[count_1 + 1].dst_area)) {
+			TDW_BOT_MOVE_RecoverInTown(false);
+			TDW_PATH_FreeInitedAreas(inited_area_list, TDW_BOT_Log);
+		}
+	}
+
+	TDW_PATH_FreeInitedAreas(inited_area_list, TDW_BOT_Log);
+
+	TDW_BOT_AttackNPCSpec.setDoAttack(old_attack_flag);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_SpecialChests_Finish()
+{
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_BotSpecialChests_d2l) == "undefined") {
+

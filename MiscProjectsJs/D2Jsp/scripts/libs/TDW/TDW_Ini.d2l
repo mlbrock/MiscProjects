@@ -1,0 +1,419 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW INI File Parsing Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Ini.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: INI file reading library.
+//
+// Revison History : 2003-02-12 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_TDW_Ini_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_TDW_Ini_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_FormatLineNumber(line_number)
+{
+	return(D2JSP_UTIL_FORMAT_RJust(line_number, 8));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_FormatLine(line_number, text, line_number_flag)
+{
+	return(((line_number_flag) ?
+		(D2JSP_UTIL_FORMAT_RJust(line_number, 8) + ":") : "") + text);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_Item(line_number, name, op, value)
+{
+	this.line_number = line_number;
+	this.name        = D2JSP_UTIL_FORMAT_Trim(name);
+	this.op          = D2JSP_UTIL_FORMAT_Trim(op);
+	this.value       = D2JSP_UTIL_FORMAT_Trim(value);
+
+	this.toString    = TDW_INI_Item_toString;
+	this.toItem      = TDW_INI_Item_toItem;
+
+	function TDW_INI_Item_toString() {
+		return(this.name + this.op + this.value);
+	}
+
+	function TDW_INI_Item_toItem(line_number_flag) {
+		return(TDW_INI_FormatLine(this.line_number, this.toString(),
+			line_number_flag));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_Item_compareItem(item_1, item_2)
+{
+	return(((!TDW_INI_Item_compareItemBasic(item_1, item_2)) &&
+		(item_1.line_number == item_2.line_number)) ? 0 : 1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_Item_compareItemBasic(item_1, item_2)
+{
+	return(((item_1.name == item_2.name) && (item_1.op && item_2.op) &&
+		(item_1.value == item_2.value)) ? 0 : 1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_Item_compareItemName(item_1, item_2)
+{
+	return((item_1.name == item_2.name) ? 0 : 1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_Section(line_number, section_name, section_index)
+{
+	this.line_number     = line_number;
+	this.section_name    = new String(section_name);
+	this.section_index   = section_index;
+	this.item_list       = new Array();
+
+	this.addItem         = TDW_INI_Section_addItem;
+	this.findItem        = TDW_INI_Section_findItem;
+	this.findName        = TDW_INI_Section_findName;
+	this.findNameOpValue = TDW_INI_Section_findNameOpValue;
+	this.toString        = TDW_INI_Section_toString;
+	this.toSectionName   = TDW_INI_Section_toSectionName;
+	this.toSection       = TDW_INI_Section_toSection;
+
+	function TDW_INI_Section_addItem(line_number, name, op, value) {
+		this.item_list.push(new TDW_INI_Item(line_number, name, op, value));
+	}
+
+	function TDW_INI_Section_findItem(compare_func, compare_data) {
+		for (var count_1 = 0; count_1 < this.item_list.length; count_1++) {
+			if (!compare_func(compare_data, this.item_list[count_1]))
+				return(this.item_list[count_1]);
+		}
+
+		return(null);
+	}
+
+	function TDW_INI_Section_findName(name) {
+		return(this.findItem(TDW_INI_Item_compareItemName,
+			new TDW_INI_Item(0, name)));
+	}
+
+	function TDW_INI_Section_findNameOpValue(name, op, value) {
+		return(this.findItem(TDW_INI_Item_compareItemBasic,
+			new TDW_INI_Item(0, name, op, value)));
+	}
+
+	function TDW_INI_Section_toString() {
+		return(this.section_name);
+	}
+
+	function TDW_INI_Section_toSectionName() {
+		return("[" + this.section_name + "]");
+	}
+
+	function TDW_INI_Section_toSection(line_number_flag) {
+		var out_list = new Array();
+
+		out_list.push(TDW_INI_FormatLine(this.line_number, this.toSectionName(),
+			line_number_flag));
+
+		for (var count_1 = 0; count_1 < this.item_list.length; count_1++)
+			out_list.push(this.item_list[count_1].toItem(line_number_flag));
+
+		return(out_list);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INI_File(file_name)
+{
+	var line_list = new Array();
+	var file_handle;
+	var count_1;
+	var this_line;
+	var new_section;
+	var section_name;
+	var pos_eq;
+	var pos_ne;
+	var pos_lt;
+	var pos_gt;
+	var op_count;
+	var pos_op;
+	var lvalue;
+	var op;
+	var rvalue;
+
+	this.ini_ok_flag     = false;
+	this.file_name       = new String(D2JSP_UTIL_GEN_CleanFileName(file_name));
+	this.load_date       = new Date();
+	this.section_list    = new Array();
+	this.section_map     = new Array();
+	this.error_list      = new Array();
+
+	this.addSection      = TDW_INI_File_addSection;
+	this.deleteSection   = TDW_INI_File_deleteSection;
+	this.addItem         = TDW_INI_File_addItem;
+	this.addError        = TDW_INI_File_addError;
+	this.findSection     = TDW_INI_File_findSection;
+	this.getErrorList    = TDW_INI_File_getErrorList;
+	this.toStringList    = TDW_INI_File_toStringList;
+	this.writeOutput     = TDW_INI_File_writeOutput;
+	this.writeToFileName = TDW_INI_File_writeToFileName;
+
+	if ((file_handle = fileOpen(this.file_name, 0)) != null) {
+		this.ini_ok_flag = true;
+		while (!file_handle.eof)
+			line_list.push(D2JSP_UTIL_FORMAT_Trim(file_handle.readLine()));
+		file_handle.close();
+		for (count_1 = 0; count_1 < line_list.length; count_1++) {
+			this_line = line_list[count_1];
+			if ((!this_line.length) || (!this_line.indexOf(";")) ||
+				(!this_line.indexOf("//")))
+				continue;
+			new_section = this_line.match(/^\[(\s*\S+.*\s*)\]$/);
+			if (new_section && (new_section.length == 2)) {
+				section_name = D2JSP_UTIL_FORMAT_Trim(new_section[1]);
+				this.addSection(count_1 + 1, section_name);
+				continue;
+			}
+			pos_eq   = this_line.indexOf("=");
+			pos_ne   = this_line.indexOf("!");
+			pos_lt   = this_line.indexOf("<");
+			pos_gt   = this_line.indexOf(">");
+			op_count =  ((pos_eq == -1) ? 0 : 1) + ((pos_ne == -1) ? 0 : 1) +
+				((pos_lt == -1) ? 0 : 1) + ((pos_gt == -1) ? 0 : 1);
+			pos_op   = D2JSP_UTIL_FORMAT_FindFirst(this_line, ["=","!","<",">"]);
+			if (op_count == 0)
+				this.addError(count_1 + 1, this_line,
+					"No conditional operator was found.");
+			else if (!pos_op)
+				this.addError(count_1 + 1, this_line,
+					"Conditional operator found at the beginning of line.");
+			else if (pos_op == (this_line.length - 1))
+				this.addError(count_1 + 1, this_line,
+					"Conditional operator found at the end of line.");
+			else {
+				lvalue = D2JSP_UTIL_FORMAT_Trim(this_line.substr(0, pos_op));
+				op     = this_line.substr(pos_op, 1);
+				rvalue = this_line.substr(pos_op + 1);
+				if (lvalue == "")
+					this.addError(count_1 + 1, this_line, "Lvalue is empty.");
+				else
+					this.addItem(count_1 + 1, lvalue, op, rvalue);
+			}
+		}
+	}
+	else
+		this.addError(null, null, "Unable to open INI file '" + this.file_name +
+			" for reading.");
+
+	function TDW_INI_File_addSection(line_number, section_name) {
+		this.deleteSection(section_name);
+
+		this.section_list.push(new TDW_INI_Section(line_number,
+			section_name, this.section_list.length));
+		this.section_map[section_name] =
+			this.section_list[this.section_list.length - 1];
+	}
+
+	function TDW_INI_File_deleteSection(section_name) {
+		var this_section = this.findSection(section_name);
+
+		if (this_section) {
+			delete this.section_map[section_name];
+			for (var count_1 = 0; count_1 < this.section_list.length; count_1++) {
+				if (this.section_list[count_1].section_name == section_name) {
+					this.section_list.splice(count_1, 1);
+					break;
+				}
+			}
+		}
+
+		return(this_section);
+	}
+
+	function TDW_INI_File_addItem(line_number, name, op, value) {
+		this.section_list[this.section_list.length - 1].addItem(line_number,
+			name, op, value);
+	}
+
+	function TDW_INI_File_addError(line_number, error_line,
+		error_description) {
+		this.error_list.push([line_number, (!this.section_list.length) ? null :
+			this.section_list[this.section_list.length - 1].section_name,
+			error_line, error_description]);
+	}
+
+	function TDW_INI_File_findSection(section_name) {
+		return((section_name in this.section_map) ?
+			this.section_map[section_name] : null);
+	}
+
+	function TDW_INI_File_getErrorList() {
+		var out_list = new Array();
+		var count_1;
+		for (count_1 = 0; count_1 < this.error_list.length; count_1++)
+			out_list.push("INI load error on line " + this.error_list[count_1][0] +
+				", section name '" + this.error_list[count_1][1] +
+				"', line text '" + this.error_list[count_1][2] + "': " +
+				this.error_list[count_1][3]);
+		return(out_list);
+	}
+
+	function TDW_INI_File_toStringList(line_number_flag) {
+		var out_list = new Array();
+		var count_1;
+		var count_2;
+
+		out_list.push("; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+			"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+			"; Source INI file name: " + this.file_name,
+			"; Source INI load date: " + this.load_date,
+			"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="), "");
+
+/*
+		for (count_1 = 0; count_1 < this.section_list.length; count_1++) {
+			out_list.push(((line_number_flag) ?
+				(D2JSP_UTIL_FORMAT_RJust(this.section_list[count_1].line_number,
+				8) + ":") : "") + "[" + this.section_list[count_1].section_name +
+				"]");
+			for (count_2 = 0;
+				count_2 < this.section_list[count_1].item_list.length; count_2++)
+				out_list.push(((line_number_flag) ?
+				(D2JSP_UTIL_FORMAT_RJust(this.section_list[count_1].
+				item_list[count_2].line_number, 8) + ":") : "") +
+				this.section_list[count_1].item_list[count_2]);
+			out_list.push("");
+		}
+*/
+		for (count_1 = 0; count_1 < this.section_list.length; count_1++) {
+			out_list.push(this.section_list[count_1].toSection(line_number_flag));
+			out_list.push("");
+		}
+
+		if (this.error_list.length)
+			out_list.push("; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+				"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+				"; ***** Error report on " + this.error_list.length +
+				" INI lines follows:",
+				"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="));
+
+		for (count_1 = 0; count_1 < this.error_list.length; count_1++) {
+			out_list.push("; Error Line        : " +
+				D2JSP_UTIL_FORMAT_RJust(this.error_list[count_1][0], 10));
+			out_list.push(";       Section Name: " + this.error_list[count_1][1]);
+			out_list.push(";       Line Text   : " + this.error_list[count_1][2]);
+			out_list.push(";       Error Text  : " + this.error_list[count_1][3]);
+		}
+
+		out_list.push("; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="))
+
+		return(out_list);
+	}
+
+	function TDW_INI_File_writeOutput(out_func, line_number_flag) {
+		var out_list = this.toStringList(line_number_flag);
+
+		for (var count_1 = 0; count_1 < out_list.length; count_1++) {
+			if (out_func == null)
+				print(out_list[count_1]);
+			else if (out_func instanceof D2JSP_UTIL_Log)
+				out_func.logInfoQuiet(out_list[count_1]);
+			else if (typeof(out_func) != "function")
+				out_func.writeLine(out_list[count_1]);
+			else
+				out_func(out_list[count_1]);
+		}
+	}
+
+	function TDW_INI_File_writeToFileName(file_name, append_flag,
+		line_number_flag) {
+		var file_handle;
+		if ((file_handle = fileOpen(file_name, (append_flag) ? 2 : 1)) != null) {
+			this.writeOutput(file_handle, line_number_flag);
+			file_handle.close();
+			return(0);
+		}
+		else
+			return(-1);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_TDW_Ini_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var file_name   = "output/RegressionTest.TDW_Ini.d2l.txt";
+	var log_obj     = new D2JSP_UTIL_Log(file_name, "TDW_Ini", null, null, null,
+								true);
+	var source_list = ["d2jspLoader.ini",
+								"settings/snagit.ini",
+								"settings/bmitems.ini"];
+
+	print("Writing 'TDW_Ini.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	for (var count_1 = 0; count_1 < source_list.length; count_1++) {
+		log_obj.emitSep("=");
+		log_obj.logInfo("Loading INI file '" + source_list[count_1] + "'...");
+		log_obj.emitSep("-");
+		var this_ini = new TDW_INI_File(source_list[count_1]);
+		if (!this_ini.error_list.length)
+			this_ini.writeOutput(log_obj, true);
+		else {
+			log_obj.logError("Error(s) occurred loading INI from input file '" +
+				source_list[count_1] + "':");
+			log_obj.logError(this_ini.error_list);
+		}
+		log_obj.emitSep("=");
+	}
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

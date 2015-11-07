@@ -1,0 +1,779 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotLib.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_CA_ExitSleepMS = 3000;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["town.logic.isf.stash"]             = TDW_CA_TownLogicStash;
+TDW_BOT_ConfigureList["teleport.step.size.max"]           = 120;
+TDW_BOT_ConfigureList["teleport.step.fudge.final"]        = 3;
+TDW_BOT_ConfigureList["mysnagit.gold.minimum"]            = 2000;
+TDW_BOT_ConfigureList["teleport.step.size"]               = 41;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_CA_ISF_CfgOriginal = null;
+
+var TDW_CA_ISF_CfgAdded    = null;
+
+var TDW_CA_ISF_TxtAdded    = [
+	"Category armor  : Class > exceptional : Quality > set : Quality ! rare",
+	"Category weapon : Class > exceptional : Quality > set : Quality ! rare",
+	"Type Orb",
+	"Type Stave",
+	"Type Staff",
+	"Type Wand",
+	"Type Scep",
+	"Type Primal Helm",
+	"Type Club",
+	"Type Pelt",
+	"Type h2h2",
+	"Type Voodoo Heads",
+	"Type Auric Shields",
+	"Type Amazon Bow",
+	"Type Amazon Spear",
+	"Type Amazon Javelin",
+	"Type Class Specific",
+	"Type Amazon Item",
+	"Type Barbarian Item",
+	"Type Necromancer Item",
+	"Type Paladin Item",
+	"Type Sorceress Item",
+	"Type Assassin Item",
+	"Type Druid Item",
+	"Type Circlet : quality > magic"
+/*
+"Type gem0",
+"Type gem1",
+"Type gem2",
+"Type gem3",
+"Type gem4",
+"Type gema",
+"Type gemd",
+"Type geme",
+"Type gemr",
+"Type gems",
+"Type gemt",
+"Type gemz",
+*/
+];
+
+
+var TDW_CA_ISF_TxtAdded    = [
+	"; Flawless gems sell for good money...",
+	"Flawless Amethyst",
+	"Flawless Topaz",
+	"Flawless Sapphire",
+	"Flawless Emerald",
+	"Flawless Ruby",
+	"Flawless Diamond",
+	"Flawless Skull",
+	"",
+	"; Elites of any quality",
+	"Category armor        : Class > elite",
+	"Category weapon       : Class > elite",
+	"Type Orb              : Class > elite",
+	"Type Stave            : Class > elite",
+	"Type Staff            : Class > elite",
+	"Type Wand             : Class > elite",
+	"Type Scep             : Class > elite",
+	"Type Primal Helm      : Class > elite",
+	"Type Club             : Class > elite",
+	"Type Pelt             : Class > elite",
+	"Type h2h2             : Class > elite",
+	"Type Voodoo Heads     : Class > elite",
+	"Type Auric Shields    : Class > elite",
+	"Type Amazon Bow       : Class > elite",
+	"Type Amazon Spear     : Class > elite",
+	"Type Amazon Javelin   : Class > elite",
+	"Type Class Specific   : Class > elite",
+	"Type Amazon Item      : Class > elite",
+	"Type Barbarian Item   : Class > elite",
+	"Type Necromancer Item : Class > elite",
+	"Type Paladin Item     : Class > elite",
+	"Type Sorceress Item   : Class > elite",
+	"Type Assassin Item    : Class > elite",
+	"Type Druid Item       : Class > elite",
+
+	"; Exceptionals must be at least normal and not ethereal",
+	";Category armor        : Class > exceptional : Quality > magic",
+	";Category weapon       : Class > exceptional : Quality > magic",
+	"Type Orb              : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Stave            : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Staff            : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Wand             : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Scep             : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Primal Helm      : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Club             : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Pelt             : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type h2h2             : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Voodoo Heads     : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Auric Shields    : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Amazon Bow       : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Amazon Spear     : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Amazon Javelin   : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Class Specific   : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Amazon Item      : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Barbarian Item   : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Necromancer Item : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Paladin Item     : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Sorceress Item   : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Assassin Item    : Class > exceptional : Quality > normal : IsEthereal = false",
+	"Type Druid Item       : Class > exceptional : Quality > normal : IsEthereal = false",
+
+	"; Normals must be superior or better and not ethereal",
+	";Category armor        : Class > normal : Quality > magic",
+	";Category weapon       : Class > normal : Quality > magic",
+	";Type Orb              : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Stave            : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Staff            : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Wand             : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Scep             : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Primal Helm      : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Club             : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Pelt             : Class > normal : Quality > superior : IsEthereal = false",
+	";Type h2h2             : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Voodoo Heads     : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Auric Shields    : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Amazon Bow       : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Amazon Spear     : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Amazon Javelin   : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Class Specific   : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Amazon Item      : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Barbarian Item   : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Necromancer Item : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Paladin Item     : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Sorceress Item   : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Assassin Item    : Class > normal : Quality > superior : IsEthereal = false",
+	";Type Druid Item       : Class > normal : Quality > superior : IsEthereal = false",
+
+	"; Normals must be superior or better and not ethereal",
+	";Category armor        : Class > normal : Quality > magic",
+	";Category weapon       : Class > normal : Quality > magic",
+	"Type Orb              : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Stave            : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Staff            : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Wand             : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Scep             : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Primal Helm      : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Club             : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Pelt             : Class > normal : Quality > magic : IsEthereal = false",
+	"Type h2h2             : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Voodoo Heads     : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Auric Shields    : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Amazon Bow       : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Amazon Spear     : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Amazon Javelin   : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Class Specific   : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Amazon Item      : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Barbarian Item   : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Necromancer Item : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Paladin Item     : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Sorceress Item   : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Assassin Item    : Class > normal : Quality > magic : IsEthereal = false",
+	"Type Druid Item       : Class > normal : Quality > magic : IsEthereal = false",
+
+	"Type Circlet : quality > magic"
+/*
+"Type gem0",
+"Type gem1",
+"Type gem2",
+"Type gem3",
+"Type gem4",
+"Type gema",
+"Type gemd",
+"Type geme",
+"Type gemr",
+"Type gems",
+"Type gemt",
+"Type gemz",
+*/
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	TDW_CA_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CA_Start(config_list)
+{
+	var error_list = new Array();
+	var time_start;
+	var time_end;
+	var error_msg_string;
+
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/TDW_ClearArea." + me.realm +
+		"." + me.account + "." + me.name + ".log", "TDW_ClearArea");
+
+	print("The Clear Area Bot is running");
+
+//TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+//TDW_BOT_Log.syncModeOn();
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	time_start = new Date();
+	TDW_BOT_Log.logInfo("-----> Beginning Clear Area run", time_start);
+
+	TDW_BOT_CTX_ContextCreate(TDW_BOT_ConfigureList, config_list,
+		"Clear Area Bot Configuration", TDW_BOT_Log);
+
+	TDW_BOT_SKILL_SpellFixUp();
+
+	TDW_CA_CreateISF();
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_NONE |
+		((TDW_BOT_ContextList["mercernary.needed"]) ?
+		TDW_BOT_MOVE_TOWN_FLAG_MERC_NEEDED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+		((TDW_BOT_ContextList["mercernary.wanted"]) ?
+		TDW_BOT_MOVE_TOWN_FLAG_MERC_WANTED : TDW_BOT_MOVE_TOWN_FLAG_NONE),
+		TDW_ISF_Cfg))
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+
+	if (D2JSP_NPC_GetMercIsLiving()) {
+		D2JSP_UTIL_LOG_GetALog().logInfo("A mercenary by the name of " +
+			D2JSP_NPC_GetMercName() + " has been located.");
+		TDW_BOT_ContextList["mercernary.name"] = D2JSP_NPC_GetMercName();
+	}
+
+	me.randommove    = true;
+	me.quitonhostile = true;
+	me.chickenhp     = me.hp / 4;
+	me.chickenmp     = me.mp / 4;
+
+	me.showcast      = (TDW_BOT_ContextList["operation.d2jsp.me.showcast"]) ?
+		1 : 0;
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+//	TDW_CA_ClearArea(null, true);
+
+	TDW_BOTLIB_ClearArea([66, 67, 68, 69, 70, 71, 72], null, null,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT);
+
+	TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasicMe);
+	TDW_MOVE_TownReturnFinalize();
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_FORCE_ISF, TDW_ISF_Cfg))
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ERASE_ME_TDW_CA_ClearArea(area_list, clear_area_flag)
+{
+	var return_code     = 0;
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+//	area_list = (area_list != null) ? area_list : [66, 67, 68, 69, 70, 71, 72];
+//area_list = (area_list != null) ? area_list : [76, 77, 78];
+//area_list = (area_list != null) ? area_list : [94, 95, 96, 97, 98, 99];
+//area_list = (area_list != null) ? area_list : [3, 4];
+area_list = (area_list != null) ? area_list : [110];
+
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		var this_area = area_list[count_1];
+		access_strategy.callback_data = null;
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_STATUS, "Target area is number " + this_area +
+			" (" + D2JSP_AREA_AreaToName(this_area) + ").");
+		if (TDW_BOT_STATE_IsBadStateUs(TDW_BOT_STATE_BadStatesAll))
+			TDW_BOT_MOVE_RecoverInTown(false);
+		if (me.act != D2JSP_AREA_GetAct(this_area)) {
+			if (!D2JSP_AREA_IsTown(me.area))
+				TDW_MOVE_PortalToTown(null, null, 20, 50);
+			TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(this_area), "waypoint");
+		}
+//		TDW_PATH_FixUpAct();
+		print("Creating the " + D2JSP_AREA_AreaToName(this_area) + " map...");
+		TDW_PATH_CreateArea(this_area);
+		print("Loading room list for " +
+			D2JSP_AREA_AreaToName(this_area) + "...");
+		var my_rooms   =
+			TDW_PATH_MapGlobal.area_list[this_area].room_list;
+		coord_list = new Array(my_rooms.length);
+		for (var count_2 = 0; count_2 < my_rooms.length; count_2++)
+			coord_list[count_2] = [[my_rooms[count_2].x, my_rooms[count_2].y],
+				my_rooms[count_2].getCenter(),
+				my_rooms[count_2].room_row, my_rooms[count_2].room_col];
+		print("...Map initialization complete");
+		coord_list = D2JSP_UTIL_PATH_ProgressivePathSort(coord_list);
+		print("***** COORD_LIST LENGTH = " + coord_list.length);
+		if (me.area != this_area) {
+/*
+			if (!D2JSP_AREA_IsTown(me.area))
+				TDW_MOVE_PortalToTown(null, null, 20, 50);
+*/
+			if (D2JSP_AREA_IsTown(me.area))
+				TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(this_area), "waypoint");
+			if (return_code = TDW_PATH_GotoTargetArea(this_area,
+				access_strategy, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT))
+{
+print("return_code = " + return_code);
+				continue;
+}
+		}
+		coord_list = TDW_RS_ChestPop_SortCoords(coord_list);
+		access_strategy.callback_data = (!clear_area_flag) ?
+			TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF :
+			(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+			TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF |
+			TDW_BOT_SUPP_TP2DEST_FLAG_OPEN_DOORS);
+		D2JSP_UTIL_BNET_OverheadSafe("Picking garbage");
+/*
+		var npc_attr_list  = new D2JSP_NPC_AttibutesList();
+		npc_attr_list.addAttr(2, null, [D2JSP_ENCHANT_LIGHTNING_ENCHANTED,
+			D2JSP_ENCHANT_MULTIPLE_SHOTS]);
+		npc_attr_list.addAttr(2, null, D2JSP_ENCHANT_LIGHTNING_ENCHANTED,
+			D2JSP_STATE_CONVICTION);
+		npc_attr_list.addAttr(2, null, null, D2JSP_STATE_FANATICISM);
+*/
+		var npc_attr_list_1 = new D2JSP_NPC_AttibutesList();
+		var npc_attr_list_2 = new D2JSP_NPC_AttibutesList();
+		npc_attr_list_1.addAttr(2, null, [D2JSP_ENCHANT_LIGHTNING_ENCHANTED,
+			D2JSP_ENCHANT_MULTIPLE_SHOTS]);
+		npc_attr_list_2.addAttr(2, null, D2JSP_ENCHANT_LIGHTNING_ENCHANTED,
+			D2JSP_STATE_CONVICTION);
+		npc_attr_list_2.addAttr(2, null, null, D2JSP_STATE_FANATICISM);
+		while (coord_list.length) {
+/*
+			var cluster = new TDW_BOT_ATTACK_Cluster(null, null, null,
+				TDW_BOT_COLL_BLOCK_ATTACK);
+			var npc_attr = npc_attr_list.check(cluster);
+			if (npc_attr) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_WARNING, "Skipping area " + this_area +
+					" (" + D2JSP_AREA_AreaToName(this_area) + ") because an " +
+					"NPC was found to be " + npc_attr + ".");
+				cluster.toLog();
+				TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic, null);
+				break;
+			}
+*/
+			var cluster = new TDW_BOT_ATTACK_Cluster(null, null, null,
+				TDW_BOT_COLL_BLOCK_ATTACK, null, npc_attr_list_1, npc_attr_list_2);
+			var npc_attr = cluster.checkAttr();
+			if (npc_attr) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_WARNING, "Skipping area " + this_area +
+					" (" + D2JSP_AREA_AreaToName(this_area) + ") because an " +
+					"NPC was found to be " + npc_attr + ".");
+				cluster.toLog();
+				TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic, null);
+				break;
+			}
+/*
+if (cluster.count) {
+	for (var count_2 = D2JSP_ENCHANT_MINIMUM; count_2 <= D2JSP_ENCHANT_MAXIMUM;
+		count_2++) {
+		if (cluster.enchants[count_2] && (!D2JSP_ENCHANT_IsValid(count_2))) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_WARNING, "Skipping area " + this_area +
+				" (" + D2JSP_AREA_AreaToName(this_area) + ") because invalid " +
+				"enchants were found in a cluster (" + count_2 + ").");
+			cluster.toLog();
+			TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic, null);
+			return(0);
+		}
+	}
+}
+*/
+if (cluster.count)
+	cluster.toLog();
+			if (clear_area_flag)
+				TDW_BOT_MOVE_DoDeparture(access_strategy.callback_data);
+			else
+				TDW_BOT_SUPP_MySnagIt();
+			D2JSP_UTIL_BNET_OverheadSafe("Picking garbage");
+			var next_center = null;
+			while (coord_list.length) {
+				coord_list = TDW_RS_ChestPop_SortCoords(coord_list);
+/*
+				var next_room  = TDW_PATH_FindRoomByBaseXY(coord_list[0][0][0],
+					coord_list[0][0][1]);
+*/
+				var next_room  = TDW_PATH_MapGlobal.area_list[this_area].
+					meta_map[coord_list[0][2]][coord_list[0][3]];
+				if (next_room && (!next_room.is_excluded)) {
+					next_center = next_room.getCenterAccessible();
+					if (next_center) {
+						coord_list.shift();
+						break;
+					}
+				}
+				coord_list.shift();
+			}
+			if (next_center) {
+				delay(250);
+				TDW_BOT_CHECK_DoChecks();
+				if (access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_GOTO_XYPAIR, next_center)) {
+					return_code = -1;
+					break;
+				}
+			}
+			else
+				break;
+/*
+			cluster = new TDW_BOT_ATTACK_Cluster(null, null, null,
+				TDW_BOT_COLL_BLOCK_ATTACK);
+			npc_attr = npc_attr_list.check(cluster);
+			if (npc_attr) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_WARNING, "Skipping area " + this_area +
+					" (" + D2JSP_AREA_AreaToName(this_area) + ") because an " +
+					"NPC was found to be " + npc_attr + ".");
+				cluster.toLog();
+				TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic, null);
+				break;
+			}
+*/
+			cluster = new TDW_BOT_ATTACK_Cluster(null, null, null,
+				TDW_BOT_COLL_BLOCK_ATTACK, null, npc_attr_list_1, npc_attr_list_2);
+			npc_attr = cluster.checkAttr();
+			if (npc_attr) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_WARNING, "Skipping area " + this_area +
+					" (" + D2JSP_AREA_AreaToName(this_area) + ") because an " +
+					"NPC was found to be " + npc_attr + ".");
+				cluster.toLog();
+				TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasic, null);
+				break;
+			}
+if (cluster.count)
+	cluster.toLog();
+			if (clear_area_flag)
+				TDW_BOT_MOVE_DoArrival(access_strategy.callback_data);
+			else
+				TDW_BOT_SUPP_MySnagIt();
+			D2JSP_UTIL_BNET_OverheadSafe("Picking garbage");
+			runGC();
+			coord_list.shift();
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ERASE_ME_TDW_RS_ChestPop_SortCoords(in_path_list, in_origin)
+{
+	var out_path_list = new Array();
+	var tmp_path_list = D2JSP_UTIL_GEN_CloneObject(in_path_list);
+	var curr_origin;
+
+	in_origin   = (in_origin != null) ? in_origin : [me.x, me.y];
+	curr_origin = in_origin;
+
+	while (tmp_path_list.length) {
+		var nearest_coord_index = -1;
+		var nearest_coord       = Number.MAX_VALUE;
+		var this_distance;
+		var count_1;
+		for (count_1 = 0; count_1 < tmp_path_list.length; count_1++) {
+			this_distance =
+				(Dist(in_origin[0], in_origin[1],
+				 tmp_path_list[count_1][1][0], tmp_path_list[count_1][1][1]) +
+				 Dist(curr_origin[0], curr_origin[1],
+				 tmp_path_list[count_1][1][0], tmp_path_list[count_1][1][1])) / 2;
+			if ((this_distance < nearest_coord) || (!count_1)) {
+				nearest_coord       = this_distance;
+				nearest_coord_index = count_1;
+			}
+		}
+		curr_origin = tmp_path_list[nearest_coord_index][1];
+		out_path_list.push(tmp_path_list[nearest_coord_index]);
+		tmp_path_list.splice(nearest_coord_index, 1);
+	}
+
+	return(out_path_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CA_CreateISF()
+{
+	var isf_text   = new Array();
+	var error_list = new Array();
+
+	var bot_name      = "TDW_BotClear";
+	var isf_file_name = (TDW_BOT_ContextList["isf.configuration.file"]) ?
+		TDW_BOT_ContextList["isf.configuration.file"] :
+		TDW_CFG_GetFileSpec("settings/ISF", bot_name);
+
+/*
+	TDW_BOT_Log.logInfo("Loading ISF configuration file '" +
+		TDW_BOT_ContextList["isf.configuration.file"] + "'...");
+	if (!(TDW_CA_ISF_CfgOriginal =
+		ISF_Create(TDW_BOT_ContextList["isf.configuration.file"], 0,
+		error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to load ISF configuration file '" +
+			TDW_BOT_ContextList["isf.configuration.file"] + "'... exiting");
+	}
+*/
+
+	TDW_BOT_ContextList["isf.configuration.file"] = isf_file_name;
+	if (isf_file_name) {
+		TDW_BOT_Log.logInfo("Loading ISF configuration file '" + isf_file_name +
+			"'...");
+		var error_list = new Array();
+		if (!(TDW_CA_ISF_CfgOriginal = ISF_Create(isf_file_name, 0, error_list))) {
+			while (error_list.length)
+				TDW_BOT_Log.logError(error_list.shift());
+			TDW_BOT_SUPP_DoExitWithMsg("Unable to load ISF configuration file '" +
+				isf_file_name + "' (see log file for details).");
+		}
+	}
+
+	TDW_BOT_Log.logInfo("Creating ISF configuration data from internal source...");
+	if (!(TDW_CA_ISF_CfgAdded = ISF_Create(TDW_CA_ISF_TxtAdded, 0, error_list))){
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to create ISF configuration from " +
+			"internal source... exiting");
+	}
+
+	if (isf_file_name) {
+		TDW_BOT_Log.logInfo("Creating combined ISF configuration...");
+		isf_text.push("include \"" + isf_file_name + "\"");
+		isf_text = isf_text.concat(TDW_CA_ISF_TxtAdded);
+		if (!(TDW_ISF_Cfg = ISF_Create(isf_text, 0, error_list))) {
+			while (error_list.length)
+				TDW_BOT_Log.logError(error_list.shift());
+			TDW_BOT_SUPP_DoExitWithMsg("Unable to create combined ISF " +
+				"configuration... exiting");
+		}
+	}
+	else
+		TDW_ISF_Cfg = TDW_CA_ISF_CfgAdded;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CA_TownLogicStash(town_flags, isf_cfg)
+{
+	var log_obj     = D2JSP_UTIL_LOG_GetALog();
+	var sell_list   = new Array();
+	var stash_data  = new Array();
+	var results_data;
+	var sell_list;
+	var sell_list_1;
+	var sell_list_2;
+
+	sell_list_1 = TDW_CA_ISF_CfgOriginal.getMatchActionList();
+	sell_list_2 = TDW_CA_ISF_CfgAdded.getMatchActionList();
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	//	Remove any items in the garbage picker ISF which are also in original
+	// list...
+	// //////////////////////////////////////////////////////////////////////
+	for (var count_1 = 0; count_1 < sell_list_2.length; ) {
+		var found_flag = false;
+		for (var count_2 = 0; count_2 < sell_list_1.length; count_2++) {
+			if (ISF_SISpec_isEqual(sell_list_2[count_1], sell_list_1[count_2]) &&
+				sell_list_1[count_2].isf_item_flag) {
+				sell_list_2.splice(count_1, 1);
+				found_flag = true;
+				break;
+			}
+		}
+		if (!found_flag)
+			count_1++;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	//	Include items for selling from the original ISF only if they're
+	//	unidentified and need to be evaluated for keeping by identifing them...
+	// //////////////////////////////////////////////////////////////////////
+	for (var count_1 = 0; count_1 < sell_list_1.length; ) {
+		if (sell_list_1[count_1].id_flag)
+			count_1++;
+		else
+			sell_list_1.splice(count_1, 1);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	//	Any items in the garbage picker ISF which are not identified need to
+	// be before sale...
+	// //////////////////////////////////////////////////////////////////////
+	for (var count_1 = 0; count_1 < sell_list_2.length; count_1++) {
+		if (!sell_list_2[count_1].is_identified)
+			sell_list_2[count_1].id_flag = true;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	sell_list = sell_list_1.concat(sell_list_2);
+
+	if (sell_list.length) {
+		var do_stashing_flag = (town_flags & TDW_BOT_MOVE_TOWN_FLAG_FORCE_ISF) ?
+			true : false;
+		if (!do_stashing_flag) {
+			if (!D2JSP_ITEM_CONT_FindSpace(2, 4, D2JSP_ITEM_CONT_BuildMapList(),
+				D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+				log_obj.logInfo("Stashing is needed because there is insufficient "+
+					"room in the inventory for a 2X4 item.");
+				do_stashing_flag = true;
+			}
+		}
+		if (do_stashing_flag) {
+			var isf_return_code;
+			isf_return_code = ISF_DoSellingInternal(TDW_CA_ISF_CfgOriginal.isf_cmp,
+				sell_list, ISF_STASH_FLAG_NONE);
+			if (isf_return_code < 0) {
+				log_obj.logError("A fatal error was encountered in the stashing " +
+					" logic");
+				return(-1);
+			}
+		}
+	}
+
+	TDW_BOT_MOVE_TownLogicStash(town_flags, TDW_CA_ISF_CfgOriginal);
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_CfgTriple(isf_cfg_stash, isf_cfg_sell, isf_cfg_merged)
+{
+	this.isf_cfg_stash  = isf_cfg_stash;
+	this.isf_cfg_sell   = isf_cfg_sell;
+	this.isf_cfg_merged = isf_cfg_merged;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_CreateTriple(source_stash, source_sell, in_flags, error_list)
+{
+	var new_isf_triple = null;
+	var isf_text       = new Array();
+	var tmp_error_list = new Array();
+	var type_stash;
+	var type_sell;
+	var source_name;
+	var isf_cfg_stash;
+	var isf_cfg_sell;
+	var isf_cfg_merged;
+
+	source_stash = (source_stash != null) ? source_stash : "settings/ISF.cfg";
+	source_sell  = (source_sell != null)  ? source_sell : "settings/ISF.SELL.cfg";
+	error_list   = D2JSP_UTIL_GEN_TypeOfArrayIndexed(error_list) ? error_list :
+		(new Array());
+
+	type_stash   = (D2JSP_UTIL_GEN_TypeOfString(source_stash)) ? 0 :
+		((D2JSP_UTIL_GEN_TypeOfArrayIndexed(source_stash)) ? 1 : -1);
+	type_sell    = (D2JSP_UTIL_GEN_TypeOfString(source_sell)) ? 0 :
+		((D2JSP_UTIL_GEN_TypeOfArrayIndexed(source_sell)) ? 1 : -1);
+
+	if (!(isf_cmp_stash = ISF_Create(source_stash, 0, tmp_error_list))) {
+		source_name = (!type_stash) ? source_stash :
+			((type_stash == 1) ? ISF_INTERNAL_SOURCE_NAME : "*INVALID-SOURCE*");
+		while (tmp_error_list.length)
+			error_list.push(source_name + ": " + tmp_error_list.shift());
+	}
+
+	if (!(isf_cfg_sell = ISF_Create(source_sell, 0, tmp_error_list))) {
+		source_name = (!type_sell) ? source_sell :
+			((type_sell == 1) ? ISF_INTERNAL_SOURCE_NAME : "*INVALID-SOURCE*");
+		while (tmp_error_list.length)
+			error_list.push(source_name + ": " + tmp_error_list.shift());
+	}
+
+	if (!error_list.length) {
+		var line_list;
+		if (!type_stash)
+			isf_text.push("include \"" + source_stash + "\"");
+		else
+			isf_text = isf_text.concat(source_stash);
+		if (!type_sell)
+			isf_text.push("include \"" + source_sell + "\"");
+		else
+			isf_text = isf_text.concat(source_sell);
+		if (!(isf_cfg_merged = ISF_Create(isf_text, 0, tmp_error_list))) {
+			while (tmp_error_list.length)
+				error_list.push(ISF_INTERNAL_SOURCE_NAME + ": " +
+					tmp_error_list.shift());
+		}
+		else
+			new_isf_triple =
+				new ISF_CfgTriple(isf_cfg_stash, isf_cfg_sell, isf_cfg_merged);
+	}
+
+	runGC();
+
+	return(new_isf_triple);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

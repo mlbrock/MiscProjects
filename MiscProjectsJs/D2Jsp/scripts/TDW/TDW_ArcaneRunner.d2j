@@ -1,0 +1,436 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const MLB_AR_MoveNameList = [
+	"Intersection Link",
+	"Corner 1",
+	"Internal Link 1",
+	"Internal Link 2",
+	"Internal Link 1",
+	"Corner 2",
+	"Bonus Intersection",
+	"Bonus Area",
+	"Bonus Intersection",
+	"Corner 3",
+	"Internal Link 2",
+	"Corner 4",
+	"Intersection Link",
+	"Arcane Waypoint",
+];
+
+const MLB_AR_MoveList_North = [
+	[25327,  5437],
+	[25330,  5382],
+	[25207,  5402],
+	[25207,  5517],
+	[25207,  5402],
+	[25082,  5381],
+	[25078,  5447],
+	[25022,  5451],
+	[25078,  5447],
+	[25086,  5496],
+	[25207,  5517],
+	[25326,  5507],
+	[25327,  5437],
+	[25449,  5449]
+];
+
+const MLB_AR_MoveList_East = [
+	[25432,  5327],
+	[25507,  5326],
+	[25496,  5207],
+	[25408,  5206],
+	[25496,  5207],
+	[25507,  5082],
+	[25447,  5080],
+	[25450,  5030],
+	[25447,  5080],
+	[25381,  5083],
+	[25408,  5206],
+	[25387,  5310],
+	[25432,  5327],
+	[25449,  5449]
+];
+
+const MLB_AR_MoveList_West = [
+	[25448,  5562],
+	[25382,  5562],
+	[25411,  5687],
+	[25498,  5687],
+	[25411,  5687],
+	[25407,  5807],
+	[25448,  5823],
+	[25440,  5864],
+	[25448,  5823],
+	[25487,  5807],
+	[25498,  5687],
+	[25506,  5561],
+	[25448,  5562],
+	[25449,  5449]
+];
+
+const MLB_AR_MoveList_South = [
+	[25566,  5448],
+	[25567,  5498],
+	[25687,  5515],
+	[25701,  5386],
+	[25687,  5515],
+	[25808,  5506],
+	[25826,  5448],
+	[25865,  5449],
+	[25826,  5448],
+	[25807,  5382],
+	[25701,  5386],
+	[25567,  5400],
+	[25566,  5448],
+	[25449,  5449]
+];
+
+const MLB_AR_MoveList_All = [
+	["North",	MLB_AR_MoveList_North],
+	["East",		MLB_AR_MoveList_East],
+	["South",	MLB_AR_MoveList_South],
+	["West",		MLB_AR_MoveList_West]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// Arcane Runner specific settings
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["operation.traversal.randomize.quadrants"] = true;
+TDW_BOT_ConfigureList["operation.traversal.skip.area.bonus"]     = false;
+TDW_BOT_ConfigureList["operation.traversal.loop"]                = false;
+TDW_BOT_ConfigureList["mana.regen.at.waypoint"]                  = false;
+//TDW_BOT_ConfigureList["teleport.step.size"]                      = 15;
+//TDW_BOT_ConfigureList["teleport.step.size.increase"]             = 5;
+TDW_BOT_ConfigureList["teleport.step.size.max"]                  = 120;
+// ////////////////////////////////////////////////////////////////////////////
+
+//TDW_BOT_ConfigureList["operation.tour"]                   = true;
+
+/*
+North Quadrant:
+---- ---------
+Intersection Link   : [25327,  5437]
+SE Corner           : [25330,  5382]
+Internal Link N     : [25207,  5402]
+Internal Link S     : [25207,  5517]
+NE Corner           : [25082,  5381]
+Bonus Intersection  : [25078,  5447]
+Bonus Area          : [25022,  5451]
+NW Corner           : [25086,  5496]
+Internal Link S     : [25207,  5517]
+SW Corner           : [25326,  5507]
+Intersection Link   : [25327,  5437]
+
+East Quadrant:
+--- ---------
+Intersection Link   : [25432,  5327]
+SW Corner           : [25507,  5326]
+Internal Link S     : [25496,  5207]
+Internal Link N     : [25408,  5206]
+SE Corner           : [25507,  5082]
+Bonus Intersection  : [25447,  5080]
+Bonus Area          : [25450,  5030]
+NE Corner           : [25381,  5083]
+Internal Link N     : [25408,  5206]
+NW Corner           : [25387,  5310]
+Intersection Link   : [25432,  5327]
+
+West Quadrant:
+---- ---------
+Intersection Link   : [25448,  5562] [25448,  5562] [25448,  5562] [25448,  5562]
+NE Corner           : [25382,  5562] [25382,  5562] [25382,  5562] [25382,  5562]
+Internal Link N     : [25411,  5687] [25411,  5687] [25411,  5687] [25411,  5687]
+Internal Link S     : [25498,  5687] [25498,  5687] [25498,  5687] [25498,  5687]
+NW Corner           : [25407,  5807] [25407,  5807] [25407,  5807] [25407,  5807]
+Bonus Intersection  : [25448,  5823] [25448,  5823] [25448,  5823] [25448,  5823]
+Bonus Area          : [25440,  5864] [25440,  5864] [25440,  5864] [25440,  5864]
+SW Corner           : [25487,  5807] [25487,  5807] [25487,  5807] [25487,  5807]
+Internal Link S     : [25498,  5687] [25498,  5687] [25498,  5687] [25498,  5687]
+SE Corner           : [25506,  5561] [25506,  5561] [25506,  5561] [25506,  5561]
+Intersection Link   : [25448,  5562] [25448,  5562] [25448,  5562] [25448,  5562]
+
+South Quadrant:
+---- ---------
+Intersection Link   : [25566, 5448]
+NW Corner           : [25567, 5498]
+Internal Link W     : [25687, 5515]
+Internal Link E     : [25701, 5386]
+SW Corner           : [25808, 5506]
+Bonus Intersection  : [25826, 5448]
+Bonus Area          : [25865, 5449]
+SE Corner           : [25807, 5382]
+Internal Link E     : [25701, 5386]
+NE Corner           : [25567, 5400]
+Intersection Link   : [25566, 5448]
+*/
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	config_list["operation.party"]                  = false;
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB") || (me.name == "ChestPopper")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	MLB_AR_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_AR_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_ArcaneRunner", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_SUPP_DoMessageDND("busy now, talk later");
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	MLB_AR_DoArcane();
+
+	if (TDW_BOT_ContextList["operation.party"]) {
+		for (var count_1 = 0; count_1 < 3; count_1++) {
+			D2JSP_UTIL_BNET_SaySafe("next game");
+			delay(500);
+		}
+	}
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_AR_DoArcane()
+{
+	var move_list = D2JSP_UTIL_GEN_CloneObject(MLB_AR_MoveList_All);
+	var name_list = D2JSP_UTIL_GEN_CloneObject(MLB_AR_MoveNameList);
+	var tmp_quad;
+	var this_room;
+	var count_1;
+	var this_element;
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	TDW_MOVE_WaypointUse(D2JSP_AREA_ARCANE_SANCTUARY);
+
+	if (me.area != D2JSP_AREA_ARCANE_SANCTUARY)
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to get to " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_ARCANE_SANCTUARY));
+
+	TDW_BOT_CHECK_PrecastChecks();
+
+	if (TDW_BOT_ContextList["operation.party"]) {
+		if (TDW_MOVE_UseTBK())
+			TDW_BOT_SUPP_DoExitWithMsg("Unable to use Tome of Town Portal...");
+	}
+
+	D2JSP_UTIL_GEN_SeedRandomNumbers();
+
+	if ((move_list.length > 1) && D2JSP_UTIL_GEN_TypeOfBoolean(
+		TDW_BOT_ContextList["operation.traversal.randomize.quadrants"]) &&
+		TDW_BOT_ContextList["operation.traversal.randomize.quadrants"]) {
+		for (count_1 = 0; count_1 < move_list.length; count_1++) {
+			while ((this_element =
+				D2JSP_UTIL_GEN_RandomRange(0, move_list.length - 1)) == count_1)
+				;
+			tmp_quad                = move_list[this_element];
+			move_list[this_element] = move_list[count_1];
+			move_list[count_1]      = tmp_quad;
+		}
+	}
+
+	print("Quadrant Traversal Order Will Be:");
+	for (count_1 = 0; count_1 < move_list.length; count_1++)
+		print("   " + move_list[count_1][0]);
+
+	this_room = getRoom();
+	if (this_room) {
+		do {
+			if ((this_room.number >= 525) && (this_room.number <= 528)) {
+				print("The Summonner is to the " +
+					["west", "east", "south", "north"][this_room.number - 525] + ".");
+				break;
+			}
+		} while (this_room && this_room.getNext());
+	}
+
+	if (D2JSP_UTIL_GEN_TypeOfBoolean(
+		TDW_BOT_ContextList["operation.traversal.skip.area.bonus"]) &&
+		TDW_BOT_ContextList["operation.traversal.skip.area.bonus"]) {
+		TDW_BOT_Log.logInfo("The bonus areas (and The Summoner) will be skipped.");
+		for (count_1 = 0; count_1 < move_list.length; count_1++)
+			move_list[count_1][1][7] = move_list[count_1][1][6];
+	}
+	else if (!TDW_BOT_ContextList["operation.tour"])
+		TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("The Summoner",
+			TDW_BOT_ATTACK_NPC_FLAG_NONE, 5, 0, 8));
+
+	do {
+		for (count_1 = 0; count_1 < move_list.length; count_1++) {
+/*
+			skip_last_flag = ((count_1 == (move_list.length - 1)) &&
+				(TDW_BOT_ContextList["operation.exit.normal.stop"] != true) &&
+				(TDW_BOT_ContextList["operation.traversal.loop"] != true))
+*/
+			var skip_last_flag = false;
+			MLB_AR_DoAQuadrant(move_list[count_1][0], move_list[count_1][1],
+				name_list, skip_last_flag);
+			if (skip_last_flag)
+				break;
+			if (TDW_BOT_ContextList["mana.regen.at.waypoint"])
+				TDW_BOT_MOVE_DoManaRegen(TDW_BOT_ContextList["me.max.mp"], false,
+					[me.x, me.y]);
+		}
+	} while (TDW_BOT_ContextList["operation.traversal.loop"]);
+
+	TDW_MOVE_WaypointUse((D2JSP_QUEST_IsStartedAct(4)) ?
+		D2JSP_AREA_THE_PANDEMONIUM_FORTRESS : D2JSP_AREA_ROGUE_ENCAMPMENT);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_AR_DoAQuadrant(quadrant_name, destination_list,
+	destination_name_list, is_last_flag)
+{
+	var count_1;
+	var count_2;
+	var attack_flags;
+
+	attack_flags = (TDW_BOT_ContextList["operation.tour"]) ?
+		TDW_BOT_SUPP_TP2DEST_FLAG_NONE :
+		(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+		TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+
+	for (count_1 = 0; count_1 < destination_list.length; count_1++) {
+		if (is_last_flag && (count_1 == (destination_list.length - 1)))
+			break;
+		print(quadrant_name + " Quadrant Destination: " +
+			destination_name_list[count_1]);
+		TDW_BOT_MOVE_TeleportToDestination(destination_list[count_1],
+			attack_flags);
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+		TDW_BOT_Log.logDetail("Quadrant " + quadrant_name + " departure " +
+			"procedure pending.");
+		TDW_BOT_MOVE_DoDeparture(attack_flags, destination_list[count_1]);
+		TDW_BOT_Log.logDetail("Quadrant " + quadrant_name + " departure " +
+			"procedure done.");
+		runGC();
+/*
+		TDW_BOT_MOVE_DoArrival(true, destination_list[count_1]);
+		if ((count_1 == 3) || (count_1 == 6)) {
+			print(quadrant_name + " Quadrant Destination: " +
+				destination_name_list[count_1 - 1]);
+			TDW_BOT_MOVE_TeleportToDestination(destination_list[count_1 - 1],
+				TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_FINAL);
+			D2JSP_UTIL_GEN_FuzzyDelay(10);
+			TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL,
+				destination_list[count_1 - 1]);
+		}
+*/
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ has expressed hostility towards you.$/i)) {
+		log_obj.logHostile("********** HOSTILITY EXIT: " + arguments[0]);
+		log_obj.closeLog();
+		quit();									// We're in trouble. REALLY quit()!
+	}
+	else
+		log_obj.logInfo(arguments[0]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			;
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (arguments[0].
+		match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+	else if (arguments[0].match(/^\S+ dropped due to timeout\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

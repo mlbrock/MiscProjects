@@ -1,0 +1,285 @@
+//////////////////////////////////////////////////////////////////////////////
+//
+// Syadasti's d2jsp function library
+//
+// Copyright (c) 2002 by Mike Gogulski
+//
+//////////////////////////////////////////////////////////////////////////////
+
+function Dist2(x1, y1, x2, y2) {
+	return Math.floor((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)); }
+
+function Dist(x1, y1, x2, y2) {
+	return Math.floor(Math.sqrt(Dist2(x1, y1, x2, y2))); }
+
+function myDist(x, y) {
+	return Dist(me.x, me.y, x, y); }
+
+function TeleportTo(x, y) {
+	me.setSkill("Teleport", 0);
+	me.useSkillAt(Math.floor(x), Math.floor(y), 0);
+	while (me.mode != 10) {
+		delay(10); }
+	while (me.mode == 10) {
+		delay(10); } }
+
+function TeleportToward(x, y, delta) {
+	var _targetx = me.x;
+	var _targety = me.y;
+	r = myDist(x, y);
+	if (delta > 0 && r <= delta) {
+		_targetx = x;
+		_targety = y; }
+	else {
+		_targetx = Math.floor(me.x + (delta * (x - me.x) / (r > 0 ? r : 1)));
+		_targety = Math.floor(me.y + (delta * (y - me.y) / (r > 0 ? r : 1))); }
+	TeleportTo(_targetx, _targety); }
+
+function Sy_CastOnSelf(skill, hand) {
+	me.setSkill(skill, hand);
+	me.useSkill(hand); 
+	while (me.mode != 10) {
+		delay(10); }
+	while (me.mode == 10) {
+		delay(10); } }
+
+// FruitBar
+function walkto(x, y)
+{
+	var _arrived = false;
+	while(_arrived==false)
+	{
+		me.move(x, y);
+		delay(100);
+
+		if((Math.abs(me.x - x) < 4) && (Math.abs(me.y - y) < 4)) 
+		{
+			_arrived=true;
+		}
+	}
+}
+
+// njaguar/Gayak
+var waypoints = [[0x01,0x03,0x04,0x05,0x06,0x1b,0x1d,0x20,0x23],[0x28,0x30,0x2a,0x39,0x2b,0x2c,0x34,0x4a,0x2e],[0x4b,0x4c,0x4d,0x4e,0x4f,0x50,0x51,0x53,0x65],[0x67,0x6a,0x6b],[0x6d,0x6f,0x70,0x71,0x73,0x7b,0x75,0x76,0x81]];
+
+// njaguar
+// Modified by TDW 2003-03-13
+function usewaypoint(act,place) {
+   var _code = waypoints[act-1][place-1];
+   waypoint = getObject("Waypoint");
+   waypoint.move();
+   waypoint.interact(_code);
+   delay(250);
+	// TDW: Re-acquire the WP after transit in order to cancel
+   waypoint = getObject("Waypoint");
+   waypoint.cancel();
+   delay(250);
+	// TDW: Even Jag doesn't remember what this does.
+	//	waypoint.interact(me.area, 0);
+}
+
+function Sy_ModeNumberToName(mode) {
+	return Sy_StateNumberToName(mode); }
+
+function Sy_StateNumberToName(state) {
+	return [
+		"None",
+		"Freeze",
+		"Poison",
+		"Resist Fire",
+		"Resist Cold",
+		"Resist Light",
+		"Resist Magic",
+		"Player Body",
+		"Resist All",
+		"Amplify Damage",
+		"Frozen Armor",
+		"Cold",
+		"Inferno",
+		"Blaze",
+		"Bone Armor",
+		"Concentrate",
+		"Enchant",
+		"Innersight",
+		"Skill Move",
+		"Weaken",
+		"Chilling Armor",
+		"Stunned",
+		"Spider Lay",
+		"Dim Vision",
+		"Slowed",
+		"Fetish Aura",
+		"Shout",
+		"Taunt",
+		"Conviction",
+		"Convicted",
+		"Energy Shield",
+		"Venom Claws",
+		"Battle Orders",
+		"Might",
+		"Prayer",
+		"Holy Fire",
+		"Thorns",
+		"Defiance",
+		"Thunder Storm",
+		"Lightning Bolt",
+		"Blessed Aim",
+		"Stamina",
+		"Concentration",
+		"Holy Wind",
+		"Holy Wind Cold",
+		"Cleansing",
+		"Holy Shock",
+		"Sanctuary",
+		"Meditation",
+		"Fanaticism",
+		"Redemption",
+		"Battle Command",
+		"Prevent Heal",
+		"Conversion",
+		"Uninterruptable",
+		"Iron Maiden",
+		"Terror",
+		"Attract",
+		"Lifetap",
+		"Confuse",
+		"Decrepify",
+		"Lower Resist",
+		"Open Wounds",
+		"Dopplezon",
+		"Critical Strike",
+		"Dodge",
+		"Avoid",
+		"Penetrate",
+		"Evade",
+		"Pierce",
+		"Warmth",
+		"Fire Mastery",
+		"Lightning Mastery",
+		"Cold Mastery",
+		"Sword Mastery",
+		"Axe Mastery",
+		"Mace Mastery",
+		"Polearm Mastery",
+		"Throwing Mastery",
+		"Spear Mastery",
+		"Increased Stamina",
+		"Iron Skin",
+		"Increased Speed",
+		"Natural Resistance",
+		"Finger Mage Curse",
+		"No Mana Regen",
+		"Just Hit",
+		"Slow Missiles",
+		"Shiver Armor",
+		"Battle Cry",
+		"Blue",
+		"Red",
+		"Death Delay",
+		"Valkyrie",
+		"Frenzy",
+		"Berserk",
+		"Revive",
+		"Item Full Set",
+		"Source Unit",
+		"Redeemed",
+		"Health Pot",
+		"Holy Shield",
+		"Just Portaled",
+		"Mon Frenzy",
+		"Corpse Nodraw",
+		"Alignment",
+		"Mana Pot",
+		"Shatter",
+		"Sync Warped",
+		"Conversion Save",
+		"Pregnant",
+		"111",
+		"Rabies",
+		"Defense Curse",
+		"Blood Mana",
+		"Burning",
+		"Dragon Flight",
+		"Maul",
+		"Corpse Noselect",
+		"Shadow Warrior",
+		"Feral Rage",
+		"Skill Delay",
+		"Progressive Damage",
+		"Progressive Steal",
+		"Progressive Other",
+		"Progressive Fire",
+		"Progressive Cold",
+		"Progressive Lightning",
+		"Shrine Armor",
+		"Shrine Combat",
+		"Shrine Resist Lightning",
+		"Shrine Resist Fire",
+		"Shrine Resist Cold",
+		"Shrine Resist Poison",
+		"Shrine Skill",
+		"Shrine Mana Regen",
+		"Shrine Stamina",
+		"Shrine Experience",
+		"Fenris Rage",
+		"Wolf",
+		"Bear",
+		"Bloodlust",
+		"Change Class",
+		"Attached",
+		"Hurricane",
+		"Armageddon",
+		"Invis",
+		"Barbs",
+		"Wolverine",
+		"Oak Sage",
+		"Vine Beast",
+		"Cyclone Armor",
+		"Claw Mastery",
+		"Cloak Of Shadows",
+		"Recycled",
+		"Weapon Block",
+		"Cloaked",
+		"Quickness",
+		"Blade Shield",
+		"Fade"
+	][state]; }
+
+function Sy_GetMode(unit) {
+	return Sy_GetState(unit); }
+
+function Sy_GetState(unit) {
+	return [
+		["Death", "Death", "Idle"],
+		["Standing still outside town", "Standing still", "Operating"],
+		["Walking", "Walking", "Opened"],
+		["Running", "Getting hit", "Special 1"],
+		["Getting hit", "Attacking (Attack 1)", "Special 2"],
+		["Standing still in town", "Attacking (Attack 2)", "Special 3"],
+		["Walking in town", "Blocking", "Special 4"],
+		["Attacking (Attack 1)", "Casting spell/skill", "Special 5"],
+		["Attacking (Attack 2)", "Using Skill 1", "UNDEFINED"],
+		["Blocking Using Skill 2", "UNDEFINED"],
+		["Casting a spell/skill", "Using Skill 3", "UNDEFINED"],
+		["Throwing an item", "Using Skill 4", "UNDEFINED"],
+		["Kicking", "Dead", "UNDEFINED"],
+		["Using Skill 1", "Being knocked back", "UNDEFINED"],
+		["Using Skill 2", "Sequence (???)", "UNDEFINED"],
+		["Using Skill 3", "Running", "UNDEFINED"],
+		["Using Skill 4", "UNDEFINED", "UNDEFINED"],
+		["Dead", "UNDEFINED", "UNDEFINED"],
+		["Sequence (???)", "UNDEFINED", "UNDEFINED"],
+		["Being knocked back", "UNDEFINED", "UNDEFINED"]
+	][unit.mode][unit.type]; }
+
+function Sy_GetClass(unit) {
+	return [
+		"Amazon",
+		"Sorceress",
+		"Necromancer",
+		"Paladin",
+		"Barbarian",
+		"Druid",
+		"Assassin"
+	][unit.classid]; }
+

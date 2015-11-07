@@ -1,0 +1,106 @@
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/_D2JSP_Areas.d2l");
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	var log_obj    = new D2JSP_UTIL_Log("output/" +
+		"____FeatureTest.018.getPresetUnitsStressTest.d2j" + "." + me.realm +
+		"." + me.account + "." + me.name + ".log", "FeatureTest.018");
+	var area_count = 0;
+
+//	log_obj.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+//	log_obj.syncModeOn();
+
+/*
+	var act_start_time = new Date();
+
+	for (var count_1 = D2JSP_AREA_MINIMUM; count_1 <= D2JSP_AREA_MAXIMUM;
+		count_1++) {
+		var this_act = D2JSP_AREA_GetAct(count_1);
+		if (this_act == me.act) {
+			DoArea(count_1, log_obj);
+			area_count++;
+		}
+	}
+
+	log_obj.logInfo("Processed " + area_count + " areas in Act " + me.act +
+		" in " + (((new Date()) - act_start_time) / 1000).toFixed(2) +
+		" seconds.");
+*/
+
+/*
+	while (true)
+		DoArea(me.area + 1, log_obj);
+*/
+
+while (true) {
+	for (var count_1 = D2JSP_AREA_MINIMUM; count_1 <= D2JSP_AREA_MAXIMUM;
+		count_1++) {
+		var this_act = D2JSP_AREA_GetAct(count_1);
+		if (this_act == me.act) {
+			DoArea(count_1, log_obj);
+			area_count++;
+		}
+	}
+	runGC();
+}
+
+	log_obj.logInfo("Script completed normally.");
+
+	log_obj.closeLog();
+}
+
+function DoArea(area, log_obj)
+{
+//	log_obj.logInfo("Beginning load of preset units for area " + area +
+//		" (" + D2JSP_AREA_AreaToName(area) + ")...");
+
+	var area_start_time = new Date();
+	var preset_list     = new Array();
+	var room_count      = 0;
+	var room_obj        = getRoom(area);
+
+	me.overhead("Area=" + area + "/Room=" + room_count);
+
+	if (room_obj) {
+		do {
+			var coll_table       = room_obj.getCollision();
+			me.overhead("Area=" + area + "/Room=" + (room_count + 1));
+if (!coll_table) {
+	log_obj.logError(D2JSP_UTIL_COLOR_RED +
+		"EMPTY COLLISION TABLE RETURNED: (area=" + area +
+		", room number=" + room_obj.number + ", base room x=" + room_obj.x +
+		", base room y=" + room_obj.y);
+	log_obj.logError(D2JSP_UTIL_COLOR_YELLOW + "RE-TRYING COLLISION TABLE ACQUISITION AFTER 5 SECONDS...");
+	delay(5000);
+	me.overhead("Area=" + area + "/Room=" + (room_count + 1));
+	coll_table = room_obj.getCollision();
+	if (!coll_table)
+		log_obj.logError(D2JSP_UTIL_COLOR_RED + "COLLISION TABLE STILL EMPTY");
+	else
+		log_obj.logInfo(D2JSP_UTIL_COLOR_GREEN + "COLLISION TABLE NOW POPULATED");
+}
+			var room_preset_list = room_obj.getPresetUnits();
+			me.overhead("Area=" + area + "/Room=" + (room_count + 1));
+			if (room_preset_list && room_preset_list.length)
+				preset_list = preset_list.concat(room_preset_list);
+			me.overhead("Area=" + area + "/Room=" + (room_count + 1));
+			room_count++;
+		} while (room_obj && room_obj.getNext(area));
+	}
+
+//	var area_total_time = (new Date()) - area_start_time;
+//	log_obj.logInfo("Completed load of preset units for area " + area +
+//		" (" + D2JSP_AREA_AreaToName(area) +
+//		") --- rooms = " + room_count + ", non-uniqued preset units = " +
+//		preset_list.length + " --- total time = " +
+//		(area_total_time / 1000).toFixed(3) + ", per-room time = " +
+//		(area_total_time / room_count / 1000).toFixed(3));
+
+	runGC();
+}
+

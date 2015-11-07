@@ -1,0 +1,94 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+function main()
+{
+	var file_name = "output/TDW_ObjectProperties." + me.realm + "." +
+		me.account + "." + me.name + ".txt";
+
+	if ((file_handle = fileOpen(file_name, 1)) != null) {
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Object Properties / " + (new Date()).toString());
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		file_handle.close();
+		WriteLine(file_name, "=================================================");
+		WriteLine(file_name, "Processing the 'me' object:");
+		WriteLine(file_name, "-------------------------------------------------");
+		DoOutput(file_name, me);
+		WriteLine(file_name, "=================================================");
+		WriteLine(file_name, "");
+		DoGet(file_name, "getUnit(ITEM)",    getUnit(D2JSP_UTIL_GETUNIT_ITEM));
+		DoGet(file_name, "getUnit(MISSILE)", getUnit(D2JSP_UTIL_GETUNIT_MISSILE));
+		DoGet(file_name, "getUnit(NPC)",     getUnit(D2JSP_UTIL_GETUNIT_NPC));
+		DoGet(file_name, "getUnit(OBJECT)",  getUnit(D2JSP_UTIL_GETUNIT_OBJECT));
+		DoGet(file_name, "getUnit(PLAYER)",  getUnit(D2JSP_UTIL_GETUNIT_PLAYER));
+		DoGet(file_name, "getRoom",          getRoom());
+		DoGet(file_name, "getUnit(TILE)",    getUnit(D2JSP_UTIL_GETUNIT_TILE));
+	}
+	else {
+		print("ERROR: Unable to open '" + file_name + "' for appending.");
+		print("Stopping script execution.");
+		stop();
+	}
+
+	print("Done");
+}
+
+function DoGet(file_name, get_name, this_object)
+{
+	print("Trying " + get_name + " ...");
+
+	WriteLine(file_name, "=================================================");
+
+	if (this_object) {
+		WriteLine(file_name, "Got an object with " + get_name + "():");
+		WriteLine(file_name, "-------------------------------------------------");
+		DoOutput(file_name, this_object);
+	}
+	else
+		WriteLine(file_name, "Nothing returned from " + get_name + "()");
+
+	WriteLine(file_name, "=================================================");
+	WriteLine(file_name, "");
+}
+
+function DoOutput(file_name, this_object)
+{
+	var prop_list = new Array();
+	var this_prop;
+
+	WriteLine(file_name, D2JSP_UTIL_FORMAT_LJust("Property Name", 20) +
+		"     " + "Property Value");
+	WriteLine(file_name, D2JSP_UTIL_FORMAT_LJust("", 20, "=") +
+		"     " + D2JSP_UTIL_FORMAT_LJust("", 50, "="));
+
+	for (this_prop in this_object)
+		prop_list.push(this_prop);
+
+	prop_list.sort();
+
+	while (prop_list.length) {
+		this_prop = prop_list.shift();
+		WriteLine(file_name, D2JSP_UTIL_FORMAT_LJust(this_prop, 20) +
+			" ---> " +
+			((this_prop == "busy") ? "********** SKIPPED **********" :
+			this_object[this_prop]));
+	}
+}
+
+function WriteLine(file_name, out_string)
+{
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 2)) != null) {
+		file_handle.writeLine(out_string);
+		file_handle.close();
+	}
+	else {
+		print("ERROR: Unable to open '" + file_name + "' for appending.");
+		print("Stopping script execution.");
+		stop();
+	}
+}
+
+

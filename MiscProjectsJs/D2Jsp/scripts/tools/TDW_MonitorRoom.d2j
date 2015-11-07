@@ -1,0 +1,275 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_Path.d2l");
+
+var TDW_MR_Log = null;
+
+var TDW_MR_UnitObject = new Array();
+var TDW_MR_UnitTile   = new Array();
+
+function main()
+{
+	var last_area;
+	var last_room;
+	var last_x;
+	var last_y;
+
+	TDW_MR_Log = new D2JSP_UTIL_Log("output/TDW_MonitorRoom." +
+		D2JSP_UTIL_FORMAT_GetUserDottedStringFixed() + ".log", "MonitorRoom");
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	last_area = me.area;
+	last_x    = me.x;
+	last_y    = me.y;
+	last_room = TDW_PATH_FindRoomByXY(last_x, last_y);
+	
+	TDW_MR_Initialize(last_room);
+	print("Ready");
+
+	while (true) {
+		if (me.area != last_area) {
+			last_area   = me.area;
+			last_x      = me.x;
+			last_y      = me.y;
+			last_room   = TDW_PATH_FindRoomByXY(last_x, last_y);
+			change_flag = true;
+			TDW_MR_Initialize(last_room);
+		}
+		else if ((me.x != last_x) || (me.y != last_y)) {
+			if (!last_room.isInRoomObject(me)) {
+				last_area   = me.area;
+				last_x      = me.x;
+				last_y      = me.y;
+				last_room   = TDW_PATH_FindRoomByXY(last_x, last_y);
+				change_flag = true;
+				TDW_MR_Initialize(last_room);
+			}
+		}
+		TDW_MR_Check(last_room);
+		D2JSP_UTIL_BNET_OverheadSafe("RM:"+me.area+":"+last_room.number+":["+me.x+","+me.y+"]");
+		delay(500);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_Initialize(last_room)
+{
+	TDW_MR_InitializeTiles(last_room);
+	TDW_MR_InitializeObjects(last_room);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_Check(last_room)
+{
+	TDW_MR_CheckTiles(last_room);
+	TDW_MR_CheckObjects(last_room);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_InitializeTiles(last_room)
+{
+	var action_count = 0;
+	var log_obj      = D2JSP_UTIL_LOG_GetALog();
+
+	TDW_MR_UnitTile = TDW_MR_GetTiles(last_room);
+
+	for (var this_prop in TDW_MR_UnitTile) {
+		log_obj.logInfo("***** Tile " + this_prop + " [" +
+			TDW_MR_UnitTile[this_prop] + "] has been recorded.");
+		action_count++;
+	}
+
+	if (action_count)
+		log_obj.logInfo("---------------------------------------------------");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_GetTiles(last_room)
+{
+	var out_list = new Array();
+	var this_obj = getUnit(D2JSP_UTIL_GETUNIT_TILE);
+
+	if (this_obj) {
+		do {
+			if (last_room.isInRoomObject(this_obj))
+				out_list[this_obj.classid + ""] =
+					[this_obj.mode, this_obj.name, this_obj.area, this_obj.x,
+					this_obj.y];
+		} while (this_obj && this_obj.getNext());
+	}
+
+/*
+for (var this_prop in out_list)
+	print("OUT LIST = this_prop = " + out_list[this_prop]);
+print("ROOM = [" + [last_room.x_1,last_room.y_1,last_room.x_2,last_room.y_2] + "]");
+print("STOPPING");
+stop();
+*/
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_CheckTiles(last_room)
+{
+	var out_list     = TDW_MR_GetTiles(last_room);
+	var action_count = 0;
+	var log_obj      = D2JSP_UTIL_LOG_GetALog();
+
+	for (var this_prop in TDW_MR_UnitTile) {
+		if (this_prop in out_list) {
+			if (TDW_MR_UnitTile[this_prop][0] != out_list[this_prop][0]) {
+				log_obj.logInfo("***** Tile " + this_prop + " [" +
+					TDW_MR_UnitTile[this_prop] + "] mode changed to " +
+					out_list[this_prop][0]);
+				action_count++;
+			}
+			if (TDW_MR_UnitTile[this_prop][1] != out_list[this_prop][1]) {
+				log_obj.logInfo("***** Tile " + this_prop + " [" +
+					TDW_MR_UnitTile[this_prop] + "] name changed to " +
+					out_list[this_prop][0]);
+				action_count++;
+			}
+			if (TDW_MR_UnitTile[this_prop][2] != out_list[this_prop][2]) {
+				log_obj.logInfo("***** Tile " + this_prop + " [" +
+					TDW_MR_UnitTile[this_prop] + "] area changed to " +
+					out_list[this_prop][0]);
+				action_count++;
+			}
+		}
+		else {
+			log_obj.logInfo("***** Tile " + this_prop + " [" +
+				TDW_MR_UnitTile[this_prop] + "] not found in current list!!!");
+			action_count++;
+		}
+	}
+
+	for (var this_prop in out_list) {
+		if (!(this_prop in TDW_MR_UnitTile)) {
+			log_obj.logInfo("***** Tile " + this_prop + " [" +
+				out_list[this_prop] + "] is new.");
+			action_count++;
+		}
+	}
+
+	if (action_count)
+		log_obj.logInfo("---------------------------------------------------");
+
+	TDW_MR_UnitTile = out_list;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_InitializeObjects(last_room)
+{
+	var action_count = 0;
+	var log_obj      = D2JSP_UTIL_LOG_GetALog();
+
+	TDW_MR_UnitObject = TDW_MR_GetObjects(last_room);
+
+	for (var this_prop in TDW_MR_UnitObject) {
+		log_obj.logInfo("***** Object " + this_prop + " [" +
+			TDW_MR_UnitObject[this_prop] + "] has been recorded.");
+		action_count++;
+	}
+
+	if (action_count)
+		log_obj.logInfo("---------------------------------------------------");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_GetObjects(last_room)
+{
+	var out_list = new Array();
+	var this_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT);
+
+	if (this_obj) {
+		do {
+			if (last_room.isInRoomObject(this_obj))
+				out_list[this_obj.classid + ""] =
+					[this_obj.mode, this_obj.name, this_obj.x, this_obj.y];
+		} while (this_obj && this_obj.getNext());
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MR_CheckObjects(last_room)
+{
+	var out_list     = TDW_MR_GetObjects(last_room);
+	var action_count = 0;
+	var log_obj      = D2JSP_UTIL_LOG_GetALog();
+
+	for (var this_prop in TDW_MR_UnitObject) {
+		if (this_prop in out_list) {
+			if (TDW_MR_UnitObject[this_prop][0] != out_list[this_prop][0]) {
+				log_obj.logInfo("***** Object " + this_prop + " [" +
+					TDW_MR_UnitObject[this_prop] + "] mode changed to " +
+					out_list[this_prop][0]);
+				action_count++;
+			}
+			if (TDW_MR_UnitObject[this_prop][1] != out_list[this_prop][1]) {
+				log_obj.logInfo("***** Object " + this_prop + " [" +
+					TDW_MR_UnitObject[this_prop] + "] name changed to " +
+					out_list[this_prop][0]);
+				action_count++;
+			}
+		}
+		else {
+			log_obj.logInfo("***** Object " + this_prop + " [" +
+				TDW_MR_UnitObject[this_prop] + "] not found in current list!!!");
+			action_count++;
+		}
+	}
+
+	for (var this_prop in out_list) {
+		if (!(this_prop in TDW_MR_UnitObject)) {
+			log_obj.logInfo("***** Object " + this_prop + " [" +
+				out_list[this_prop] + "] is new.");
+			action_count++;
+		}
+	}
+
+	if (action_count)
+		log_obj.logInfo("---------------------------------------------------");
+
+	TDW_MR_UnitObject = out_list;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

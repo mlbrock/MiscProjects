@@ -1,0 +1,344 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Required include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/TDW_BotSupport.d2l");
+
+includeonce("TDW/TDW_Move.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_IS_ConfigureList = new Array();
+TDW_IS_ConfigureList["operation.isf.file"]            = "settings/ISF.SpeedShop.cfg";
+TDW_IS_ConfigureList["operation.exit.normal.stop"]    = false;
+// Should be left as 'true' until NJaguar fixes core item traversal.
+TDW_IS_ConfigureList["operation.exit.after.purchase"] = false;
+TDW_IS_ConfigureList["npc.name"]                      = "Larzuk";
+TDW_IS_ConfigureList["items.file.all"]                = true;
+TDW_IS_ConfigureList["items.file.bought"]             = true;
+
+var TDW_IS_ContextList = new Array();
+// ////////////////////////////////////////////////////////////////////////////
+
+const TDW_IS_GameLoadMS  = 1000;
+const TDW_IS_ExitSleepMS = 3000;
+
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_IS_Log              = null;
+var TDW_ISF_Cfg             = null;
+var TDW_IS_ContainerMapList = null;
+var TDW_IS_ItemsLogAll      = null;
+var TDW_IS_ItemsLogWanted   = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+function main()
+{
+	var config_list = new Array();
+
+	if ((me.realm != "useast.battle.net") && (me.realm != ""))
+		config_list["operation.isf.file"] = "settings/ISF.SpeedShop.Foreign.cfg"
+
+	TDW_IS_Start(config_list);
+}
+
+function TDW_IS_Start(config_list)
+{
+	var error_list = new Array();
+	var error_msg_string;
+
+	TDW_IS_Log = new D2JSP_UTIL_Log("output\\TDW_InShop." + me.realm +
+		"." + me.account + "." + me.name + ".log", "SpeedShop");
+
+//TDW_IS_ConfigureList["operation.exit.normal.stop"] = true;
+//TDW_IS_ConfigureList["npc.name"]                   = "Anya";
+
+	TDW_IS_Log.syncModeOn();
+	TDW_IS_Log.setLevelFile(D2JSP_UTIL_LOG_Level_DEBUG);
+
+	print("...waiting " + (TDW_IS_GameLoadMS / 1000) +
+		" seconds for game load to complete...");
+	delay(TDW_IS_GameLoadMS);
+
+	TDW_BOT_CTX_ContextCreate(TDW_IS_ConfigureList, config_list,
+		"In Shopper Bot Configuration", TDW_IS_Log);
+
+	print("Loading ISF configuration file '" +
+		TDW_BOT_ContextList["operation.isf.file"] + "'...");
+	if (!(TDW_ISF_Cfg =
+		ISF_Create(TDW_BOT_ContextList["operation.isf.file"],
+		ISF_PARSE_FLAG_NONE, error_list))) {
+		var this_date = new Date();
+		TDW_IS_Log.logError("Error loading ISF configuration file '" +
+			TDW_BOT_ContextList["operation.isf.file"] + "'.");
+		while (error_list.length)
+			TDW_IS_Log.logError(error_list.shift(), this_date);
+		TDW_IS_DoExitWithMsg("Error loading ISF configuration file '" +
+			TDW_BOT_ContextList["operation.isf.file"] + "'.");
+	}
+
+	if (TDW_ISF_Cfg.cursorCheckStart())
+		TDW_IS_DoExitWithMsg("Item could not be removed from cursor");
+
+	TDW_IS_OpenItemLogAll();
+	TDW_IS_OpenItemLogWanted();
+
+	print("Ready.");
+	
+	while (true) {
+		if (getUIFlag(D2JSP_UTIL_UI_SHOP)) {
+			print("Entered shop.");
+			delay(500);
+			var sispec_list = new Array();
+			var item_count  = TDW_IS_SearchItems(sispec_list);
+			print("Items found: " + sispec_list.length + " / " + item_count);
+			while (sispec_list.length) {
+				print(sispec_list[0].parent_name + ": " +
+					sispec_list[0].fullNameColor + D2JSP_UTIL_COLOR_WHITE + " (on " +
+					D2JSP_ITEM_STORE_TabCodeToName(sispec_list[0].itemloc) + ")");
+				sispec_list.shift();
+			}
+			while (getUIFlag(D2JSP_UTIL_UI_SHOP))
+				delay(500);
+			print("Exited shop.");
+		}
+		else
+			delay(500);
+	}
+
+	print("Stopping");
+	quit();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_SearchItems(sispec_list)
+{
+	var item_count  = 0;
+	var this_item   = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+	var all_list    = new Array();
+	var wanted_list = new Array();
+	var this_parent;
+
+	sispec_list.length = 0;
+
+	if (this_item) {
+		do {
+			this_parent = this_item.getParent();
+			if (this_parent && D2JSP_NPC_IsAVendor(this_parent.name)) {
+				item_count++;
+				all_list.push(D2JSP_ITEM_FixFName(this_item));
+				if ((results_data = TDW_ISF_Cfg.evalItemForKeep(this_item,
+					ISF_EVAL_FLAG_RETURN_SOURCE_INFO))[0] == true) {
+					sispec_list.push(new ISF_SISpec(this_item, false, false, true,
+						results_data[1]));
+					wanted_list.push(D2JSP_ITEM_FixFName(this_item));
+					TDW_IS_Log.logDetail("Found an item for purchase    : " +
+						sispec_list[sispec_list.length - 1].fullNameColor);
+				}
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	TDW_IS_Log.logDetail("Total of " + all_list.length +
+		" items found in " + TDW_BOT_ContextList["npc.name"] +
+		"'s shop this pass.");
+
+	if (all_list.length)
+		TDW_IS_ItemLogAll(all_list);
+
+	if (wanted_list.length)
+		TDW_IS_ItemLogWanted(wanted_list);
+
+	return(item_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_DoExitWithMsg(msg_string)
+{
+	TDW_IS_CloseItemLogsAll();
+	TDW_IS_Log.logFatal(D2JSP_UTIL_COLOR_RED + msg_string + " --- exiting...");
+	TDW_IS_Log.closeLog();
+
+	print("... Waiting " + (TDW_IS_ExitSleepMS / 1000) + " seconds ...");
+	delay(TDW_IS_ExitSleepMS);
+
+	TDW_IS_DoQuit();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_DoQuit()
+{
+	TDW_IS_CloseItemLogsAll();
+	TDW_IS_Log.closeLog();
+
+	if (!TDW_BOT_ContextList["operation.exit.normal.stop"])
+		quit();
+
+	print("Not doing a 'quit()', but stopping the Speed Shopper.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_OpenItemLogAll()
+{
+	if ((typeof(TDW_BOT_ContextList["items.file.all"]) != "undefined") &&
+		TDW_BOT_ContextList["items.file.all"])
+		TDW_IS_ItemsLogAll = TDW_IS_OpenItemLog("output/TDW_InShop." +
+			me.realm + "." + me.account + "." + me.name +".Items.All.txt");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_OpenItemLogWanted()
+{
+	if ((typeof(TDW_BOT_ContextList["items.file.bought"]) != "undefined") &&
+		TDW_BOT_ContextList["items.file.bought"])
+		TDW_IS_ItemsLogWanted = TDW_IS_OpenItemLog("output/TDW_InShop."+
+			me.realm + "." + me.account + "." + me.name +".Items.Wanted.txt");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_OpenItemLog(file_name)
+{
+	var file_handle = null;
+	var tmp_text;
+
+	if ((file_handle = fileOpen(file_name, 2)) != null) {
+		tmp_text = D2JSP_UTIL_FORMAT_RJust("", 4 + 1 + 2 + 1 + 2, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 2 + 1 + 2 + 1 + 2 + 1 + 3, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 80, "*");
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(D2JSP_UTIL_DATE_ToSmallDate() + " " +
+			"Start of Shopping Session");
+		file_handle.writeLine(tmp_text);
+	}
+	else
+		TDW_IS_DoExitWithMsg("Unable to open items log file '" +
+			file_name + "' for appending");
+
+	return(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_CloseItemLogsAll()
+{
+	var close_date = new Date();
+
+	TDW_IS_CloseItemLogsOne(close_date, TDW_IS_ItemsLogAll);
+	TDW_IS_CloseItemLogsOne(close_date, TDW_IS_ItemsLogWanted);
+
+	TDW_IS_ItemsLogAll    = null;
+	TDW_IS_ItemsLogWanted = null;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_CloseItemLogsOne(close_date, file_handle)
+{
+
+	var tmp_text;
+
+	if (file_handle != null) {
+		tmp_text = D2JSP_UTIL_FORMAT_RJust("", 4 + 1 + 2 + 1 + 2, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 2 + 1 + 2 + 1 + 2 + 1 + 3, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 80, "*");
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(D2JSP_UTIL_DATE_ToSmallDate() + " " +
+			"End of Shopping Session");
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine("");
+		file_handle.close();
+		file_handle = null;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_ItemLogAll(out_data)
+{
+	TDW_IS_WriteItemLog(out_data, TDW_IS_ItemsLogAll);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_ItemLogWanted(out_data)
+{
+	TDW_IS_WriteItemLog(out_data, TDW_IS_ItemsLogWanted);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_IS_WriteItemLog(out_data, file_handle, in_date)
+{
+	var this_date;
+	var count_1;
+	var tmp_message;
+
+	if (file_handle != null) {
+		this_date = (in_date instanceof Date) ? in_date : (new Date());
+		if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(out_data)) {
+			for (count_1 = 0; count_1 < out_data.length; count_1++)
+				TDW_IS_WriteItemLog(out_data[count_1], file_handle, this_date);
+		}
+		else {
+			tmp_message = out_data + "";
+			tmp_message = tmp_message.replace(/\xff+(c\d)/g, "");
+			file_handle.writeLine(D2JSP_UTIL_DATE_ToSmallDate(this_date) + " " +
+				tmp_message, this_date);
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

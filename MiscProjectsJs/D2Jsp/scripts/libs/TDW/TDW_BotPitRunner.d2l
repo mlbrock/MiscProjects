@@ -1,0 +1,131 @@
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Pit Runner Bot Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BotPitRunner.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Pit Runner Bot Library.
+//
+// Revison History : 2003-11-22 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_BotPitRunner_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_BotPitRunner_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotLib.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_BOT_PIT_PathFlags =
+	TDW_PATHL_AREA_LOAD_FLAG_NONE              |
+	TDW_PATHL_AREA_LOAD_FLAG_BASIC             |
+	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX |
+//	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_ALL     |
+//	TDW_PATHL_AREA_LOAD_FLAG_CENTER_ACCESS     |
+//	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_SRC     |
+//	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_DST     |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_SRC  |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_DST  |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_SRC  |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_DST  |
+	TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA;
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PIT_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_PIT_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_PIT_Run();
+
+	TDW_BOT_PIT_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PIT_Init(config_list)
+{
+	return(TDW_BOT_Init("TDW_BotPitRunner", null, config_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PIT_Run()
+{
+	return(TDW_BOT_PIT_DoPitRun());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PIT_Finish()
+{
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PIT_DoPitRun(access_strategy)
+{
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_MOVE_COMPAT_TownMove("waypoint");
+
+	if (!TDW_MOVE_WaypointAccessDataDoneFlag) {
+		TDW_MOVE_GetMyWayPointAccess();
+		access_strategy.wp_access =
+			D2JSP_UTIL_GEN_CloneObject(TDW_MOVE_WaypointAccessData);
+	}
+
+	if (!D2JSP_AREA_HasWaypointAccess(D2JSP_AREA_BLACK_MARSH,
+		access_strategy.wp_access)) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_WARNING, "You don't have the " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_BLACK_MARSH) +
+			" waypoint --- attempting to acquire it...");
+		TDW_BOT_CHECK_PrecastChecks(30000);
+		if (TDW_BOT_WP_AcquireWaypointOneBasic(D2JSP_AREA_BLACK_MARSH,
+			access_strategy))
+			return(-1);
+	}
+
+	var area_list = [
+//		D2JSP_AREA_PIT_LEVEL_1,
+//		D2JSP_AREA_PIT_LEVEL_2
+		D2JSP_AREA_ANCIENT_TUNNELS
+//		D2JSP_AREA_MAUSOLEUM
+	];
+
+/*
+	TDW_PATHL_LoadAreaLinksMulti(area_list, access_strategy,
+		TDW_BOT_PIT_PathFlags);
+*/
+
+/*
+	TDW_PATHL_LoadAreaLinksMulti(area_list, access_strategy,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT);
+*/
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	return(TDW_BOTLIB_ClearArea(area_list, access_strategy, null,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT));
+	
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_BotPitRunner_d2l) == "undefined") {
+

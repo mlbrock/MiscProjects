@@ -1,0 +1,30 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+var TEST_Log = null;
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	TEST_Log = new D2JSP_UTIL_Log("output/" +
+		"____FeatureTest.021.getLocaleString.d2j" + "." + me.realm +
+		"." + me.account + "." + me.name + ".log", "FeatureTest.021",
+		null, null, null, true);
+
+	TEST_Log.syncModeOn();
+
+	for (var count_1 = 0; count_1 < 65535; count_1++) {
+		TEST_Log.logInfoQuiet("String Number: " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 6))
+		TEST_Log.logInfoQuiet("String Text  : " +
+			getLocaleString(count_1));
+	}
+
+	TEST_Log.closeLog();
+
+	print("Script completed normally.");
+}
+
+

@@ -1,0 +1,52 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+// Physical = 0
+// Fire = 1
+// Lightning = 2
+// Magic = 3
+// Cold = 4
+// Poison = 5
+
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/SkillAttackUsage." + me.realm +
+		"." + me.account + "." + me.name + ".log", "SkillAttackUsage", null, null,
+		null, true);
+
+	me.overhead(" ");
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	var skill_info_list = new Array();
+	for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+		count_1++)
+		skill_info_list.push(new D2JSP_SkillInfoCore(count_1));
+
+	my_log.logInfo(skill_info_list[0].toStringListHeader())
+	my_log.logInfo(skill_info_list[0].toStringListTrailer())
+	for (var count_1 = 0; count_1 < skill_info_list.length; count_1++)
+		my_log.logInfo(skill_info_list[count_1].toStringListItem());
+	my_log.logInfo(skill_info_list[0].toStringListTrailer())
+
+	var attack_skill_list = D2JSP_SKILL_GetAttacksForMe();
+
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+		while (attack_skill_list[count_1].length) {
+			my_log.logInfo(D2JSP_UTIL_FORMAT_LJust(
+				D2JSP_UTIL_DAMAGE_BaseElementList[count_1], 10) + ": " +
+				D2JSP_UTIL_FORMAT_RJust(attack_skill_list[count_1][0].level, 3) +
+				": " + attack_skill_list[count_1][0].name);
+			attack_skill_list[count_1].shift();
+		}
+	}
+
+	print("Script done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

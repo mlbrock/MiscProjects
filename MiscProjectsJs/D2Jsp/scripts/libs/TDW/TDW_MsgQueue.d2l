@@ -1,0 +1,220 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Bot Message Queue Management Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_MsgQueue.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: TDW bot message queue library.
+//
+// Revison History : 2004-02-07 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_MsgQueue_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_MsgQueue_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MSGQ_DEFAULT_QUEUE_NAME = "DEFAULT";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MSGQ_Msg(msg_text)
+{
+	if (arguments.length) {
+		this.msg_text = msg_text + "";
+		this.msg_time = new Date();
+	}
+
+	this.getMsgText = function() {
+		return(this.msg_text);
+	}
+
+	this.getMsgTime = function() {
+		return(this.msg_time);
+	}
+
+	this.toString   = function() {
+		return(D2JSP_UTIL_DATE_ToSmallDateSimple(this.msg_time) + " " +
+			this.msg_text);
+	}
+
+	this.toLog      = function(log_obj) {
+		D2JSP_UTIL_LOG_SelectALog(log_obj).logInfo(this);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MSGQ_Queue(queue_name)
+{
+	if (arguments.length) {
+		this.queue_name    = TDW_MSGQ_GetQueueName(queue_name);
+		this.recv_msg_list = new Array();
+		this.send_msg_list = new Array();
+	}
+
+	this.getMsg   = function() {
+		return((this.recv_msg_list.length) ? this.recv_msg_list.shift() : null);
+	}
+
+	this.putMsg   = function(msg) {
+		if (msg instanceof TDW_MSGQ_Msg)
+			this.send_msg_list.push(msg);
+		else
+			this.send_msg_list.push(new TDW_MSGQ_Msg(msg));
+
+		return(true);
+	}
+
+	this.clearRecvQueue = function() {
+		this.recv_msg_list = new Array();
+		return(true);
+	}
+
+	this.clearSendQueue = function() {
+		this.send_msg_list = new Array();
+		return(true);
+	}
+
+	this.clearQueue     = function() {
+		this.clearRecvQueue();
+		this.clearSendQueue();
+		return(true);
+	}
+
+	this.toString   = function() {
+		return("Message queue '" + this.queue_name + "': recv queue length = " +
+			this.recv_msg_list.length + ", send queue length = " +
+			this.send_msg_list.length);
+	}
+
+	this.toLog      = function(log_obj) {
+		var log_obj = D2JSP_UTIL_LOG_SelectALog(log_obj);
+		D2JSP_UTIL_LogInfoQuiet("Queue Name       : " +
+			this.queue_name, null, log_obj);
+		D2JSP_UTIL_LogInfoQuiet("Recv Queue Length: " +
+			D2JSP_UTIL_FORMAT_RJust(this.recv_msg_list.length, 10), null, log_obj);
+		D2JSP_UTIL_LogInfoQuiet("Send Queue Length: " +
+			D2JSP_UTIL_FORMAT_RJust(this.send_msg_list.length, 10), null, log_obj);
+		for (var count_1 = 0; count_1 < this.recv_msg_list.length; count_1++)
+			D2JSP_UTIL_LogInfoQuiet("RECV " + this.recv_msg_list[count_1]);
+		for (var count_1 = 0; count_1 < this.send_msg_list.length; count_1++)
+			D2JSP_UTIL_LogInfoQuiet("SEND " + this.send_msg_list[count_1]);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MSGQ_QueueManager()
+{
+	this.queue_hash                              = new Array();
+	this.queue_hash[TDW_MSGQ_DEFAULT_QUEUE_NAME] =
+		new TDW_MSGQ_Queue(TDW_MSGQ_DEFAULT_QUEUE_NAME);
+
+	this.addQueue       = function(queue) {
+		var queue      = (queue instanceof TDW_MSGQ_Queue) ?
+			queue : (new TDW_MSGQ_Queue(queue));
+
+		if (this.findQueue(queue.queue_name))
+			return(false);
+
+		this.queue_hash[queue.queue_name] = queue;
+
+		return(true);		
+	}
+
+	this.removeQueue    = function(queue_name) {
+		var queue_name = TDW_MSGQ_GetQueueName(queue_name);
+
+		if ((queue_name == TDW_MSGQ_DEFAULT_QUEUE_NAME) ||
+			(!this.findQueue(queue_name)))
+			return(false);
+
+		delete this.queue_hash[queue_name];
+
+		return(true);
+	}
+
+	this.findQueue      = function(queue_name) {
+		return(this.queue_hash[queue_name]);
+	}
+
+	this.clearRecvQueue = function(queue_name) {
+		var queue = this.findQueue(queue_name);
+
+		return((queue) ? queue.clearRecvQueue() : false);
+	}
+
+	this.clearSendQueue = function(queue_name) {
+		var queue = this.findQueue(queue_name);
+
+		return((queue) ? queue.clearSendQueue() : false);
+	}
+
+	this.clearQueue     = function(queue_name) {
+		var queue = this.findQueue(queue_name);
+
+		return((queue) ? queue.clearQueue() : false);
+	}
+
+	this.getMsg         = function(queue_name) {
+		var queue = this.findQueue(queue_name);
+
+		return((queue) ? queue.getMsg() : null);
+	}
+
+	this.putMsg         = function(msg, queue_name) {
+		var queue = this.findQueue(queue_name);
+
+		return((queue) ? queue.putMsg(msg) : false);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MSGQ_GetQueueName(queue_name)
+{
+	return((D2JSP_UTIL_GEN_TypeOfStringNotEmpty(queue_name)) ?
+		queue_name.toUpperCase() : TDW_MSGQ_DEFAULT_QUEUE_NAME);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_MsgQueue_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main()
+{
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/RegressionTest.TDW_MsgQueue.log",
+		"TDW_MsgQueue", null, null, null, true);
+
+	print("Done.");
+
+	TDW_BOT_Log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

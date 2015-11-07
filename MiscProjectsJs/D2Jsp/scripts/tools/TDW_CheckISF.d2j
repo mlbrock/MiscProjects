@@ -1,0 +1,186 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/ISF.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log     = new D2JSP_UTIL_Log("output/TDW_CheckISF." + me.realm +
+		"." + me.account + "." + me.name + ".log", "CheckISF");
+	var error_list = new Array();
+	var isf_cfg;
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	my_log.logInfo("Attempting to load your ISF configuration file...");
+//var start_time = getTickCount();
+	if (!(isf_cfg = ISF_Create(null, 0, error_list))) {
+//	if (!(isf_cfg = ISF_Create("settings/ISF.cfg", 0, error_list))) {
+		while (error_list.length)
+			my_log.logError(error_list.shift());
+		my_log.logError("Load of ISF configuration file failed.");
+	}
+	else {
+//var end_time = getTickCount();
+		my_log.logInfo("Load of ISF configuration file completed.");
+//print("***** TOTAL TIME = " + (end_time - start_time));
+//print("STOPPING");
+//stop();
+		TEST_ISF_ScanAll(isf_cfg, my_log);
+	}
+
+	my_log.closeLog();
+
+	print("Done");
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_ISF_ScanAll(isf_cfg, my_log)
+{
+	var isf_flags    = ISF_EVAL_FLAG_RETURN_SOURCE_INFO;
+	var pickup_count = 0;
+	var this_item;
+	var this_parent;
+	var this_string;
+
+	my_log.logInfo("My ISF object is an 'ISF_Cfg' object: " +
+		(isf_cfg instanceof ISF_Cfg));
+	my_log.logInfo("My ISF configuration: " + isf_cfg);
+	my_log.logInfo("My ISF version: " + isf_cfg.getVersion());
+	my_log.logInfo("My ISF source list count: " + isf_cfg.getSourceList().length);
+	my_log.logInfo("My ISF spec list count: [" + isf_cfg.getSpecList().length + "]");
+	my_log.logInfo("My ISF code has specs for '7gr'?: [" + isf_cfg.getCode("7qr") + "]");
+	my_log.logInfo("My ISF first spec: [" + isf_cfg.getSpec(0) + "]");
+
+	my_log.logInfo("If every item in the game were to drop on the ground unided...");
+	this_item = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+
+	if (this_item) {
+		do {
+			TEST_ISF_ScanItem(isf_cfg, my_log, this_item);
+		} while (this_item && this_item.getNext());
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_ISF_ScanItem(isf_cfg, my_log, in_item)
+{
+	var isf_flags    = ISF_EVAL_FLAG_RETURN_SOURCE_INFO;
+	var pickup_count = 0;
+
+	var this_item    = copyUnit(in_item);
+	var tmp_item     = new D2JSP_UTIL_GEN_UnitCloneItem(in_item);
+	var this_string;
+
+	// Note: Unless your ISF configuration includes such specifications as:
+	//
+	//		category armor : IsRuneWord=true
+	//		category weapon : IsRuneWord=true
+	//
+	// Any legit RuneWords (or Iths) will be reported as "wouldn't pick up'.
+	//
+	// Also, high-powered rares such as Corruption Grip and bugged items such
+	// as the Wizardspike ring based upon the SoJ are ignored unless your
+	//	configuration looks for items with those stats.
+/*
+	if ((this_item.code == "amu") || (this_item.code == "rin") ||
+		(D2JSP_ITEM_ItemList[this_item.code][D2JSP_ITEM_ELEMENT_CATEGORY] !=
+		"M")) {
+*/
+	if ((!(this_item.mode == D2JSP_MODE_ITEM_SOCKETED_IN_ITEM)) &&
+		(!(this_item.code in D2JSP_ITEM_BeltCellUpgrades)) &&
+		(!D2JSP_ITEM_IsValidTomeCode(this_item.code)) &&
+		(!D2JSP_ITEM_IsValidScrollCode(this_item.code)) &&
+		(this_item.code != "key")) {
+		if ((this_item.quality >= D2JSP_ITEM_QUALITY_MAGIC) &&
+			(this_item.quality != D2JSP_ITEM_QUALITY_CRAFTED) &&
+			this_item.getFlag(D2JSP_ITEMFLAG_IDENTIFIED))
+			tmp_item._item_flags ^= D2JSP_ITEMFLAG_IDENTIFIED;
+		var eval_p = isf_cfg.evalItemForPickup(tmp_item, isf_flags);
+		var eval_i = isf_cfg.evalItemForId(tmp_item, isf_flags);
+		var eval_k = isf_cfg.evalItemForKeep(this_item, isf_flags);
+		if (eval_p[0]) {
+			this_string = "I'd pickup the " +
+				(((this_item.quality < D2JSP_ITEM_QUALITY_MAGIC) ||
+				this_item.getFlag(D2JSP_ITEMFLAG_IDENTIFIED)) ?
+				D2JSP_ITEM_ColorItemFixFName(this_item) :
+				D2JSP_ITEM_ColorItemFullName(this_item)) + " --- ";
+			if ((this_item.quality >= D2JSP_ITEM_QUALITY_MAGIC) &&
+				(this_item.quality != D2JSP_ITEM_QUALITY_CRAFTED)) {
+				if (eval_i[0]) {
+					this_string += "and identify it to see if it's worth keeping";
+					if (this_item.getFlag(D2JSP_ITEMFLAG_IDENTIFIED))
+						this_string += ((eval_k[0]) ? " (it is)." : " (it isn't).");
+					else
+						this_string += ".";
+				}
+				else if (eval_k[0])
+					this_string += "and keep it unidentified.";
+			}
+			else
+				this_string += ((eval_k[0]) ? "and keep it." :
+					"but I wouldn't keep it.");
+			my_log.logInfo(this_string);
+			if (eval_p[0])
+				my_log.logInfoQuiet("           PICKUP: " +
+					isf_cfg.getSpecString(eval_p[1]));
+			if (eval_i[0])
+				my_log.logInfoQuiet("           ID    : " +
+					isf_cfg.getSpecString(eval_i[1]));
+			if (eval_k[0]) {
+				my_log.logInfoQuiet("           KEEP  : " +
+					isf_cfg.getSpecString(eval_k[1]));
+				my_log.logInfoQuiet("                 : " +
+					isf_cfg.getSpecText(eval_k[1]));
+				my_log.logInfoQuiet("                 : " +
+					isf_cfg.getSpec(eval_k[1]));
+			}
+		}
+		else
+			my_log.logInfo("I wouldn't pickup the " +
+				(((this_item.quality < D2JSP_ITEM_QUALITY_MAGIC) ||
+				this_item.getFlag(D2JSP_ITEMFLAG_IDENTIFIED)) ?
+				D2JSP_ITEM_ColorItemFixFName(this_item) :
+				D2JSP_ITEM_ColorItemFullName(this_item)) + ".");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

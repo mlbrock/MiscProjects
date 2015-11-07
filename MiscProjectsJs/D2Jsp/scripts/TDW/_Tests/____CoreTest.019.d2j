@@ -1,0 +1,75 @@
+/*
+	___CoreTest.019.d2j
+
+	Symptoms    :
+
+		Items without prefixes and suffices repeat those listed previously.
+
+		The full name is correct.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			31.Final Release Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+
+		Best way to test is to enter trade with a vendor then run this script.
+*/
+
+function main()
+{
+	var file_name = "output/____CoreTest.019.log";
+	var file_handle;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready.");
+
+	if (!(file_handle = fileOpen(file_name, 1)))
+		print("Unable to open file '" + file_name + "' for writing.");
+	else {
+		var this_obj = getUnit(4);
+		if (this_obj) {
+			do {
+				if (this_obj.quality == 4)
+					file_handle.writeLine(
+						D2JSP_UTIL_FORMAT_LJust(this_obj.fname, 40) + " | " +
+						D2JSP_UTIL_FORMAT_LJust(this_obj.prefix, 20) + " | " +
+						D2JSP_UTIL_FORMAT_LJust(this_obj.suffix, 20));
+			} while (this_obj && this_obj.getNext());
+		}
+	}
+
+	print("Stopping script");
+	stop();
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UTIL_FORMAT_Trim(in_string)
+{
+	return(in_string.replace(/^\s+|\s+$/g, ""));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UTIL_FORMAT_LJust(in_string, in_width, fill_char)
+{
+	var tmp_fill_char;
+	var tmp_string;
+
+	tmp_fill_char = ((typeof(fill_char) != "string") || (!fill_char.length)) ?
+		" " : fill_char.toString(fill_char.charCodeAt(0, 1));
+
+	if (in_width <= 0)
+		return("");
+	else {
+		tmp_string = D2JSP_UTIL_FORMAT_Trim(in_string + "");
+		if (tmp_string.length > in_width)
+			return(tmp_string.substr(0, in_width));
+		else if (tmp_string.length < in_width) {
+			var tmp_array = new Array((in_width - tmp_string.length) + 1);
+			return(tmp_string + tmp_array.join(tmp_fill_char));
+		}
+		return(tmp_string);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+

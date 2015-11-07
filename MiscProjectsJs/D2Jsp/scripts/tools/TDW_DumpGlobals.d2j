@@ -1,0 +1,55 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_BaseStats.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Enchants.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Missiles.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Quests.d2l");
+includeonce("TDW/_D2JSP_Rooms.d2l");
+includeonce("TDW/_D2JSP_RoomStats.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/TDW_Attack.d2l");
+includeonce("TDW/TDW_Basic.d2l");
+includeonce("TDW/TDW_BeltManager.d2l");
+includeonce("TDW/TDW_BotLib.d2l");
+includeonce("TDW/TDW_BotSupport.d2l");
+includeonce("TDW/TDW_Cfg.d2l");
+includeonce("TDW/TDW_Ini.d2l");
+includeonce("TDW/TDW_Inventory.d2l");
+includeonce("TDW/TDW_Move.d2l");
+includeonce("TDW/TDW_Path.d2l");
+includeonce("TDW/TDW_PathLink.d2l");
+
+includeonce("TDW/TDW_OOG_Utility.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+var ___TDW_DG_FileName  = "output/TDW_DumpGlobals.log";
+var ___TDW_DG_MyLog     = new D2JSP_UTIL_Log(___TDW_DG_FileName,
+									"TDW_DumpGlobals", null, null, true, true);
+var ___TDW_DG_ThisProp  = null;
+var ___TDW_DG_ThisCount = 0;
+
+print("Dumping include file globals to '" + ___TDW_DG_FileName + "'...");
+for (var ___TDW_DG_ThisProp in this)
+	___TDW_DG_MyLog.logInfoQuiet(D2JSP_UTIL_FORMAT_RJust(++___TDW_DG_ThisCount,
+		8) + ": " + ___TDW_DG_ThisProp);
+___TDW_DG_MyLog.closeLog();
+print("Done!!!");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+

@@ -1,0 +1,906 @@
+print("Starting...");
+
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_BaseStats.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Enchants.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Quests.d2l");
+includeonce("TDW/_D2JSP_Rooms.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+const MLB_DATA_DUMP_FLAG_SPARSE  = 0x00000001;
+const MLB_DATA_DUMP_FLAG_SYNC    = 0x80000000;
+
+// ////////////////////////////////////////////////////////////////////////////
+var MLB_DD_FileHandle      = null;
+var MLB_DD_SynchronousFlag = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteToFile(file_name, append_flag, flags)
+{
+	var file_handle;
+
+	MLB_DD_SynchronousFlag = (flags & MLB_DATA_DUMP_FLAG_SYNC) ? true : false;
+
+	if ((!arguments.length) || (file_name == null) || (file_name == ""))
+		file_name = "output\\MLB_DataDump." + me.realm + "." + me.account + "." +
+			me.name + ".txt";
+
+	if (MLB_DD_FileHandle = fileOpen(file_name, ((append_flag) ? 2 : 1))) {
+//		file_handle.close();
+		MLB_DD_FileName = file_name;
+		print("Beginning comprehensive game data dump...");
+		MLB_DD_WriteHeader(MLB_DD_FileHandle);
+		MLB_DD_WriteToHandle(MLB_DD_FileHandle, flags);
+		print("Comprehensive game data dump complete!");
+		return(0);
+	}
+	else {
+		print("Unable to open file '" + file_name + "' for " +
+			((append_flag) ? "appending." : "writing."));
+		return(-1);
+	}
+
+	MLB_DD_FileHandle      = null;
+	MLB_DD_SynchronousFlag = false;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteToHandle(file_handle, flags)
+{
+	var dump_list = [
+		["Player",  D2JSP_UTIL_GETUNIT_PLAYER,  null,    MLB_DD_DumpTypePlayer],
+		["NPC",     D2JSP_UTIL_GETUNIT_NPC,     null,    MLB_DD_DumpTypeNPC],
+		["Object",  D2JSP_UTIL_GETUNIT_OBJECT,  null,    MLB_DD_DumpTypeObject],
+		["Item",    D2JSP_UTIL_GETUNIT_ITEM,    null,    MLB_DD_DumpTypeItem],
+		["Room",    0,                          getRoom, MLB_DD_DumpTypeRoom],
+		["Tile",    D2JSP_UTIL_GETUNIT_TILE,    null,    MLB_DD_DumpTypeTile],
+		["Missile", D2JSP_UTIL_GETUNIT_MISSILE, null,    MLB_DD_DumpTypeMissile]
+	];
+	var count_1;
+	var obj_count;
+
+	MLB_DD_DumpTypeMe(file_handle, flags);
+
+	for (count_1 = 0; count_1 < dump_list.length; count_1++) {
+		MLB_DD_WriteSep2(file_handle);
+		MLB_DD_WriteLine(dump_list[count_1][0] + " Dump Start");
+		MLB_DD_WriteSep3(file_handle);
+		obj_count = MLB_DD_DoType(dump_list[count_1][1], dump_list[count_1][2],
+			dump_list[count_1][3], file_handle, flags);
+		MLB_DD_WriteSep3(file_handle);
+		MLB_DD_WriteLine(dump_list[count_1][0] + " Dump Complete (" +
+			obj_count + " " + dump_list[count_1][0].toLowerCase() + "s found)");
+		MLB_DD_WriteSep2(file_handle);
+		MLB_DD_WriteLine("");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DoType(unit_type, first_func, dump_func, file_handle, flags)
+{
+	var obj_count = 0;
+	var this_obj  = (first_func == null) ? getUnit(unit_type) : first_func();
+
+	if (this_obj) {
+		do {
+			dump_func(file_handle, this_obj, flags);
+			obj_count++;
+		} while (this_obj && this_obj.getNext());
+	}
+
+	return(obj_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypeMe(file_handle, flags)
+{
+	var in_obj = me;
+
+	MLB_DD_WriteSep2(file_handle);
+	MLB_DD_WriteLine("Me Dump Start");
+	MLB_DD_WriteSep3(file_handle);
+
+	MLB_DD_WriteLine("Me Realm          : " + in_obj.realm);
+	MLB_DD_WriteLine("Me Account        : " + in_obj.account);
+	MLB_DD_WriteLine("Me Name           : " + in_obj.name);
+	MLB_DD_WriteLine("Me Act            : " + in_obj.act);
+	MLB_DD_WriteLine("Me Area           : " + in_obj.area + " (" +
+		D2JSP_AREA_AreaToName(in_obj.area) + ")");
+	MLB_DD_WriteLine("Me Difficulty     : " + in_obj.diff);
+	MLB_DD_WriteLine("Me ID             : " + in_obj.id);
+	MLB_DD_WriteLine("Me GID            : " + in_obj.gid);
+	MLB_DD_WriteLine("Me Class ID       : " + in_obj.classid);
+
+	MLB_DD_WriteLine("Me HP             : " + in_obj.hp);
+	MLB_DD_WriteLine("Me HP Max         : " + in_obj.hpmax);
+	MLB_DD_WriteLine("Me MP             : " + in_obj.mp);
+	MLB_DD_WriteLine("Me MP Max         : " + in_obj.mpmax);
+
+	MLB_DD_WriteLine("Me Item On Cursor : " + in_obj.itemoncursor);
+	MLB_DD_WriteLine("Me Last Error     : " + in_obj.lasterror);
+	MLB_DD_WriteLine("Me Ping           : " + in_obj.ping);
+	MLB_DD_WriteLine("Me Skip           : " + in_obj.skip);
+	MLB_DD_WriteLine("Me Run/Walk       : " + in_obj.runwalk);
+	MLB_DD_WriteLine("Me Screensize     : " + in_obj.screensize);
+	MLB_DD_WriteLine("Me Version        : " + in_obj.version);
+	MLB_DD_WriteLine("Me Weapon Switch  : " + in_obj.weaponswitch);
+
+	MLB_DD_WriteLine("Me Auto Loot      : " + in_obj.autoloot);
+	MLB_DD_WriteLine("Me Auto Party     : " + in_obj.autoparty);
+	MLB_DD_WriteLine("Me Auto Quit On PK: " + in_obj.autoquitonpk);
+	MLB_DD_WriteLine("Me Chicken HP     : " + in_obj.chickenhp);
+	MLB_DD_WriteLine("Me Chicken MP     : " + in_obj.chickenmp);
+	MLB_DD_WriteLine("Me Random Move    : " + in_obj.randommove);
+	MLB_DD_WriteLine("Me Show Cast      : " + in_obj.showcast);
+	MLB_DD_WriteLine("Me Show Move      : " + in_obj.showmove);
+	MLB_DD_WriteLine("Me Show RX Msg    : " + in_obj.showrxmsg);
+	MLB_DD_WriteLine("Me Show TX Msg    : " + in_obj.showtxmsg);
+
+	MLB_DD_WriteLine("Me Quit On Error  : " + in_obj.quitonerror);
+	MLB_DD_WriteLine("Me Quit Script End: " + in_obj.quitscriptend);
+
+	for (count_1 = 0; count_1 < D2JSP_QUEST_WORD_COUNT; count_1++) {
+		var quest_bits = "";
+		for (count_2 = 0; count_2 < D2JSP_QUEST_BIT_COUNT; count_2++)
+			quest_bits += me.getQuest(count_1, count_2);
+		MLB_DD_WriteLine("Me Quest " + ((count_1 < 10) ? " " : "") + count_1 +
+			"        : " + quest_bits + " : " + D2JSP_QUEST_Name[count_1]);
+	}
+
+	MLB_DD_WriteSep3(file_handle);
+	MLB_DD_WriteLine("Me Dump Complete");
+	MLB_DD_WriteSep2(file_handle);
+	MLB_DD_WriteLine("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypePlayer(file_handle, in_obj, flags)
+{
+	var this_parent = in_obj.getParent();
+
+	MLB_DD_WriteLine("Player Name       : " + in_obj.name);
+	MLB_DD_WriteLine("Player Parent     : " +
+		((this_parent && this_parent.name) ? this_parent.name : "*NONE*"));
+	MLB_DD_WriteLine("Player Owner      : " + in_obj.owner);
+	MLB_DD_WriteLine("Player Owner Type : " + in_obj.ownertype);
+	MLB_DD_WriteLine("Player ID         : " + in_obj.id);
+	MLB_DD_WriteLine("Player GID        : " + in_obj.gid);
+	MLB_DD_WriteLine("Player Class ID   : " + in_obj.classid);
+	MLB_DD_WriteLine("Player Player Type: " + in_obj.playertype);
+	MLB_DD_WriteLine("Player Act        : " + in_obj.act);
+	MLB_DD_WriteLine("Player Area       : " + in_obj.area + " (" +
+		D2JSP_AREA_AreaToName(in_obj.area) + ")");
+	MLB_DD_WriteLine("Player Room       : " +
+		getRoom(in_obj.area, in_obj.x, in_obj.y).number);
+	MLB_DD_WriteLine("Player Location   : " + MLB_DD_GetLocationString(in_obj));
+	MLB_DD_WriteLine("Player Distance   : " + ((me.area == in_obj.area) ?
+		myDist(in_obj.x, in_obj.y) : "N/A"));
+	MLB_DD_WriteLine("Player Type       : " + in_obj.type);
+	MLB_DD_WriteLine("Player Mode       : " + in_obj.mode + " (" +
+		D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_PLAYER, in_obj.mode) + ")");
+//	MLB_DD_WriteLine("Player Busy ?     : " + ((in_obj.busy) ? "TRUE" : "FALSE"));
+	MLB_DD_WriteLine("Player ClassId    : " + in_obj.classid);
+	MLB_DD_WriteLine("Player HP         : " + in_obj.hp);
+	MLB_DD_WriteLine("Player HP Max     : " + in_obj.hpmax);
+	MLB_DD_WriteLine("Player MP         : " + in_obj.mp);
+	MLB_DD_WriteLine("Player MP Max     : " + in_obj.mpmax);
+
+	MLB_DD_DumpSkills(file_handle, "Player", in_obj, flags);
+
+	MLB_DD_DumpStats(file_handle,  "Player", in_obj, flags);
+
+//	MLB_DD_DumpBaseStats(file_handle,  "Player", in_obj, flags);
+
+	MLB_DD_DumpStates(file_handle, "Player", in_obj, flags);
+
+	MLB_DD_WriteSep3(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypeNPC(file_handle, in_obj, flags)
+{
+	var this_parent = in_obj.getParent();
+
+	MLB_DD_WriteLine("NPC Name      : " + in_obj.name);
+	MLB_DD_WriteLine("NPC Parent    : " +
+		((this_parent && this_parent.name) ? this_parent.name : "*NONE*"));
+	MLB_DD_WriteLine("NPC Owner     : " + in_obj.owner);
+	MLB_DD_WriteLine("NPC Owner Type: " + in_obj.ownertype);
+	MLB_DD_WriteLine("NPC ID        : " + in_obj.id);
+	MLB_DD_WriteLine("NPC GID       : " + in_obj.gid);
+	MLB_DD_WriteLine("NPC Class ID  : " + in_obj.classid);
+	MLB_DD_WriteLine("NPC Act       : " + in_obj.act);
+	MLB_DD_WriteLine("NPC Area      : " + in_obj.area + " (" +
+		D2JSP_AREA_AreaToName(in_obj.area) + ")");
+	MLB_DD_WriteLine("NPC Room      : " +
+		getRoom(in_obj.area, in_obj.x, in_obj.y).number);
+	MLB_DD_WriteLine("NPC Location  : " + MLB_DD_GetLocationString(in_obj));
+	MLB_DD_WriteLine("NPC Distance  : " + ((me.area == in_obj.area) ?
+		myDist(in_obj.x, in_obj.y) : "N/A"));
+	MLB_DD_WriteLine("NPC Type      : " + in_obj.type);
+	MLB_DD_WriteLine("NPC Mode      : " + in_obj.mode + " (" +
+		D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_NPC, in_obj.mode) + ")");
+//	MLB_DD_WriteLine("NPC Busy ?    : " + ((in_obj.busy) ? "TRUE" : "FALSE"));
+	MLB_DD_WriteLine("NPC ClassId   : " + in_obj.classid);
+	MLB_DD_WriteLine("NPC HP        : " + in_obj.hp);
+	MLB_DD_WriteLine("NPC HP Max    : " + in_obj.hpmax);
+	MLB_DD_WriteLine("NPC MP        : " + in_obj.mp);
+	MLB_DD_WriteLine("NPC MP Max    : " + in_obj.mpmax);
+	if (parseFloat(me.version) >= 0.3525)
+		MLB_DD_WriteLine("NPC Spec Type : " + in_obj.spectype +
+			" (" + D2JSP_NPC_GetSpecTypeName(in_obj) + ")");
+
+	MLB_DD_DumpSkills(file_handle, "NPC", in_obj, flags);
+
+	MLB_DD_DumpEnchants(file_handle,  "NPC", in_obj, flags);
+
+	MLB_DD_DumpStats(file_handle,  "NPC", in_obj, flags);
+
+//	MLB_DD_DumpBaseStats(file_handle,  "NPC", in_obj, flags);
+
+	MLB_DD_DumpStates(file_handle, "NPC", in_obj, flags);
+
+	MLB_DD_WriteSep3(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypeObject(file_handle, in_obj, flags)
+{
+	var this_parent = in_obj.getParent();
+
+	MLB_DD_WriteLine("Object Name      : " + in_obj.name);
+	MLB_DD_WriteLine("Object Parent    : " +
+		((this_parent && this_parent.name) ? this_parent.name : "*NONE*"));
+	MLB_DD_WriteLine("Object Owner     : " + in_obj.owner);
+	MLB_DD_WriteLine("Object Owner Type: " + in_obj.ownertype);
+	MLB_DD_WriteLine("Object ID        : " + in_obj.id);
+	MLB_DD_WriteLine("Object GID       : " + in_obj.gid);
+	MLB_DD_WriteLine("Object Class ID  : " + in_obj.classid);
+	MLB_DD_WriteLine("Object Act       : " + in_obj.act);
+	MLB_DD_WriteLine("Object Area      : " + in_obj.area + " (" +
+		D2JSP_AREA_AreaToName(in_obj.area) + ")");
+	MLB_DD_WriteLine("Object Sub-Area  : " +
+		D2JSP_UTIL_GetObjectTargetArea(in_obj) + " (" +
+		D2JSP_AREA_AreaToName(D2JSP_UTIL_GetObjectTargetArea(in_obj)) + ")");
+	MLB_DD_WriteLine("Object Room      : " +
+		getRoom(in_obj.area, in_obj.x, in_obj.y).number);
+	MLB_DD_WriteLine("Object Location  : " + MLB_DD_GetLocationString(in_obj));
+	MLB_DD_WriteLine("Object Distance  : " + ((me.area == in_obj.area) ?
+		myDist(in_obj.x, in_obj.y) : "N/A"));
+	MLB_DD_WriteLine("Object Type      : " + in_obj.type);
+	MLB_DD_WriteLine("Object Mode      : " + in_obj.mode + " (" +
+		D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_OBJECT, in_obj.mode) + ")");
+
+	MLB_DD_DumpBaseStats(file_handle, "Object", in_obj, flags,
+		D2JSP_BASE_OBJECTS_NAMES, D2JSP_UTIL_GetBaseStatObject);
+
+	MLB_DD_WriteSep3(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypeItem(file_handle, in_obj, flags)
+{
+	var this_parent = in_obj.getParent();
+
+	MLB_DD_WriteLine("Item Name      : " + D2JSP_ITEM_GetItemName(in_obj));
+	MLB_DD_WriteLine("Item Parent    : " +
+		((this_parent && this_parent.name) ? this_parent.name : "*NONE*"));
+	MLB_DD_WriteLine("Item Owner     : " + in_obj.owner);
+	MLB_DD_WriteLine("Item Owner Type: " + in_obj.ownertype);
+	MLB_DD_WriteLine("Item ID        : " + in_obj.id);
+	MLB_DD_WriteLine("Item GID       : " + in_obj.gid);
+	MLB_DD_WriteLine("Item Class ID  : " + in_obj.classid);
+	MLB_DD_WriteLine("Item Act       : " + in_obj.act);
+	MLB_DD_WriteLine("Item Area      : " + in_obj.area + " (" +
+		D2JSP_AREA_AreaToName(in_obj.area) + ")");
+/*
+	CODE NOTE: To be removed... Not very useful for items.
+	MLB_DD_WriteLine("Item Room      : " +
+		D2JSP_ROOM_GetCurrentRoomNumber(in_obj));
+*/
+	MLB_DD_WriteLine("Item Location  : [" + in_obj.x + ", " +
+		in_obj.y + "]");
+	MLB_DD_WriteLine("Item Type      : " + in_obj.type);
+	MLB_DD_WriteLine("Item Mode      : " + in_obj.mode + " (" +
+		D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_ITEM, in_obj.mode) + ")");
+//	MLB_DD_WriteLine("Item Busy ?    : " + ((in_obj.busy) ? "TRUE" : "FALSE"));
+	MLB_DD_WriteLine("Item Code      : " + in_obj.code);
+	MLB_DD_WriteLine("Item Flags     : 0x" +
+		D2JSP_UTIL_FORMAT_ZeroFill(
+		D2JSP_ITEMFLAG_GetFlagsForItem(in_obj).toString(16), 8) +
+		" (" + D2JSP_ITEMFLAG_GetStringForItem(in_obj) + ")");
+	MLB_DD_WriteLine("Item Diff      : " + in_obj.diff);
+	MLB_DD_WriteLine("Item FLPFile   : " + in_obj.flpfile);
+	MLB_DD_WriteLine("Item Name      : " + D2JSP_ITEM_GetItemName(in_obj));
+	MLB_DD_WriteLine("Item FName     : " + D2JSP_ITEM_GetItemFName(in_obj));
+	MLB_DD_WriteLine("Item ILvl      : " + in_obj.ilvl);
+	MLB_DD_WriteLine("Item InvFile   : " + in_obj.invfile);
+	MLB_DD_WriteLine("Item ItemLoc   : " + in_obj.itemloc);
+	MLB_DD_WriteLine("Item Class     : " + in_obj.itemclass);
+	MLB_DD_WriteLine("Item ItemType  : " + D2JSP_ITEM_GetItemType(in_obj) +
+		" (" + D2JSP_ITEMTYPE_TypeToName(D2JSP_ITEM_GetItemType(in_obj)) + ")");
+	MLB_DD_WriteLine("Item Prefix    : " + D2JSP_ITEM_GetItemPrefix(in_obj));
+	MLB_DD_WriteLine("Item Suffix    : " + D2JSP_ITEM_GetItemSuffix(in_obj));
+	MLB_DD_WriteLine("Item Quality   : " + in_obj.quality);
+	MLB_DD_WriteLine("Item SInvFile  : " + in_obj.sinvfile);
+	MLB_DD_WriteLine("Item UInvFile  : " + in_obj.uinvfile);
+	MLB_DD_WriteLine("Item X-Size    : " + D2JSP_ITEM_GetItemXSize(in_obj));
+	MLB_DD_WriteLine("Item Y-Size    : " + D2JSP_ITEM_GetItemYSize(in_obj));
+
+	MLB_DD_DumpSkillStats(file_handle, "Item", in_obj, flags);
+
+	MLB_DD_DumpStats(file_handle,  "Item", in_obj, flags);
+
+//	MLB_DD_DumpBaseStats(file_handle,  "Item", in_obj, flags);
+	MLB_DD_DumpBaseStats(file_handle, "Item", in_obj, flags,
+		D2JSP_BASE_ITEMS_NAMES, D2JSP_UTIL_GetBaseStatItem);
+
+	MLB_DD_DumpStates(file_handle, "Item", in_obj, flags);
+
+	MLB_DD_WriteSep3(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypeRoom(file_handle, in_obj, flags)
+{
+	MLB_DD_WriteLine("Room Name        : " + in_obj.name);
+	MLB_DD_WriteLine("Room Number      : " + in_obj.number);
+	MLB_DD_WriteLine("Room Sub-number  : " + in_obj.subnumber);
+	MLB_DD_WriteLine("Room ID          : " + in_obj.id);
+	MLB_DD_WriteLine("Room Level       : " + in_obj.level);
+	MLB_DD_WriteLine("Room Correct Tomb: " + in_obj.correcttomb);
+	MLB_DD_WriteLine("Room Level X,Y   : [" + in_obj.levelx + ", " +
+		in_obj.levely + "]");
+	MLB_DD_WriteLine("Room Location    : [" + in_obj.x + ", " +
+		in_obj.y + "] (multiplied by 5 = [" +
+		(in_obj.x * 5) + ", " + (in_obj.y * 5) + "])");
+	MLB_DD_WriteLine("Room Distance    : " + ((me.area == in_obj.area) ?
+		myDist(in_obj.x * 5, in_obj.y * 5) : "N/A"));
+
+	MLB_DD_WriteSep3(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypeTile(file_handle, in_obj, flags)
+{
+	var this_parent = in_obj.getParent();
+
+	MLB_DD_WriteLine("Tile Name      : " + in_obj.name);
+	MLB_DD_WriteLine("Tile Parent    : " +
+		((this_parent && this_parent.name) ? this_parent.name : "*NONE*"));
+	MLB_DD_WriteLine("Tile Owner     : " + in_obj.owner);
+	MLB_DD_WriteLine("Tile Owner Type: " + in_obj.ownertype);
+	MLB_DD_WriteLine("Tile ID        : " + in_obj.id);
+	MLB_DD_WriteLine("Tile GID       : " + in_obj.gid);
+	MLB_DD_WriteLine("Tile Class ID  : " + in_obj.classid);
+	MLB_DD_WriteLine("Tile Act       : " + in_obj.act);
+	MLB_DD_WriteLine("Tile Area      : " + in_obj.area + " (" +
+		D2JSP_AREA_AreaToName(in_obj.area) + ")");
+	MLB_DD_WriteLine("Tile Sub-Area  : " +
+		D2JSP_UTIL_GetObjectTargetArea(in_obj) + " (" +
+		D2JSP_AREA_AreaToName(D2JSP_UTIL_GetObjectTargetArea(in_obj)) + ")");
+	MLB_DD_WriteLine("Tile Room      : " +
+		getRoom(in_obj.area, in_obj.x, in_obj.y).number);
+	MLB_DD_WriteLine("Tile Location  : " + MLB_DD_GetLocationString(in_obj));
+	MLB_DD_WriteLine("Tile Distance  : " + ((me.area == in_obj.area) ?
+		myDist(in_obj.x, in_obj.y) : "N/A"));
+	MLB_DD_WriteLine("Tile Type      : " + in_obj.type);
+	MLB_DD_WriteLine("Tile Number    : " + in_obj.number);
+
+	MLB_DD_WriteSep3(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpTypeMissile(file_handle, in_obj, flags)
+{
+	var this_parent = in_obj.getParent();
+
+	MLB_DD_WriteLine("Missile Name      : " + in_obj.name);
+	MLB_DD_WriteLine("Missile Parent    : " +
+		((this_parent && this_parent.name) ? this_parent.name : "*NONE*"));
+	MLB_DD_WriteLine("Missile Owner     : " + in_obj.owner);
+	MLB_DD_WriteLine("Missile Owner Type: " + in_obj.ownertype);
+	MLB_DD_WriteLine("Missile Type      : " + in_obj.type);
+	MLB_DD_WriteLine("Missile ID        : " + in_obj.id);
+	MLB_DD_WriteLine("Missile GID       : " + in_obj.gid);
+	MLB_DD_WriteLine("Missile Class ID  : " + in_obj.classid);
+	MLB_DD_WriteLine("Missile Diff      : " + in_obj.diff);
+	MLB_DD_WriteLine("Missile Number    : " + in_obj.number);
+	MLB_DD_WriteLine("Missile Room      : " +
+		getRoom(in_obj.area, in_obj.x, in_obj.y).number);
+	MLB_DD_WriteLine("Missile Location  : " + MLB_DD_GetLocationString(in_obj));
+	MLB_DD_WriteLine("Missile Distance  : " + ((me.area == in_obj.area) ?
+		myDist(in_obj.x, in_obj.y) : "N/A"));
+
+	MLB_DD_WriteSep3(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_GetLocationString(in_obj)
+{
+	return("[" + in_obj.x + ", " + in_obj.y + "]" +
+		((me.area != in_obj.area) ? "" :
+		(" (distance = " + myDist(in_obj.x, in_obj.y) + ")")));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpSkills(file_handle, in_name, in_obj, flags)
+{
+/*
+	var do_it_flag = true;
+	var count_1    = 0;
+	var this_value;
+
+	if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+		do_it_flag = false;
+		for (count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+			count_1++) {
+			var skill_name = D2JSP_SKILL_ToSkillName(count_1);
+			if (in_obj.getSkill(skill_name, 0)) {
+				MLB_DD_WriteLine(in_name + " " + in_obj.name + " Skills:");
+				do_it_flag = true;
+				break;
+			}
+		}
+	}
+
+	if (do_it_flag) {
+		for ( ; count_1 < D2JSP_SKILL_MAXIMUM; count_1++) {
+			var skill_name = D2JSP_SKILL_ToSkillName(count_1);
+			if ((this_value = in_obj.getSkill(skill_name, 0)) ||
+				(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+				MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("SKILL", 10) +
+					": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+					D2JSP_UTIL_FORMAT_LJust(skill_name, 36) +
+					" = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18) +
+					" = " + D2JSP_UTIL_FORMAT_RJust(
+						in_obj.getSkill(skill_name, 1), 18));
+		}
+	}
+*/
+	var do_it_flag = true;
+	var count_1    = 0;
+	var this_value;
+
+	if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+		do_it_flag = false;
+		for (count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+			count_1++) {
+			if (in_obj.getSkill(count_1, 0)) {
+				MLB_DD_WriteLine(in_name + " " + in_obj.name + " Skills:");
+				do_it_flag = true;
+				break;
+			}
+		}
+	}
+
+	if (do_it_flag) {
+		for ( ; count_1 < D2JSP_SKILL_MAXIMUM; count_1++) {
+			var skill_name = D2JSP_SKILL_ToSkillName(count_1);
+			if ((this_value = in_obj.getSkill(count_1, 0)) ||
+				(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+				MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("SKILL", 10) +
+					": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+					D2JSP_UTIL_FORMAT_LJust(skill_name, 36) +
+					" = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18) +
+					" = " + D2JSP_UTIL_FORMAT_RJust(
+						in_obj.getSkill(count_1, 1), 18));
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpEnchants(file_handle, in_name, in_obj, flags)
+{
+if (false) {
+	var do_it_flag = true;
+	var count_1    = 0;
+	var this_value;
+
+	if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+		do_it_flag = false;
+		for (count_1 = 0; count_1 < D2JSP_ENCHANT_ValidList.length; count_1++) {
+			if (in_obj.getEnchant(D2JSP_ENCHANT_ValidList[count_1])) {
+				MLB_DD_WriteLine(in_name + " " + in_obj.name + " Enchants:");
+				do_it_flag = true;
+				break;
+			}
+		}
+	}
+
+	if (do_it_flag) {
+		for ( ; count_1 < D2JSP_ENCHANT_ValidList.length; count_1++) {
+			if ((this_value =
+				in_obj.getEnchant(D2JSP_ENCHANT_ValidList[count_1])) ||
+				(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+				MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("ENCHANT", 10) +
+					": " +
+					D2JSP_UTIL_FORMAT_RJust(D2JSP_ENCHANT_ValidList[count_1], 5) +
+					" : " +
+					D2JSP_UTIL_FORMAT_LJust(D2JSP_ENCHANT_EnchantToName(
+					D2JSP_ENCHANT_ValidList[count_1]), 36) + " = " +
+					D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+		}
+	}
+}
+else {
+	var do_it_flag = true;
+	var count_1    = 0;
+	var this_value;
+
+	if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+		do_it_flag = false;
+		for (count_1 = 0; count_1 < 63; count_1++) {
+			if (in_obj.getEnchant(count_1)) {
+				MLB_DD_WriteLine(in_name + " " + in_obj.name + " Enchants:");
+				do_it_flag = true;
+				break;
+			}
+		}
+	}
+
+	if (do_it_flag) {
+		for ( ; count_1 < 63; count_1++) {
+			if ((this_value =
+				in_obj.getEnchant(count_1)) ||
+				(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+				MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("ENCHANT", 10) +
+					": " +
+					D2JSP_UTIL_FORMAT_RJust(count_1, 5) +
+					" : " +
+					D2JSP_UTIL_FORMAT_LJust(D2JSP_ENCHANT_EnchantToName(
+					count_1), 36) + " = " +
+					D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+		}
+	}
+}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpStats(file_handle, in_name, in_obj, flags)
+{
+	var do_it_flag = (flags & MLB_DATA_DUMP_FLAG_SPARSE) ? false : true;
+	var count_1    = 0;
+	var this_value;
+
+	if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+		for (count_1 = 0; count_1 < D2JSP_STAT_COUNT; count_1++) {
+//			if (in_obj.getStat(count_1)) {
+//			if (D2JSP_STAT_Get(in_obj, count_1)) {
+			if (in_obj.getStat(count_1) ||
+				((parseFloat(me.version) >= 0.3527) && in_obj.getStatEx(count_1))) {
+				MLB_DD_WriteLine(in_name + " " + in_obj.name + " Stats:");
+				do_it_flag = true;
+				break;
+			}
+		}
+	}
+
+	if (do_it_flag) {
+		for ( ; count_1 < D2JSP_STAT_COUNT; count_1++) {
+/*
+			if ((this_value = in_obj.getStat(count_1)) ||
+				(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+				MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("STAT", 10) +
+					": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+					D2JSP_UTIL_FORMAT_LJust(D2JSP_STAT_StatToName(count_1), 36) +
+					" = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+*/
+			if (parseFloat(me.version) < 0.3527) {
+				if ((this_value = in_obj.getStat(count_1)) ||
+					(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+					MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("STAT", 10) +
+						": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+						D2JSP_UTIL_FORMAT_LJust(D2JSP_STAT_StatToName(count_1), 36) +
+						" = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+			}
+			else {
+				if (in_obj.getStat(count_1) || in_obj.getStatEx(count_1) ||
+					(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+					MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("STAT", 10) +
+						": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+						D2JSP_UTIL_FORMAT_LJust(D2JSP_STAT_StatToName(count_1), 36) +
+						" = " +
+						D2JSP_UTIL_FORMAT_RJust(in_obj.getStat(count_1), 18) +
+						" = " +
+						D2JSP_UTIL_FORMAT_RJust(in_obj.getStatEx(count_1), 18));
+			}
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpSkillStats(file_handle, in_name, in_obj, flags)
+{
+	var this_value = in_obj.getStat(D2JSP_STAT_ITEM_ALLSKILLS);
+	if (this_value || (!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+		MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("SKILL STAT", 10) +
+			": " + D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_ALLSKILLS, 5) +
+			" : " + D2JSP_UTIL_FORMAT_LJust("Skills All", 36) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+
+	for (var count_1 = 0; count_1 < D2JSP_CLASS_ID_COUNT; count_1++) {
+//		var this_value = in_obj.getStat(D2JSP_STAT_ClassToStatSkills[count_1]);
+		var this_value = in_obj.getStat(D2JSP_STAT_ITEM_ADDAMASKILLPOINTS,
+			count_1);
+		if (this_value || (!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+			MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("SKILL STAT", 10) +
+				":" +
+//				D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ClassToStatSkills[count_1], 5) +
+				D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_ADDAMASKILLPOINTS, 3) +
+				"/" + D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+				": " + D2JSP_UTIL_FORMAT_LJust("Skill Class " +
+				D2JSP_CLASS_ID_NameList[count_1], 36) + " = " +
+				D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+	}
+
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+		var this_value = in_obj.getStat(D2JSP_STAT_ITEM_FIRESKILL, count_1);
+		if (this_value || (!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+			MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("SKILL STAT", 10) +
+				":" + D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_FIRESKILL, 3) +
+				"/" + D2JSP_UTIL_FORMAT_RJust(count_1, 3) + ": " +
+				D2JSP_UTIL_FORMAT_LJust("Skill Elemental " +
+				D2JSP_UTIL_DAMAGE_BaseElementList[count_1], 36) + " = " +
+				D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+	}
+
+	for (var count_1 = 0; count_1 < D2JSP_SKILL_TreeList.length; count_1++) {
+		var this_id    = D2JSP_SKILL_TreeList[count_1].value_110;
+		var this_value = in_obj.getStat(D2JSP_STAT_ITEM_ADDSKILL_TAB1, this_id);
+		if (this_value || (!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+			MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("SKILL STAT", 10) +
+				":" + D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_ADDSKILL_TAB1, 3) +
+				"/" + D2JSP_UTIL_FORMAT_RJust(this_id, 3) +
+				": " + D2JSP_UTIL_FORMAT_LJust("Skill Tree " +
+				D2JSP_SKILL_TreeList[count_1].name, 36) + " = " +
+				D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+	}
+
+	for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 < D2JSP_SKILL_MAXIMUM;
+		count_1++) {
+		var this_value = in_obj.getStat(D2JSP_STAT_ITEM_SINGLESKILL1, count_1);
+		if (this_value || (!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+			MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("SKILL STAT", 10) +
+				":" + D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_SINGLESKILL1, 3) +
+				"/" + D2JSP_UTIL_FORMAT_RJust(count_1, 3) + ": " +
+				D2JSP_UTIL_FORMAT_LJust("Skill Single " +
+				D2JSP_SKILL_SkillList[count_1], 36) + " = " +
+				D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpBaseStats(file_handle, in_name, in_obj, flags,
+	base_stats_list, base_stats_func)
+{
+	var do_it_flag = true;
+	var count_1    = 0;
+	var this_value;
+
+	if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+		do_it_flag = false;
+		for (count_1 = 0; count_1 < base_stats_list.length; count_1++) {
+			if (base_stats_func(in_obj, count_1)) {
+				MLB_DD_WriteLine(in_name + " " + in_obj.name + " Base Stats:");
+				do_it_flag = true;
+				break;
+			}
+		}
+	}
+
+	if (do_it_flag) {
+		for ( ; count_1 < base_stats_list.length; count_1++) {
+			var this_value = base_stats_func(in_obj, count_1);
+			if (this_value || (!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+				MLB_DD_WriteLine("   " +
+					D2JSP_UTIL_FORMAT_LJust("BASE STAT", 10) +
+					": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+					D2JSP_UTIL_FORMAT_LJust(base_stats_list[count_1],
+					36) + " = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// CODE NOTE: To be removed when getBaseStat() is stable.
+function MLB_DD_DumpBaseStats_Items(file_handle, in_name, in_obj, flags)
+{
+	var do_it_flag = true;
+	var count_1    = 0;
+	var this_value;
+
+	if (parseFloat(me.version) < 0.3316) {
+		if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+			do_it_flag = false;
+			for (count_1 = 0; count_1 < D2JSP_BASESTAT_COUNT; count_1++) {
+				if (in_obj.getBaseStat(count_1)) {
+					MLB_DD_WriteLine(in_name + " " + in_obj.name + " Base Stats:");
+					do_it_flag = true;
+					break;
+				}
+			}
+		}
+		if (do_it_flag) {
+			for ( ; count_1 < D2JSP_BASESTAT_COUNT; count_1++) {
+				if ((this_value = in_obj.getBaseStat(count_1)) ||
+					(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+					MLB_DD_WriteLine("   " +
+						D2JSP_UTIL_FORMAT_LJust("BASE STAT", 10) +
+						": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+						D2JSP_UTIL_FORMAT_LJust(D2JSP_BASESTAT_StatToName(count_1),
+						36) + " = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+			}
+		}
+	}
+	else {
+		if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+			do_it_flag = false;
+			for (count_1 = 0; count_1 < D2JSP_BASE_ITEMS_NAMES.length; count_1++) {
+				if (D2JSP_UTIL_GetBaseStatItem(in_obj, count_1)) {
+					MLB_DD_WriteLine(in_name + " " + in_obj.name + " Base Stats:");
+					do_it_flag = true;
+					break;
+				}
+			}
+		}
+		if (do_it_flag) {
+			for ( ; count_1 < D2JSP_BASE_ITEMS_NAMES.length; count_1++) {
+				var this_value = D2JSP_UTIL_GetBaseStatItem(in_obj, count_1);
+				if (this_value || (!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+					MLB_DD_WriteLine("   " +
+						D2JSP_UTIL_FORMAT_LJust("BASE STAT", 10) +
+						": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+						D2JSP_UTIL_FORMAT_LJust(D2JSP_BASE_ITEMS_NAMES[count_1],
+						36) + " = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+			}
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_DumpStates(file_handle, in_name, in_obj, flags)
+{
+	var do_it_flag = true;
+	var count_1    = 0;
+	var this_value;
+
+	if (flags & MLB_DATA_DUMP_FLAG_SPARSE) {
+		do_it_flag = false;
+		for (count_1 = 0; count_1 < D2JSP_STATE_COUNT; count_1++) {
+			if (in_obj.getState(count_1)) {
+				MLB_DD_WriteLine(in_name + " " + in_obj.name + " States:");
+				do_it_flag = true;
+				break;
+			}
+		}
+	}
+
+	if (do_it_flag) {
+		for ( ; count_1 < D2JSP_STATE_COUNT; count_1++) {
+			if ((this_value = in_obj.getState(count_1)) ||
+				(!(flags & MLB_DATA_DUMP_FLAG_SPARSE)))
+				MLB_DD_WriteLine("   " + D2JSP_UTIL_FORMAT_LJust("STATE", 10) +
+					": " + D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " : " +
+					D2JSP_UTIL_FORMAT_LJust(D2JSP_STATE_StateToName(count_1), 36) +
+					" = " + D2JSP_UTIL_FORMAT_RJust(this_value, 18));
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteHeader(file_handle)
+{
+	var this_date = new Date();
+
+	MLB_DD_WriteSep(file_handle);
+	MLB_DD_WriteSep(file_handle);
+	MLB_DD_WriteComment(file_handle, "D2JSP Data Dumper");
+	MLB_DD_WriteSep(file_handle);
+	MLB_DD_WriteComment(file_handle, "Realm    : " + me.realm);
+	MLB_DD_WriteComment(file_handle, "Account  : " + me.account);
+	MLB_DD_WriteComment(file_handle, "Character: " + me.name);
+	MLB_DD_WriteComment(file_handle, "Act      : " + me.act);
+	MLB_DD_WriteComment(file_handle, "Area     : " + me.area + " (" +
+		D2JSP_AREA_AreaToName(me.area) + ")");
+	MLB_DD_WriteComment(file_handle, "Location : [" + me.x + ", " + me.y + "]");
+	MLB_DD_WriteComment(file_handle, "Date/Time: " + this_date.toString());
+	MLB_DD_WriteSep(file_handle);
+	MLB_DD_WriteLine("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteSep(file_handle)
+{
+	var tmp_array = new Array(77);
+	MLB_DD_WriteLine("// " + tmp_array.join("/"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteSep2(file_handle)
+{
+	var tmp_array = new Array(80);
+	MLB_DD_WriteLine(tmp_array.join("="));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteSep3(file_handle)
+{
+	var tmp_array = new Array(80);
+	MLB_DD_WriteLine(tmp_array.join("-"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteComment(file_handle, comment_string)
+{
+	MLB_DD_WriteLine("//" + ((comment_string != "") ? " " : "") +
+		comment_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_DD_WriteLine(out_string)
+{
+/*
+	CODE NOTE: Old code was needed to ensure data was written to disk before
+				  flush() was added to the core. To be removed. 
+	if (file_handle = fileOpen(MLB_DD_FileName, 2)) {
+		file_handle.writeLine(out_string);
+		file_handle.close();
+	}
+	else {
+		print("Unable to re-open file '" + file_name + "' for appending.");
+		quit();
+	}
+*/
+	MLB_DD_FileHandle.writeLine(out_string);
+
+	if (MLB_DD_SynchronousFlag)
+		MLB_DD_FileHandle.flush();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	print("Waiting for game load to complete...");
+	D2JSP_UTIL_GEN_CheckGameReady();
+	print("Ready.");
+
+	return(MLB_DD_WriteToFile(null, false, true));
+}
+// ////////////////////////////////////////////////////////////////////////////
+

@@ -1,0 +1,9 @@
+//include("TDW_BOT_CFG/TDW_BOT_CFG.TDW_BotPindleskin.JUNIOR.d2l");
+include("TDW_BOT_CFG/TDW_BOT_CFG.TDW_BotPindleskin.SENIOR.d2l");
+
+TDW_BOT_ConfigureList["town.heal.mercenary.hp"]           = 0;
+TDW_BOT_ConfigureList["chicken.mercenary.hp"]             = 0;
+TDW_BOT_ConfigureList["town.revive.mercenary"]            = false;
+TDW_BOT_ConfigureList["mercernary.needed"]                = false;
+
+

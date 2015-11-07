@@ -1,0 +1,37 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+me.overhead("ÿc9" + "Loading...");
+
+include("TDW/_D2JSP_Utility.d2l");
+
+me.overhead(D2JSP_UTIL_COLOR_YELLOW + "Initializing...");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var bot_name      = "TDW_ShowGameServer";
+	print("The " + bot_name + " is running");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	var srv_name   = "output/GetDiabloGameServerInfo.txt";
+	var srv_handle = fileOpen(srv_name, 0);
+	if (srv_handle) {
+		while (!srv_handle.eof) {
+			var this_line = srv_handle.readLine();
+			if (this_line == "END OF FILE")
+				break;
+			var tmp_list = this_line.split(/\s+/);
+			print("BattleNet Server: " + tmp_list[tmp_list.length - 1]);	
+		}
+		srv_handle.close();
+	}
+
+	print("Done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

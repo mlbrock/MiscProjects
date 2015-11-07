@@ -1,0 +1,809 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+me.overhead("ÿc9" + "Loading...");
+
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Quests.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/ISF.d2l");
+//includeonce("TDW/TDW_PathLink.d2l");
+
+me.overhead(D2JSP_UTIL_COLOR_YELLOW + "Initializing...");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BOT_Log               = null;
+var TDW_ISF_Cfg_1             = null;
+var TDW_ISF_Cfg_2             = null;
+var TDW_BossScarf_DiabloClone = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BossScarf_BossList = new Array();
+TDW_BossScarf_BossList[D2JSP_AREA_CATACOMBS_LEVEL_4 + ""]       = [D2JSP_AREA_CATACOMBS_LEVEL_4,       156, "Andariel"];
+TDW_BossScarf_BossList[D2JSP_AREA_DURIELS_LAIR + ""]            = [D2JSP_AREA_DURIELS_LAIR,            211, "Duriel"];
+TDW_BossScarf_BossList[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3 + ""] = [D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, 242, "Mephisto"];
+TDW_BossScarf_BossList[D2JSP_AREA_CHAOS_SANCTUM + ""]           = [D2JSP_AREA_CHAOS_SANCTUM,           243, "Diablo"];
+TDW_BossScarf_BossList[D2JSP_AREA_THE_WORLDSTONE_CHAMBER + ""]  = [D2JSP_AREA_THE_WORLDSTONE_CHAMBER,  544, "Baal"];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var ISF_FAST_PICKUP_FLAG_NONE               = 0x00000000;
+
+var ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE       = 0x00000001;
+var ISF_FAST_PICKUP_FLAG_ELITE_SET          = 0x00000002;
+var ISF_FAST_PICKUP_FLAG_ELITE_RARE         = 0x00000004;
+var ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE = 0x00000008;
+var ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET    = 0x00000010;
+var ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_RARE   = 0x00000020;
+var ISF_FAST_PICKUP_FLAG_NORMAL_UNIQUE      = 0x00000040;
+var ISF_FAST_PICKUP_FLAG_NORMAL_SET         = 0x00000080;
+var ISF_FAST_PICKUP_FLAG_NORMAL_RARE        = 0x00000100;
+var ISF_FAST_PICKUP_FLAG_UNIQUE_RING        = 0x00000200;
+var ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET      = 0x00000400;
+var ISF_FAST_PICKUP_FLAG_SET_RING           = 0x00000800;
+var ISF_FAST_PICKUP_FLAG_SET_AMULET         = 0x00001000;
+var ISF_FAST_PICKUP_FLAG_RARE_RING          = 0x00002000;
+var ISF_FAST_PICKUP_FLAG_RARE_AMULET        = 0x00004000;
+var ISF_FAST_PICKUP_FLAG_UNIQUE_CM1         = 0x00008000;
+var ISF_FAST_PICKUP_FLAG_UNIQUE_CM2         = 0x00010000;	// None known yet.
+var ISF_FAST_PICKUP_FLAG_UNIQUE_CM3         = 0x00020000;
+var ISF_FAST_PICKUP_FLAG_UNIQUE_JEW         = 0x00040000;
+
+var ISF_FAST_PICKUP_FLAG_DEFAULT            =
+	ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE       |
+	ISF_FAST_PICKUP_FLAG_ELITE_SET          |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET    |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_RING        |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET      |
+	ISF_FAST_PICKUP_FLAG_SET_AMULET         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM1         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM2         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM3         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_JEW;
+								
+var ISF_FAST_PICKUP_FLAG_ELITE              =
+	ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE       |
+	ISF_FAST_PICKUP_FLAG_ELITE_SET          |
+	ISF_FAST_PICKUP_FLAG_ELITE_RARE;
+var ISF_FAST_PICKUP_FLAG_EXCEPTIONAL        =
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET    |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_RARE;
+var ISF_FAST_PICKUP_FLAG_NORMAL             =
+	ISF_FAST_PICKUP_FLAG_NORMAL_UNIQUE      |
+	ISF_FAST_PICKUP_FLAG_NORMAL_SET         |
+	ISF_FAST_PICKUP_FLAG_NORMAL_RARE;
+
+var ISF_FAST_PICKUP_FLAG_UNIQUE             =
+	ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE       |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE |
+	ISF_FAST_PICKUP_FLAG_NORMAL_UNIQUE      |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_RING        |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET      |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM1         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM2         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM3         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_JEW
+var ISF_FAST_PICKUP_FLAG_SET                =
+	ISF_FAST_PICKUP_FLAG_ELITE_SET          |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET    |
+	ISF_FAST_PICKUP_FLAG_NORMAL_SET         |
+	ISF_FAST_PICKUP_FLAG_SET_RING           |
+	ISF_FAST_PICKUP_FLAG_SET_AMULET;
+var ISF_FAST_PICKUP_FLAG_RARE               =
+	ISF_FAST_PICKUP_FLAG_ELITE_RARE         |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_RARE   |
+	ISF_FAST_PICKUP_FLAG_NORMAL_RARE;
+
+var ISF_FAST_PICKUP_FLAG_MASK               = 
+	ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE       |
+	ISF_FAST_PICKUP_FLAG_ELITE_SET          |
+	ISF_FAST_PICKUP_FLAG_ELITE_RARE         |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET    |
+	ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_RARE   |
+	ISF_FAST_PICKUP_FLAG_NORMAL_UNIQUE      |
+	ISF_FAST_PICKUP_FLAG_NORMAL_SET         |
+	ISF_FAST_PICKUP_FLAG_NORMAL_RARE        |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_RING        |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET      |
+	ISF_FAST_PICKUP_FLAG_SET_RING           |
+	ISF_FAST_PICKUP_FLAG_SET_AMULET         |
+	ISF_FAST_PICKUP_FLAG_RARE_RING          |
+	ISF_FAST_PICKUP_FLAG_RARE_AMULET        |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM1         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM2         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_CM3         |
+	ISF_FAST_PICKUP_FLAG_UNIQUE_JEW;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var ISF_FastPickupMap = new Array();
+for (var count_1 = 0; count_1 < D2JSP_ITEM_CLASS_COUNT; count_1++)
+	ISF_FastPickupMap[count_1] = new Array();
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_ELITE][D2JSP_ITEM_QUALITY_UNIQUE]       = ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_ELITE][D2JSP_ITEM_QUALITY_SET]          = ISF_FAST_PICKUP_FLAG_ELITE_SET;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_ELITE][D2JSP_ITEM_QUALITY_RARE]         = ISF_FAST_PICKUP_FLAG_ELITE_RARE;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_EXCEPTIONAL][D2JSP_ITEM_QUALITY_UNIQUE] = ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_EXCEPTIONAL][D2JSP_ITEM_QUALITY_SET]    = ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_EXCEPTIONAL][D2JSP_ITEM_QUALITY_RARE]   = ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_RARE;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_NORMAL][D2JSP_ITEM_QUALITY_SET]         = ISF_FAST_PICKUP_FLAG_NORMAL_UNIQUE;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_NORMAL][D2JSP_ITEM_QUALITY_RARE]        = ISF_FAST_PICKUP_FLAG_NORMAL_SET;
+ISF_FastPickupMap[D2JSP_ITEM_CLASS_NORMAL][D2JSP_ITEM_QUALITY_UNIQUE]      = ISF_FAST_PICKUP_FLAG_NORMAL_RARE;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var ISF_FastPickupIgnoreList = new Array(D2JSP_AREA_COUNT);
+for (var count_1 = 0; count_1 < D2JSP_AREA_COUNT; count_1++)
+	ISF_FastPickupIgnoreList[count_1] = new Array();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BossScarf_FastSnagList = [
+	ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE          |
+		ISF_FAST_PICKUP_FLAG_ELITE_SET          |
+//		ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_RING        |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET      |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM1         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM2         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM3         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_JEW,
+	ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE          |
+		ISF_FAST_PICKUP_FLAG_ELITE_SET          |
+		ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE |
+		ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET    |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_RING        |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET      |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM1         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM2         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM3         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_JEW,
+	ISF_FAST_PICKUP_FLAG_ELITE_UNIQUE          |
+		ISF_FAST_PICKUP_FLAG_ELITE_SET          |
+//		ISF_FAST_PICKUP_FLAG_ELITE_RARE         |
+		ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_UNIQUE |
+		ISF_FAST_PICKUP_FLAG_EXCEPTIONAL_SET    |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_RING        |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET      |
+		ISF_FAST_PICKUP_FLAG_SET_AMULET         |
+		ISF_FAST_PICKUP_FLAG_RARE_RING          |
+		ISF_FAST_PICKUP_FLAG_RARE_AMULET        |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM1         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM2         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_CM3         |
+		ISF_FAST_PICKUP_FLAG_UNIQUE_JEW
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BossScarf_ISFList_1 = [
+	"Dusk Shroud       : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Wyrmhide          : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Scarab Husk       : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Wire Fleece       : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Archon Plate      : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Flail             : Quality  < superior : Item num sockets = 4 : IsEthereal = false",
+	"Knout             : Quality  < superior : Item num sockets = 4 : IsEthereal = false",
+	"Crystal Sword     : Quality  < superior : Item num sockets = 5 : IsEthereal = false",
+	"Great Sword       : Quality  < superior : Item num sockets = 5 : IsEthereal = false",
+	"Dimensional Blade : Quality  < superior : Item num sockets = 5 : IsEthereal = false",
+	"",
+	"Berserker Axe     : Quality  < superior : Item num sockets = 6 : IsEthereal = true",
+	"Berserker Axe     : Quality  < superior : Item num sockets = 0 : IsEthereal = true",
+	"War Pike          : Quality  < superior : Item num sockets = 6 : IsEthereal = true",
+	"War Pike          : Quality  < superior : Item num sockets = 0 : IsEthereal = true",
+
+	"cm1, cm2, cm3, jew                                    : Quality = unique",
+	"Type Circlet                                          : Quality = unique",
+	"Type rune : code > r20",
+	"rin, amu                                              : Quality = unique",
+	"Category armor, Category weapon : Class = elite       : Quality = unique",
+	"Category armor, Category weapon : Class = elite       : Quality = set",
+	"Category armor                  : Class = elite       : Quality = rare : Item num sockets = 4 : Max hit points > 20736",
+	"Category weapon                 : Class = elite       : Quality = rare : Item min damage percent > 200",
+
+	"Type rune : code > r16",
+	"Category armor, Category weapon : Class = exceptional : Quality = unique",
+	"Category armor, Category weapon : Class = exceptional : Quality = set",
+	"Type Circlet                                          : Quality > magic : Quality ! set : Skill Class Any = 2",
+	"Type Circlet                                          : Quality > magic : Quality ! set : Skill Tree Any = 3",
+	"Type rune : code > r10",
+	"amu                                                   : Quality = set : Skill Class Sorceress = 2",
+	"amu                                                   : Skill Class Any > 2",
+	"amu                                                   : Skill Tree Any = 3",
+
+	";Tarnhelm",
+	"Skull Cap : Quality = unique",
+	";Wormskull",
+	"Bone Helm : Quality = unique",
+	";The Hand of Broc",
+	"Leather Gloves : Quality = unique",
+	";Chance Guards",
+	"Chain Gloves : Quality = unique",
+	";Magefist",
+	"Light Gauntlets : Quality = unique",
+	";Frostburn",
+	"Gauntlets : Quality = unique",
+	";Nightsmoke",
+	"Belt : Quality = unique",
+	";Goldwrap",
+	"Heavy Belt : Quality = unique",
+	";Greyform",
+	"Quilted Armor : Quality = unique",
+	";Twitchthroe",
+	"Studded Leather : Quality = unique",
+	";Heavenly Garb",
+	"Light Plate : Quality = unique",
+	";Silks of the Victor",
+	"Ancient Armor : Quality = unique",
+	";Biggin's Bonnet",
+	"Cap : Quality = unique",
+
+	"; Gull",
+	"Dagger : Quality = unique",
+	";Spire of Lazarus",
+	"Gnarled Staff : Quality = unique",
+	";The Salamander",
+	"Battle Staff : Quality = unique",
+	";The Iron Jang Bong",
+	"War Staff : Quality = unique",
+	";Torch of Iro",
+	"Wand : Quality = unique",
+	";Maelstrom",
+	"Yew Wand : Quality = unique",
+	";Gravenspine",
+	"Bone Wand : Quality = unique",
+	";Ume's Lament",
+	"Grim Wand : Quality = unique",
+
+	"jew, cm1, cm2, cm3 : IsIdentified = false",
+	"Type Orb : Skill Class Sorceress = 2 : Skill Tree Fire > 2",
+	"Type Stave, Type Staff : Quality  < superior : Skill Tree Fire = 3 : Item num sockets < 2 : Item num sockets ! 1",
+	"Type Stave, Type Staff : Quality  < superior : Skill Tree Fire > 2 : Skill Class Sorceress = 2 : Item num sockets < 2 : Item num sockets ! 1"
+];
+var TDW_BossScarf_ISFList_2 = [
+	";Flawless Topaz, Flawless Diamond, Flawless Sapphire",
+	";Perfect Topaz, Perfect Diamond, Perfect Sapphire",
+//"Type Armor        : Class > exceptional",
+//"Type Weapon        : Class = elite : Quality > magic",
+	"Dusk Shroud       : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Wyrmhide          : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Scarab Husk       : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Wire Fleece       : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Archon Plate      : Quality  < superior : Item num sockets = 3 : IsEthereal = false",
+	"Flail             : Quality  < superior : Item num sockets = 4 : IsEthereal = false",
+	"Knout             : Quality  < superior : Item num sockets = 4 : IsEthereal = false",
+	"Scourge           : Quality  < superior : Item num sockets = 4 : IsEthereal = false",
+	"Crystal Sword     : Quality  < superior : Item num sockets = 5 : IsEthereal = false",
+	"Great Sword       : Quality  < superior : Item num sockets = 5 : IsEthereal = false",
+	"Dimensional Blade : Quality  < superior : Item num sockets = 5 : IsEthereal = false",
+	"",
+	"Berserker Axe     : Quality  < superior : Item num sockets = 6 : IsEthereal = true",
+	"Berserker Axe     : Quality  < superior : Item num sockets = 0 : IsEthereal = true",
+	"War Pike          : Quality  < superior : Item num sockets = 6 : IsEthereal = true",
+	"War Pike          : Quality  < superior : Item num sockets = 0 : IsEthereal = true",
+	"",
+	"amu : Skill Class Any > 2",
+	"",
+	"cm1, cm2, cm3, jew                                    : Quality = unique",
+	"; ***** Type rune : code > r20",
+	"; Type rune : code > r10",
+	"rin, amu                                              : Quality = unique",
+	"Category armor, Category weapon : Class = elite       : Quality = unique",
+	"Category armor, Category weapon : Class = elite       : Quality = set",
+	"Category armor                  : Class = elite       : Quality = rare : Item num sockets = 4 : Max hit points > 20736",
+	"Category weapon                 : Class = elite       : Quality = rare : Item min damage percent > 200",
+
+	"Type rune : code > r16",
+	"Category armor, Category weapon : Class = exceptional : Quality = unique",
+	"Category armor, Category weapon : Class = exceptional : Quality = set",
+	"Type Circlet                                          : Quality > magic : Quality ! set : Skill Class Any = 2",
+	"Type Circlet                                          : Quality > magic : Quality ! set : Skill Tree Any = 3",
+	"; ***** Type rune : code > r10",
+	";Type rune : code > r13",
+	"amu                                                   : Quality = set : Skill Class Sorceress = 2",
+	"amu                                                   : Skill Tree Any = 3",
+
+	";Tarnhelm",
+	"Skull Cap : Quality = unique",
+	";Wormskull",
+	"Bone Helm : Quality = unique",
+	";The Hand of Broc",
+	"Leather Gloves : Quality = unique",
+	";Chance Guards",
+	"Chain Gloves : Quality = unique",
+	";Magefist",
+	"Light Gauntlets : Quality = unique",
+	";Frostburn",
+	"Gauntlets : Quality = unique",
+	";Nightsmoke",
+	"Belt : Quality = unique",
+	";Goldwrap",
+	"Heavy Belt : Quality = unique",
+	";Greyform",
+	"Quilted Armor : Quality = unique",
+	";Twitchthroe",
+	"Studded Leather : Quality = unique",
+	";Heavenly Garb",
+	"Light Plate : Quality = unique",
+	";Silks of the Victor",
+	"Ancient Armor : Quality = unique",
+	";Biggin's Bonnet",
+	"Cap : Quality = unique",
+
+	"; Gull",
+	"Dagger : Quality = unique",
+	";Spire of Lazarus",
+	"Gnarled Staff : Quality = unique",
+	";The Salamander",
+	"Battle Staff : Quality = unique",
+	";The Iron Jang Bong",
+	"War Staff : Quality = unique",
+	";Torch of Iro",
+	"Wand : Quality = unique",
+	";Maelstrom",
+	"Yew Wand : Quality = unique",
+	";Gravenspine",
+	"Bone Wand : Quality = unique",
+	";Ume's Lament",
+	"Grim Wand : Quality = unique",
+
+	"jew, cm1, cm2, cm3 : IsIdentified = false",
+	"; ***** Type Orb : Skill Class Sorceress = 2 : Skill Tree Fire > 2",
+	"Type Stave, Type Staff : Quality  < superior : Skill Tree Fire = 3 : Item num sockets < 2 : Item num sockets ! 1",
+	"Type Stave, Type Staff : Quality  < superior : Skill Tree Fire > 2 : Skill Class Sorceress = 2 : Item num sockets < 2 : Item num sockets ! 1"
+
+	,"rvl"
+//	,"rvs"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var bot_name      = "TDW_BossScarf";
+	var log_file_name = "output/" + bot_name + "." + me.realm + "." + 
+		me.account + "." + me.name + ".log";
+	var error_list    = new Array();
+	var teleport_flag = D2JSP_SKILL_CanTeleport();
+
+	TDW_BOT_Log = new D2JSP_UTIL_Log(log_file_name, bot_name);
+
+//TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	print("The " + bot_name + " is running");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+//print("D2JSP_QUEST_GetQuestDone()           = " + D2JSP_QUEST_GetQuestDone(5, 6));
+//print("D2JSP_QUEST_GetQuestCanNotComplete() = " + D2JSP_QUEST_GetQuestCanNotComplete(5, 6));
+//print("D2JSP_QUEST_GetQuestCanComplete()    = " + D2JSP_QUEST_GetQuestCanComplete(5, 6));
+
+//	if (D2JSP_QUEST_GetQuestCanComplete(5, 6))
+//		TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_RED + "WARNING: You can complete " +
+//		"the Baal quest in this game.");
+
+//	TDW_MOVE_WaypointUseInTown(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2);
+
+	TDW_BOT_Log.logInfo("Loading internal ISF configurations...");
+
+	if (!(TDW_ISF_Cfg_1 = ISF_Create(TDW_BossScarf_ISFList_1, 0, error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BossScarf_ExitFatal("Unable to load internal ISF configuration #1" +
+			" (see log file for details).");
+	}
+
+	if (!(TDW_ISF_Cfg_2 = ISF_Create(TDW_BossScarf_ISFList_2, 0, error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BossScarf_ExitFatal("Unable to load internal ISF configuration #2" +
+			" (see log file for details).");
+	}
+
+	TDW_BossScarf_GetReady();
+
+//	var move_control  = new TDW_BOT_ATTACK_MoveControl();
+//	move_control.no_change_max = 3;
+
+	TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN + "Ready.");
+	me.overhead(D2JSP_UTIL_COLOR_GREEN + "Ready.");
+
+/*
+	var srv_name   = "output/GetDiabloGameServerInfo.txt";
+	var srv_handle = fileOpen(srv_name, 0);
+	if (srv_handle) {
+		while (!srv_handle.eof) {
+			var this_line = srv_handle.readLine();
+			if (this_line == "END OF FILE")
+				break;
+			var tmp_list = this_line.split(/\s+/);
+			print("BattleNet Server: " + tmp_list[tmp_list.length - 1]);	
+		}
+		srv_handle.close();
+	}
+*/
+
+	print("BattleNet Server: " + D2JSP_UTIL_GetGameServerNumber());
+
+	while (true) {
+		var loop_count  = 0;
+		var flash_list  = [D2JSP_UTIL_COLOR_RED, D2JSP_UTIL_COLOR_ORANGE, D2JSP_UTIL_COLOR_YELLOW];
+		var flash_count = 0;
+		var flash_index = 0;
+		while (!((me.area + "") in TDW_BossScarf_BossList)) {
+			if (!D2JSP_AREA_IsTown(me.area)) {
+				if (getUnit(D2JSP_UTIL_GETUNIT_NPC, "Black Soul",
+					D2JSP_MODE_FLAG_INDICATOR | D2JSP_MODE_NPC_FLAGS_ALL_BUT_DEAD)) {
+					if (flash_count++ > 4)
+						me.overhead(flash_list[flash_index++ % 3] + "Black Souls!!!");
+				}
+				else if (flash_count) {
+					me.overhead("");
+					flash_count = 0;
+				}
+				if (loop_count)
+					ISF_FastSnagList(null, 2, TDW_BossScarf_FastSnagList,
+						TDW_BOT_Log);
+				else {
+					var return_code = ISF_FastSnagList(TDW_ISF_Cfg_2, 2,
+						TDW_BossScarf_FastSnagList, TDW_BOT_Log,
+						ISF_PICKUP_FLAG_ITEM | ISF_PICKUP_FLAG_GOLD |
+						ISF_PICKUP_FLAG_BELT_SIMPLE, 90, TDW_BELTMAN_FLAG_NONE, 1000);
+					if (return_code == -2)
+						TDW_BossScarf_ExitFatal("Exiting because I have a scarfed " +
+							"item on my cursor.");
+					delay(25);
+					runGC();
+				}
+				loop_count = (loop_count + 1) % 10;
+				TDW_BossScarf_CheckDiabloClone();
+			}
+			TDW_BossScarf_DoChecks();
+			delay(25);
+		}
+		var first_time    = true;
+		var this_boss     = TDW_BossScarf_BossList[me.area + ""];
+		var boss_location = null;
+		TDW_BOT_Log.logInfo("Entered area for boss NPC " + this_boss[2] + " (" +
+			D2JSP_AREA_AreaToName(this_boss[0]) + ").");
+		while (me.area == this_boss[0]) {
+			var this_delay = 100;
+			var npc_obj    = getUnit(D2JSP_UTIL_GETUNIT_NPC, this_boss[1]);
+			if (npc_obj) {
+				this_delay    = 25;
+				boss_location = [npc_obj.x, npc_obj.y];
+				if (first_time) {
+					TDW_BOT_Log.logInfo("Boss NPC " + this_boss[2] + " classid = " +
+						npc_obj.classid + ".");
+					first_time = false;
+				}
+				if ((npc_obj.mode == D2JSP_MODE_NPC_DEATH) ||
+					(npc_obj.mode == D2JSP_MODE_NPC_DEAD) || (!npc_obj.hp)) {
+					TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN + "NPC " +
+						this_boss[2] + " is dead.");
+					if (myDist(boss_location[0], boss_location[1]) > 15) {
+						if (teleport_flag)
+							D2JSP_SKILL_TeleportToPair(boss_location);
+						else
+							TDW_MOVE_MoveToXYPair(boss_location);
+					}
+					ISF_FastSnagList(null, 3000, TDW_BossScarf_FastSnagList,
+						TDW_BOT_Log);
+					if (ISF_FastSnagList(TDW_ISF_Cfg_1, 3,
+						TDW_BossScarf_FastSnagList, TDW_BOT_Log,
+						ISF_PICKUP_FLAG_ITEM | ISF_PICKUP_FLAG_GOLD |
+						ISF_PICKUP_FLAG_BELT_SIMPLE, 90, TDW_BELTMAN_FLAG_NONE,
+						25000) == -2)
+						TDW_BossScarf_ExitFatal("Exiting because I have a scarfed " +
+							"item on my cursor.");
+					ISF_FastSnagList(null, 3000, TDW_BossScarf_FastSnagList,
+						TDW_BOT_Log);
+					if (ISF_FastSnagList(TDW_ISF_Cfg_1, 10,
+						TDW_BossScarf_FastSnagList, TDW_BOT_Log,
+						ISF_PICKUP_FLAG_ITEM | ISF_PICKUP_FLAG_GOLD |
+						ISF_PICKUP_FLAG_BELT_SIMPLE, 90, TDW_BELTMAN_FLAG_NONE,
+						25000) == -2)
+						TDW_BossScarf_ExitFatal("Exiting because I have a scarfed " +
+							"item on my cursor.");
+					TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN + "Scarfing of " +
+						"boss items for NPC " + this_boss[2] + " is complete.");
+					delete TDW_BossScarf_BossList[me.area + ""];
+					break;
+				}
+			}
+			if (me.area != D2JSP_AREA_THE_WORLDSTONE_CHAMBER) {
+				var return_code = ISF_FastSnag(TDW_ISF_Cfg_2, 3,
+					TDW_BossScarf_FastSnagList, TDW_BOT_Log, ISF_PICKUP_FLAG_ITEM |
+					ISF_PICKUP_FLAG_GOLD | ISF_PICKUP_FLAG_BELT_SIMPLE,
+					90, TDW_BELTMAN_FLAG_NONE, 5000);
+				if (return_code == -2)
+						TDW_BossScarf_ExitFatal("Exiting because I have a scarfed " +
+							"item on my cursor.");
+			}
+			TDW_BossScarf_DoChecks();
+			delay(this_delay);
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BossScarf_GetReady()
+{
+	if (D2JSP_COMM_PickupForCorpse())
+		TDW_BOT_Log.logError("Unable to pickup corpse --- probably not " +
+			"prudent to continue");
+
+	TDW_BELTMAN_OptimizeBelt();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BossScarf_DoChecks()
+{
+	if ((!me.hp) || (me.mode == D2JSP_MODE_PLAYER_DEATH) ||
+		(me.mode == D2JSP_MODE_PLAYER_DEAD)) {
+		print(D2JSP_UTIL_COLOR_RED + "I'm dead!!!");
+		var loop_count = 0;
+		do {
+			me.overhead((loop_count++ % 2) ? "" :
+				(D2JSP_UTIL_COLOR_RED + "I'm dead!!!"));
+			delay(500);
+		} while ((!me.hp) || (me.mode == D2JSP_MODE_PLAYER_DEATH) ||
+			(me.mode == D2JSP_MODE_PLAYER_DEAD));
+		print(D2JSP_UTIL_COLOR_GREEN + "Stopped BossScarfer");
+		me.overhead(D2JSP_UTIL_COLOR_GREEN + "Stopped BossScarfer");
+		stop();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BossScarf_CheckDiabloClone()
+{
+	if ((!TDW_BossScarf_DiabloClone) && getUnit(D2JSP_UTIL_GETUNIT_NPC, 333)) {
+		TDW_BossScarf_BossList[me.area + ""]  = [me.area,  333, "Diablo Clone"];
+		TDW_BossScarf_DiabloClone             = true;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BossScarf_ExitFatal(exit_msg)
+{
+	TDW_BOT_Log.logFatal(D2JSP_UTIL_COLOR_RED + exit_msg);
+
+	TDW_BOT_Log.closeLog();
+
+	quit();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+var ISF_FastSnagDidMoveFlag = false;
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_FastSnag(isf_cfg, fast_flag_count, fast_flags, log_obj,
+	pickup_flags, pickup_radius, belt_flags, min_gold_amount, destination,
+	callback_func, callback_data)
+{
+	fast_flag_count = (fast_flag_count < 1) ? 3 : fast_flag_count;
+	fast_flags      = (fast_flags & ISF_FAST_PICKUP_FLAG_MASK) ? fast_flags :
+		ISF_FAST_PICKUP_FLAG_DEFAULT;
+
+	return(ISF_FastSnagList(isf_cfg, fast_flag_count, [fast_flags], log_obj,
+		pickup_flags, pickup_radius, belt_flags, min_gold_amount, destination,
+		callback_func, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_FastSnagList(isf_cfg, fast_flag_count, fast_flag_list, log_obj,
+	pickup_flags, pickup_radius, belt_flags, min_gold_amount, destination,
+	callback_func, callback_data)
+{
+	fast_flag_count = (fast_flag_count < 1) ? 3 : fast_flag_count;
+	fast_flag_list  = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(fast_flag_list)) ?
+		fast_flag_list : [ISF_FAST_PICKUP_FLAG_DEFAULT];
+	log_obj         = (log_obj instanceof D2JSP_UTIL_Log) ? log_obj : null;
+
+	var original_location = [me.x, me.y];
+	var left_skill        = me.getSkill(0);
+	var telekinesis_flag  = D2JSP_SKILL_CanTelekinesisHere();
+	var teleport_flag     = D2JSP_SKILL_CanTeleportHere();
+
+	ISF_FastSnagDidMoveFlag = false;
+
+	var return_code = 0;
+
+	for (var count_1 = 0; count_1 < fast_flag_count; count_1++) {
+		for (var count_2 = 0; count_2 < fast_flag_list.length; count_2++) {
+			var fast_flags = (fast_flag_list[count_2] & ISF_FAST_PICKUP_FLAG_MASK)?
+				fast_flag_list[count_2] : ISF_FAST_PICKUP_FLAG_DEFAULT;
+			return_code = ISF_FastSnagInternal(fast_flags, log_obj, pickup_radius,
+				telekinesis_flag, teleport_flag);
+			if (return_code < 0)
+				return(return_code);
+		}
+		if (!return_code)
+			break;
+	}
+
+	if (ISF_IsCfg(isf_cfg))
+		return_code = isf_cfg.doPickup(pickup_flags, pickup_radius, belt_flags,
+			min_gold_amount, destination, callback_func, callback_data);
+	else if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(isf_cfg) &&
+		(isf_cfg.length == ISF_COMPILED_DATA_COUNT))
+		return_code = ISF_DoPickup(isf_cfg, pickup_flags, pickup_radius,
+			belt_flags, min_gold_amount, destination, callback_func,
+			callback_data);
+	else if (ISF_FastSnagDidMoveFlag &&
+		(D2JSP_SYLIB_DistPair([me.x, me.y], original_location) > 5)) {
+		if (teleport_flag)
+			D2JSP_SKILL_TeleportToPair(original_location);
+		else
+			TDW_MOVE_MoveToXYPair(original_location);
+	}
+
+	if ((me.classid == D2JSP_CLASS_ID_SORCERESS) &&
+		(left_skill != me.getSkill(0)))
+		D2JSP_SKILL_SetSkill(left_skill, 0);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_FastSnagInternal(fast_flags, log_obj, pickup_radius,
+	telekinesis_flag, teleport_flag)
+{
+	var to_snag_count = 0;
+	var this_obj      = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+		ISF_ITEM_PICKUP_MODE_FLAGS);
+
+	if (this_obj) {
+		var this_mask;
+		do {
+			var pickup_flag = false;
+/*
+			if (ISF_FastPickupIgnoreList[this_obj.area][this_obj.gid + ""])
+				;
+			else if (((this_obj.quality < D2JSP_ITEM_QUALITY_SET) &&
+				(this_obj.quality > D2JSP_ITEM_QUALITY_UNIQUE)) &&
+				((this_obj.itemtype != D2JSP_ITEMTYPE_RUNE) ||
+				(this_obj.code < "r15"))) {
+				ISF_FastPickupIgnoreList[this_obj.area][this_obj.gid + ""] = true;
+			else {
+*/
+			if (((this_obj.quality >= D2JSP_ITEM_QUALITY_SET) &&
+				(this_obj.quality <= D2JSP_ITEM_QUALITY_UNIQUE)) ||
+				((this_obj.itemtype == D2JSP_ITEMTYPE_RUNE) &&
+				(this_obj.code >= "r15"))) {
+				var this_distance = Dist(me.x, me.y, this_obj.x, this_obj.y);
+				var itemclass     = D2JSP_ITEM_GetItemClass(this_obj);
+				if (ISF_FastPickupMap[itemclass][this_obj.quality] & fast_flags)
+					pickup_flag = true;
+				else if (this_obj.itemtype == D2JSP_ITEMTYPE_RUNE)
+					pickup_flag = true;
+				else if (this_obj.code == "rin") {
+					if (((fast_flags & ISF_FAST_PICKUP_FLAG_UNIQUE_RING) &&
+						(this_obj.quality == D2JSP_ITEM_QUALITY_UNIQUE)) ||
+						((fast_flags & ISF_FAST_PICKUP_FLAG_RARE_RING) &&
+						(this_obj.quality == D2JSP_ITEM_QUALITY_RARE)) ||
+						((fast_flags & ISF_FAST_PICKUP_FLAG_SET_RING) &&
+						(this_obj.quality == D2JSP_ITEM_QUALITY_SET)))
+						pickup_flag = true;
+				}
+				else if (this_obj.code == "amu") {
+					if (((fast_flags & ISF_FAST_PICKUP_FLAG_UNIQUE_AMULET) &&
+						(this_obj.quality == D2JSP_ITEM_QUALITY_UNIQUE)) ||
+						((fast_flags & ISF_FAST_PICKUP_FLAG_RARE_AMULET) &&
+						(this_obj.quality == D2JSP_ITEM_QUALITY_RARE)) ||
+						((fast_flags & ISF_FAST_PICKUP_FLAG_SET_AMULET) &&
+						(this_obj.quality == D2JSP_ITEM_QUALITY_SET)))
+						pickup_flag = true;
+				}
+				else if ((this_obj.code == "cm1") &&
+					(fast_flags & ISF_FAST_PICKUP_FLAG_UNIQUE_CM1) &&
+					(this_obj.quality == D2JSP_ITEM_QUALITY_UNIQUE))
+					pickup_flag = true;
+				else if ((this_obj.code == "cm2") &&
+					(fast_flags & ISF_FAST_PICKUP_FLAG_UNIQUE_CM2) &&
+					(this_obj.quality == D2JSP_ITEM_QUALITY_UNIQUE))
+					pickup_flag = true;
+				else if ((this_obj.code == "cm3") &&
+					(fast_flags & ISF_FAST_PICKUP_FLAG_UNIQUE_CM3) &&
+					(this_obj.quality == D2JSP_ITEM_QUALITY_UNIQUE))
+					pickup_flag = true;
+				else if ((this_obj.code == "jew") &&
+					(fast_flags & ISF_FAST_PICKUP_FLAG_UNIQUE_JEW) &&
+					(this_obj.quality == D2JSP_ITEM_QUALITY_UNIQUE))
+					pickup_flag = true;
+				if (!pickup_flag)
+					;
+				else if (this_distance > pickup_radius)
+					;
+				else {
+					var puspec    = new ISF_PUSpec(this_obj, 0, this_distance, false);
+					var this_move = false;
+					ISF_FastSnagDidMoveFlag = false;
+					to_snag_count++;
+					if (this_distance > 8) {
+						if (teleport_flag)
+							D2JSP_SKILL_TeleportTo(this_obj.x, this_obj.y);
+						else
+							TDW_MOVE_MoveToObject(this_obj);
+						delay(0);
+						ISF_FastSnagDidMoveFlag = true;
+						this_move = true;
+					}
+					for (var count_1 = 0; count_1 < 2; count_1++) {
+						ISF_DoPickupItemBegin(this_obj);
+						delay(0);
+						ISF_DoPickupItemEnd(this_obj);
+						if ((this_obj.mode != D2JSP_MODE_ITEM_ON_GROUND) &&
+							(this_obj.mode != D2JSP_MODE_ITEM_BEING_DROPPED))
+							break;
+					}
+					if (log_obj)
+						log_obj.logPickup("***** Snagging " + puspec.fullNameColor);
+				}
+			}
+		} while (this_obj && this_obj.getNext(null, ISF_ITEM_PICKUP_MODE_FLAGS));
+	}
+
+	return(to_snag_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_FlushFastPickupIgnoreList(flush_area)
+{
+	if (!arguments.length) {
+		ISF_FastPickupIgnoreList = new Array(D2JSP_AREA_COUNT);
+		for (var count_1 = 0; count_1 < D2JSP_AREA_COUNT; count_1++)
+			ISF_FastPickupIgnoreList[count_1] = new Array();
+		runGC();
+	}
+	else if (D2JSP_UTIL_GEN_TypeOfNumber(flush_area) &&
+		D2JSP_AREA_IsValidInGame(flush_area)) {
+		ISF_FastPickupIgnoreList[flush_area] = new Array();
+		runGC();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

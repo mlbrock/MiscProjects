@@ -1,0 +1,50 @@
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+
+var NPC_Hash = new Array();
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+var file_handle = fileOpen("output/____EraseMe.txt", 1);
+
+	me.overhead("Looking for NPCs");
+
+	while (true) {
+		var npc_count = 0;
+		var this_npc  = getUnit(D2JSP_UTIL_GETUNIT_NPC);
+		if (this_npc) {
+			npc_count++;
+			do {
+				if (D2JSP_NPC_IsEnemyAttackable(this_npc))
+{
+					print("NPC: [" + this_npc.name + "] = " +
+"(" + this_npc.name.length + ") = " +
+						this_npc.getStat(D2JSP_STAT_ALIGNMENT) + " / " +
+						this_npc.getState(D2JSP_STATE_ALIGNMENT) + " / " +
+						this_npc.classid);
+if (this_npc.name == "") {
+/*
+	for (var this_prop in this_npc) {
+		print(this_prop + " = " + this_npc[this_prop]);
+		file_handle.writeLine(this_prop + " = " + this_npc[this_prop]);
+	}
+*/
+	print("Stopping");
+	stop();
+}
+}
+			} while (this_npc && this_npc.getNext());
+		}
+		me.overhead("Looking for NPCs");
+		delay(500);
+		me.overhead("Looking for NPCs");
+	}
+}
+
+

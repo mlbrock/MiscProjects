@@ -1,0 +1,2037 @@
+//##################################################
+//######   Matts Map and Pathing Library    ########
+//##################################################
+/*
+----------------------------------------------------*/
+var mlMapVersion = "2.2.5";
+/*----------------------------------------------------
+Copyright (C) 2003 Matt Lanteigne aka mattlant <mattlant@hotmail.com>
+
+Thanks go out to Knaar, who started the whole thing with his initial d2Map
+that i used as a template. The code to access collision info has been added
+to the core now, but still Knaar deserves a lot of credit here. If it
+wasnt for him, i would never have been led down this path (no pun intended)
+Thanks to Wolf for the collision info
+Thanks to Gshock for some EXCELLENT ideas
+Thanks to Darien for a great amount of testing
+Thanks to Froggy for pointing out some stuff that i screwed up
+----------------------------------------------------
+
+This program is free software; You can redistrubute freely as long as this
+header stays intact. Modifications may be done as long as original header
+and credits stay.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTIBILITY
+or FITNESS FOR A PARTICULAR PURPOSE.
+----------------------------------------------------
+NOTE:
+Use mlHeap v 1.0.2 with this release. The new mlHeap
+yeilds a 15% speed improvement.
+----------------------------------------------------
+Known Issues:
+----------------------------------------------------
+TODO:
+- Add automatic support for doors
+- Finish the exploreing stuff and create room based pathing to further
+speed pathing
+- Add in Area Linkage Info
+
+----------------------------------------------------
+FIXES and upgrades:
+2.2.5
+- Added straight line small gap detection in pathing algo
+
+2.2.4
+- Caching now caches Preset Units
+- Fixed again the sorceress recalc
+- Added in a more suitable me.move method
+
+FIXES and upgrades:
+2.2.3
+- Added in a unit perameter for los to check if it is in the los path
+
+2.2.2
+- Fixed a recalc pathing issue for sorcs.
+- Added in the ability to do LOS checks with either line of sight data,
+or collision data.
+
+2.2.1
+- Added in a check for 0.32
+- Fixed out of range issues
+- Added in more error control
+- Changed the pathfinding to work better with PathMove. It will now
+set a flag for PathMove top tell it to walk or teleport according to
+the type of reduction you use. It will also overide Sorc reduction and
+force walking if you have no teleport skill or are not a sorc.
+
+2.2.0 (Requires 0.32)
+- Added PathToWarp(mlWARPTYPE, etc)
+- Added PathToLevel(level, etc)
+- Far waypoints are again supported
+- Added getSafeOffScreenXY(x,y) Use this to calculate an x,y along a 
+line to the target x,y. This will allow you to aim ranged attacks at offscreen
+targets without using the offscreen coordinates(which can be detected by Bnet)
+- Fixed a major flaw in LOS that caused a true state when in in a particular
+quadrant
+- Added the ability to Initliaze Maps on other areas. Will only work for areas in
+the current act. Be advised that this may crash sometimes, maybe once every 2000
+times, but it could still happen. This is due to the way data is gathered from.
+- Made some optimizations through heuristic pruneing which result in a decreased 
+pathing time.  This is now the recommended and default pathing.  To use the older 
+pathing pass _square as true.
+- Added in a padding to the final path to keep it at least 1 unit away from 
+walls and obstacles
+
+2.0.3
+- Fixed a problem with pathing very short distances
+- Fixed a ton of small misc errors
+
+2.0.2
+- Added in Area Caching
+- Added in FindPathToRoom
+- Added in FindPathALongPoints (requested by scavenger)
+- Fixed getMapExit bugs
+- commeneted out some path to map code which may speed pathing a bit
+- fixed some other misc bugs
+
+2.0.1
+- fixed problems in PathMove method
+- removed mlReason and replaced with a member variable called:
+.LastError
+
+2.0.0
+- Made it .29 compliant
+- added in different heuristics and factor options
+- added in a function called FindScore so you can know the cost
+of moving to a destination
+- crosslevel pathing is non functional
+- GetFarObject is non functional
+- Encapsulated all functions inside an object
+
+1.0.3
+- Added in mlFindClosestWalkable(x,y)
+this will return the closest walkable x,y to the given x,y
+- fixed up a couple misnumbered warps
+- added in a couple more range checks
+- fixed up some other small misc code
+- changed to dynamically linked dll(smaller d2h file)
+
+1.0.2
+- Changed communication to completely file I/O
+This should fix problems people were having with the msg function.
+- Fixed some code in the mlMap.d2h, including a 10k per game mem leak :(
+- Added mlgetLevelWarpNumber(warptype, level)
+this will allow you to get the warptypes tile number, so its now easier
+to use getTile function ie:
+stairs = getUnit(5, mlgetLevelWarpNumber(mlWARPNEXT));
+- cleaned up some miscellaneous code
+
+1.0.1
+Area cross level pathing sometomes wouldnt get good coordinates (fixed)
+Act 1 Town cross level pathing (fixed)
+Map edge wrap around in pathing algoritm's if both far edges are open (hehe)(outdoor areas only)(fixed)
+D2MapReply msg's stop processing. (possibly fixed and MUCH faster)
+being added:
+waypoint warps(done)
+getFarObject(done)
+remove printed messages and make them optional(done)
+seperate the dprint into a new function(done)
+have walkcalls passed the actual value for advanced stuff(done)
+out of bounds checks for more stability(done)
+mlMap.d2h optional error log(done)
+
+----------------------------------------------------
+Bit Structure:
+Map bits:
+bit 0 : block walk
+bit 1 : block light
+bit 2 : Block LOS (block jump too)
+bit 3 : block Player's walk but not Mercenary's walk (weird)
+bit 4 : ?
+bit 5 : block light only (not LOS) ?
+bit 6 : ?
+bit 7 : ?
+NPC/Monster bits: //to be implemented in next release
+bit 8 :
+bit 9 :
+bit 10 :
+bit 11 :
+bit 12 :
+bit 13 :
+bit 14 :
+bit 15 :
+
+*/
+
+
+//if(!mlHeapVersion)
+	include("mlHeap.d2l");
+
+//include("terminal.d2l");
+
+var SCORE = [1, 1.414];
+var FORWARDHEURISTICS = ["nofh", "euclidian", "euclidiannosqrt", "manhattan", "diagshortcut", "maxdxdy"]
+
+var mlFHNONE = 0;
+var mlFHEUCLIDIAN = 1;
+var mlFHEUCLIDIANNOSQRT = 2;
+var mlFHMANHATTAN = 3;
+var mlFHDIAGSHORTCUT = 4;
+var mlFHMAXDXDY = 5;
+
+
+
+//////////////////////////////////////////////////////////////////////
+// CONSTANT VARIABLES
+// -------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////
+//d2map settings constants(used internally only) - NOT USED AS OF VERSION 2.00
+var mlCURRENTMAP = 0;
+var mlPRINTMSG = 1;
+var mlDOLOGGING = 2;
+var mlMAPINFO = 3;
+
+//path reduction types
+var mlWALK = 0;
+var mlTELEPORT = 1;
+
+//path algo types
+var mlBREADTHFIRST = 1;
+var mlASTAR = 0;
+
+//path reduction algo types
+var mlREDUCEWALK = 0;
+var mlREDUCESORC = 1;
+var mlREDUCEJUMP = 2; //Not Used
+
+//Warp types
+var WARPS = [0,0,3,3,1,0,3,4,1,0,4,1,0,1,0,0,1,1,0,3,4,3,1,0,5,3,1,1,0,0,1,1,0,3,3,3,3,3,3,4,5,6,7,8,9,1,0,3,1,0,4,3,1,4,5,1,0,3,1,1,0,4,1,1,5,1,1,0,0,0,1,3,4,1,0,3,3,1,0,3,4,1,0];
+
+var mlWARPNONE = 99;
+var mlWARPNEXT = 0;
+var mlWARPPREVIOUS = 1;
+var mlWARPWAYPOINT = 2;
+var mlWARPOTHER1 = 3;
+var mlWARPOTHER2 = 4;
+var mlWARPOTHER3 = 5;
+var mlWARPOTHER4 = 6;
+var mlWARPOTHER5 = 7;
+var mlWARPOTHER6 = 8;
+var mlWARPOTHER7 = 9;
+var mlWARPOTHER8 = 10;
+var mlWARPUNDERGROUNDPASSAGE = 0;
+var mlWARPUNDERGROUNDPASSAGEOTHER = 3;
+var mlWARPUGPASSAGE = 0;
+var mlWARPUGPASSAGEOTHER = 3;
+var mlWARPDEN = 3;
+var mlWARPHOLE = 3;
+var mlWARPCAVE = 3;
+var mlWARPPIT = 3;
+var mlWARPCRYPT = 3;
+var mlWARPMAUSOLEUM = 4;
+var mlWARPTOWER = 4;
+var mlWARPTOWNTOSEWERTRAP = 3;
+var mlWARPTOWNTOSEWERDOCK = 4;
+var mlWARPSEWERTOTOWNDOCK = 3;
+var mlWARPTOWNTOHAREM = 5;
+var mlWARPHAREMTOTOWN = 3;
+var mlWARPTOMB = 3;
+var mlWARPVIPER = 3;
+var mlWARPTALTOMB1 = 3;
+var mlWARPTALTOMB2 = 4;
+var mlWARPTALTOMB3 = 5;
+var mlWARPTALTOMB4 = 6;
+var mlWARPTALTOMB5 = 7;
+var mlWARPTALTOMB6 = 8;
+var mlWARPTALTOMB7 = 9;
+var mlWARPMAGGOT = 3;
+var mlWARPDESSERTSEWERTRAP = 4;
+var mlWARPSPIDER = 3;
+var mlWARPDUNGEONFORT = 4;
+var mlWARPDUNGEONHOLE = 5;
+var mlWARPKURASTTOSEWER = 3;
+var mlWARPKURASTTOTEMPLE = 4;
+var mlWARPTRAVINCALTOMEPH = 5;
+var mlWARPCITYTORIVER = 0;
+var mlWARPRIVERTOCITY = 1;
+var mlWARPBARRICADEDOWN = 3;
+var mlWARPBARRICADEDOWNWALL = 4;
+var mlWARPICECAVEDOWNFLOOR = 3;
+var mlWARPTEMPLETONIHL = 3;
+var mlWARPMOUNTAINTOICE = 3;
+var mlWARPMOUNTAINTOBAAL = 4;
+
+//Waypoint varants DO NOT USE
+var mlWAYPOINTS = new Array(119,145,156,157,237,238,288,323,324,398,402,429,494,496,511,539);
+
+//Direction constants
+var mlNORTH = 0;
+var mlEAST = 1;
+var mlSOUTH = 2;
+var mlWEST = 3;
+
+//Walkcalls return values
+var mlCONTINUE = 1;
+var mlSTOP = 2;
+var mlSTEPAHEAD = 100;
+var mlSTEPBACK = 200;
+
+//Settings constants
+var mlNO = 0;
+var mlYES = 1;
+
+
+//Areas
+var mlAREASOUTDOORFLAG = new Array(0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 
+1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 
+1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+
+//////////////////////////////////////////////////////////////////////
+// LIBRARY GLOBAL VARIABLES
+// -------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////
+var mlMapMSGDelay = 100;
+var watched = false;
+
+var pathhop = null;
+var walkdel = 150;
+//var RandomMove = 1;
+//var RandomMoveDel = 10;
+
+var mldebugdelay = 0;
+var mldebuglevel=0;
+var mldebuglog="output/mlMap.log";
+
+function oMap(_initarea, _pathtomap) {
+	
+	if(me.version <.32) {
+		print("This version requires d2jsp v0.32 or higher");
+		return null;
+	}
+	this.Area = null;
+	var AreaCache = new Object();
+	this.Path = null;
+
+	this.minx = Number.MAX_VALUE;
+	this.miny = Number.MAX_VALUE;
+	this.maxx = 0;
+	this.maxy = 0;
+	this.roomsizex = 0;
+	this.roomsizey = 0;
+	this.sizex = 0;
+	this.sizey = 0;
+	this.AreaInitialized = null;
+	this.PathToMap = _pathtomap;
+	this.LastPathScore = 0;
+	this.LastError = "";
+	this.LastErrorCode = 0;
+	this.PresetUnits = new Array();
+	this.LastOpenNodes = 0;
+	this.LastClosedNodes = 0;
+	this.RoomGrid;
+	this.UseTeleport = 0;
+
+	this.InitializeMap = oMap_initmap;
+	this.FindPath = oMap_findpath;
+	this.FindPathToLevel = oMap_FindPathToLevel;
+	this.FindExplorePath = oMap_findexplorepath;
+	this.IsWalkable = oMap_iswalkable;
+	this.LOS = oMap_los;
+	this.FindClosestWalkable = oMap_findclosestwalkable;
+	this.getMapExit = oMap_getmapexit;
+	this.DumpMap = oMap_dumpmap;
+	this.getLevelWarpXY = oMap_getlevelwarpxy;
+	this.FindScore = oMap_findscore;
+	this.PathMove = oMap_pathmove;
+	this.getSafeOffScreenXY = oMap_getSafeOffScreenXY;
+	this.IsInRange = oMap_isinrange;
+	this.getRoomExits = oMap_getroomexits;
+	
+	
+
+	if(_initarea)
+		this.InitializeMap(_initarea);
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.Initializemap()
+	// -------------------------------------------------------------------
+	// Used to initialize the current areas map
+	//////////////////////////////////////////////////////////////////////
+	function oMap_initmap(_area) {
+		mlprint("Initializing Map");
+		var sDate = new Date();
+		this.minx = Number.MAX_VALUE;
+		this.miny = Number.MAX_VALUE;
+		this.maxx = 0;
+		this.maxy = 0;
+		this.roomsizex = Number.MAX_VALUE;
+		this.roomsizey = Number.MAX_VALUE;
+		this.sizex = 0;
+		this.sizey = 0;
+		if(_area) this.AreaInitialized = _area;
+		else this.AreaInitialized = me.area;
+		this.PresetUnits = new Array();
+		//var stime = new Date();
+		//print("starting getting dims");
+		if (_area) var troom = getRoom(_area);
+		else var troom = getRoom();
+		do {
+			var troomy = troom.y*5;
+			var troomx = troom.x*5;
+			if (troomx > this.maxx) {
+				this.maxx = troomx;
+			}
+			if (troomy > this.maxy) {
+				this.maxy = troomy;
+			}
+			if (troomx < this.minx) {
+				this.minx = troomx;
+			}
+			if (troomy < this.miny) {
+				this.miny = troomy;
+			}
+			var stat11 = troom.getStat(11);
+			if(stat11 < this.roomsizex)
+				this.roomsizex = stat11;
+
+			var stat12 = troom.getStat(12);
+			if(stat12 < this.roomsizey)
+				this.roomsizey = stat12;
+		} while(troom.getNext());
+		//print("Dims took: " + (new Date-stime));
+		this.maxx += this.roomsizex;
+		this.maxy += this.roomsizey;
+		this.sizex = this.maxx - this.minx;
+		this.sizey = this.maxy - this.miny;
+		this.maxx--;
+		this.maxy--;
+
+
+		//setup the room grid NEW 06-29-2003
+		this.RoomGrid = new Array();
+		this.RoomGrid.length = Math.ceil(this.sizex/this.roomsizex)+1;
+		for(var rg = 0; rg<this.RoomGrid.length; rg++) {
+			this.RoomGrid[rg] = new Array();
+			//print("check:" + (this.sizey/this.roomsizey));
+			this.RoomGrid[rg].length = Math.ceil(this.sizey/this.roomsizey)+1;
+		}
+		
+		this.Area = new Array();
+		this.Area.length = this.maxy - this.miny + 20;
+		var tdim = this.maxx - this.minx + 20;
+		for(var i = 0; i<this.Area.length; i++){
+			this.Area[i] = new Array();
+			this.Area[i].length = tdim;
+			if(mlAREASOUTDOORFLAG[me.area]){
+				for(var j = 0; j<this.Area[i].length; j++) this.Area[i][j] = 0xFF
+			}
+		}
+		
+		if (_area) troom = getRoom(_area);
+		else troom = getRoom();
+		var init = false;
+		do {
+
+			var roomcolldata = troom.getCollision();
+			runGC();
+
+			var stat11 = troom.getStat(11);
+			var stat12 = troom.getStat(12);
+			var troomy = troom.y*5-this.miny;
+			var troomx = troom.x*5-this.minx;
+			
+			//setup the room grid NEW 06-29-2003 oRoom(_x, _y, _n, _o, _e, _d, _s)
+			var db = this.getRoomExits(troom);
+			//this.RoomGrid[troomx/this.roomsizex][troomy/this.roomsizey] = 
+			//	new oRoom(troom.x*5, troom.y*5, troom.number, true, false, db, 0, stat11, stat12);
+			
+			for(var y = 0; y < stat12; y++) {
+				for(var x = 0; x < stat11; x++) {
+					this.Area[troomy + y][troomx + x] = roomcolldata[y][x];
+				}
+			}
+			
+			var tempparray = troom.getPresetUnits();
+			if(tempparray instanceof Array)	{
+				for(var ta = 0; ta<tempparray.length; ta++) {
+					tempparray[ta].x+=(troomx+this.minx);
+					tempparray[ta].y+=(troomy+this.miny);
+				}
+				this.PresetUnits = this.PresetUnits.concat(tempparray);
+			}
+		}while(troom.getNext());
+		runGC();
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// Area Caching Functions
+	// -------------------------------------------------------------------
+	// These area a collection of functions that will allow you to cache
+	// an areas map data so that it can be instantly retrieved, rather
+	// than having to reinitialize a map.
+	//////////////////////////////////////////////////////////////////////
+	this.AreaCacheSave = function() {
+		if(!this.AreaInitialized) {
+			mlprint("mlMap:AreaCacheSave - Cannot save to cache: no area is initialized");
+			this.LastError = ("mlMap:AreaCacheSave - Cannot save to cache: no area is initialized");
+			return false;
+		}
+		AreaCache[this.AreaInitialized] = {minx:this.minx, miny:this.miny, maxx:this.maxx,
+			maxy:this.maxy, sizex:this.sizex, sizey:this.sizey,
+			roomsizex:this.roomsizex, roomsizey:this.roomsizey,
+			Area:this.Area, PresetUnits:this.PresetUnits}
+		return true;
+	}
+
+	this.AreaCacheLoad = function (area) {
+		if(!AreaCache[area]) {
+			mlprint("mlMap:AreaCacheLoad - Could not load from cache: Area not in cache");
+			this.LastError = ("mlMap:AreaCacheLoad - Could not load from cache: Area not in cache");
+			return false;
+		}
+		this.Area = AreaCache[area].Area;
+		this.minx = AreaCache[area].minx;
+		this.miny = AreaCache[area].miny;
+		this.maxx = AreaCache[area].maxx;
+		this.maxy = AreaCache[area].maxy;
+		this.sizex = AreaCache[area].sizex;
+		this.sizey = AreaCache[area].sizey;
+		this.roomsizey = AreaCache[area].roomsizey;
+		this.roomsizex = AreaCache[area].roomsizex;
+		this.PresetUnits = AreaCache[area].PresetUnits;
+
+		return true;
+	}
+
+	this.AreaCacheDelete = function(area) {
+		if(AreaCache[area]) delete AreaCache[area];
+	}
+
+	this.AreaCacheClear = function () {
+		AreaCache = new Object();
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.IsWalkable(_x, _y)
+	// -------------------------------------------------------------------
+	// returns: true if walkable else false
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	function oMap_iswalkable(_x, _y)
+	{
+		if(!this.IsInRange(_x, _y))
+			return false;
+			
+		if(this.Area[_y-this.miny][_x-this.minx] & 1) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.FindClosestWalkable(_x, _y)
+	// -------------------------------------------------------------------
+	// returns: coordinate of closest walkable
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	function oMap_findclosestwalkable(x, y)
+	{
+		if(!this.IsInRange(x, y)) {
+			return false;
+		}
+		if(this.IsWalkable(x,y)) {
+			return {x:x, y:y};
+		}
+
+		var dist = 0;
+		while(1){
+			for(var vy = -1-dist; vy < 2+dist; vy++){
+				for(var vx = -1-dist; vx < 2+dist; vx++){
+					if(this.IsWalkable(x+vx, y+vy)) {
+						return {x:x+vx, y:y+vy};
+					}
+				}
+			}
+			dist++;
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.LOS(_x1, _y1, _x2, _y2)
+	// -------------------------------------------------------------------
+	// returns: true if there is line of sight
+	// requires an initialized map
+	// THANKS TO BRESENHAM
+	//////////////////////////////////////////////////////////////////////
+	function oMap_los(Ax, Ay, Bx, By, _cutoff, _coll, _unit)
+	{
+		if(!this.IsInRange(Ax, Ay))
+			return false;
+		if(!this.IsInRange(Bx, By))
+			return false;
+		
+		var _bit = 4;
+		if(_coll) _bit = 1;
+		
+		if(_cutoff && this.euclidian(Ax, Ay, Bx, By) > _cutoff) return false;
+
+		var dX = Math.abs(Bx-Ax);
+		var dY = Math.abs(By-Ay);
+
+		var Xincr, Yincr;
+		
+		if (Ax > Bx) { Xincr=-1; } else { Xincr=1; }
+		if (Ay > By) { Yincr=-1; } else { Yincr=1; }
+
+		if (dX >= dY){
+			var dPr 	= dY<<1;
+			var dPru 	= dPr - (dX<<1);
+			var P 		= dPr - dX;
+			for (; dX>=0; dX--)	{
+				if (this.Area[Ay-this.miny][Ax-this.minx] & _bit)
+					return false;
+				if(_unit) {	
+					for(var ux = -1; ux < 2; ux++) {
+						for(var uy = -1; uy < 2; uy++) {
+							if(_unit.x == (Ax+ux) && _unit.y == (Ay+uy))
+							return false;
+						}
+					}
+				}
+						
+				if (P > 0){
+					Ax+=Xincr;
+					Ay+=Yincr;
+					P+=dPru;
+				}
+				else{
+					Ax+=Xincr;
+					P+=dPr;
+				}
+			}
+		}
+		else{
+			var dPr 	= dX<<1;
+			var dPru 	= dPr - (dY<<1);
+			var P 		= dPr - dY;
+			for (; dY>=0; dY--)	{
+				if (this.Area[Ay-this.miny][Ax-this.minx] & _bit)
+					return false;
+				if(_unit) {	
+					for(var ux = -1; ux < 2; ux++) {
+						for(var uy = -1; uy < 2; uy++) {
+							if(_unit.x == (Ax+ux) && _unit.y == (Ay+uy))
+							return false;
+						}
+					}
+				}
+				if (P > 0){
+					Ax+=Xincr;
+					Ay+=Yincr;
+					P+=dPru;
+				}
+				else{
+					Ay+=Yincr;
+					P+=dPr;
+				}
+			}
+		}
+		return true;
+	}
+	//////////////////////////////////////////////////////////////////////
+	// oMap.getSafeOffScreenXY(_x1, _y1, _x2, _y2)
+	// -------------------------------------------------------------------
+	// returns: a safe x,y
+	// for example: If you have a monster way off screen, but you want to
+	// target it anyways, you can pass the monsters x,y to this function,
+	// and it will give you safe coordinates to target so your ranged weapon
+	// will still hit (if the monster hasnt moved :D )
+	// requires an initialized map only if you use findclosestwalkable option
+	// THANKS TO BRESENHAM
+	//////////////////////////////////////////////////////////////////////
+	function oMap_getSafeOffScreenXY(Ax, Ay, Bx, By, _cutoff, _closestwalkable, _multi)
+	{
+		if(!_cutoff) _cutoff = 20;
+		
+		if(!_multi) _multi = 1;
+		
+		var Ox = Ax, Oy = Ay;
+		
+		var dX = Math.abs(Bx-Ax)*_multi;
+		var dY = Math.abs(By-Ay)*_multi;
+
+		var Xincr, Yincr;
+		
+		if (Ax > Bx) { Xincr=-1; } else { Xincr=1; }
+		if (Ay > By) { Yincr=-1; } else { Yincr=1; }
+
+		if (dX >= dY){
+			var dPr 	= dY<<1;
+			var dPru 	= dPr - (dX<<1);
+			var P 		= dPr - dX;
+			for (; dX>=0; dX--)	{
+				if (this.euclidian(Ox, Oy, Ax, Ay) > _cutoff) {
+					if(_closestwalkable) return this.FindClosestWalkable(Ax, Ay);
+					else return {x:Ax, y:Ay};
+				}
+				if (P > 0){
+					Ax += Xincr;
+					Ay += Yincr;
+					P  += dPru;
+				}
+				else{
+					Ax+=Xincr;
+					P+=dPr;
+				}
+			}
+		}
+		else{
+			var dPr 	= dX<<1;
+			var dPru 	= dPr - (dY<<1);
+			var P 		= dPr - dY;
+			for (; dY>=0; dY--)	{
+				if (this.euclidian(Ox, Oy, Ax, Ay) > _cutoff) {
+					if(_closestwalkable) return this.FindClosestWalkable(Ax, Ay);
+					else return {x:Ax, y:Ay};
+				}
+				if (P > 0){
+					Ax+=Xincr;
+					Ay+=Yincr;
+					P+=dPru;
+				}
+				else{
+					Ay+=Yincr;
+					P+=dPr;
+				}
+			}
+		}
+		return {x:Bx, y:By};
+	}
+	
+	
+	//////////////////////////////////////////////////////////////////////
+	// oMap.FindPathToLevel(level, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	// -------------------------------------------------------------------
+	// Finds a path from the current level to the given level
+	// returns: path on success, false on failure
+	// requires initialized map: Yes
+	//////////////////////////////////////////////////////////////////////
+	function oMap_FindPathToLevel(level, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	{
+		//Set up the needed arrays and variables
+		var sL = new Array;
+		//var destLevel = new Array;
+		//var sLcoord = new wpath;
+		//var destLevelcoord = new wpath;
+		//var tempcoord;
+		//var mlflag;
+		// get exit coordinates of given level
+
+		var lroom = getRoom(level);
+		
+		//get exit coords of current level
+
+		for (var i = 0; i < 4; i++) {
+			sL[i] = this.getMapExit(i);
+		}
+		
+		var ld = getlvldim(level);
+		
+		if(sL[mlNORTH].x && sL[mlNORTH].y) {
+			var sNx = sL[mlNORTH].x; var sNy = sL[mlNORTH].y - 100;
+			if(sNx > ld.minx && sNx < ld.maxx && sNy > ld.miny && sNy < ld.maxy) {
+				//WE FOUND IT
+				var temppath = this.FindPath(_sx, _sy, sL[mlNORTH].x, sL[mlNORTH].y, _dist, _reduc, _algo, _fh, _factor, _square);
+				if(!temppath) return null;
+				this.Path[this.Path.length] = {x:sL[mlNORTH].x, y:sL[mlNORTH].y - 15};
+				return this.Path;
+			}
+		}
+		if(sL[mlEAST].x && sL[mlEAST].y) {
+			var sEx = sL[mlEAST].x + 100; var sEy = sL[mlEAST].y;
+			if(sEx > ld.minx && sEx < ld.maxx && sEy > ld.miny && sEy < ld.maxy) {
+				//WE FOUND IT
+				var temppath = this.FindPath(_sx, _sy, sL[mlEAST].x, sL[mlEAST].y, _dist, _reduc, _algo, _fh, _factor, _square);
+				if(!temppath) return null;
+				this.Path[this.Path.length] = {x:sL[mlEAST].x + 15, y:sL[mlEAST].y};
+				return this.Path;
+			}
+		}
+		if(sL[mlSOUTH].x && sL[mlSOUTH].y) {
+			var sSx = sL[mlSOUTH].x; var sSy = sL[mlSOUTH].y + 100;
+			if(sSx > ld.minx && sSx < ld.maxx && sSy > ld.miny && sSy < ld.maxy) {
+				//WE FOUND IT
+				var temppath = this.FindPath(_sx, _sy, sL[mlSOUTH].x, sL[mlSOUTH].y, _dist, _reduc, _algo, _fh, _factor, _square);
+				if(!temppath) return null;
+				this.Path[this.Path.length] = {x:sL[mlSOUTH].x, y:sL[mlSOUTH].y + 15};
+				return this.Path;
+			}
+		}
+		if(sL[mlWEST].x && sL[mlWEST].y) {
+			var sWx = sL[mlWEST].x - 100; var sWy = sL[mlWEST].y;
+			if(sWx > ld.minx && sWx < ld.maxx && sWy > ld.miny && sWy < ld.maxy) {
+				//WE FOUND IT
+				var temppath = this.FindPath(_sx, _sy, sL[mlWEST].x, sL[mlWEST].y, _dist, _reduc, _algo, _fh, _factor, _square);
+				if(!temppath) return null;
+				this.Path[this.Path.length] = {x:sL[mlWEST].x - 15, y:sL[mlWEST].y};
+				return this.Path;
+			}
+		}
+		mlprint("mlMap:mlFindPathToLevel - Could not find exit coordinates");
+		mlReason = ("mlMap:mlFindPathToLevel - Could not find exit coordinates");
+		return false;
+		for(var s = 0; s < 4; s++) {
+				if(sL[s].x && sL[s].y)
+				{
+					if(me.area != 1 && Math.abs(sL[s].x - destLevel[d].x) < 20 && Math.abs(sL[s].y - destLevel[d].y) < 20)
+					{
+						sLcoord.x = sL[s].x;
+						sLcoord.y = sL[s].y;
+						destLevelcoord.x = destLevel[d].x;
+						destLevelcoord.y = destLevel[d].y;
+						break;
+					}
+					if(me.area == 1 && Math.abs(sL[s].x - destLevel[d].x) < 80 && Math.abs(sL[s].y - destLevel[d].y) < 50)
+					{ //special circumstance ACT 1 TOWN
+						//NORTH
+						if(s == 0) {
+							sLcoord.x = sL[s].x;
+							sLcoord.y = sL[s].y;
+							destLevelcoord.x = sL[s].x;
+							destLevelcoord.y = sL[s].y - 10;
+							break;
+						}
+						//SOUTH
+						if(s == 2) {
+							sLcoord.x = sL[s].x;
+							sLcoord.y = sL[s].y;
+							destLevelcoord.x = sL[s].x;
+							destLevelcoord.y = sL[s].y + 10;
+							break;
+						}
+						//EAST
+						if(s == 1) {
+							sLcoord.x = sL[s].x;
+							sLcoord.y = sL[s].y + 33;
+							destLevelcoord.x = sL[s].x + 10;
+							destLevelcoord.y = sL[s].y + 33;
+							break;
+						}
+						//WEST
+						if(s == 3) {
+							sLcoord.x = sL[s].x;
+							sLcoord.y = sL[s].y;
+							destLevelcoord.x = sL[s].x - 10;
+							destLevelcoord.y = sL[s].y;
+							break;
+						}
+					}
+				}
+			
+		}
+		if(!sLcoord.x || !sLcoord.y || !destLevelcoord.x || !destLevelcoord.y)
+		{
+			mlprint("mlMap:mlFindPathToLevel - Could not find exit coordinates");
+			mlReason = ("mlMap:mlFindPathToLevel - Could not find exit coordinates");
+			return false;
+		}
+	
+		//We have the coordinates so lets path them :D
+		var pathtodest = mlFindPath(mlWARPNONE, me.x, me.y, sLcoord.x, sLcoord.y, maxdist, algtype, reducetype);
+		if(!pathtodest)
+			return false; // no need for a reason since mlFindPath will set the reason on failure
+	
+		//Now we have a path so add the destination level coordinates
+		pathtodest[pathtodest.length] = new wpath;
+		pathtodest[pathtodest.length-1].x = destLevelcoord.x;
+		pathtodest[pathtodest.length-1].y = destLevelcoord.y;
+	
+		return pathtodest;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.getMapExit(direction)
+	// -------------------------------------------------------------------
+	// returns: path on success, assigns the path to this.Path; false on failure
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	function oMap_getmapexit(_d) {
+		if(_d < 0 || _d > 3) return false;
+
+		var ec = new Array();
+		var notdoneexit = false;
+		var count = 0;
+		var avgcoord = 0;
+
+		if(_d == 0) { //NORTH 	Scan for white space
+			for (var x = this.minx; x < this.maxx; x++){
+				if(this.IsWalkable(x, this.miny)){
+					ec[ec.length] = {x:x, y:this.miny};
+					notdoneexit = true;
+					continue;
+				}
+				else if (notdoneexit) {
+					if (ec.length < 4){ //Too small
+						notdoneexit = false;
+						ec.length = 0;
+						continue;
+					}
+					break;
+				}
+			}
+			if (ec.length < 4) return false; //exit because we didnt find an exit
+			for(var i = 0; i < ec.length; i++) avgcoord += ec[i].x;
+			return this.FindClosestWalkable(Math.floor(avgcoord / ec.length), this.miny+6);
+		}
+		if(_d == 1) { //EAST 	Scan for white space
+			for (var y = this.miny; y < this.maxy; y++){
+				if(this.IsWalkable(this.maxx, y)){
+					ec[ec.length] = {x:this.maxx, y:y};
+					notdoneexit = true;
+					continue;
+				}
+				else if (notdoneexit) {
+					if (ec.length < 4){ //Too small
+						notdoneexit = false;
+						ec.length = 0;
+						continue;
+					}
+					break;
+				}
+			}
+			if (ec.length < 4) return false; //exit because we didnt find an exit
+			for(var i = 0; i < ec.length; i++) avgcoord += ec[i].y;
+			return this.FindClosestWalkable(this.maxx-6, Math.floor(avgcoord / ec.length));
+		}
+		if(_d == 2) { //South	Scan for white space
+			for (var x = this.minx; x < this.maxx; x++){
+				if(this.IsWalkable(x, this.maxy)){
+					ec[ec.length] = {x:x, y:this.maxy};
+					notdoneexit = true;
+					continue;
+				}
+				else if (notdoneexit) {
+					if (ec.length < 4){ //Too small
+						notdoneexit = false;
+						ec.length = 0;
+						continue;
+					}
+					break;
+				}
+			}
+			if (ec.length < 4) return false; //exit because we didnt find an exit
+			for(var i = 0; i < ec.length; i++) avgcoord += ec[i].x;
+			return this.FindClosestWalkable(Math.floor(avgcoord / ec.length), this.maxy-6);
+		}
+		if(_d == 3) { //West 	Scan for white space
+			for (var y = this.miny; y < this.maxy; y++){
+				if(this.IsWalkable(this.minx, y)){
+					ec[ec.length] = {x:this.minx, y:y};
+					notdoneexit = true;
+					continue;
+				}
+				else if (notdoneexit) {
+					if (ec.length < 4){ //Too small
+						notdoneexit = false;
+						ec.length = 0;
+						continue;
+					}
+					break;
+				}
+			}
+			if (ec.length < 4) return false; //exit because we didnt find an exit
+			for(var i = 0; i < ec.length; i++) avgcoord += ec[i].y;
+			return this.FindClosestWalkable(this.minx+6, Math.floor(avgcoord / ec.length));
+		}
+	}
+
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.getRoomExits()
+	// -------------------------------------------------------------------
+	// returns: A bit field denoting which directions a room can go.
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	function oMap_getroomexits(_room) {
+		var ec = 0;
+		var notdoneexit = false;
+		
+		var cannorth = 1;
+		var caneast = 2;
+		var cansouth = 4;
+		var canwest = 8;
+		
+		var rminx = _room.x*5;
+		var rmaxx = rminx+_room.getStat(11);
+		var rminy = _room.y*5;
+		var rmaxy = rminy+_room.getStat(12);
+		//print(rminx, rmaxx, rminy, rmaxy);
+
+		for (var x = rminx; x < rmaxx; x++){
+			if(this.IsWalkable(x, rminy)){
+				ec++;
+				notdoneexit = true;
+				continue;
+			}
+			else if (notdoneexit) {
+				if (ec < 3){ //Too small
+					notdoneexit = false;
+					ec = 0;
+					continue;
+				}
+				break;
+			}
+		}
+		if (ec < 3) cannorth = 0; //exit because we didnt find an exit
+
+		ec = 0;
+		notdoneexit = false;
+		count = 0;
+		for (var y = rminy; y < rmaxy; y++){
+			if(this.IsWalkable(rmaxx-1, y)){
+				ec++;
+				notdoneexit = true;
+				continue;
+			}
+			else if (notdoneexit) {
+				if (ec < 3){ //Too small
+					notdoneexit = false;
+					ec = 0;
+					continue;
+				}
+				break;
+			}
+		}
+		if (ec < 3) caneast = 0; //exit because we didnt find an exit
+
+		ec = 0;
+		notdoneexit = false;
+		count = 0;
+		for (var x = rminx; x < rmaxx; x++){
+			if(this.IsWalkable(x, rmaxy-1)){
+				ec++;
+				notdoneexit = true;
+				continue;
+			}
+			else if (notdoneexit) {
+				if (ec < 3){ //Too small
+					notdoneexit = false;
+					ec = 0;
+					continue;
+				}
+				break;
+			}
+		}
+		if (ec < 3) cansouth = 0; //exit because we didnt find an exit
+		
+		ec = 0;
+		notdoneexit = false;
+		count = 0;
+		for (var y = rminy; y < rmaxy; y++){
+			if(this.IsWalkable(rminx, y)){
+				ec++;
+				notdoneexit = true;
+				continue;
+			}
+			else if (notdoneexit) {
+				if (ec < 3){ //Too small
+					notdoneexit = false;
+					ec = 0;
+					continue;
+				}
+				break;
+			}
+		}
+		if (ec < 3) canwest = 0; //exit because we didnt find an exit
+		var retval = 0;
+		retval = retval | cannorth;
+		retval = retval | caneast;
+		retval = retval | cansouth;
+		retval = retval | canwest;
+		return retval;
+	}
+
+
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.FindPathToWarp(warptype, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	// -------------------------------------------------------------------
+	// returns: path on success, assigns the path to this.Path; false on failure
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	this.FindPathToWarp = function(warptype, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	{
+		var dx = null,dy = null;
+		if(warptype == mlWARPWAYPOINT)
+		{
+			var wpflag = false;
+			for (var w = 0; w < this.PresetUnits.length; w++)
+			{
+				for (var a = 0; a < mlWAYPOINTS.length; a++)
+				{
+					if(this.PresetUnits[w].id == mlWAYPOINTS[a])
+					{
+						//we've found a waypoint
+						dx = this.PresetUnits[w].x;
+						dy = this.PresetUnits[w].y;
+						wpflag = true;
+						break;
+					}
+				}
+			}
+			if(!wpflag)
+			{
+				mlprint("mlMap:mlFindPath - Could not find a waypoint");
+				mlReason = ("mlMap:mlFindPath - Could not find a waypoint");
+				return false;
+			}
+
+		}
+		else if(warptype != mlWARPNONE) {
+			var tcoord = this.getLevelWarpXY(warptype);
+			if(!tcoord)
+				return false;
+			dx = tcoord.x;
+			dy = tcoord.y;
+		}
+		
+		return this.FindPath(_sx, _sy, dx, dy, _dist, _reduc, _algo, _fh, _factor, _square);
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.getLevelWarpXY(warptype, level)
+	// -------------------------------------------------------------------
+	// returns: path on success, assigns the path to this.Path; false on failure
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	function oMap_getlevelwarpxy(warptype, level)
+	{
+		mlprint("In mlmap:oMap_getlevelwarpxy");
+		var twarps = new Array();
+		var foundwarp = false;
+		
+		for (var p = 0; p < this.PresetUnits.length; p++) {
+			if(this.PresetUnits[p].type == 5) twarps[twarps.length] = this.PresetUnits[p];
+		}
+		
+		
+		if(twarps.length == 0) {
+			this.LastError = "mlMap:getLevelWarpXY - No matching warp found";
+			mlprint("Out mlmap:oMap_getlevelwarpxy - warp not found");
+			return null; //no warps found
+		}
+		
+		for (var p = 0; p < twarps.length; p++)
+		{	
+			mlprint("twarpinfo: id: " + twarps[p].id + " x: " + twarps[p].x + " y: " + twarps[p].y);
+			if (WARPS[twarps[p].id] == warptype)
+			{
+				mlprint("chosen twarpinfo: id: " + twarps[p].id + " x: " + twarps[p].x + " y: " + twarps[p].y);
+				foundwarp = true;
+				break;
+			}
+		}
+
+		if (!foundwarp) {
+			mlprint("Out mlmap:oMap_getlevelwarpxy - warp not found 2");
+			return null;
+		}
+			
+		var tcwarp = this.FindClosestWalkable(twarps[p].x, twarps[p].y);
+		if(!tcwarp) {
+			mlprint("Out mlmap:oMap_getlevelwarpxy - findclosest did not find or errored");
+		}
+			
+		mlprint("Out mlmap:oMap_getlevelwarpxy - normal");
+		return tcwarp
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.FindPathToRoom(room, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	// -------------------------------------------------------------------
+	// Finds a path to a room
+	// room argument can be a single room number or an array of room numbers
+	// returns: path on success, assigns the path to this.Path; false on failure
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	this.FindPathToRoom = function(rooms, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	{
+		var tc, trooms = getRoom();
+		outofhere:
+		if(trooms) do {
+			if(rooms instanceof Array) {
+				for(var i = 0; i<rooms.length; i++) {
+					if(rooms[i] == trooms.number) {
+						tc = this.FindClosestWalkable(trooms.x*5+this.roomsizex/2, trooms.y*5+this.roomsizey/2);
+						break outofhere;
+					}
+				}
+			}
+			else if(rooms == trooms.number) {
+				tc = this.FindClosestWalkable(trooms.x*5+this.roomsizex/2, trooms.y*5+this.roomsizey/2);
+				break;
+			}
+		} while(trooms.getNext());
+
+		if(!tc) {
+			mlprint("mlMap:mlFindPathToRoom - Could not find room coordinates");
+			this.LastError = ("mlMap:mlFindPathToRoom - Could not find room coordinates");
+			return false;
+		}
+		return this.FindPath(_sx, _sy, tc.x, tc.y, _dist, _reduc, _algo, _fh, _factor, _square);
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.FindPathAlongPoints(points, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	// -------------------------------------------------------------------
+	// Finds a path along the given points
+	// returns: path on success, assigns the path to this.Path; false on failure
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	this.FindPathAlongPoints = function(points, _sx, _sy, _dist, _reduc, _algo, _fh, _factor, _square)
+	{
+		if(!(points instanceof Array) || !points.length) {
+			mlprint("mlMap:FindPathAlongPoints - Invalid points argument passed to function");
+			this.LastError = ("mlMap:FindPathAlongPoints - Invalid points argument passed to function");
+			return false;
+		}
+		for (var i =0; i<points.length; i++) {
+			if(!this.IsWalkable(points[i].x, points[i].y)) {
+				mlprint("mlMap:FindPathAlongPoints - One of points is out of range or not walkable");
+				this.LastError = ("mlMap:FindPathAlongPoints - One of points is out of range or not walkable");
+				return false;
+			}
+		}
+
+		var fp = new Array();
+		var tpath = this.FindPath(_sx, _sy, points[0].x, points[0].y, _dist, _reduc, _algo, _fh, _factor, _square)
+		if(!tpath) return false;
+		fp = fp.concat(tpath);
+		if(points.length >1) {
+			for(var i = 1; i<points.length; i++) {
+				tpath = this.FindPath(points[i-1].x, points[i-1].y, points[i].x, points[i].y, _dist, _reduc, _algo, _fh, _factor, _square)
+				if(!tpath) return false;
+				fp = fp.concat(tpath);
+			}
+		}
+		return fp;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.FindExplorePath(_sx, _sy, _dx, _dy, _type, _dist, _reduc, _algo, _fh)
+	// -------------------------------------------------------------------
+	// Use this function to find an optimized exploration path in the currently
+	// initialized area
+	// returns: path on success, assigns the path to this.Path; false on failure
+	// requires an initialized map
+	// types: mlEXPLORECIRCULAR, mlEXPLOREBIDIRECTIONAL, mlEXPLORERANDOM
+	// 06-29-2003
+	//////////////////////////////////////////////////////////////////////
+	function oMap_findexplorepath(_sx, _sy, _dx, _dy, _type, _percent, _excluderooms, _dist, _reduc, _algo, _fh, _factor, _square) {
+		
+		//Debug
+		for(var y = 0; y<this.RoomGrid.length; y++) {
+			for( var x = 0; x<this.RoomGrid[y].length; x++) {
+				if(this.RoomGrid[x][y])
+					print("Room " + x + ", " + y + " Coords: " + this.RoomGrid[x][y].x +
+						", " + this.RoomGrid[x][y].y);
+			}
+		}
+		
+		//find start room
+		expoutloop1: for(var ry = 0; ry<this.RoomGrid.length; ry++) {
+			for( var rx = 0; rx<this.RoomGrid[ry].length; rx++) {
+				if(this.RoomGrid[rx][ry] && _sx > this.RoomGrid[rx][ry].x && _sx < this.RoomGrid[rx][ry].x+this.roomsizex &&
+					_sy > this.RoomGrid[rx][ry].y && _sy < this.RoomGrid[rx][ry].y+this.roomsizey) {}
+					
+			}
+		}
+		
+		var startx = 0, endx = this.RoomGrid.length-1;
+		var starty = 0, endy = this.RoomGrid[0].length-1;
+		
+		for(var i = 0; i<4; i++) {
+			
+		
+		}
+			
+	}
+		
+	
+	//////////////////////////////////////////////////////////////////////
+	// oMap.FindPath(_sx, _sy, _dx, _dy, _dist, _reduc, _algo, _fh)
+	// -------------------------------------------------------------------
+	// returns: path on success, assigns the path to this.Path; false on failure
+	// requires an initialized map
+	//////////////////////////////////////////////////////////////////////
+	function oMap_findpath(_sx, _sy, _dx, _dy, _dist, _reduc, _algo, _fh, _factor, _square) {
+
+		//mlprint("In mlmap:oMap_findpath");
+		if(!_sx || !_sy || !_dx || !_dy){ 		//basic check for illegal coordinates
+			mlprint("mlMap:mlFindPath - The start or end has a 0 coordinate value");
+			this.LastError = ("mlMap:mlFindPath - The start or end has a 0 coordinate value");
+			//mlprint("Out mlmap:oMap_findpath - he start or end has a 0 coordinate value");
+			return false;
+		}
+		if(!this.IsWalkable(_sx, _sy) || !this.IsWalkable(_dx, _dy))
+		{
+			mlprint("mlMap.FindPath - Either the start or end coord's are not walkable or out of range");
+			this.LastError = ("mlMap.FindPath - Either the start or end coord's are not walkable or out of range");
+			//mlprint("Out mlmap:oMap_findpath - Either the start or end coord's are not walkable or out of range");
+			return false;
+		}
+
+		if(typeof(_reduc) != "number" || _reduc < 0) _reduc = mlREDUCEWALK;
+		if(typeof(_algo) != "number" || _algo < 0 || _algo > 1) _algo = mlASTAR;
+		if(typeof(_factor) != "number" || _fh < 0) _factor = 1;
+		if(typeof(_fh) != "number" || _fh < 0 || _fh > FORWARDHEURISTICS.length-1) _fh=mlFHMAXDXDY;
+		
+		//added in 06-30-2003 for auto use teleport and overiding reduction if no teleport skill
+		if(me.classid == 1 && _reduc == mlREDUCESORC && (mlInTown(me) || me.getSkill("Teleport") < 1)) {
+			_reduc = mlREDUCEWALK;
+			_dist = 5;
+		}
+		if(me.classid != 1 && _reduc == mlREDUCESORC) {
+			_reduc = mlREDUCEWALK;
+			_dist = 5;
+		}
+		this.UseTeleport = _reduc;
+
+		if(_algo) {
+			var oq = new oFIFO();
+			_fh = 0;
+		}
+		else var oq = new oHeap("f", mlHEAPLOW);
+
+		var minx = this.minx, miny = this.miny, maxx = this.maxx, maxy = this.maxy;
+		var width = this.maxx - this.minx, height = this.maxy - this.miny;
+
+		var AreaData = this.Area;
+
+		var ptd = new Array(), fp = new Array();
+		var dx = _dx - minx, dy = _dy - miny, sx = _sx - minx, sy = _sy - miny
+		var newg, cx = 0, cy = 0, node, _done = false;
+
+		//node grid array used to hold references
+		var ng = new Array();
+		ng.length = height+1;
+		for(var i = 0; i<ng.length; i++){
+			ng[i] = new Array();
+			ng[i].length = width+1;
+		}
+
+		//starting and ending node's
+		var enode = new oNode(dx, dy);
+		var snode = new oNode(sx, sy, false, true, -1, 0, this[FORWARDHEURISTICS[_fh]](dx, dy, sx, sy)*_factor);
+		snode.f = snode.h;
+		ng[snode.y][snode.x] = snode;
+		oq.Insert(snode);
+
+		//pdis = new oTerminal(100, 30, 40, 40, 6, 0);
+		var vxvy = 0;
+		var cnode;
+		var stime = new Date();
+		while (node = oq.Remove())
+		{
+			//updateterminal(AreaData, node.x, node.y);
+
+			if(node.x == enode.x && node.y == enode.y) {   //Found the destination
+				_done = true;
+				this.LastScore = node.f;
+				if(_reduc == 99)
+					return node.f;
+
+				//BUILD PATH USING REFRENCED PARENTS
+				//var donebuild = false;
+				ptd.push(node);
+				if (ptd[ptd.length-1].parent!=-1) do {
+					ptd.push(ptd[ptd.length-1].parent);
+					if (ptd[ptd.length-1].parent==-1)
+						break;
+				} while (1);
+				
+				for (var p = 0; p<ptd.length; p++){
+					for (var px = -1; px < 2; px++) {
+						for (var py = -1; py < 2; py++) {
+							if((px*py) && (!px && !py)) continue; //continue if diagonal or same coordinate
+							if(!this.IsWalkable(ptd[p].x+px+this.minx, ptd[p].y+py+this.miny)) {
+								ptd[p].x+=(px*(-1));
+								ptd[p].y+=(py*(-1));
+							}
+						}
+					}
+				}
+
+				if(this.PathToMap) {
+					var pathbit = 0x10000 << _algo;
+					//var pathbit = 0x10000 << _fh-1;
+					for (var i = 0; i<ptd.length; i++) {
+						AreaData[ptd[i].y][ptd[i].x] |= pathbit;
+					}
+				}
+
+				//reverse the path now so we can work with it from start and reduce the points
+				var vecanglelast = 0;
+				var vecanglenew = 0;
+				var vecdistance;
+				for (var d=ptd.length-1; d>=0; d--) {
+					if (d == ptd.length-1 && d) {		//add first point always
+						fp.push(ptd[d]);
+						if(!_reduc) vecanglelast = getAngle(fp[fp.length-1].x, fp[fp.length-1].y, ptd[d-1].x, ptd[d-1].y);
+						else vecanglelast = 0;
+						continue;
+					}
+
+					if (d == 0) {				//add last point always
+						fp.push(ptd[d]);
+						break;
+					}
+
+					if(!_reduc)	vecanglenew = getAngle(fp[fp.length-1].x, fp[fp.length-1].y, ptd[d].x, ptd[d].y);
+					else vecanglenew = 0;
+					vecdistance = this.euclidian(fp[fp.length-1].x, fp[fp.length-1].y, ptd[d].x, ptd[d].y);
+
+					if(vecanglenew != vecanglelast || vecdistance > _dist) {
+						fp.push(ptd[d]);
+						if(!_reduc)	vecanglelast = getAngle(fp[fp.length-1].x, fp[fp.length-1].y, ptd[d-1].x, ptd[d-1].y);
+						else vecanglelast = 0;
+						continue;
+					}
+				}
+				this.Path = new Array();
+				//Put the offset back in and move to path
+				for (var d = 0; d<fp.length; d++)
+					this.Path[d] = {x:fp[d].x + minx, y:fp[d].y + miny}
+				runGC();
+				return this.Path;
+
+			}
+			else {  		// look for adjacent blocks that we attach to and add them to open
+				for(var vy = -1; vy < 2; vy ++) {
+					for(var vx = -1; vx < 2; vx++)	{
+						if((!vx && !vy) || (vx && vy && !_square)) continue; //continue if we are on the current node
+						cx = node.x+vx; cy = node.y+vy;
+						vxvy = vx*vy;
+						//check for map edge
+						if(cy < 0 || cy > height || cx < 0 || cx > width) continue;
+
+						//check for walkability and small diagonal gaps that cant be passed
+						if (AreaData[cy][cx] & 1) continue;
+						if (_square && vxvy && (AreaData[cy][node.x] & 1) && (AreaData[node.y][cx]) & 1) continue;
+						//if ((AreaData[cy][cx+1] & 1) || (AreaData[cy][cx-1] & 1) || 
+						//	(AreaData[cy+1][cx] & 1) || (AreaData[cy-1][cx] & 1)) continue;
+						if (((AreaData[cy][cx+1] & 1) && (AreaData[cy][cx-1] & 1)) || 
+							((AreaData[cy+1][cx] & 1) && (AreaData[cy-1][cx] & 1))) continue;
+
+						newg = node.g + SCORE[Math.abs(vxvy)];
+
+						cnode = ng[cy][cx];
+
+						if(!cnode) {
+							cnode = new oNode(cx,cy,false,false,node,newg,this[FORWARDHEURISTICS[_fh]](dx, dy, cx, cy)*_factor);
+							ng[cy][cx] = cnode;
+						}
+						else {
+							if (cnode.g > newg){
+								cnode.closed = false;
+								cnode.g = newg;
+								cnode.parent = node;
+							}
+							else continue;
+						}
+						cnode.f = cnode.g + cnode.h;
+
+						if(!cnode.open) {
+							cnode.open = true;
+							oq.Insert(cnode);
+							//AreaData[cnode.y][cnode.x] |= 0x200000;
+						}
+					}
+				}
+				node.open = false;	node.closed = true;
+				//AreaData[node.y][node.x] |= 0x100000;
+			}
+		}
+		mlprint("mlMap:mlFindPath - Couldnt find a path to destination");
+		this.LastError = ("mlMap:mlFindPath - Couldnt find a path to destination");
+		mlprint("Out mlmap:oMap_findpath - Couldnt find a path to destination");
+		return false;
+	}
+
+	function oMap_findscore(x1, y1, x2, y2)
+	{
+		return this.FindPath(x1, y1, x2, y2, 0, 99, 0, 5, 1);
+	}
+
+	function oMap_pathmove(pathtodest, walkcallflag, pointtostart, recalcmaxdist, recalcalgotype, factor, _notele)
+	{
+		if(!pathtodest) pathtodest = this.Path;
+		if(!pointtostart) pointtostart = 0;
+		if(!recalcmaxdist) recalcmaxdist = 2;
+		if(!recalcalgotype) recalcalgotype = mlASTAR;
+		if(!factor) factor = 1.2;
+		var failedhops = 0;
+		for (var i=pointtostart; i<pathtodest.length; i++)
+		{
+			mlprint("moving to " + pathtodest[i].x + ", " + pathtodest[i].y);
+			if(me.classid == 1 && !mlInTown(me) && me.getSkill("Teleport") > 0 && this.UseTeleport && !_notele) var retval = mlteleportto(pathtodest[i].x, pathtodest[i].y, walkcallflag, i);
+			else var retval = mlwalkto(pathtodest[i].x, pathtodest[i].y, walkcallflag, i);
+			if (!retval)
+			{
+				if(me.area != this.AreaInitialized)
+					this.InitializeMap();
+
+				print("First destination failed, attempting recalculating a course to the next coordinate");
+				var midpath = this.FindPath(me.x, me.y, pathtodest[i].x, pathtodest[i].y, recalcmaxdist, this.UseTeleport, recalcalgotype, factor);
+				if (!midpath)
+				{
+					mlprint("mlMap:PathMove - Couldn't recalculate a path");
+					this.LastError = "mlMap:PathMove - Couldn't recalculate a path";
+					return false;
+				}
+				for(var k = 0; k<midpath.length; k++) {
+					if(me.classid == 1 && !mlInTown(me) && me.getSkill("Teleport") > 0 && this.UseTeleport && !_notele) var retval = mlteleportto(midpath[k].x, midpath[k].y, walkcallflag, i);
+					else retval = mlwalkto(midpath[k].x, midpath[k].y, walkcallflag, i);
+				}
+			}
+
+			else if (retval > mlSTEPAHEAD && retval < mlSTEPBACK) {		// step ahead
+					i += (retval - mlSTEPAHEAD); continue; }
+			else if (retval > mlSTEPBACK)//step back
+			{
+				print("(retval - mlSTEPBACK):" + (retval - mlSTEPBACK));
+				for (var j = i; j > i - (retval - mlSTEPBACK); j--) {
+					if(me.classid == 1 && !mlInTown(me) && me.getSkill("Teleport") > 0 && this.UseTeleport && !_notele) var retval = mlteleportto(pathtodest[j].x, pathtodest[j].y, walkcallflag, i);
+					else mlwalkto(pathtodest[j].x, pathtodest[j].y, false);
+				}
+				i -= (retval - mlSTEPBACK);
+				continue;
+			}
+			else if (retval == mlSTOP) {					//step back
+					return mlSTOP; }
+			if (!retval)
+			{
+				print("We couldnt find a way to the next path point");
+				if(failedhops == 5)
+				{
+					mlprint("mlMap:PathMove - had five failed destinations along this path");
+					this.LastError = "mlMap:PathMove - had five failed destinations along this path";
+					return false;
+				}
+				failedhops++;
+			}
+			//delay(50);
+		}
+		return true;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// Forward Heuristics functions - DO NOT TOUCH
+	// -------------------------------------------------------------------
+	//////////////////////////////////////////////////////////////////////
+	this.manhattan = function(x1, y1, x2, y2) {
+		return Math.abs(x2-x1) + Math.abs(y2-y1);
+	}
+	this.euclidian = function(x1, y1, x2, y2) {
+		return Math.floor(Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)));
+	}
+	this.euclidiannosqrt = function(x1, y1, x2, y2) {
+		return Math.floor((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+	}
+	this.nofh = function() {
+		return 0;
+	}
+	this.diagshortcut = function(x1, y1, x2, y2) {
+		var dy = Math.abs(y2-y1);
+		var dx = Math.abs(x2-x1);
+		if (dy <= dx) return dy*0.414 + dx; else return dx*0.414 + dy;
+	}
+	this.maxdxdy = function(x1, y1, x2, y2) {
+		var dy = Math.abs(y2-y1);
+		var dx = Math.abs(x2-x1);
+		return (dx>dy)?dx:dy;
+	}
+	//////////////////////////////////////////////////////////////////////
+	// misc private functions
+	// -------------------------------------------------------------------
+	//////////////////////////////////////////////////////////////////////
+	// this.IsInRange
+	function oMap_isinrange(_x, _y) {
+		if(_x > this.maxx || _x < this.minx || _y > this.maxy || _y < this.miny)
+			return false;
+		else
+			return true;
+	}
+
+	// evaldirbits
+	function evaldirbits(_bits) {
+		var bshift = 1;
+		var dir = 0;
+		for(var i = 0; i<4; i++) {
+			if(_bits & bshift) dir++;
+			bshift << 1;
+		}
+		return dir;
+	}
+
+	// updateterminal
+	function updateterminal(area, nx, ny) {
+		var mx = nx - Math.floor(pdis.Columns/2);
+		var my = ny - Math.floor(pdis.Rows/2);
+		for(var yy = 0; yy<pdis.Rows; yy++){
+			for(var xx = 0; xx<pdis.Columns; xx++){
+				if(!area[my+yy] && !area[my+yy][mx+xx]) {
+					pdis.Poke(yy, xx, " ");
+					continue;
+				}
+				if(area[my+yy][mx+xx] & 1)
+					pdis.Poke(yy, xx, "X");
+				else if(area[my+yy][mx+xx] & 0x10000)
+					pdis.Poke(yy, xx, "1");
+				else if(area[my+yy][mx+xx] & 0x20000)
+					pdis.Poke(yy, xx, "2");
+				else if(area[my+yy][mx+xx] & 0x40000)
+					pdis.Poke(yy, xx, "3");
+				else if(area[my+yy][mx+xx] & 0x80000)
+					pdis.Poke(yy, xx, "4");
+				else if(area[my+yy][mx+xx] & 0x100000)
+					pdis.Poke(yy, xx, "+");
+				else if(area[my+yy][mx+xx] & 0x200000)
+					pdis.Poke(yy, xx, "-");
+				else
+					pdis.Poke(yy, xx, " ");
+			}
+		}
+	}
+	
+	//getleveldimensions
+	function getlvldim(area) {
+		
+		
+		var minx = Number.MAX_VALUE, maxx = 0, miny = Number.MAX_VALUE, maxy = 0;
+		
+		var troom = getRoom(area);
+		
+		do {
+			if (troom.x*5 > maxx) {
+				maxx = troom.x*5;
+			}
+			if (troom.y*5 > maxy) {
+				maxy = troom.y*5;
+			}
+			if (troom.x*5 < minx) {
+				minx = troom.x*5;
+			}
+			if (troom.y*5 < miny) {
+				miny = troom.y*5;
+			}
+		} while(troom.getNext());
+		
+		return {minx:minx, maxx:maxx, miny:miny, maxy:maxy};
+	}
+
+
+
+
+	//////////////////////////////////////////////////////////////////////
+	// oMap.DumpMap(_filename, _type, _bit)
+	// -------------------------------------------------------------------
+	// Used to dump the map to a file
+	// _type 0 == Hex dump
+	// _type 1 == text character dump
+	//////////////////////////////////////////////////////////////////////
+	function oMap_dumpmap(_filename, _type, _bit) {
+		var line = "";
+		var bit = 0x1 << _bit;
+
+		hFile = fileOpen("output/" + _filename, 1);
+		if(!_type) {
+			for (var y = 0; y < this.sizey; y++) {
+				for (var x = 0; x < this.sizex; x++) {
+					if(this.Area[y][x] != undefined)
+						line += "0x" + this.Area[y][x].toString(16) + " ";
+					else line += "0xFFFF ";
+				}
+				hFile.writeLine(line);
+				line = "";
+			}
+		}
+		else if(_type ==1) {
+			for (var y = 0; y < this.sizey; y++) {
+				for (var x = 0; x < this.sizex; x++) {
+
+					if(this.Area[y][x] & bit)
+						line += "X";
+					else if(this.Area[y][x] & 0x10000)
+						line += "1";
+					else if(this.Area[y][x] & 0x20000)
+						line += "2";
+					else if(this.Area[y][x] & 0x40000)
+						line += "3";
+					else if(this.Area[y][x] & 0x80000)
+						line += "4";
+					//else if(this.Area[y][x] & 0x100000)
+					//	line += "+";
+					//else if(this.Area[y][x] & 0x200000)
+					//	line += "-";
+					else
+						line += ".";
+
+				}
+				hFile.writeLine(line);
+				line = "";
+			}
+		}
+
+		hFile.close();
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// mlwalkto(x, y, walkcallflag)
+// -------------------------------------------------------------------
+// walks to the given coordinates
+// returns: true on success, false on failure
+// requires mlMapInitializeMap: NO
+//////////////////////////////////////////////////////////////////////
+function mlwalkto(x, y, walkcallflag, currentpoint) //currentpoint is for internal use only
+{
+	var startX = me.x;
+	var startY = me.y;
+	var currDestX = x;
+	var currDestY = y;
+
+	if (Math.abs(me.x - x) <= 1 && Math.abs(me.y - y) <= 1) return 1;
+
+	var trys = 0;
+	var ntrys=12;
+	var thrash = 0;
+	var nthrash=3;
+	var startX = me.x;
+	var startY = me.y;
+	var currDestX = x;
+	var currDestY = y;
+	var door;
+	mlprint("Walking to (lib)[" + x + ", " + y + "]");
+
+	//if (Math.sqrt(Dist2(x, y, mdx[3], mdx[3])) > Math.sqrt(Dist2(me.x, me.y, mdx[3], mdx[3])) && midi != 3)
+	//	continue;
+	var directionalmove=0;
+
+	while ((Math.abs(me.x - x) > 2 || Math.abs(me.y - y) > 2) && trys <= ntrys)
+	{
+		mlmemove(currDestX, currDestY);
+		//call optional function if true
+		if (walkcallflag)
+		{
+			var retvalin = walkcalls(x,y, currentpoint, walkcallflag);
+			if (retvalin == mlSTEPBACK)
+				mlmemove(currDestX, currDestY);
+			if (retvalin > 1 && retvalin != mlSTEPBACK && retvalin != mlSTEPAHEAD)
+				return retvalin;
+			//Now move back where we were so we can so we can continue on
+			//me.move(currDestX, currDestY);
+			if (Math.abs(me.x - x) <= 2 && Math.abs(me.y - y) <= 2)
+				return 1;
+		}
+		delay(walkdel);
+		trys++;
+		if ((Math.abs(me.x - startX) < 3 && Math.abs(me.y - startY) < 3))
+		{
+			if (thrash >= nthrash)
+			{
+				var direction = Math.abs(Math.floor((Math.atan2(x-me.x , y-me.y)) * 180 / 3.1415) - 180);
+				if (direction > 0 && direction < 45){
+					currDestX = me.x+5;
+					currDesty = me.y+1;
+				}
+				else if(direction > 45 && direction < 90) {
+					currDestX = me.x-1;
+					currDestY = me.y-5;
+				}
+				else if (direction > 90 && direction < 135){
+					currDestX = me.x-1;
+					currDestY = me.y+5;
+				}
+				else if(direction > 135 && direction < 180) {
+					currDestX = me.x+5;
+					currDestY = me.y-1;
+				}
+				else if (direction > 180 && direction < 225){
+					currDestX = me.x-5;
+					cuurDestY = me.y-1;
+				}
+				else if(direction > 225 && direction < 270) {
+					currDestX = me.x+1;
+					cuurDestY = me.y+5;
+				}
+				else if (direction > 270 && direction < 315){
+					currDestX = me.x+1;
+					currDestY = me.y-5;
+				}
+				else if(direction > 315 && direction < 360) {
+					currDestX = me.x-5;
+					currDestY = me.y+1;
+				}
+				else
+				{
+					//make a randome move
+					var dx = currDestX - startX;
+					var dy = currDestY - startY;
+					var a = Math.atan2(dx, dy);
+					a = Math.floor(a * 100) + 157;  // + pi/2;
+					var direction = rnd(a, a+314)/100;  // + pi
+					currDestX = Math.floor(Math.sin(direction)*20) + me.x;
+					currDestY = Math.floor(Math.cos(direction)*20) + me.y;
+				}
+				directionalmove = 0;
+
+				//########################################
+				thrash=0;
+				directionalmove++;
+				while (me.mode !=1)
+					delay(50);
+			} else thrash++;
+		}
+		else
+		{
+			startX = me.x;
+			startY = me.y;
+			currDestX = x;
+			currDestY = y;
+		}
+
+	}
+	if (Math.abs(me.x - x) > 4 || Math.abs(me.y - y) > 4)
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// mlteleportto(x, y, walkcallflag)
+// -------------------------------------------------------------------
+// teleports to the given coordinates
+// returns: true on success, false on failure
+// requires mlMapInitializeMap: NO
+//////////////////////////////////////////////////////////////////////
+function mlteleportto(x, y, walkcallflag, currentpoint) //current point is used internally
+{
+	var DestX = x;
+	var DestY = y;
+
+		if (walkcallflag)
+		{
+			var retvalin = walkcalls(x,y, currentpoint, walkcallflag);
+			if(currentpoint)
+			{
+				if (retvalin == mlSTEPBACK)
+					mlCast("Teleport",0,DestX,DestY);
+				if (retvalin > 1 && retvalin != mlSTEPBACK && retvalin != mlSTEPAHEAD)
+					return retvalin;
+			}
+		}
+
+		for (var rv = 0; rv < 3; rv++)
+		{
+			mlCast("Teleport",0,x,y);
+
+			// Check to see see if we have arrived at our destination
+			if ((Math.abs(me.x - x) < 6) && (Math.abs(me.y - y) < 6))
+			{
+				mlprint("Teleported to [" + me.x + ", " + me.y + "]");
+				break;
+			}
+		}
+
+	if ((Math.abs(me.x - DestX) < 6) && (Math.abs(me.y - DestY) < 6))
+		return 1;
+	else
+		return 0;
+
+}
+
+//#################
+//Utility Functions
+//#################
+function mlinitdebuglog()
+{
+	var debugfile = fileOpen(mldebuglog, 1);
+	debugfile.writeLine("Debug Initialized");
+	debugfile.close();
+}
+
+function mlprint(string)
+{
+	if (mldebuglevel > 0)
+	{
+		var debugfile = fileOpen(mldebuglog, 2);
+		debugfile.writeLine(string);
+		debugfile.close();
+	}
+	if (mldebuglevel > 1)
+	{
+		print(string);
+		delay(mldebugdelay);
+	}
+}
+
+function mlCast(which,usehand,x,y)
+{
+	if(!usehand) usehand = 0;
+
+	me.setSkill(which,usehand);
+	var count=0;
+	while(1) {
+		if(me.getSkill(usehand) == which) break;
+		delay(20);
+		count++;
+		if(count>50) {
+			print("Could not set skill");
+			return false;
+		}
+	}
+
+	switch(arguments.length)
+	{
+		case 0: break;
+		case 2: me.useSkill(usehand); break;
+		case 3:	x.useSkill(usehand);
+			break;
+		case 4: me.useSkillAt(x,y,usehand); break;
+	}
+	mcheck=mlModeWait();
+	while (me.mode==mcheck)
+	{
+		if(x)
+		{
+			if (x.hp <= 0) return true;
+		}
+		delay(10);
+	}
+	return true;
+}
+
+function mlModeWait()
+{
+	for (qw = 1; qw <= 20; qw++)
+	{
+		var mymode = me.mode;
+		if (mymode==7 || mymode==8 || (mymode>9 && mymode<19)) return mymode;
+		delay(20);
+	}
+	return 10;
+}
+
+function mlgetClosestObject(x, y, r, n, s) {
+	if (arguments.length < 4)
+	{
+		n = null;
+		s = null;
+	}
+	closest_dist = r; obj_id = 0;
+	obj = getUnit(2, n, s);
+	if (obj) do {
+			p = obj.getParent();
+			if (!p || p.name != me.name) {
+				dist = mlDist(obj.x, obj.y, x, y);
+				if (dist <= closest_dist) {
+					closest_dist = dist;
+					obj_id = obj.id
+				}
+			}
+	}while(obj && obj.getNext(n));
+	// - skip this if no objs found
+	if (obj_id)
+	{
+		obj = getUnit(2, n, s);
+		if (obj) do {
+				p = obj.getParent();
+				if (!p || p.name != me.name) {
+					if (obj.id == obj_id) {
+						return obj;
+					}
+				}
+		}while(obj && obj.getNext());
+		print("Close object not on 2nd detect");
+	}
+	return false;
+}
+
+function mlDist(x1, y1, x2, y2) {
+	return Math.floor(Math.sqrt(mlDist2(x1, y1, x2, y2))); }
+
+function mlDist2(x1, y1, x2, y2) {
+	return Math.floor((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)); }
+
+function mlInTown(unit) {
+	switch(unit.area) {
+		case 1: case 40: case 75: case 103: case 109: return true;
+		default: return false;
+	}
+}
+
+
+
+function getAngle(x1, y1, x2, y2) {
+	return Math.floor((Math.atan2(y2-y1 , x2-x1)) * 180 / 3.1415);
+}
+
+function oNode(_x, _y, _o, _c, _p, _g, _h){
+	this.x = _x;
+	this.y = _y;
+	this.open = _o;
+	this.closed = _c;
+	this.parent = _p;
+	this.g = _g;	//cost to dest, will be either euclidean or manhattan, latter being the quicker
+	this.h = _h;	//total cost
+	this.f;	//cost so far
+}
+
+function oRoom(_x, _y, _n, _o, _e, _d, _s, _w, _h) {
+	this.x = _x;
+	this.y = _y;
+	this.number = _n;
+	this.open = _o;
+	this.exclude = _e;
+	this.score = _s;
+	this.dirbits = _d;
+	this.w = _w;
+	this.h = _h;
+	
+	this.getDistance = function (_x, _y) {
+		if(_x && _y) return mlDist(_x, _y, this.x, this.y);
+		return mlDist(me.x, me.y, this.x, this.y);
+	}
+	
+	
+}
+
+//thanks scav, njag
+function mlmemove(x, y) 
+{
+	if(parseFloat(me.version) >= 0.33)
+		clickMap(0, 0, x, y);
+	else
+		me.move(x, y);
+	
+	var xoff = parseInt(rnd(0,12)/6) * (x - me.x<0 ? -1 : 1);
+	var yoff = parseInt(rnd(0,12)/6) * (y - me.y<0 ? -1 : 1);
+	delay(rnd(10,50));
+	if(parseFloat(me.version) >= 0.33)
+		clickMap(2, 0, x+xoff, y+yoff);
+	else
+		me.move(x+xoff, y+yoff);
+}
+		

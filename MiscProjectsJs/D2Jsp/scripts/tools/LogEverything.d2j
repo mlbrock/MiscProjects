@@ -1,0 +1,365 @@
+function credits()
+{
+	print("ÿc2Location Logging Script");
+	print("ÿc4Script by FruitBar with coding from LordOfMars and Syadasti");
+	print("ÿc1Core .d2h created by nJaguar");
+}
+
+/*ææææææææææææææææææææææææææææ
+Other options:
+ææææææææææææææææææææææææææææ*/
+
+//Set this to the length you want to pause at the start of the game.  0 will not pause.
+var LongPause=0;
+//Set this to true to tell you when your current mode changes, and what it changes to
+var CheckMODE=true;
+//Set this to true to check when your states change.
+var CheckSTATES=true;
+
+/*ææææææææææææææææææææææææææææ
+Variables:
+ææææææææææææææææææææææææææææ*/
+
+//Set this to false to only display coords on screen.
+var WriteFile=true;
+//Set this to false to have it not print anything to the screen.
+var PrintScreen=true;
+//This is the function call.  Set this to whatever function you will use the coords for.
+var Output="walkto";
+//true returns the coords, false returns how far you moved.
+var StaticCoords=true;
+//set this to true to display your current coordinates over your head.
+var OverHead=true;
+//Set this to true if you want updated coords to be printed to the screen
+var PrintPoints=false;
+//Set this to true to list everything upon joining the game.
+var OnJOIN=true;
+
+/*ææææææææææææææææææææææææææææ
+Object, tile, area, and npc listing:
+ææææææææææææææææææææææææææææ*/
+
+//Set this to false not to print your current area
+var AreaPrint=true;
+//Set this to true to get a list of objects around you.
+var CheckOBJ=false;
+//Set this to true if you want to get every tile listed around you.
+var CheckTILE=true;
+//Set this to true to get a list of all npcs around you.  This includes monsters and mercs.
+var CheckNPCS=false;
+//Set this to true to be notified of all objects named dummy, Dummy, or an evil force.
+var CheckDUM=false;
+//Set this to false to check everything, otherwise it will only check objects, tiles, or npcs that return obj.area.
+var CheckOnly=false;
+
+/*ææææææææææææææææææææææææææææ
+Object, Tile, and NPC specifics:
+ææææææææææææææææææææææææææææ*/
+
+//This is the radius of objects, tiles, or npcs that will be returned to you.
+//100 or greater is everything in your returnable area.
+var Oradius=100;
+//Set this to false to return to search for a specific tile, object, or npc listed below
+var IgnoreName=true;
+//This is the name of the NPC, Object, or tile you are searching for
+var ThingName="Waypoint";
+//Set this to false to return only an object, tile, or npc with a specific class id
+var IgnoreClass=true;
+//This is the class ID of the NPC, object, or tile you are checking
+var ClassNum=119;
+
+/*ææææææææææææææææææææææææææææ
+Room listing:
+ææææææææææææææææææææææææææææ*/
+
+//Set this to true to check rooms in your radius.
+var CheckRADIUS=false;
+//This is the radius you want to have rooms printed out around you if you are checking for rooms in your radius.
+var Rradius=50;
+//Set this to false, and you will start searching for a specific range of room numbers
+var IgnoreNumber=false;
+//These are the range of the rooms you want to scan for.  Set these the same to check for a single room.
+var RoomNuma=337;
+var RoomNumb=340;
+
+/*ææææææææææææææææææææææææææææ
+main function:
+ææææææææææææææææææææææææææææ*/
+
+var StatesB=new Array();
+var StatesA=new Array();
+
+function main()
+{
+	credits();
+
+	if(LongPause != 0)
+		delay(LongPause);
+
+	if(WriteFile)
+		printfile("ææææææææææææææææææææææææææææææææææææææææææææææææææææææææ");
+
+	CheckA=me.area;
+	CheckX=me.x;
+	CheckY=me.y;
+	CheckAct=me.act;
+	TempX=me.x;
+	CheckM=me.mode;
+	cursoritem=false;
+
+	if(OnJOIN && StaticCoords)
+		StaticFunction();
+	else if(OnJOIN)
+		DistanceFunction();
+		
+	if(AreaPrint)
+		printfile("My starting area is:  #" + me.area + "    In act: #" +me.act);
+
+	MainLoop();
+}
+/*ææææææææææææææææææææææææææææ
+main function:
+ææææææææææææææææææææææææææææ*/
+
+function MainLoop()
+{
+	while(1==1)
+	{
+		if(overhead && me.x != TempX)
+		{
+			overhead("My Position is ÿc1[" + me.x + ", " + me.y + "]");
+			TempX=me.x;
+		}
+		
+		delay(200);
+		
+		if (me.itemoncursor && !cursoritem)
+		{
+			print("there is an item on your cursor!");
+			cursoritem=true;
+		}
+		else if (!me.itemoncursor && cursoritem) cursoritem=false
+
+		if(CheckA != me.area && CheckAct == me.act)
+		{
+			if(AreaPrint)
+				printfile("I am now in area number:  #" + me.area);
+			CheckA=me.area;
+			delay(200);
+		}
+
+		if((CheckX != me.x || CheckY != me.y) && me.mode!=2 && me.mode!=3)
+		{
+			if(StaticCoords)
+				StaticFunction();
+			else DistanceFunction();
+			delay(200);
+		}
+		
+		if(CheckAct != me.act)
+		{
+			if(AreaPrint)
+				printfile("My new act is:   " + me.act)
+			CheckAct=me.act;
+			delay(200);
+		}
+		
+		if(CheckMODE && me.mode !=CheckM)
+		{
+			printfile("My current mode is:  #" +me.mode);
+			CheckM=me.mode;
+			delay(200);
+		}
+		
+		if(CheckSTATES)
+		{
+			num=0;
+			for (i = 0; i <= 159; i++)
+			{
+				if(me.getState(i) > 0)
+				{
+					StatesA[num]=i;
+					num++
+				}
+			}
+			
+			if(StatesA.length < StatesB.length)
+				Lcheck=StatesA.length;
+			else Lcheck=StatesB.length;
+			
+			for (b = 0; b <= Lcheck; b++)
+			{
+				if(StatesA[b] != StatesB[b])
+				{
+					StatesB=new Array();
+					num=0;
+					for (i = 0; i <= 159; i++)
+					{
+						if(me.getState(i) > 0)
+						{
+							StatesB[num]=i;
+							num++
+						}
+					}
+					printfile("My current states are:  " + StatesB);
+					break;
+				}
+			}
+			StatesA=new Array();
+		}
+	}
+}
+
+/*ææææææææææææææææææææææææææææ
+Log printing:
+ææææææææææææææææææææææææææææ*/
+
+function printfile(string)
+{
+	if(WriteFile)
+	{
+		file = fileOpen("output/loc.txt", 2);
+		if(file)
+		{
+			file.writeLine(string);
+			file.close();
+		} else print("Please create loc.txt to be able to write to a file.");
+	}
+	if(PrintScreen)
+		print(string);
+}
+
+/*ææææææææææææææææææææææææææææ
+Functions to get static coords:
+ææææææææææææææææææææææææææææ*/
+
+function StaticFunction()
+{
+	CheckX=me.x;
+	CheckY=me.y;
+
+	if(PrintPoints)
+		printfile(Output + "(" + me.x + ", " + me.y + ");");
+
+	if(CheckRADIUS)
+	{
+		ListRoomsRadius();
+	}
+	
+	if(CheckOBJ)
+	{
+		obj = getObject(); 
+		StaticOBJ();
+	}
+
+	if(CheckTILE)
+	{
+		obj = getTile(); 
+		StaticOBJ();
+	}
+
+	if(CheckNPCS)
+	{
+		obj = getNPC();
+		StaticOBJ();
+	}
+}
+
+/*ææææææææææææææææææææææææææææ
+Functions to get distances:
+ææææææææææææææææææææææææææææ*/
+
+function DistanceFunction()
+{
+	Xmove=(me.x - CheckX);
+	Ymove=(me.y - CheckY);
+	CheckX=me.x;
+	CheckY=me.y;
+
+	if(PrintPoints)
+		printfile(Output + "(me.x + " + Xmove + ", me.y + " + Ymove + ");");
+
+	if(CheckRADIUS)
+	{
+		ListRoomsRadius();
+	}
+	
+	if(CheckOBJ)
+	{
+		obj = getObject(); 
+		DistanceOBJ();
+	}
+
+	if(CheckTILE)
+	{
+		obj = getTile(); 
+		DistanceOBJ();
+	}
+
+	if(CheckNPCS)
+	{
+		obj = getNPC();
+		DistanceOBJ();
+	}
+}
+
+/*ææææææææææææææææææææææææææææ
+Functions for different objects distances:
+ææææææææææææææææææææææææææææ*/
+
+function DistanceOBJ()
+{
+	do
+	{ 
+		if (obj && (obj.name != "Dummy" || CheckDUM) && (obj.name != "dummy" || CheckDUM) && (obj.name != "an evil force" || CheckDUM) && ((Math.abs(obj.x - me.x) || Math.abs(obj.y - me.y)) <= Oradius) && (IgnoreName || obj.name == ThingName) && (IgnoreClass || obj.classid == ClassNum))
+		{
+			OBJx=(obj.x - me.x);
+			OBJy=(obj.y - me.y);
+			if(obj.name == undefined)
+				printfile("undefined tile or object with the classid of:  " + obj.classid + "      With distance of:  " + OBJx + ", " + OBJy);
+			else if(obj.area > 0)
+				printfile(obj.name + " with the classid of:  " + obj.classid + "      With distance of:  " + OBJx + ", " + OBJy + "   obj.area: #" + obj.area);
+			else if(!CheckOnly)
+				printfile(obj.name + " with the classid of:  " + obj.classid + "      With distance of:  " + OBJx + ", " + OBJy);
+			
+		}
+	} while (obj && obj.getNext());
+}
+
+function StaticOBJ()
+{
+	do
+	{ 
+		if (obj && (obj.name != "Dummy" || CheckDUM) && (obj.name != "dummy" || CheckDUM) && (obj.name != "an evil force" || CheckDUM) && ((Math.abs(obj.x - me.x) || Math.abs(obj.y - me.y)) <= Oradius) && (IgnoreName || obj.name == ThingName) && (IgnoreClass || obj.classid == ClassNum))
+		{
+			if(obj.name == undefined)
+				printfile("undefined tile or object with the classid of:  " + obj.classid + "      with coords of:  " + obj.x + ", " + obj.y);
+			else if(obj.area > 0)
+				printfile(obj.name + " with the classid of:  " + obj.classid + "      with coords of:  " + obj.x + ", " + obj.y + "   obj.area: #" + obj.area);
+			else if(!CheckOnly)
+				printfile(obj.name + " with the classid of:  " + obj.classid + "      with coords of:  " + obj.x + ", " + obj.y);
+		}
+	} while (obj && obj.getNext());
+}
+
+function ListRoomsRadius()
+{
+	room = getRoom();
+	do
+	{
+		if(room && (IgnoreNumber || ((room.number >= RoomNuma) && (room.number <= RoomNumb))))
+		{
+			ROOMx=(room.x * 5);
+			ROOMy=(room.y * 5);
+			ROOMxd=(ROOMx - me.x);
+			ROOMyd=(ROOMy - me.y);
+			if((Math.abs(ROOMx - me.x) || Math.abs(ROOMy - me.y)) <= Rradius)
+			{
+				if(StaticCoords)
+					printfile("Room #" + room.number + "  coords: " + room.x + ", " + room.y + " : with real coords of: " + ROOMx + ", " + ROOMy);
+				else
+					printfile("Room #" + room.number + "  coords: " + room.x + ", " + room.y + " : With the distance of: " + ROOMxd + ", " + ROOMyd);
+			}
+		}
+	} while(room && room.getNext());
+}

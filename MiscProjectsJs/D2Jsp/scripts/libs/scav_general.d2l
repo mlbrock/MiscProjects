@@ -1,0 +1,89 @@
+
+function LoadIni(filename, errorfunc)
+{
+	// if no function specified, use an empty function
+	if (!errorfunc)
+		errorfunc = new Function();
+		
+	var file = fileOpen(filename, 0);
+	if (!file)
+		return null;
+	
+	var RegTrimLeft = /^\s*/;
+	var RegTrimRight = /\s*$/;
+	var RegSection = /^\[([^\]]*)\]/;
+	var RegField = /(^[a-zA-Z0-9_]+)(\s*)(=)(\s*)(.+$)/
+	var RegComments = /;.*$/
+	var Sections = new Object();
+	var CurrentSection = "";
+	
+	var lineno = 0;
+	var line = "";
+	var full_line;
+	var m = null;
+	
+	while(!file.eof) {
+		lineno++;
+		full_line = file.readLine();
+		line = full_line;
+		
+		if (!line.length)
+			continue;
+			
+		// remove leading and trailing whitespace and comments
+		line = line.replace(RegComments, "");
+		line = line.replace(RegTrimLeft, "");
+		line = line.replace(RegTrimRight, "");
+		
+		if (!line.length)
+			continue;
+		
+		m = line.match(RegSection);
+		
+		if (m && m.length == 2) {
+			var section = m[1];
+			section = section.replace(RegTrimLeft, "");
+			section = section.replace(RegTrimRight, "");
+			if (!section.length) {
+				errorfunc("Error at line " + lineno + " in " + filename + ": Skipping empty section");
+				continue;
+			}
+			//print("Found section: " + section);
+			CurrentSection = section;
+			if (!Sections[section])
+				Sections[section] = new Object();
+				
+			continue;
+		}
+		
+		m = line.match(RegField);
+		if (m && m.length == 6) {
+			var key = m[1];
+			key = key.replace(RegTrimLeft, "");
+			key = key.replace(RegTrimRight, "");
+			var val = m[5];
+			val = val.replace(RegTrimLeft, "");
+			val = val.replace(RegTrimRight, "")
+			
+			if (!key.length) {
+				errorfunc("Error at line " + lineno + " in " + filename + ": Skipping field with no key set");
+				continue;
+			}
+			
+			if (!CurrentSection.length) {
+				errorfunc("Error at line " + lineno + " in " + filename + ": Found field outside section");
+				continue
+			}
+			
+			//print("Found field: " + key + "=" + val);
+			Sections[CurrentSection][key] = val;
+			continue;
+		}
+		
+		//print(m.length);
+		
+		errorfunc("Error at line " + lineno + " in " + filename + ": Skipping line. Unknown syntax");
+	}
+	
+	return Sections;
+}

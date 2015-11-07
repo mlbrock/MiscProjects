@@ -1,0 +1,65 @@
+includeonce("TDW/TDW_Move.d2l");
+
+var print_array = [
+	"Line 1",
+	"Line 2",
+	"Line 3",
+	"Line 4",
+	"Line 5",
+	"Line 6",
+	"Line 7",
+	"Line 8",
+	"Line 9",
+	"Line 10"
+];
+
+function main() {
+	var big_obj = new BigObject();
+
+	print("Running");
+
+	DoMovesNPC();
+//	DoMovesNPC(big_obj);
+}
+
+
+function BigObject()
+{
+	this.list = new Array(100000);
+
+	for (var count_1 = 0; count_1 < this.list.length; count_1++)
+		this.list[count_1] = count_1;
+}
+
+function DoMovesNPC()
+{
+	var this_count = 0;
+	while (true) {
+		var npc_list = ["Akara", "Charsi"];
+		var npc_name = npc_list[this_count % npc_list.length];
+		me.overhead("Going to " + npc_name);
+		TDW_MOVE_COMPAT_TownMove(npc_name);
+		this_count++;
+		for (var count_1 = 0; count_1 < print_array.length; count_1++)
+			print(this_count + ":" + print_array[count_1]);
+		delay(1000);
+	}
+}
+
+if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+}
+
+if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+}
+
+

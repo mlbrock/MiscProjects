@@ -1,0 +1,85 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/TDW_BotSupport.d2l");
+
+/*
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_Path.d2l");
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+includeonce("TownMove2.d2l");
+includeonce("SyLib.d2l");
+*/
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	bot_name      = "TDW_SimpleAndy";
+	log_file_name = "output/" + bot_name + "." + me.realm + "." + 
+		me.account + "." + me.name + ".log";
+	
+	TDW_BOT_Log = new D2JSP_UTIL_Log(log_file_name, bot_name);
+
+for (var this_prop in TDW_BOT_ConfigureList)
+	TDW_BOT_ContextList[this_prop] = TDW_BOT_ConfigureList[this_prop];
+
+	TDW_BOT_ContextList["operation.bot.time.start"] = new Date();
+
+	print("TDW_SimpleAndy.d2j");
+
+	if (!D2JSP_AREA_IsTown())
+		TDW_SA_ExitWithError("Not in town.");
+	else {
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+		TDW_PATH_CreateArea(D2JSP_AREA_CATACOMBS_LEVEL_2);
+		TDW_PATH_CreateArea(D2JSP_AREA_CATACOMBS_LEVEL_3);
+		TDW_PATH_CreateArea(D2JSP_AREA_CATACOMBS_LEVEL_4);
+		TDW_MOVE_WaypointUseInTown(D2JSP_AREA_CATACOMBS_LEVEL_2);
+		var stairs = TDW_PATH_FindRoomByNumberSpec([291, 292, 293, 294]);
+		if (stairs.length != 1)
+			TDW_SA_ExitWithError("Unable to find the stairs from " +
+				D2JSP_AREA_AreaToName(D2JSP_AREA_CATACOMBS_LEVEL_2) + " to " +
+				D2JSP_AREA_AreaToName(D2JSP_AREA_CATACOMBS_LEVEL_3) + ".");
+print("Building map...");
+		TDW_PATH_BuildMap(D2JSP_AREA_CATACOMBS_LEVEL_2,
+			TDW_PATH_MAP_BUILD_FLAG_NONE, TDW_BOT_SUPP_TP2DEST_FLAG_NONE);
+print("Map built.");
+		TDW_BOT_MOVE_GotoXYPair(stairs);
+		print("GOTO DONE???");
+print("STOPPING");
+stop();
+		TDW_BOT_MOVE_GotoXYPair(stairs[0].getCenter());
+		stairs = TDW_PATH_FindRoomByNumberSpec([291, 292, 293, 294]);
+		if (stairs.length != 1)
+			TDW_SA_ExitWithError("Unable to find the stairs from " +
+				D2JSP_AREA_AreaToName(D2JSP_AREA_CATACOMBS_LEVEL_3) + " to " +
+				D2JSP_AREA_AreaToName(D2JSP_AREA_CATACOMBS_LEVEL_4) + ".");
+		TDW_BOT_MOVE_GotoXYPair(stairs[0].getCenter());
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SA_ExitWithError(msg)
+{
+	print(msg);
+
+	TDW_SA_Exit();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+function TDW_SA_Exit()
+{
+//	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

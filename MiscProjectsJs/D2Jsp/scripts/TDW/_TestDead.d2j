@@ -1,0 +1,86 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Modes.d2l");
+
+const D2J_MBI_StepSize   = 3;
+const D2J_MBI_TestCount  = 20;
+const D2J_MBI_TestTime   = 50;
+
+function main()
+{
+	print("Sleeping 3 seconds while game loads...");
+	delay(3000);
+	print("Ready.");
+
+	print("Current me.mode = " + me.mode);
+
+	while (1) {
+		if ((me.mode == D2JSP_MODE_PLAYER_DEATH) ||
+			(me.mode == D2JSP_MODE_PLAYER_DEAD)) {
+			print("I'm dead!!!");
+			if (me.mode == D2JSP_MODE_PLAYER_DEATH)
+				print("me.mode = D2JSP_MODE_PLAYER_DEATH = " + D2JSP_MODE_PLAYER_DEATH);
+			else
+				print("me.mode = D2JSP_MODE_PLAYER_DEAD = " + D2JSP_MODE_PLAYER_DEAD);
+			MoveOnDeath(1, D2J_MBI_StepSize, D2J_MBI_TestCount, D2J_MBI_TestTime);
+			break;
+		}
+		delay(10);
+	}
+
+	print("Exiting...");
+	quit();
+}
+
+function MoveOnDeath(loop_count, step_size, step_count, step_time)
+{
+	var move_array = new Array();
+	var this_move  = new Array();
+	var count_1;
+	var count_2;
+	var new_x;
+	var new_y;
+
+	while (loop_count) {
+		loop_count--
+		me.overhead("Going forward...");
+		move_array.push([me.x, me.y]);
+		for (count_1 = 0; count_1 < 10; count_1++) {
+			new_x = me.x + step_size
+			new_y = me.y;
+			D2JSP_UTIL_MoveTo(new_x, new_y);
+			for (count_2 = 0; count_2 < step_count; count_2++) {
+				if ((me.x == new_x) && (me.y == new_y))
+					break;
+				delay(step_time);
+			}
+			move_array.push([me.x, me.y]);
+		}
+		for (count_1 = 0; count_1 < 10; count_1++) {
+			new_x = me.x;
+			new_y = me.y + step_size;
+			D2JSP_UTIL_MoveTo(new_x, new_y);
+			for (count_2 = 0; count_2 < step_count; count_2++) {
+				if ((me.x == new_x) && (me.y == new_y))
+					break;
+				delay(step_time);
+			}
+			move_array.push([me.x, me.y]);
+		}
+		me.overhead("Waiting here for 10 seconds...");
+		delay(10000);
+		me.overhead("Going backward...");
+		while (move_array.length) {
+			this_move = move_array.pop();
+			new_x     = this_move[0];
+			new_y     = this_move[1];
+			D2JSP_UTIL_MoveTo(new_x, new_y);
+			for (count_2 = 0; count_2 < step_count; count_2++) {
+				if ((me.x == new_x) && (me.y == new_y))
+					break;
+				delay(step_time);
+			}
+		}
+	}
+}
+

@@ -1,0 +1,4386 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Link Pathing Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Path.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains TDW area linkage functionality.
+//
+// Revison History : 2003-02-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_PathLink_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_PathLink_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Quests.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_LINK_FLAG_NONE					=  0;
+var TDW_PATH_LINK_FLAG_NO_MODE_CHANGE		=	1;
+var TDW_PATH_LINK_FLAG_MULTIPLE				=  2;
+var TDW_PATH_LINK_FLAG_NON_PRESET_FIRST	=  4;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_ASCB_MSG_STATUS					=  0;
+var TDW_PATH_ASCB_MSG_WARNING					=  1;
+var TDW_PATH_ASCB_MSG_ERROR					=  2;
+var TDW_PATH_ASCB_GOTO_XYPAIR					=  3;
+var TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL			=  4;
+var TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL_ONLY	=  5;
+var TDW_PATH_ASCB_AREA_CHANGE					=  6;
+var TDW_PATH_ASCB_EXIT_TOWN					=  7;
+var TDW_PATH_ASCB_ENTER_TOWN					=  8;
+var TDW_PATH_ASCB_TP_TO_TOWN					=  9;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATHL_AREA_LOAD_FLAG_NONE              = 0x0000;
+var TDW_PATHL_AREA_LOAD_FLAG_BASIC             = 0x0001;
+var TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX = 0x0002;
+var TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_ALL     = 0x0004;
+var TDW_PATHL_AREA_LOAD_FLAG_CENTER_ACCESS     = 0x0008;
+var TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_SRC     = 0x0010;
+var TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_DST     = 0x0020;
+var TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_SRC  = 0x0040;
+var TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_DST  = 0x0080;
+var TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_SRC  = 0x0100;
+var TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_DST  = 0x0200;
+var TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA      = 0x0400;
+var TDW_PATHL_AREA_LOAD_FLAG_ALL_DATA          =
+	TDW_PATHL_AREA_LOAD_FLAG_BASIC             |
+	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_ALL     |
+	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX |
+	TDW_PATHL_AREA_LOAD_FLAG_CENTER_ACCESS     |
+	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_SRC     |
+	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_DST     |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_SRC  |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_DST  |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_SRC  |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_DST  |
+	TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA;
+var TDW_PATHL_AREA_LOAD_FLAG_FORCE_RELOAD      = 0x1000;
+var TDW_PATHL_AREA_LOAD_FLAG_ALL               = 
+	TDW_PATHL_AREA_LOAD_FLAG_BASIC             |
+	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_ALL     |
+	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX |
+	TDW_PATHL_AREA_LOAD_FLAG_CENTER_ACCESS     |
+	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_SRC     |
+	TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_DST     |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_SRC  |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_DST  |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_SRC  |
+	TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_DST  |
+	TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA      |
+	TDW_PATHL_AREA_LOAD_FLAG_FORCE_RELOAD;
+var TDW_PATHL_AREA_LOAD_FLAG_MASK              = TDW_PATHL_AREA_LOAD_FLAG_ALL;
+var TDW_PATHL_AREA_LOAD_FLAG_DEFAULT           =
+	TDW_PATHL_AREA_LOAD_FLAG_BASIC             |
+	TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_SRC  |
+//	TDW_PATHL_AREA_LOAD_FLAG_PRESET_LINKS_DST  |
+	TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_NumberStringList(in_list)
+{
+	var out_list = new Array(in_list.length);
+	var width    = (in_list.length + "").length;
+
+	for (var count_1 = 0; count_1 < in_list.length; count_1++)
+		out_list[count_1] = D2JSP_UTIL_FORMAT_RJust(count_1 + 1, width) +
+			") " + in_list[count_1];
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkExit(source_area, destination_area)
+{
+	this.source_area      = source_area;
+	this.destination_area = destination_area;
+	this.location_list    = null;
+
+	this.getLocation      = TDW_PATH_LinkExit_getLocation;
+	this.toString         = TDW_PATH_LinkExit_toString;
+	this.toStringName     = TDW_PATH_LinkExit_toStringName;
+	this.toStringList     = TDW_PATH_LinkExit_toStringList;
+	this.toStringListCore = TDW_PATH_LinkExit_toStringListCore;
+	this.toClassName      = TDW_PATH_LinkExit_toClassName;
+
+	function TDW_PATH_LinkExit_getLocation() {
+		if ((this.location_list == null) &&
+			(me.act == D2JSP_AREA_GetAct(this.source_area)))
+			this.location_list = TDW_PATH_GetAreaExit(this.source_area,
+				this.destination_area);
+		return(D2JSP_UTIL_GEN_CloneObject(this.location_list));
+	}
+
+	function TDW_PATH_LinkExit_toString() {
+		return("Area " + this.source_area + " ---> " + this.destination_area);
+	}
+
+	function TDW_PATH_LinkExit_toStringName() {
+		return("Basic area exit");
+	}
+
+	function TDW_PATH_LinkExit_toStringListCore() {
+		var out_list = new Array();
+
+		out_list.push("Locate the cardinal direction of the common edge " +
+			"between " + this.source_area + " (" +
+			D2JSP_AREA_AreaToName(this.source_area) + ") and " +
+			this.destination_area + " (" +
+			D2JSP_AREA_AreaToName(this.destination_area) + ").");
+		out_list.push("Move in that direction until me.area changes to " +
+			this.destination_area + " (" +
+			D2JSP_AREA_AreaToName(this.destination_area) + ").");
+
+		return(out_list);
+	}
+
+	function TDW_PATH_LinkExit_toStringList() {
+		var out_list = new Array();
+
+		out_list.push("Go to area " + this.source_area + " (" +
+			D2JSP_AREA_AreaToName(this.source_area) + ").");
+		out_list = out_list.concat(this.toStringListCore());
+
+		return(TDW_PATH_NumberStringList(out_list));
+	}
+
+	function TDW_PATH_LinkExit_toClassName() {
+		return(D2JSP_UTIL_FORMAT_FunctionToName(this.constructor));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkObject(source_area, room_spec, unit_id_spec,
+	desired_mode, destination_area, linked_object, link_flags)
+{
+	this.source_area      = source_area;
+	this.room_spec        = D2JSP_UTIL_GEN_ExpandArgs(room_spec);
+	this.unit_type        = D2JSP_UTIL_GETUNIT_OBJECT;
+	this.unit_id_spec     = D2JSP_UTIL_GEN_ExpandArgs(unit_id_spec);
+	this.desired_mode     = desired_mode;
+	this.destination_area = destination_area;
+	this.linked_object    = D2JSP_UTIL_GEN_CloneObject(linked_object);
+	this.link_flags       = (link_flags != null) ? link_flags :
+		TDW_PATH_LINK_FLAG_NONE;
+	this.location_list    = null;
+
+	this.getLocation      = TDW_PATH_LinkObject_getLocation;
+	this.toString         = TDW_PATH_LinkObject_toString;
+	this.toStringName     = TDW_PATH_LinkObject_toStringName;
+	this.toStringList     = TDW_PATH_LinkObject_toStringList;
+	this.toStringListCore = TDW_PATH_LinkObject_toStringListCore;
+	this.toClassName      = TDW_PATH_LinkObject_toClassName;
+
+	function TDW_PATH_LinkObject_getLocation() {
+		if ((this.location_list == null) &&
+			(me.act == D2JSP_AREA_GetAct(this.source_area))) {
+			TDW_PATH_MapGlobal.createArea(this.source_area);
+			this.location_list =
+				TDW_PATH_MapGlobal.area_list[this.source_area].getPresetCoordsList(
+				this.room_spec, this.unit_type, this.unit_id_spec,
+				(this.link_flags & TDW_PATH_LINK_FLAG_MULTIPLE) ? false : true);
+		}
+		return(D2JSP_UTIL_GEN_CloneObject(this.location_list));
+	}
+
+	function TDW_PATH_LinkObject_toString() {
+		return("Area " + this.source_area + ", room [" + this.room_spec +
+			"], " + this.toStringName() + " ---> " + this.destination_area);
+	}
+
+	function TDW_PATH_LinkObject_toStringName() {
+		return("unit type " + this.unit_type + " (" +
+			D2JSP_UTIL_UnitNameList[this.unit_type] + "), identifier spec [" +
+			this.unit_id_spec + "]");
+	}
+
+	function TDW_PATH_LinkObject_toStringListCore() {
+		var out_list = new Array();
+
+		if (desired_mode == null)
+			out_list.push("Perform an interact() with the " + this.toStringName() +
+				".");
+		else
+			out_list.push("If the mode of the " + this.toStringName() +
+				" is not equal to " + this.desired_mode + " (" +
+				D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_OBJECT, this.desired_mode) +
+				"), perform an interact() with the " + this.toStringName() +
+				" and wait until the mode changes to " + this.desired_mode + ".");
+
+		return(out_list);
+	}
+
+	function TDW_PATH_LinkObject_toStringList() {
+		var out_list = new Array();
+
+		out_list.push("Go to area " + this.source_area + " (" +
+			D2JSP_AREA_AreaToName(this.source_area) + ").");
+		if (this.room_spec.length)
+			out_list.push("Search each room in the set [" + this.room_spec +
+				"] within that area.");
+		else
+			out_list.push("Search all rooms within that area.");
+		out_list.push("If a room contains " + this.toStringName() +
+			", move to its X,Y coordinates. Otherwise, continue examining rooms.");
+/*
+		if (desired_mode == null)
+			out_list.push("Perform an interact() with the " + this.toStringName() +
+				".");
+		else
+			out_list.push("If the mode of the " + this.toStringName() +
+				" is not equal to " + this.desired_mode + " (" +
+				D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_OBJECT, this.desired_mode) +
+				"), perform an interact() with the " + this.toStringName() +
+				" and wait until the mode changes to " + this.desired_mode + ".");
+*/
+		out_list = out_list.concat(this.toStringListCore());
+
+		if (linked_object instanceof TDW_PATH_LinkExit)
+			out_list = out_list.concat(linked_object.toStringListCore());
+		else {
+			if (linked_object instanceof TDW_PATH_LinkTile)
+				out_list.push("Perform an interact() with the " +
+					linked_object.toStringName() + ".");
+			out_list.push("Wait until me.area changes to " +
+				this.destination_area + " (" +
+				D2JSP_AREA_AreaToName(this.destination_area) + ").");
+		}
+
+		return(TDW_PATH_NumberStringList(out_list));
+	}
+
+	function TDW_PATH_LinkObject_toClassName() {
+		return(D2JSP_UTIL_FORMAT_FunctionToName(this.constructor));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkTile(source_area, room_spec, unit_id_spec,
+	desired_mode, destination_area, linked_object, link_flags)
+{
+	this.source_area      = source_area;
+	this.room_spec        = D2JSP_UTIL_GEN_ExpandArgs(room_spec);
+	this.unit_type        = D2JSP_UTIL_GETUNIT_TILE;
+	this.unit_id_spec     = D2JSP_UTIL_GEN_ExpandArgs(unit_id_spec);
+	this.desired_mode     = desired_mode;
+	this.destination_area = destination_area;
+	this.linked_object    = D2JSP_UTIL_GEN_CloneObject(linked_object);
+	this.link_flags       = (link_flags != null) ? link_flags :
+		TDW_PATH_LINK_FLAG_NONE;
+	this.location_list    = null;
+
+	this.getLocation      = TDW_PATH_LinkTile_getLocation;
+	this.toString         = TDW_PATH_LinkTile_toString;
+	this.toStringName     = TDW_PATH_LinkTile_toStringName;
+	this.toStringList     = TDW_PATH_LinkTile_toStringList;
+	this.toStringListCore = TDW_PATH_LinkTile_toStringListCore;
+	this.toClassName      = TDW_PATH_LinkTile_toClassName;
+
+	function TDW_PATH_LinkTile_getLocation() {
+		if ((this.location_list == null) &&
+			(me.act == D2JSP_AREA_GetAct(this.source_area))) {
+			TDW_PATH_MapGlobal.createArea(this.source_area);
+			this.location_list =
+				TDW_PATH_MapGlobal.area_list[this.source_area].getPresetCoordsList(
+				this.room_spec, this.unit_type, this.unit_id_spec,
+				(this.link_flags & TDW_PATH_LINK_FLAG_MULTIPLE) ? false : true);
+		}
+		return(D2JSP_UTIL_GEN_CloneObject(this.location_list));
+	}
+
+	function TDW_PATH_LinkTile_toString() {
+		return("Area " + this.source_area + ", room [" + this.room_spec +
+			"], " + this.toStringName() + " ---> " + this.destination_area);
+	}
+
+	function TDW_PATH_LinkTile_toStringName() {
+		return("unit type " + this.unit_type + " (" +
+			D2JSP_UTIL_UnitNameList[this.unit_type] + "), identifier spec [" +
+			this.unit_id_spec + "]");
+	}
+
+	function TDW_PATH_LinkTile_toStringListCore() {
+		var out_list = new Array();
+
+		out_list.push("Perform an interact() with the " + 
+			this.toStringName() + ".");
+		out_list.push("Wait until me.area changes to " + this.destination_area +
+			" (" +
+			D2JSP_AREA_AreaToName(this.destination_area) + ").");
+
+		return(out_list);
+	}
+
+	function TDW_PATH_LinkTile_toStringList() {
+		var out_list = new Array();
+
+		out_list.push("Go to area " + this.source_area + " (" +
+			D2JSP_AREA_AreaToName(this.source_area) + ").");
+		if (this.room_spec.length)
+			out_list.push("Search each room in the set [" + this.room_spec +
+				"]" + " within that area.");
+		else
+			out_list.push("Search all rooms within that area.");
+		out_list.push("If such a room contains " + this.toStringName() +
+			", move to its X,Y coordinates. Otherwise, continue examining rooms.");
+		if (linked_object != null) {
+			out_list.push("Find the nearest " + linked_object.toStringName() +
+				".");
+			out_list.push("If its mode is not equal to " +
+				linked_object.desired_mode + " (" +
+				D2JSP_MODE_UnitModeToName(linked_object.unit_type,
+				linked_object.desired_mode) + "), perform an interact() on it " +
+				"and wait until its mode changes to the desired value.");
+		}
+/*
+		out_list.push("Perform an interact() with the " + 
+			this.toStringName() + ".");
+		out_list.push("Wait until me.area changes to " + this.destination_area +
+			" (" +
+			D2JSP_AREA_AreaToName(this.destination_area) + ").");
+*/
+
+		out_list = out_list.concat(this.toStringListCore());
+
+		return(TDW_PATH_NumberStringList(out_list));
+	}
+
+	function TDW_PATH_LinkTile_toClassName() {
+		return(D2JSP_UTIL_FORMAT_FunctionToName(this.constructor));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkWaypoint(destination_area)
+{
+	this.source_area      = me.area;
+	this.destination_area = destination_area;
+	this.location_list    = null;
+
+	this.getLocation      = TDW_PATH_LinkWaypoint_getLocation;
+	this.toString         = TDW_PATH_LinkWaypoint_toString;
+	this.toStringName     = TDW_PATH_LinkWaypoint_toStringName;
+	this.toStringList     = TDW_PATH_LinkWaypoint_toStringList;
+	this.toStringListCore = TDW_PATH_LinkWaypoint_toStringListCore;
+	this.toClassName      = TDW_PATH_LinkWaypoint_toClassName;
+
+	function TDW_PATH_LinkWaypoint_getLocation() {
+		if ((this.location_list == null) &&
+			(me.act == D2JSP_AREA_GetAct(this.source_area)) &&
+			D2JSP_AREA_HasWayPoint(this.source_area)) {
+			TDW_PATH_MapGlobal.createArea(this.source_area);
+			var wp_indices   = D2JSP_AREA_AreaToWayPointIndices();
+			var waypoint_obj = D2JSP_AREA_WaypointObjList[wp_indices[0]]
+				[wp_indices[1]];
+			this.location_list = TDW_PATH_GetPresetCoordsList(
+				waypoint_obj.room_spec, D2JSP_UTIL_GETUNIT_OBJECT,
+				waypoint_obj.unit_id_spec, true);
+		}
+		return(D2JSP_UTIL_GEN_CloneObject(this.location_list));
+	}
+
+	function TDW_PATH_LinkWaypoint_toString() {
+		return("Any area with a waypoint ---> " + this.destination_area);
+	}
+
+	function TDW_PATH_LinkWaypoint_toStringName() {
+		return("Waypoint");
+	}
+
+	function TDW_PATH_LinkWaypoint_toStringListCore() {
+		var out_list = new Array();
+
+		out_list.push("Take a waypoint to " + this.destination_area + " (" +
+			D2JSP_AREA_AreaToName(this.destination_area) + ").");
+
+		return(out_list);
+	}
+
+	function TDW_PATH_LinkWaypoint_toStringList() {
+		return(TDW_PATH_NumberStringList(this.toStringListCore()));
+	}
+
+	function TDW_PATH_LinkWaypoint_toClassName() {
+		return(D2JSP_UTIL_FORMAT_FunctionToName(this.constructor));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkTownReturn(source_area, destination_area)
+{
+	this.source_area      = (D2JSP_UTIL_GEN_TypeOfNumber(source_area) &&
+		D2JSP_AREA_IsValidInGame(source_area)) ? source_area : me.area;
+	this.destination_area = (D2JSP_UTIL_GEN_TypeOfNumber(destination_area) &&
+		D2JSP_AREA_IsValidInGame(destination_area)) ? destination_area :
+		D2JSP_AREA_AreaToTown(me.area);
+	this.location_list    = null;
+
+	this.getLocation      = TDW_PATH_LinkTownReturn_getLocation;
+	this.toString         = TDW_PATH_LinkTownReturn_toString;
+	this.toStringName     = TDW_PATH_LinkTownReturn_toStringName;
+	this.toStringList     = TDW_PATH_LinkTownReturn_toStringList;
+	this.toStringListCore = TDW_PATH_LinkTownReturn_toStringListCore;
+	this.toClassName      = TDW_PATH_LinkTownReturn_toClassName;
+
+	function TDW_PATH_LinkTownReturn_getLocation() {
+		return(D2JSP_UTIL_GEN_CloneObject(this.location_list));
+	}
+
+	function TDW_PATH_LinkTownReturn_toString() {
+		return("Return to town area from any area");
+	}
+
+	function TDW_PATH_LinkTownReturn_toStringName() {
+		return("Return to town");
+	}
+
+	function TDW_PATH_LinkTownReturn_toStringListCore() {
+		return(["Return from area " + this.source_area + " to the Act town " +
+			"area " + this.destination_area + "."]);
+	}
+
+	function TDW_PATH_LinkTownReturn_toStringList() {
+		return(TDW_PATH_NumberStringList(this.toStringListCore()));
+	}
+
+	function TDW_PATH_LinkTownReturn_toClassName() {
+		return(D2JSP_UTIL_FORMAT_FunctionToName(this.constructor));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkGotoXY(source_area, coord_x, coord_y, destination_area,
+	linked_object, link_flags)
+{
+	this.source_area      = source_area;
+	this.coord_x          = coord_x;
+	this.coord_y          = coord_y;
+	this.destination_area = destination_area;
+	this.linked_object    = D2JSP_UTIL_GEN_CloneObject(linked_object);
+	this.link_flags       = (link_flags != null) ? link_flags :
+		TDW_PATH_LINK_FLAG_NONE;
+	this.location_list    = [this.coord_x, this.coord_y];
+
+	this.getLocation      = TDW_PATH_LinkGotoXY_getLocation;
+	this.toString         = TDW_PATH_LinkGotoXY_toString;
+	this.toStringName     = TDW_PATH_LinkGotoXY_toStringName;
+	this.toStringList     = TDW_PATH_LinkGotoXY_toStringList;
+	this.toStringListCore = TDW_PATH_LinkGotoXY_toStringListCore;
+	this.toClassName      = TDW_PATH_LinkGotoXY_toClassName;
+
+	function TDW_PATH_LinkGotoXY_getLocation() {
+		return(D2JSP_UTIL_GEN_CloneObject(this.location_list));
+	}
+
+	function TDW_PATH_LinkGotoXY_toString() {
+		return("Area " + this.source_area + ", " +
+			this.toStringName() + " ---> " + this.destination_area);
+	}
+
+	function TDW_PATH_LinkGotoXY_toStringName() {
+		return("X,Y coordinates [" + this.coord + ", " + this.coord_y + "]");
+	}
+
+	function TDW_PATH_LinkGotoXY_toStringListCore() {
+		return(["Move to " + this.toStringName() + "."]);
+	}
+
+	function TDW_PATH_LinkGotoXY_toStringList() {
+		var out_list = new Array();
+
+		out_list.push("Go to area " + this.source_area + " (" +
+			D2JSP_AREA_AreaToName(this.source_area) + ").");
+		out_list.push(toStringListCore());
+		if (linked_object != null) {
+			out_list.push("Find the nearest " + linked_object.toStringName() +
+				".");
+			out_list.push("If its mode is not equal to " +
+				linked_object.desired_mode + " (" +
+				D2JSP_MODE_UnitModeToName(linked_object.unit_type,
+				linked_object.desired_mode) + "), perform an interact() on it " +
+				"and wait until its mode changes to the desired value.");
+		}
+
+		return(TDW_PATH_NumberStringList(out_list));
+	}
+
+	function TDW_PATH_LinkGotoXY_toClassName() {
+		return(D2JSP_UTIL_FORMAT_FunctionToName(this.constructor));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkTownMove(source_area, town_move_command, destination_area,
+	linked_object, link_flags)
+{
+	this.source_area       = source_area;
+	this.town_move_command = town_move_command;
+	this.destination_area  = destination_area;
+	this.linked_object     = D2JSP_UTIL_GEN_CloneObject(linked_object);
+	this.link_flags        = (link_flags != null) ? link_flags :
+		TDW_PATH_LINK_FLAG_NONE;
+	this.location_list    = null;
+
+	this.getLocation      = TDW_PATH_LinkTownMove_getLocation;
+	this.toString         = TDW_PATH_LinkTownMove_toString;
+	this.toStringName     = TDW_PATH_LinkTownMove_toStringName;
+	this.toStringList     = TDW_PATH_LinkTownMove_toStringList;
+	this.toStringListCore = TDW_PATH_LinkTownMove_toStringListCore;
+	this.toClassName      = TDW_PATH_LinkTownMove_toClassName;
+
+	function TDW_PATH_LinkTownMove_getLocation() {
+		return(D2JSP_UTIL_GEN_CloneObject(this.location_list));
+	}
+
+	function TDW_PATH_LinkTownMove_toString() {
+		return("Area " + this.source_area + ", " +
+			this.toStringName() + " ---> " + this.destination_area);
+	}
+
+	function TDW_PATH_LinkTownMove_toStringName() {
+		if (this.town_move_command.match(/^Sc_/))
+			return("eval(\"" + this.town_move_command + "\");");
+		else
+			return("TDW_MOVE_COMPAT_TownMove(\"" + town_move_command + "\");");
+	}
+
+	function TDW_PATH_LinkTownMove_toStringListCore() {
+		return(["Execute the following TownMove command: " +
+			this.toStringName() + "."]);
+	}
+
+	function TDW_PATH_LinkTownMove_toStringList() {
+		var out_list = new Array();
+
+		out_list.push("Go to area " + this.source_area + " (" +
+			D2JSP_AREA_AreaToName(this.source_area) + ").");
+		out_list.push(toStringListCore());
+		if (linked_object != null) {
+			out_list.push("Find the nearest " + linked_object.toStringName() +
+				".");
+			out_list.push("If its mode is not equal to " +
+				linked_object.desired_mode + " (" +
+				D2JSP_MODE_UnitModeToName(linked_object.unit_type,
+				linked_object.desired_mode) + "), perform an interact() on it " +
+				"and wait until its mode changes to the desired value.");
+		}
+
+		return(TDW_PATH_NumberStringList(out_list));
+	}
+
+	function TDW_PATH_LinkTownMove_toClassName() {
+		return(D2JSP_UTIL_FORMAT_FunctionToName(this.constructor));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkArea(link_spec)
+{
+	this.area          = 0;
+	this.is_town       = false;
+	this.has_waypoint  = false;
+	this.link_spec     = new Array();
+
+	this.isValidLinkIndex = TDW_PATH_LinkArea_isValidLinkIndex;
+	this.getLinkedArea    = TDW_PATH_LinkArea_getLinkedArea;
+	this.getLinkForSource = TDW_PATH_LinkArea_getLinkForSource;
+	this.toString         = TDW_PATH_LinkArea_toString;
+
+	for (var count_1 = 0; count_1 < arguments.length; count_1++)
+		if (D2JSP_UTIL_GEN_TypeOfNumber(arguments[count_1]))
+			this.link_spec.push(new TDW_PATH_LinkExit(arguments[count_1], 0));
+		else
+			this.link_spec.push(D2JSP_UTIL_GEN_CloneObject(arguments[count_1]));
+
+	function TDW_PATH_LinkArea_isValidLinkIndex(link_index) {
+		return(((link_index >= 0) && (link_index < this.link_spec.length)) ?
+			true : false);
+	}
+
+	function TDW_PATH_LinkArea_getLinkedArea(link_index) {
+		return((this.isValidLinkIndex(link_index)) ?
+			((D2JSP_UTIL_GEN_TypeOfNumber(this.link_spec[link_index])) ?
+			this.link_spec[link_index] :
+			this.link_spec[link_index].source_area) : null);
+	}
+
+	function TDW_PATH_LinkArea_getLinkForSource(source_area) {
+		for (var count_1 = 0; count_1 < this.link_spec.length; count_1++) {
+			if (this.getLinkedArea(count_1) == source_area)
+				return(this.link_spec[count_1]);
+		}
+		return(null);
+	}
+
+	function TDW_PATH_LinkArea_toString() {
+		return("Area " + this.area + " has " + this.link_spec.length +
+			" linkages to other areas.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_LinkAccessStrategy(callback_func, callback_data,
+	step_size, access_flags, map_build_flags, wp_access)
+{
+	if (arguments.length) {
+		this.callback_func   = callback_func;
+		this.callback_data   = callback_data;
+		this.step_size       = (step_size < 1) ? 5 : step_size;
+		this.access_flags    = access_flags;
+		this.map_build_flags = map_build_flags;
+		this.wp_access       = (D2JSP_AREA_IsValidWaypointAccess(wp_access)) ?
+			D2JSP_UTIL_GEN_CloneObject(wp_access) :
+			D2JSP_UTIL_GEN_CloneObject(TDW_MOVE_WaypointAccessData);
+		this.pre_func        = null;
+		this.post_func       = null;
+	}
+	else {
+		this.callback_func   = null;
+		this.callback_data   = null;
+		this.step_size       = null;
+		this.access_flags    = null;
+		this.map_build_flags = null;
+		this.wp_access       = null;
+		this.pre_func        = null;
+		this.post_func       = null;
+	}
+
+	this.addPreFunc      = function(func_ref) {
+		if (D2JSP_UTIL_GEN_TypeOfFunction(func_ref)) {
+			this.pre_func = func_ref;
+			return(true);
+		}
+		return(false);
+	}
+
+	this.addPostFunc     = function(func_ref) {
+		if (D2JSP_UTIL_GEN_TypeOfFunction(func_ref)) {
+			this.post_func = func_ref;
+			return(true);
+		}
+		return(false);
+	}
+
+	this.msgStatus       = function(out_text, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_MSG_STATUS, out_text,
+			other_data));
+	}
+
+	this.msgWarning      = function(out_text, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_MSG_WARNING, out_text,
+			other_data));
+	}
+
+	this.msgError        = function(out_text, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_MSG_ERROR, out_text,
+			other_data));
+	}
+
+	this.gotoXYPair      = function(xy_pair, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_GOTO_XYPAIR, xy_pair,
+			other_data));
+	}
+
+	this.gotoXYPairLocal = function(xy_pair, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL, xy_pair,
+			other_data));
+	}
+
+	this.gotoXYPairLocalOnly = function(xy_pair, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL_ONLY,
+			xy_pair, other_data));
+	}
+
+
+	this.areaChange      = function(ascb_data, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_AREA_CHANGE, ascb_data,
+			other_data));
+	}
+
+	this.enterTown       = function(ascb_data, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_ENTER_TOWN, ascb_data,
+			other_data));
+	}
+
+	this.exitTown        = function(ascb_data, other_data) {
+		return(this.callback_func(this, TDW_PATH_ASCB_EXIT_TOWN, ascb_data,
+			other_data));
+	}
+
+	this.__PRIVATE__doPreFunc  = function(ascb_type, ascb_data, other_data) {
+		if (D2JSP_UTIL_GEN_TypeOfFunction(this.pre_func))
+			this.pre_func(this, ascb_type, ascb_data, other_data);
+	}
+
+	this.__PRIVATE__doPostFunc = function(ascb_type, ascb_data, other_data) {
+		if (D2JSP_UTIL_GEN_TypeOfFunction(this.pre_func))
+			this.post_func(this, ascb_type, ascb_data, other_data);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_AreaLink   = new Array(D2JSP_AREA_COUNT);
+TDW_PATH_AreaLink[D2JSP_AREA_NONE]                        =
+	new TDW_PATH_LinkArea();
+TDW_PATH_AreaLink[D2JSP_AREA_ROGUE_ENCAMPMENT]            =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_BLOOD_MOOR
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_BLOOD_MOOR]                  =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_ROGUE_ENCAMPMENT,
+		D2JSP_AREA_COLD_PLAINS,
+		new TDW_PATH_LinkTile(D2JSP_AREA_DEN_OF_EVIL, [83, 84, 85, 86], 4, null,
+			D2JSP_AREA_BLOOD_MOOR)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_COLD_PLAINS]                 =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_BLOOD_MOOR,
+		D2JSP_AREA_STONY_FIELD,
+		D2JSP_AREA_BURIAL_GROUNDS,
+		new TDW_PATH_LinkTile(D2JSP_AREA_CAVE_LEVEL_1, [83, 84, 85, 86], 4, null,
+			D2JSP_AREA_COLD_PLAINS)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_STONY_FIELD]                 =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_COLD_PLAINS,
+		new TDW_PATH_LinkTile(D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1, [83, 84, 85, 86], 4, null,
+			D2JSP_AREA_STONY_FIELD)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DARK_WOOD]                   =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_BLACK_MARSH,
+		new TDW_PATH_LinkTile(D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1, [87, 88, 89, 90], 4, null,
+			D2JSP_AREA_DARK_WOOD, null)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_BLACK_MARSH]                 =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_DARK_WOOD,
+		D2JSP_AREA_TAMOE_HIGHLAND,
+		new TDW_PATH_LinkTile(D2JSP_AREA_HOLE_LEVEL_1, [83, 84, 85, 86], 4, null,
+			D2JSP_AREA_BLACK_MARSH),
+		new TDW_PATH_LinkTile(D2JSP_AREA_FORGOTTEN_TOWER, 164, 11, null,
+			D2JSP_AREA_BLACK_MARSH)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAMOE_HIGHLAND]              =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_BLACK_MARSH,
+		D2JSP_AREA_MONASTERY_GATE,
+		new TDW_PATH_LinkTile(D2JSP_AREA_PIT_LEVEL_1, [83, 84, 85, 86], 4, null,
+			D2JSP_AREA_TAMOE_HIGHLAND)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DEN_OF_EVIL]                 =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_BLOOD_MOOR, 52, [2, 3], null,
+			D2JSP_AREA_DEN_OF_EVIL)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CAVE_LEVEL_1]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_COLD_PLAINS, [24, 25, 51], [0, 1, 2, 3], null,
+			D2JSP_AREA_CAVE_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CAVE_LEVEL_2, [103, 104, 105, 106, 107], 4, null,
+			D2JSP_AREA_CAVE_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1] =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_STONY_FIELD, [24, 25, 51], [0, 1, 2, 3], null,
+			D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_DARK_WOOD, [24, 25, 51], [0, 1, 2, 3], null,
+			D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2, [103, 104, 105, 106, 107], 4, null,
+			D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HOLE_LEVEL_1]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_BLACK_MARSH, [24, 25, 51], [0, 1, 2, 3], null,
+			D2JSP_AREA_HOLE_LEVEL_1),
+		 new TDW_PATH_LinkTile(D2JSP_AREA_HOLE_LEVEL_2, [103, 104, 105, 106, 107], 4, null,
+			D2JSP_AREA_HOLE_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_PIT_LEVEL_1]                 =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAMOE_HIGHLAND, [24, 25, 51], [0, 1, 2, 3], null,
+			D2JSP_AREA_PIT_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_PIT_LEVEL_2, [103, 104, 105, 106, 107], 4, null,
+			D2JSP_AREA_PIT_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CAVE_LEVEL_2]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CAVE_LEVEL_1, [91, 92, 93, 94], 5, null,
+			D2JSP_AREA_CAVE_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2] =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1, [91, 92, 93, 94], 5, null,
+			D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HOLE_LEVEL_2]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_HOLE_LEVEL_1, [91, 92, 93, 94], 5, null,
+			D2JSP_AREA_HOLE_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_PIT_LEVEL_2]                 =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_PIT_LEVEL_1, [91, 92, 93, 94], 5, null,
+			D2JSP_AREA_PIT_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_BURIAL_GROUNDS]              =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_COLD_PLAINS,
+		new TDW_PATH_LinkTile(D2JSP_AREA_CRYPT, [139, 140, 141, 142], 8, null,
+			D2JSP_AREA_BURIAL_GROUNDS),
+		new TDW_PATH_LinkTile(D2JSP_AREA_MAUSOLEUM, [139, 140, 141, 142], 8, null,
+			D2JSP_AREA_BURIAL_GROUNDS)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CRYPT]                       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_BURIAL_GROUNDS, 108, 6, null,
+			D2JSP_AREA_CRYPT)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_MAUSOLEUM]                   =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_BURIAL_GROUNDS, 108, 7, null,
+			D2JSP_AREA_MAUSOLEUM)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FORGOTTEN_TOWER]             =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_BLACK_MARSH, 163, 10, null,
+			D2JSP_AREA_FORGOTTEN_TOWER),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_1, [139, 140, 141, 142], 8, null,
+			D2JSP_AREA_FORGOTTEN_TOWER)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TOWER_CELLAR_LEVEL_1]        =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_FORGOTTEN_TOWER, 164, 12, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_2, [139, 140, 141, 142], 8, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TOWER_CELLAR_LEVEL_2]        =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_1, [143, 144, 145, 146], 9, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_3, [139, 140, 141, 142], 8, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TOWER_CELLAR_LEVEL_3]        =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_2, [143, 144, 145, 146], 9, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_3),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_4, [139, 140, 141, 142], 8, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TOWER_CELLAR_LEVEL_4]        =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_3, [143, 144, 145, 146], 9, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_4),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_5, 159, 8, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_4)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TOWER_CELLAR_LEVEL_5]        =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TOWER_CELLAR_LEVEL_4, [143, 144, 145, 146], 9, null,
+			D2JSP_AREA_TOWER_CELLAR_LEVEL_5)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_MONASTERY_GATE]              =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_TAMOE_HIGHLAND,
+		D2JSP_AREA_OUTER_CLOISTER
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_OUTER_CLOISTER]              =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_MONASTERY_GATE,
+		D2JSP_AREA_BARRACKS
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_BARRACKS]                    =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_OUTER_CLOISTER,
+		new TDW_PATH_LinkTile(D2JSP_AREA_JAIL_LEVEL_1, [236, 237, 238, 239], 13, null,
+			D2JSP_AREA_BARRACKS)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_JAIL_LEVEL_1]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_BARRACKS, [198, 199, 200, 201], 14, null,
+			D2JSP_AREA_JAIL_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_JAIL_LEVEL_2, [236, 237, 238, 239], 13, null,
+			D2JSP_AREA_JAIL_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_JAIL_LEVEL_2]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_JAIL_LEVEL_1, [240, 241, 242, 243], 14, null,
+			D2JSP_AREA_JAIL_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_JAIL_LEVEL_3, [236, 237, 238, 239], 13, null,
+			D2JSP_AREA_JAIL_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_JAIL_LEVEL_3]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_JAIL_LEVEL_2, [240, 241, 242, 243], 14, null,
+			D2JSP_AREA_JAIL_LEVEL_3),
+		new TDW_PATH_LinkTile(D2JSP_AREA_INNER_CLOISTER, 256, 14, null,
+			D2JSP_AREA_JAIL_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_INNER_CLOISTER]              =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_JAIL_LEVEL_3, [244, 245, 246, 247], 13, null,
+			D2JSP_AREA_INNER_CLOISTER),
+		new TDW_PATH_LinkObject(D2JSP_AREA_CATHEDRAL, null, 25,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_INNER_CLOISTER,
+			new TDW_PATH_LinkExit(D2JSP_AREA_CATHEDRAL, D2JSP_AREA_INNER_CLOISTER))
+//		D2JSP_AREA_CATHEDRAL
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CATHEDRAL]                   =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_INNER_CLOISTER, null, 25,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_CATHEDRAL,
+			new TDW_PATH_LinkExit(D2JSP_AREA_INNER_CLOISTER, D2JSP_AREA_CATHEDRAL)),
+//		D2JSP_AREA_INNER_CLOISTER,
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATACOMBS_LEVEL_1, [288, 289, 290], 16, null,
+			D2JSP_AREA_CATHEDRAL)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CATACOMBS_LEVEL_1]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATHEDRAL, 257, 15, null,
+			D2JSP_AREA_CATACOMBS_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATACOMBS_LEVEL_2, [288, 289, 290], 17, null,
+			D2JSP_AREA_CATACOMBS_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CATACOMBS_LEVEL_2]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATACOMBS_LEVEL_1, [291, 292, 293, 294], 18, null,
+			D2JSP_AREA_CATACOMBS_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATACOMBS_LEVEL_3, [288, 289, 290], 17, null,
+			D2JSP_AREA_CATACOMBS_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CATACOMBS_LEVEL_3]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATACOMBS_LEVEL_2, [291, 292, 293, 294], 18, null,
+			D2JSP_AREA_CATACOMBS_LEVEL_3),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATACOMBS_LEVEL_4, 299, 17, null,
+			D2JSP_AREA_CATACOMBS_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CATACOMBS_LEVEL_4]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CATACOMBS_LEVEL_3, [291, 292, 293, 294], 18, null,
+			D2JSP_AREA_CATACOMBS_LEVEL_4)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TRISTRAM]                    =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_STONY_FIELD, 160, 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_TRISTRAM)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_MOO_MOO_FARM]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_ROGUE_ENCAMPMENT, null, 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_MOO_MOO_FARM)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_LUT_GHOLEIN]                 =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_ROCKY_WASTE,
+		new TDW_PATH_LinkTile(D2JSP_AREA_A2_SEWERS_LEVEL_1, [332, 333, 334, 335, 336], 22, null,
+			D2JSP_AREA_LUT_GHOLEIN),
+		new TDW_PATH_LinkTile(D2JSP_AREA_HAREM_LEVEL_1, 353, 25, null,
+			D2JSP_AREA_LUT_GHOLEIN)
+/*
+		// Dock exit from Sewers level 1 to town not used.
+		,
+		new TDW_PATH_LinkTile(D2JSP_AREA_A2_SEWERS_LEVEL_1, [332, 333, 334, 335, 336], 21, null,
+			D2JSP_AREA_LUT_GHOLEIN)
+*/
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_ROCKY_WASTE]                 =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_LUT_GHOLEIN,
+		D2JSP_AREA_DRY_HILLS,
+		new TDW_PATH_LinkTile(D2JSP_AREA_STONY_TOMB_LEVEL_1, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_ROCKY_WASTE)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DRY_HILLS]                   =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_ROCKY_WASTE,
+		D2JSP_AREA_FAR_OASIS,
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_DRY_HILLS)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FAR_OASIS]                   =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_DRY_HILLS,
+		D2JSP_AREA_LOST_CITY,
+		new TDW_PATH_LinkTile(D2JSP_AREA_MAGGOT_LAIR_LEVEL_1, [497, 498, 499, 500], 48, null,
+			D2JSP_AREA_FAR_OASIS)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_LOST_CITY]                   =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_FAR_OASIS,
+		D2JSP_AREA_VALLEY_OF_SNAKES,
+		new TDW_PATH_LinkTile(D2JSP_AREA_ANCIENT_TUNNELS, [332, 333, 334, 335, 336], 22, null,
+			D2JSP_AREA_LOST_CITY)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_VALLEY_OF_SNAKES]            =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_LOST_CITY,
+		new TDW_PATH_LinkTile(D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_VALLEY_OF_SNAKES)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CANYON_OF_THE_MAGI]          =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAL_RASHAS_TOMB1, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_CANYON_OF_THE_MAGI),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAL_RASHAS_TOMB2, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_CANYON_OF_THE_MAGI),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAL_RASHAS_TOMB3, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_CANYON_OF_THE_MAGI),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAL_RASHAS_TOMB4, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_CANYON_OF_THE_MAGI),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAL_RASHAS_TOMB5, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_CANYON_OF_THE_MAGI),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAL_RASHAS_TOMB6, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_CANYON_OF_THE_MAGI),
+		new TDW_PATH_LinkTile(D2JSP_AREA_TAL_RASHAS_TOMB7, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_CANYON_OF_THE_MAGI)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_A2_SEWERS_LEVEL_1]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_LUT_GHOLEIN, 301, 19, null,
+			D2JSP_AREA_A2_SEWERS_LEVEL_1,
+			// MLB 2004-07-17
+/*
+			new TDW_PATH_LinkObject(D2JSP_AREA_LUT_GHOLEIN, 301, 74,
+				D2JSP_MODE_OBJECT_OPENED, null)),
+*/
+			new TDW_PATH_LinkObject(D2JSP_AREA_LUT_GHOLEIN, 301, 74,
+				D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_A2_SEWERS_LEVEL_1)),
+		new TDW_PATH_LinkTile(D2JSP_AREA_A2_SEWERS_LEVEL_2, [332, 333, 334, 335, 336], 22, null,
+			D2JSP_AREA_A2_SEWERS_LEVEL_1)
+/*
+		// Dock entrance from town to Sewers level not used.
+		,
+		new TDW_PATH_LinkTile(D2JSP_AREA_LUT_GHOLEIN, 301, 20, null,
+			D2JSP_AREA_A2_SEWERS_LEVEL_1)
+*/
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_A2_SEWERS_LEVEL_2]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_A2_SEWERS_LEVEL_1, [337, 338, 339, 340], 23, null,
+			D2JSP_AREA_A2_SEWERS_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_A2_SEWERS_LEVEL_3, [332, 333, 334, 335, 336], 22, null,
+			D2JSP_AREA_A2_SEWERS_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_A2_SEWERS_LEVEL_3]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_A2_SEWERS_LEVEL_2, [337, 338, 339, 340], 23, null,
+			D2JSP_AREA_A2_SEWERS_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HAREM_LEVEL_1]               =
+	new TDW_PATH_LinkArea(
+/*
+		new TDW_PATH_LinkTile(D2JSP_AREA_LUT_GHOLEIN, 301, 24, null,
+			D2JSP_AREA_HAREM_LEVEL_1),
+*/
+		new TDW_PATH_LinkTownMove(D2JSP_AREA_LUT_GHOLEIN, "palace",
+			D2JSP_AREA_HAREM_LEVEL_1,
+			new TDW_PATH_LinkTile(D2JSP_AREA_LUT_GHOLEIN, null, 24, null,
+				D2JSP_AREA_HAREM_LEVEL_1), TDW_PATH_LINK_FLAG_NON_PRESET_FIRST),
+		new TDW_PATH_LinkTile(D2JSP_AREA_HAREM_LEVEL_2, [354, 356], [26, 27], null,
+			D2JSP_AREA_HAREM_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HAREM_LEVEL_2]               =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_HAREM_LEVEL_1, 353, [28, 29], null,
+			D2JSP_AREA_HAREM_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_PALACE_CELLAR_LEVEL_1, [358, 360], [26, 27], null,
+			D2JSP_AREA_HAREM_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_PALACE_CELLAR_LEVEL_1]       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_HAREM_LEVEL_2, [355, 357], [28, 29], null,
+			D2JSP_AREA_PALACE_CELLAR_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_PALACE_CELLAR_LEVEL_2, [358, 360], [30, 31], null,
+			D2JSP_AREA_PALACE_CELLAR_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_PALACE_CELLAR_LEVEL_2]       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_PALACE_CELLAR_LEVEL_1, [359, 361], 32, null,
+			D2JSP_AREA_PALACE_CELLAR_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_PALACE_CELLAR_LEVEL_3, [358, 360], [30, 31], null,
+			D2JSP_AREA_PALACE_CELLAR_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_PALACE_CELLAR_LEVEL_3]       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_PALACE_CELLAR_LEVEL_2, [359, 361], 32, null,
+			D2JSP_AREA_PALACE_CELLAR_LEVEL_3),
+		new TDW_PATH_LinkObject(D2JSP_AREA_ARCANE_SANCTUARY, 524, 298,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_PALACE_CELLAR_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_STONY_TOMB_LEVEL_1]          =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_ROCKY_WASTE, [388, 389], [33, 34, 35, 36], null,
+			D2JSP_AREA_STONY_TOMB_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_STONY_TOMB_LEVEL_2, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_STONY_TOMB_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1]   =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_DRY_HILLS, [388, 389], [33, 34, 35, 36], null,
+			D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2]   =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_1, [448, 449, 450, 451], 46, null,
+			D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3, [444, 445, 446, 447], 45, null,
+			D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1]   =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_VALLEY_OF_SNAKES, [388, 389], 37, null,
+			D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2, 480, 45, null,
+			D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_STONY_TOMB_LEVEL_2]          =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_STONY_TOMB_LEVEL_1, [448, 449, 450, 451], 46, null,
+			D2JSP_AREA_STONY_TOMB_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3]   =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2, [448, 449, 450, 451], 46, null,
+			D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2]   =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1, [448, 449, 450, 451], 46, null,
+			D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_MAGGOT_LAIR_LEVEL_1]         =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_FAR_OASIS, 390, 47, null,
+			D2JSP_AREA_MAGGOT_LAIR_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_MAGGOT_LAIR_LEVEL_2, [497, 498, 499, 500], 48, null,
+			D2JSP_AREA_MAGGOT_LAIR_LEVEL_1)
+
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_MAGGOT_LAIR_LEVEL_2]         =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_MAGGOT_LAIR_LEVEL_1, [501, 502, 503, 504], 49, null,
+			D2JSP_AREA_MAGGOT_LAIR_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_MAGGOT_LAIR_LEVEL_3, [497, 498, 499, 500], 48, null,
+			D2JSP_AREA_MAGGOT_LAIR_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_MAGGOT_LAIR_LEVEL_3]         =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_MAGGOT_LAIR_LEVEL_2, [501, 502, 503, 504], 49, null,
+			D2JSP_AREA_MAGGOT_LAIR_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_ANCIENT_TUNNELS]             =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_LOST_CITY, 412, 50, null,
+			D2JSP_AREA_ANCIENT_TUNNELS,
+			// MLB: 2004-07-17
+/*
+			new TDW_PATH_LinkObject(D2JSP_AREA_LOST_CITY, 412, 74,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+			new TDW_PATH_LinkObject(D2JSP_AREA_LOST_CITY, 412, 74,
+				D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_ANCIENT_TUNNELS))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAL_RASHAS_TOMB1]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CANYON_OF_THE_MAGI, 387, 38, null,
+			D2JSP_AREA_TAL_RASHAS_TOMB1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAL_RASHAS_TOMB2]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CANYON_OF_THE_MAGI, 385, 39, null,
+			D2JSP_AREA_TAL_RASHAS_TOMB2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAL_RASHAS_TOMB3]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CANYON_OF_THE_MAGI, 385, 40, null,
+			D2JSP_AREA_TAL_RASHAS_TOMB3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAL_RASHAS_TOMB4]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CANYON_OF_THE_MAGI, 385, 41, null,
+			D2JSP_AREA_TAL_RASHAS_TOMB4)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAL_RASHAS_TOMB5]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CANYON_OF_THE_MAGI, 383, 42, null,
+			D2JSP_AREA_TAL_RASHAS_TOMB5)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAL_RASHAS_TOMB6]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CANYON_OF_THE_MAGI, 383, 43, null,
+			D2JSP_AREA_TAL_RASHAS_TOMB6)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TAL_RASHAS_TOMB7]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CANYON_OF_THE_MAGI, 383, 44, null,
+			D2JSP_AREA_TAL_RASHAS_TOMB7)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DURIELS_LAIR]                =
+	new TDW_PATH_LinkArea(
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_ARCANE_SANCTUARY]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_PALACE_CELLAR_LEVEL_3, 359, 298,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_ARCANE_SANCTUARY)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_KURAST_DOCKTOWN]             =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_SPIDER_FOREST
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_SPIDER_FOREST]               =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_KURAST_DOCKTOWN,
+//		D2JSP_AREA_GREAT_MARSH,				// Fixed-up with post-processing.
+		new TDW_PATH_LinkTile(D2JSP_AREA_SPIDER_CAVE, null, 52, null,
+			D2JSP_AREA_SPIDER_FOREST),
+		new TDW_PATH_LinkTile(D2JSP_AREA_SPIDER_CAVERN, null, 52, null,
+			D2JSP_AREA_SPIDER_FOREST)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_GREAT_MARSH]                 =
+	new TDW_PATH_LinkArea(
+//		D2JSP_AREA_SPIDER_FOREST,			// Fixed-up with post-processing.
+//		D2JSP_AREA_FLAYER_JUNGLE			// Fixed-up with post-processing.
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FLAYER_JUNGLE]               =
+	new TDW_PATH_LinkArea(
+//		D2JSP_AREA_GREAT_MARSH,				// Fixed-up with post-processing.
+		D2JSP_AREA_LOWER_KURAST,
+		new TDW_PATH_LinkTile(D2JSP_AREA_SWAMPY_PIT_LEVEL_1, [695, 696, 697, 698], 55, null,
+			D2JSP_AREA_FLAYER_JUNGLE),
+		new TDW_PATH_LinkTile(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1, [695, 696, 697, 698], 55, null,
+			D2JSP_AREA_FLAYER_JUNGLE)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_LOWER_KURAST]                =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_FLAYER_JUNGLE,
+		D2JSP_AREA_KURAST_BAZAAR
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_KURAST_BAZAAR]               =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_LOWER_KURAST,
+		D2JSP_AREA_UPPER_KURAST,
+		new TDW_PATH_LinkTile(D2JSP_AREA_RUINED_TEMPLE, null, [62, 63], null,
+			D2JSP_AREA_KURAST_BAZAAR),
+		new TDW_PATH_LinkTile(D2JSP_AREA_DISUSED_FANE, null, [62, 63], null,
+			D2JSP_AREA_KURAST_BAZAAR),
+		new TDW_PATH_LinkTile(D2JSP_AREA_A3_SEWERS_LEVEL_1, [737, 738], [58, 59], null,
+			D2JSP_AREA_KURAST_BAZAAR)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_UPPER_KURAST]                =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_KURAST_BAZAAR,
+		D2JSP_AREA_KURAST_CAUSEWAY,
+		new TDW_PATH_LinkTile(D2JSP_AREA_FORGOTTEN_RELIQUARY, null, [62, 63], null,
+			D2JSP_AREA_UPPER_KURAST),
+		new TDW_PATH_LinkTile(D2JSP_AREA_FORGOTTEN_TEMPLE, null, [62, 63], null,
+			D2JSP_AREA_UPPER_KURAST),
+		new TDW_PATH_LinkTile(D2JSP_AREA_A3_SEWERS_LEVEL_1, [735, 736], [58, 59], null,
+			D2JSP_AREA_UPPER_KURAST)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_KURAST_CAUSEWAY]             =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_UPPER_KURAST,
+		D2JSP_AREA_TRAVINCAL,
+		new TDW_PATH_LinkTile(D2JSP_AREA_RUINED_FANE, null, [62, 63], null,
+			D2JSP_AREA_KURAST_CAUSEWAY),
+		new TDW_PATH_LinkTile(D2JSP_AREA_DISUSED_RELIQUARY, null, [62, 63], null,
+			D2JSP_AREA_KURAST_CAUSEWAY)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TRAVINCAL]                   =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_KURAST_CAUSEWAY,
+		new TDW_PATH_LinkTile(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1, [784, 785, 786, 787], [65, 66], null,
+			D2JSP_AREA_TRAVINCAL)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_SPIDER_CAVE]                 =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_SPIDER_FOREST, [575, 576, 577, 578, 579, 580, 581, 582, 583, 584], 51, null,
+			D2JSP_AREA_SPIDER_CAVE, null, TDW_PATH_LINK_FLAG_MULTIPLE)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_SPIDER_CAVERN]               =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_SPIDER_FOREST, [575, 576, 577, 578, 579, 580, 581, 582, 583, 584], 51, null,
+			D2JSP_AREA_SPIDER_CAVERN, null, TDW_PATH_LINK_FLAG_MULTIPLE)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_SWAMPY_PIT_LEVEL_1]          =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_FLAYER_JUNGLE, [595, 596, 597, 598, 599, 600, 601, 602, 603, 604], 53, null,
+			D2JSP_AREA_SWAMPY_PIT_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_SWAMPY_PIT_LEVEL_2, [695, 696, 697, 698], 55, null,
+			D2JSP_AREA_SWAMPY_PIT_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_SWAMPY_PIT_LEVEL_2]          =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_SWAMPY_PIT_LEVEL_1, [699, 700, 701, 702], 56, null,
+			D2JSP_AREA_SWAMPY_PIT_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_SWAMPY_PIT_LEVEL_3, null, 55, null,
+			D2JSP_AREA_SWAMPY_PIT_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1]      =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_FLAYER_JUNGLE, [595, 596, 597, 598, 599, 600, 601, 602, 603, 604], 54, null,
+			D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2, [695, 696, 697, 698], 55, null,
+			D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2]      =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_1, [699, 700, 701, 702], 56, null,
+			D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3, null, 55, null,
+			D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_SWAMPY_PIT_LEVEL_3]          =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_SWAMPY_PIT_LEVEL_2, [699, 700, 701, 702], 56, null,
+			D2JSP_AREA_SWAMPY_PIT_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3]      =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_2, [699, 700, 701, 702], 56, null,
+			D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_A3_SEWERS_LEVEL_1]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_BAZAAR, 629, 57, null,
+			D2JSP_AREA_A3_SEWERS_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_UPPER_KURAST, 646, 57, null,
+			D2JSP_AREA_A3_SEWERS_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_A3_SEWERS_LEVEL_2, 747, [58, 59], null,
+			D2JSP_AREA_A3_SEWERS_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_A3_SEWERS_LEVEL_2]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_A3_SEWERS_LEVEL_1, [739, 740, 741, 742], 60, null,
+			D2JSP_AREA_A3_SEWERS_LEVEL_2,
+			// MLB: 2004-07-17
+/*
+			new TDW_PATH_LinkObject(D2JSP_AREA_A3_SEWERS_LEVEL_1, 630, 367,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+			new TDW_PATH_LinkObject(D2JSP_AREA_A3_SEWERS_LEVEL_1, 630, 367,
+				D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_A3_SEWERS_LEVEL_2))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_RUINED_TEMPLE]               =
+	new TDW_PATH_LinkArea(
+/*
+		new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_BAZAAR, 630, 61, null,
+			D2JSP_AREA_RUINED_TEMPLE,
+			new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_BAZAAR, 630, 195,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+		new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_BAZAAR, 630, 195, D2JSP_MODE_OBJECT_OPENED,
+			D2JSP_AREA_RUINED_TEMPLE,
+			new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_BAZAAR, 630, 61, null,
+				D2JSP_AREA_RUINED_TEMPLE))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DISUSED_FANE]                =
+	new TDW_PATH_LinkArea(
+/*
+		new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_BAZAAR, 630, 61, null,
+			D2JSP_AREA_DISUSED_FANE,
+			new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_BAZAAR, 630, 194,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+		new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_BAZAAR, 630, 194, D2JSP_MODE_OBJECT_OPENED,
+			D2JSP_AREA_DISUSED_FANE,
+			new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_BAZAAR, 630, 61, null,
+				D2JSP_AREA_DISUSED_FANE))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FORGOTTEN_RELIQUARY]         =
+	new TDW_PATH_LinkArea(
+/*
+		new TDW_PATH_LinkTile(D2JSP_AREA_UPPER_KURAST, 647, 61, null,
+			D2JSP_AREA_FORGOTTEN_RELIQUARY,
+			new TDW_PATH_LinkObject(D2JSP_AREA_UPPER_KURAST, 647, 195,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+		new TDW_PATH_LinkObject(D2JSP_AREA_UPPER_KURAST, 647, 195, D2JSP_MODE_OBJECT_OPENED,
+			D2JSP_AREA_FORGOTTEN_RELIQUARY,
+			new TDW_PATH_LinkTile(D2JSP_AREA_UPPER_KURAST, 647, 61, null,
+				D2JSP_AREA_FORGOTTEN_RELIQUARY))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_FORGOTTEN_TEMPLE]            =
+	new TDW_PATH_LinkArea(
+/*
+		new TDW_PATH_LinkTile(D2JSP_AREA_UPPER_KURAST, 647, 61, null,
+			D2JSP_AREA_FORGOTTEN_TEMPLE,
+			new TDW_PATH_LinkObject(D2JSP_AREA_UPPER_KURAST, 647, 194,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+		new TDW_PATH_LinkObject(D2JSP_AREA_UPPER_KURAST, 647, 194, D2JSP_MODE_OBJECT_OPENED,
+			D2JSP_AREA_FORGOTTEN_TEMPLE,
+			new TDW_PATH_LinkTile(D2JSP_AREA_UPPER_KURAST, 647, 61, null,
+				D2JSP_AREA_FORGOTTEN_TEMPLE))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_RUINED_FANE]                 =
+	new TDW_PATH_LinkArea(
+/*
+		new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_CAUSEWAY, null, 61, null,
+			D2JSP_AREA_RUINED_FANE,
+			new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_CAUSEWAY, null, 195,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+		new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_CAUSEWAY, null, 195, D2JSP_MODE_OBJECT_OPENED,
+			D2JSP_AREA_RUINED_FANE,
+			new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_CAUSEWAY, null, 61, null,
+				D2JSP_AREA_RUINED_FANE))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DISUSED_RELIQUARY]           =
+	new TDW_PATH_LinkArea(
+/*
+		new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_CAUSEWAY, null, 61, null,
+			D2JSP_AREA_DISUSED_RELIQUARY,
+			new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_CAUSEWAY, null, 194,
+				D2JSP_MODE_OBJECT_OPENED, null))
+*/
+		new TDW_PATH_LinkObject(D2JSP_AREA_KURAST_CAUSEWAY, null, 194, D2JSP_MODE_OBJECT_OPENED,
+			D2JSP_AREA_DISUSED_RELIQUARY,
+			new TDW_PATH_LinkTile(D2JSP_AREA_KURAST_CAUSEWAY, null, 61, null,
+				D2JSP_AREA_DISUSED_RELIQUARY))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1]     =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TRAVINCAL, 654, 64, null,
+			D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1,
+			// MLB: 2004-07-17
+/*
+			new TDW_PATH_LinkObject(D2JSP_AREA_TRAVINCAL, 654, 404,
+				D2JSP_MODE_OBJECT_OPENED, null)),
+*/
+			new TDW_PATH_LinkObject(D2JSP_AREA_TRAVINCAL, 654, 404,
+				D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1)),
+		new TDW_PATH_LinkTile(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2, [784, 785, 786, 787], [65, 66], null,
+			D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2]     =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_1, [788, 789, 790, 791], [67, 68], null,
+			D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, [65, 66], null,
+			D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3]     =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2, [788, 789, 790, 791], [67, 68], null,
+			D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_THE_PANDEMONIUM_FORTRESS]    =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_OUTER_STEPPES
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_OUTER_STEPPES]               =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+		D2JSP_AREA_PLAINS_OF_DESPAIR
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_PLAINS_OF_DESPAIR]           =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_OUTER_STEPPES,
+		D2JSP_AREA_CITY_OF_THE_DAMNED
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CITY_OF_THE_DAMNED]          =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_PLAINS_OF_DESPAIR,
+		new TDW_PATH_LinkTile(D2JSP_AREA_RIVER_OF_FLAME, 852, 70, null,
+			D2JSP_AREA_CITY_OF_THE_DAMNED)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_RIVER_OF_FLAME]              =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CITY_OF_THE_DAMNED, 811, 69, null,
+			D2JSP_AREA_RIVER_OF_FLAME),
+		D2JSP_AREA_CHAOS_SANCTUM
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CHAOS_SANCTUM]               =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_RIVER_OF_FLAME
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HARROGATH]                   =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_BLOODY_FOOTHILLS
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_BLOODY_FOOTHILLS]            =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_HARROGATH,
+		D2JSP_AREA_RIGID_HIGHLANDS
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_RIGID_HIGHLANDS]             =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_BLOODY_FOOTHILLS,
+		D2JSP_AREA_ARREAT_PLATEAU,
+		new TDW_PATH_LinkObject(D2JSP_AREA_HELL1, [1053, 1054, 1055, 1056], 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_RIGID_HIGHLANDS)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_ARREAT_PLATEAU]              =
+	new TDW_PATH_LinkArea(
+		D2JSP_AREA_RIGID_HIGHLANDS,
+		new TDW_PATH_LinkTile(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1, [1018, 1019, 1020, 1021], 73, null,
+			D2JSP_AREA_ARREAT_PLATEAU),
+		new TDW_PATH_LinkObject(D2JSP_AREA_HELL2, [1053, 1054, 1055, 1056], 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_ARREAT_PLATEAU)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1]  =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_ARREAT_PLATEAU, [913, 914], 71, null,
+			D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2, [1018, 1019, 1020, 1021], 73, null,
+			D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CELLAR_OF_PITY, [1038, 1039], 73, null,
+			D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CELLAR_OF_PITY]              =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1, [1026, 1027, 1028, 1029], 75, null,
+			D2JSP_AREA_CELLAR_OF_PITY)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2]  =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TUNDRA_WASTELANDS, [983, 984], 72, null,
+			D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1, [1022, 1023, 1024, 1025], 74, null,
+			D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_ECHO_CHAMBER, [1040, 1041], 73, null,
+			D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_ECHO_CHAMBER]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2, [1026, 1027, 1028, 1029], 75, null,
+			D2JSP_AREA_ECHO_CHAMBER)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_TUNDRA_WASTELANDS]           =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2, [1022, 1023, 1024, 1025], 74, null,
+			D2JSP_AREA_TUNDRA_WASTELANDS),
+		new TDW_PATH_LinkTile(D2JSP_AREA_GLACIAL_CAVES_LEVEL_1, [1018, 1019, 1020, 1021], 73, null,
+			D2JSP_AREA_TUNDRA_WASTELANDS),
+		new TDW_PATH_LinkObject(D2JSP_AREA_HELL3, [1053, 1054, 1055, 1056], 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_TUNDRA_WASTELANDS)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_GLACIAL_CAVES_LEVEL_1]       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_TUNDRA_WASTELANDS, [985, 986], 71, null,
+			D2JSP_AREA_GLACIAL_CAVES_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_GLACIAL_CAVES_LEVEL_2, [1040, 1041], 73, null,
+			D2JSP_AREA_GLACIAL_CAVES_LEVEL_1),
+		new TDW_PATH_LinkTile(D2JSP_AREA_ROCKY_SUMMIT, 1089, 79, null,
+			D2JSP_AREA_GLACIAL_CAVES_LEVEL_1,
+			// MLB: 2004-07-17
+/*
+			new TDW_PATH_LinkObject(D2JSP_AREA_ROCKY_SUMMIT, 1089, 564,
+				D2JSP_MODE_OBJECT_IDLE, null))
+*/
+			new TDW_PATH_LinkObject(D2JSP_AREA_ROCKY_SUMMIT, 1089, 564,
+				D2JSP_MODE_OBJECT_IDLE, D2JSP_AREA_GLACIAL_CAVES_LEVEL_1))
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_GLACIAL_CAVES_LEVEL_2]       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_GLACIAL_CAVES_LEVEL_1, [1026, 1027, 1028, 1029], 75, null,
+			D2JSP_AREA_GLACIAL_CAVES_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_ROCKY_SUMMIT]                =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_GLACIAL_CAVES_LEVEL_1, [1022, 1023, 1024, 1025], 74, null,
+			D2JSP_AREA_ROCKY_SUMMIT),
+		new TDW_PATH_LinkTile(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1, [1074, 1075, 1076, 1077], 81, null,
+			D2JSP_AREA_ROCKY_SUMMIT)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_NIHLATHAKS_TEMPLE]           =
+	new TDW_PATH_LinkArea(
+//		D2JSP_AREA_HARROGATH,
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_ANGUISH, 1044, 78, null,
+			D2JSP_AREA_NIHLATHAKS_TEMPLE)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HALLS_OF_ANGUISH]            =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_NIHLATHAKS_TEMPLE, 1088, 76, null,
+			D2JSP_AREA_HALLS_OF_ANGUISH),
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_DEATHS_CALLING, [1044, 1049, 1050, 1051, 1052], 78, null,
+			D2JSP_AREA_HALLS_OF_ANGUISH)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HALLS_OF_DEATHS_CALLING]     =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_ANGUISH, [1046, 1047, 1048], 77, null,
+			D2JSP_AREA_HALLS_OF_DEATHS_CALLING),
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_VAUGHT, 864, 78, null,
+			D2JSP_AREA_HALLS_OF_DEATHS_CALLING)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HALLS_OF_VAUGHT]             =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_HALLS_OF_DEATHS_CALLING, [1046, 1047, 1048], 77, null,
+			D2JSP_AREA_HALLS_OF_VAUGHT)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HELL1]                       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_RIGID_HIGHLANDS, [955, 956], 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_HELL1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HELL2]                       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_ARREAT_PLATEAU, [955, 956], 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_HELL2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_HELL3]                       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_TUNDRA_WASTELANDS, [955, 956], 60,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_HELL3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1] =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_ROCKY_SUMMIT, 1089, 80, null,
+			D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1,
+			// MLB: 2004-07-17
+/*
+			new TDW_PATH_LinkObject(D2JSP_AREA_ROCKY_SUMMIT, 1089, 547,
+				D2JSP_MODE_OBJECT_OPENED, null)),
+*/
+			new TDW_PATH_LinkObject(D2JSP_AREA_ROCKY_SUMMIT, 1089, 547,
+				D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1)),
+		new TDW_PATH_LinkTile(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2, [1074, 1075, 1076, 1077], 81, null,
+			D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2] =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_1, [1078, 1079, 1080, 1081], 82, null,
+			D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2),
+		new TDW_PATH_LinkTile(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3, [1074, 1075, 1076, 1077], 81, null,
+			D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3] =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2, [1078, 1079, 1080, 1081], 82, null,
+			D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3),
+		new TDW_PATH_LinkTile(D2JSP_AREA_THRONE_OF_DESTRUCTION, 1086, 81, null,
+			D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_THRONE_OF_DESTRUCTION]       =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkTile(D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_3, [1078, 1079, 1080, 1081], 82, null,
+			D2JSP_AREA_THRONE_OF_DESTRUCTION)
+	);
+TDW_PATH_AreaLink[D2JSP_AREA_THE_WORLDSTONE_CHAMBER]      =
+	new TDW_PATH_LinkArea(
+		new TDW_PATH_LinkObject(D2JSP_AREA_THRONE_OF_DESTRUCTION, 1086, 563,
+			D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_THE_WORLDSTONE_CHAMBER)
+	);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_SpecialChests(dst_area, room_spec, unit_id_spec,
+	real_unit_id, first_only_flag)
+{
+	this.dst_area        = dst_area;
+	this.room_spec       = D2JSP_UTIL_GEN_ExpandArgs(room_spec);
+	this.unit_id_spec    = D2JSP_UTIL_GEN_ExpandArgs(unit_id_spec);
+	this.real_unit_id    = (D2JSP_UTIL_GEN_TypeOfNumber(real_unit_id)) ?
+		real_unit_id : null;
+	this.first_only_flag = (arguments.length < 5) ? true :
+		((first_only_flag) ? true : false);
+
+	this.toString        = TDW_PATHL_SpecialChests_toString;
+
+	function TDW_PATHL_SpecialChests_toString() {
+		return("Special chest in area " + this.dst_area + " (" +
+			D2JSP_AREA_AreaToName(this.dst_area) + "), room specification = [" +
+			this.room_spec + "], unit id specification = [" + this.unit_id_spec +
+			"], real unit id specification = " + this.real_unit_id);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATHL_SpecialChestList = new Array();
+
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_CAVE_LEVEL_2,
+		null, 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_CRYPT,
+		[147, 148, 149, 150], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_MAUSOLEUM,
+		[151, 152, 153, 154], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2,
+		[103, 104, 105, 106, 107], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_HOLE_LEVEL_2,
+		[103, 104, 105, 106, 107], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_PIT_LEVEL_2,
+		[103, 104, 105, 106, 107], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_A2_SEWERS_LEVEL_3,
+		[341, 342, 343, 344], 355));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_STONY_TOMB_LEVEL_2,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3,
+		[456, 457, 458, 459], 354));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_MAGGOT_LAIR_LEVEL_3,
+		509, 356));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_LOST_CITY,
+		409, 580, 87));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_ANCIENT_TUNNELS,
+		[349, 350, 351, 352], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_TAL_RASHAS_TOMB4,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_TAL_RASHAS_TOMB3,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_TAL_RASHAS_TOMB2,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_TAL_RASHAS_TOMB1,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_TAL_RASHAS_TOMB5,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_TAL_RASHAS_TOMB6,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_TAL_RASHAS_TOMB7,
+		[472, 473, 474, 475], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_SPIDER_CAVE,
+		[663, 664], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_SPIDER_CAVERN,
+		[663, 664], 407));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_GREAT_MARSH,
+		[585, 586, 587, 588, 589, 590, 591, 592, 593, 594], 397, 397, false));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_SWAMPY_PIT_LEVEL_3,
+		[703, 704], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3,
+		[703, 704], 406));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_A3_SEWERS_LEVEL_1,
+		[743, 744, 745, 746], 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_A3_SEWERS_LEVEL_2,
+		747, 405));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+		null, 329, null, false));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+		null, 330, null, false));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+		null, 331, null, false));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+		null, 332, null, false));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+		null, 580, 181));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_RIGID_HIGHLANDS,
+		[941, 943, 947], 455));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_HELL1,
+		null, 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_HELL2,
+		null, 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2,
+		null, 455));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_ECHO_CHAMBER,
+		null, 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_HELL3,
+		null, 397));
+TDW_PATHL_SpecialChestList.push(
+	new TDW_PATHL_SpecialChests(D2JSP_AREA_GLACIAL_CAVES_LEVEL_2,
+		null, 397));
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_EnemyLocation(npc_name, dst_area, room_spec, unit_type,
+	unit_id_spec, first_only_flag)
+{
+	this.npc_name           = npc_name;
+	this.dst_area           = dst_area;
+	this.room_spec          = D2JSP_UTIL_GEN_ExpandArgs(room_spec);
+	this.unit_type          = unit_type;
+	this.unit_id_spec       = D2JSP_UTIL_GEN_ExpandArgs(unit_id_spec);
+	this.first_only_flag    = (D2JSP_UTIL_GEN_TypeOfBoolean(first_only_flag)) ?
+		first_only_flag : true;
+
+	this.getUnit                = TDW_PATHL_EnemyLocation_getUnit;
+	this.getEnemyCoordListBasic = TDW_PATHL_EnemyLocation_getEnemyCoordListBasic;
+	this.getEnemyCoordList      = TDW_PATHL_EnemyLocation_getEnemyCoordList;
+	this.gotoEnemy              = TDW_PATHL_EnemyLocation_gotoEnemy;
+	this.gotoEnemyArea          = TDW_PATHL_EnemyLocation_gotoEnemyArea;
+	this.gotoEnemyCoordList     = TDW_PATHL_EnemyLocation_gotoEnemyCoordList;
+	this.loadEnemyLinks         = TDW_PATHL_EnemyLocation_loadEnemyLinks;
+	this.toString               = TDW_PATHL_EnemyLocation_toString;
+
+	function TDW_PATHL_EnemyLocation_getUnit() {
+		return(getUnit(D2JSP_UTIL_GETUNIT_NPC, this.npc_name));
+	}
+
+	function TDW_PATHL_EnemyLocation_getEnemyCoordList() {
+		var enemy_npc;
+		if (me.act != D2JSP_AREA_GetAct(this.dst_area))
+			return(new Array());
+		else if (enemy_npc = this.getUnit())
+			return([enemy_npc.x, enemy_npc.y]);
+		else if (this.unit_type != null)
+			return(this.getEnemyCoordListBasic());
+		else {
+			TDW_PATH_CreateArea(this.dst_area);
+			return(D2JSP_UTIL_PATH_ProgressivePathSort(
+				TDW_PATH_MapGlobal.area_list[this.dst_area].
+				getCenterAccessibleList(null, this.room_spec)));
+		}
+	}
+
+	function TDW_PATHL_EnemyLocation_getEnemyCoordListBasic() {
+		if ((me.act == D2JSP_AREA_GetAct(this.dst_area)) &&
+			(this.unit_type != null)) {
+			TDW_PATH_CreateArea(this.dst_area);
+			return(D2JSP_UTIL_PATH_ProgressivePathSort(
+				TDW_PATH_MapGlobal.area_list[this.dst_area].getPresetCoordsList(
+				this.room_spec, this.unit_type, this.unit_id_spec,
+				this.first_only_flag)));
+		}
+
+		return(new Array());
+	}
+
+	function TDW_PATHL_EnemyLocation_gotoEnemy(access_strategy, load_flags) {
+		var return_code;
+
+		if (!(return_code = this.gotoEnemyArea(access_strategy, load_flags)))
+			return_code = this.gotoEnemyCoordList(this.getEnemyCoordList(),
+				access_strategy);
+
+		return(return_code);
+	}
+
+	function TDW_PATHL_EnemyLocation_gotoEnemyArea(access_strategy, load_flags) {
+		if (this.npc_name == "Duriel")
+			TDW_PATH_FixUpAct();
+		else if ((this.npc_name == "Ancient Kaa the Soulless") &&
+			(this.dst_area == D2JSP_AREA_HAREM_LEVEL_1)) {
+			for (var count_1 = D2JSP_AREA_TAL_RASHAS_TOMB1;
+				count_1 <= D2JSP_AREA_TAL_RASHAS_TOMB7; count_1++) {
+				var this_room = getRoom(count_1);
+				if (this_room) {
+					do {
+						for (var count_2 = 0; count_2 < this.room_spec.length;
+							count_2++) {
+							if (this_room.number == this.room_spec[count_2]) {
+								this.dst_area = count_1;
+								break;
+							}
+						}
+					} while ((this.dst_area == D2JSP_AREA_HAREM_LEVEL_1) &&
+						this_room && this_room.getNext(count_1));
+				}
+				if (this.dst_area != D2JSP_AREA_HAREM_LEVEL_1)
+					break;
+			}
+			if (this.dst_area == D2JSP_AREA_HAREM_LEVEL_1)
+				return(-1);
+		}
+
+		return(TDW_PATH_GotoTargetArea(this.dst_area, access_strategy,
+			load_flags));
+	}
+
+	function TDW_PATHL_EnemyLocation_gotoEnemyCoordList(coord_list,
+		access_strategy) {
+		var return_code = -1;
+
+		if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(coord_list)) {
+			while (coord_list.length) {
+				if (this.getUnit()) {
+					return_code = 0;
+					break;
+				}
+				if (access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL, coord_list[0]))
+					break;
+				if (this.getUnit()) {
+					return_code = 0;
+					break;
+				}
+				coord_list.shift();
+			}
+		}
+
+		return(return_code);		
+	}
+
+	function TDW_PATHL_EnemyLocation_loadEnemyLinks(src_area,
+		access_strategy, load_flags) {
+// CODE NOTE: Set to none because of core bug getting many collision tables.
+//load_flags = TDW_PATHL_AREA_LOAD_FLAG_NONE;
+		if ((load_flags & TDW_PATHL_AREA_LOAD_FLAG_MASK) &&
+			D2JSP_AREA_IsValidInGame(src_area)) {
+			TDW_PATH_ConstructTargetList(this.dst_area, src_area, access_strategy,
+				load_flags);
+			if (me.act == D2JSP_AREA_GetAct(this.dst_area))
+				this.getEnemyCoordListBasic();
+			runGC();
+		}
+	}
+
+	function TDW_PATHL_EnemyLocation_toString() {
+		return("Enemy NPC location for " + this.npc_name);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (parseFloat(me.version) < 0.3518) {
+var TDW_PATHL_EnemyList = new Array();
+/*
+	// Not an enemy, but useful.
+TDW_PATHL_EnemyList["Tyrael"]                   =
+	new TDW_PATHL_EnemyLocation("Tyrael",                   D2JSP_AREA_DURIELS_LAIR, null, D2JSP_UTIL_GETUNIT_NPC, 251);
+*/
+
+TDW_PATHL_EnemyList["Corpsefire"]               =
+	new TDW_PATHL_EnemyLocation("Corpsefire",               D2JSP_AREA_DEN_OF_EVIL, null, D2JSP_UTIL_GETUNIT_NPC, 652);
+TDW_PATHL_EnemyList["Bishibosh"]                =
+	new TDW_PATHL_EnemyLocation("Bishibosh",                D2JSP_AREA_COLD_PLAINS, 44, D2JSP_UTIL_GETUNIT_NPC, 612);
+TDW_PATHL_EnemyList["Coldcrow"]                 =
+	new TDW_PATHL_EnemyLocation("Coldcrow",                 D2JSP_AREA_CAVE_LEVEL_1, [99, 100, 101, 102]);
+TDW_PATHL_EnemyList["Blood Raven"]              =
+	new TDW_PATHL_EnemyLocation("Blood Raven",              D2JSP_AREA_BURIAL_GROUNDS, null, D2JSP_UTIL_GETUNIT_NPC, 580);
+TDW_PATHL_EnemyList["Bonebreaker"]              =
+	new TDW_PATHL_EnemyLocation("Bonebreaker",              D2JSP_AREA_CRYPT, [147, 148, 149, 150], D2JSP_UTIL_GETUNIT_NPC, 613);
+TDW_PATHL_EnemyList["Rakanishu"]                =
+	new TDW_PATHL_EnemyLocation("Rakanishu",                D2JSP_AREA_STONY_FIELD, 160);
+TDW_PATHL_EnemyList["Griswold"]                 =
+	new TDW_PATHL_EnemyLocation("Griswold",                 D2JSP_AREA_TRISTRAM, null, D2JSP_UTIL_GETUNIT_NPC, 617);
+TDW_PATHL_EnemyList["Treehead Woodfist"]        =
+	new TDW_PATHL_EnemyLocation("Treehead Woodfist",        D2JSP_AREA_DARK_WOOD, 161);
+TDW_PATHL_EnemyList["The Countess"]             =
+	new TDW_PATHL_EnemyLocation("The Countess",             D2JSP_AREA_TOWER_CELLAR_LEVEL_5, null, D2JSP_UTIL_GETUNIT_NPC, 618);
+TDW_PATHL_EnemyList["The Smith"]                =
+	new TDW_PATHL_EnemyLocation("The Smith",                D2JSP_AREA_BARRACKS, [202, 203, 204, 205]);
+TDW_PATHL_EnemyList["Pitspawn Fouldog"]         =
+	new TDW_PATHL_EnemyLocation("Pitspawn Fouldog",         D2JSP_AREA_JAIL_LEVEL_2, [252, 253, 254, 255]);
+TDW_PATHL_EnemyList["Bone Ash"]                 =
+	new TDW_PATHL_EnemyLocation("Bone Ash",                 D2JSP_AREA_CATHEDRAL, null, D2JSP_UTIL_GETUNIT_NPC, 621);
+TDW_PATHL_EnemyList["Andariel"]                 =
+	new TDW_PATHL_EnemyLocation("Andariel",                 D2JSP_AREA_CATACOMBS_LEVEL_4, null, D2JSP_UTIL_GETUNIT_NPC, 156);
+TDW_PATHL_EnemyList["The Cow King"]             =
+	new TDW_PATHL_EnemyLocation("The Cow King",             D2JSP_AREA_MOO_MOO_FARM, 50);
+TDW_PATHL_EnemyList["Radament"]                 =
+	new TDW_PATHL_EnemyLocation("Radament",                 D2JSP_AREA_A2_SEWERS_LEVEL_3, [341, 342, 343, 344]);
+TDW_PATHL_EnemyList["Creeping Feature"]         =
+	new TDW_PATHL_EnemyLocation("Creeping Feature",         D2JSP_AREA_STONY_TOMB_LEVEL_2, null, D2JSP_UTIL_GETUNIT_NPC, 626);
+TDW_PATHL_EnemyList["Bloodwitch the Wild"]      =
+	new TDW_PATHL_EnemyLocation("Bloodwitch the Wild",      D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3, [456, 457, 458, 459]);
+TDW_PATHL_EnemyList["Beetleburst"]              =
+	new TDW_PATHL_EnemyLocation("Beetleburst",              D2JSP_AREA_FAR_OASIS, 396, D2JSP_UTIL_GETUNIT_NPC, 625);
+TDW_PATHL_EnemyList["Dark Elder"]               =
+	new TDW_PATHL_EnemyLocation("Dark Elder",               D2JSP_AREA_LOST_CITY, 413, D2JSP_UTIL_GETUNIT_NPC, 629);
+TDW_PATHL_EnemyList["Coldworm the Burrower"]    =
+	new TDW_PATHL_EnemyLocation("Coldworm the Burrower",    D2JSP_AREA_MAGGOT_LAIR_LEVEL_3, 509);
+TDW_PATHL_EnemyList["Fangskin"]                 =
+	new TDW_PATHL_EnemyLocation("Fangskin",                 D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2);
+TDW_PATHL_EnemyList["Fire Eye"]                 =
+	new TDW_PATHL_EnemyLocation("Fire Eye",                 D2JSP_AREA_PALACE_CELLAR_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 628);
+TDW_PATHL_EnemyList["The Summoner"]             =
+	new TDW_PATHL_EnemyLocation("The Summoner",             D2JSP_AREA_ARCANE_SANCTUARY, [525, 526, 527, 528]);
+TDW_PATHL_EnemyList["Ancient Kaa the Soulless"] =
+	new TDW_PATHL_EnemyLocation("Ancient Kaa the Soulless", D2JSP_AREA_HAREM_LEVEL_1, [468, 469, 470, 471]);
+TDW_PATHL_EnemyList["Duriel"]                   =
+	new TDW_PATHL_EnemyLocation("Duriel",                   D2JSP_AREA_DURIELS_LAIR, null, D2JSP_UTIL_GETUNIT_NPC, 211);
+/*
+TDW_PATHL_EnemyList["Sszark the Burning"]       =
+	new TDW_PATHL_EnemyLocation("Sszark the Burning",       D2JSP_AREA_SPIDER_CAVERN, null, D2JSP_UTIL_GETUNIT_OBJECT, 407);
+*/
+TDW_PATHL_EnemyList["Sszark the Burning"]       =
+	new TDW_PATHL_EnemyLocation("Sszark the Burning",       D2JSP_AREA_SPIDER_CAVERN, null, D2JSP_UTIL_GETUNIT_NPC, 633);
+/*
+TDW_PATHL_EnemyList["Witch Doctor Endugu"]      =
+	new TDW_PATHL_EnemyLocation("Witch Doctor Endugu",      D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3, null, D2JSP_UTIL_GETUNIT_OBJECT, 406);
+*/
+TDW_PATHL_EnemyList["Witch Doctor Endugu"]      =
+	new TDW_PATHL_EnemyLocation("Witch Doctor Endugu",      D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 634);
+/*
+TDW_PATHL_EnemyList["Icehawk Riftwing"]         =
+	new TDW_PATHL_EnemyLocation("Icehawk Riftwing",         D2JSP_AREA_A3_SEWERS_LEVEL_1, [739, 740, 741, 742], D2JSP_UTIL_GETUNIT_TILE, 60);
+*/
+TDW_PATHL_EnemyList["Icehawk Riftwing"]         =
+	new TDW_PATHL_EnemyLocation("Icehawk Riftwing",         D2JSP_AREA_A3_SEWERS_LEVEL_1, [739, 740, 741, 742], D2JSP_UTIL_GETUNIT_NPC, 637);
+TDW_PATHL_EnemyList["Stormtree"]                =
+	new TDW_PATHL_EnemyLocation("Stormtree",                D2JSP_AREA_FLAYER_JUNGLE, 574, D2JSP_UTIL_GETUNIT_NPC, 635);
+TDW_PATHL_EnemyList["Battlemaid Sarina"]        =
+	new TDW_PATHL_EnemyLocation("Battlemaid Sarina",        D2JSP_AREA_RUINED_TEMPLE, null, D2JSP_UTIL_GETUNIT_NPC, 636);
+TDW_PATHL_EnemyList["Ismail Vilehand"]          =
+	new TDW_PATHL_EnemyLocation("Ismail Vilehand",          D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 638);
+TDW_PATHL_EnemyList["Geleb Flamefinger"]        =
+	new TDW_PATHL_EnemyLocation("Geleb Flamefinger",        D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 639);
+TDW_PATHL_EnemyList["Toorc Icefist"]            =
+	new TDW_PATHL_EnemyLocation("Toorc Icefist",            D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 641);
+TDW_PATHL_EnemyList["Maffer Dragonhand"]        =
+	new TDW_PATHL_EnemyLocation("Maffer Dragonhand",        D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 643);
+TDW_PATHL_EnemyList["Wyand Voidbringer"]        =
+	new TDW_PATHL_EnemyLocation("Wyand Voidbringer",        D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 642);
+TDW_PATHL_EnemyList["Bremm Sparkfist"]          =
+	new TDW_PATHL_EnemyLocation("Bremm Sparkfist",          D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 640);
+TDW_PATHL_EnemyList["Mephisto"]                 =
+	new TDW_PATHL_EnemyLocation("Mephisto",                 D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 242);
+TDW_PATHL_EnemyList["Izual"]                    =
+	new TDW_PATHL_EnemyLocation("Izual",                    D2JSP_AREA_PLAINS_OF_DESPAIR, 822);
+TDW_PATHL_EnemyList["Hephasto The Armorer"]     =
+	new TDW_PATHL_EnemyLocation("Hephasto The Armorer",     D2JSP_AREA_RIVER_OF_FLAME, [853, 854]);
+TDW_PATHL_EnemyList["Infector of Souls"]        =
+	new TDW_PATHL_EnemyLocation("Infector of Souls",        D2JSP_AREA_CHAOS_SANCTUM, 859, D2JSP_UTIL_GETUNIT_OBJECT, [392, 393]);
+TDW_PATHL_EnemyList["Lord De Seis"]             =
+	new TDW_PATHL_EnemyLocation("Lord De Seis",             D2JSP_AREA_CHAOS_SANCTUM, 861, D2JSP_UTIL_GETUNIT_OBJECT, 394);
+TDW_PATHL_EnemyList["Grand Vizier of Chaos"]    =
+	new TDW_PATHL_EnemyLocation("Grand Vizier of Chaos",    D2JSP_AREA_CHAOS_SANCTUM, 858, D2JSP_UTIL_GETUNIT_OBJECT, [395, 396]);
+TDW_PATHL_EnemyList["Diablo"]                   =
+	new TDW_PATHL_EnemyLocation("Diablo",                   D2JSP_AREA_CHAOS_SANCTUM, 862);
+TDW_PATHL_EnemyList["Dac Farren"]               =
+	new TDW_PATHL_EnemyLocation("Dac Farren",               D2JSP_AREA_BLOODY_FOOTHILLS, 871, D2JSP_UTIL_GETUNIT_NPC, 660);
+TDW_PATHL_EnemyList["Shenk the Overseer"]       =
+	new TDW_PATHL_EnemyLocation("Shenk the Overseer",       D2JSP_AREA_BLOODY_FOOTHILLS, 878, D2JSP_UTIL_GETUNIT_NPC, 654);
+TDW_PATHL_EnemyList["Eldritch the Rectifier"]   =
+	new TDW_PATHL_EnemyLocation("Eldritch the Rectifier",   D2JSP_AREA_RIGID_HIGHLANDS, 880, D2JSP_UTIL_GETUNIT_NPC, 661);
+// Thresh Socket found in 931, 933, 937
+TDW_PATHL_EnemyList["Thresh Socket"]            =
+	new TDW_PATHL_EnemyLocation("Thresh Socket",            D2JSP_AREA_RIGID_HIGHLANDS, [931, 932, 933, 934, 935, 936, 937, 938], D2JSP_UTIL_GETUNIT_NPC, 663, false);
+TDW_PATHL_EnemyList["Eyeback the Unleashed"]    =
+	new TDW_PATHL_EnemyLocation("Eyeback the Unleashed",    D2JSP_AREA_RIGID_HIGHLANDS, [909, 910], D2JSP_UTIL_GETUNIT_NPC, 662);
+TDW_PATHL_EnemyList["Sharptooth Slayer"]        =
+	new TDW_PATHL_EnemyLocation("Sharptooth Slayer",        D2JSP_AREA_ARREAT_PLATEAU, [913, 914], D2JSP_UTIL_GETUNIT_TILE, 71);
+TDW_PATHL_EnemyList["Frozenstein"]              =
+	new TDW_PATHL_EnemyLocation("Frozenstein",              D2JSP_AREA_CELLAR_OF_PITY, null, D2JSP_UTIL_GETUNIT_OBJECT, 460);
+TDW_PATHL_EnemyList["Bonesaw Breaker"]          =
+	new TDW_PATHL_EnemyLocation("Bonesaw Breaker",          D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2, null, D2JSP_UTIL_GETUNIT_OBJECT, 455);
+TDW_PATHL_EnemyList["Pindleskin"]               =
+	new TDW_PATHL_EnemyLocation("Pindleskin",               D2JSP_AREA_NIHLATHAKS_TEMPLE, null, D2JSP_UTIL_GETUNIT_NPC, 664);
+TDW_PATHL_EnemyList["Nihlathak"]                =
+	new TDW_PATHL_EnemyLocation("Nihlathak",                D2JSP_AREA_HALLS_OF_VAUGHT, 864, D2JSP_UTIL_GETUNIT_OBJECT, 462);
+TDW_PATHL_EnemyList["Snapchip Shatter"]         =
+	new TDW_PATHL_EnemyLocation("Snapchip Shatter",         D2JSP_AREA_GLACIAL_CAVES_LEVEL_2, null, D2JSP_UTIL_GETUNIT_OBJECT, 397);
+TDW_PATHL_EnemyList["Talic"]                    =
+	new TDW_PATHL_EnemyLocation("Talic",                    D2JSP_AREA_ROCKY_SUMMIT);
+TDW_PATHL_EnemyList["Korlic"]                   =
+	new TDW_PATHL_EnemyLocation("Korlic",                   D2JSP_AREA_ROCKY_SUMMIT);
+TDW_PATHL_EnemyList["Madawc"]                   =
+	new TDW_PATHL_EnemyLocation("Madawc",                   D2JSP_AREA_ROCKY_SUMMIT);
+TDW_PATHL_EnemyList["Colenzo the Annihilator"]  =
+	new TDW_PATHL_EnemyLocation("Colenzo the Annihilator",  D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Achmel the Cursed"]        =
+	new TDW_PATHL_EnemyLocation("Achmel the Cursed",        D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Bartuc the Bloody"]        =
+	new TDW_PATHL_EnemyLocation("Bartuc the Bloody",        D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Ventar the Unholy"]        =
+	new TDW_PATHL_EnemyLocation("Ventar the Unholy",        D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Lister the Tormentor"]     =
+	new TDW_PATHL_EnemyLocation("Lister the Tormentor",     D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Baal"]                     =
+	new TDW_PATHL_EnemyLocation("Baal",                     D2JSP_AREA_THE_WORLDSTONE_CHAMBER);
+}
+else {
+/*
+	UNDONE LIST:
+	------ -----
+***		Griswold
+Sharptooth Slayer
+*/
+var TDW_PATHL_EnemyList = new Array();
+/*
+	// Not an enemy, but useful.
+TDW_PATHL_EnemyList["Tyrael"]                   =
+	new TDW_PATHL_EnemyLocation("Tyrael",                   D2JSP_AREA_DURIELS_LAIR, null, D2JSP_UTIL_GETUNIT_NPC, 251);
+*/
+
+TDW_PATHL_EnemyList["Corpsefire"]               =
+//	new TDW_PATHL_EnemyLocation("Corpsefire",               D2JSP_AREA_DEN_OF_EVIL, null, D2JSP_UTIL_GETUNIT_NPC, 652);
+	new TDW_PATHL_EnemyLocation("Corpsefire",               D2JSP_AREA_DEN_OF_EVIL, null, D2JSP_UTIL_GETUNIT_NPC, 744);
+TDW_PATHL_EnemyList["Bishibosh"]                =
+//	new TDW_PATHL_EnemyLocation("Bishibosh",                D2JSP_AREA_COLD_PLAINS, 44, D2JSP_UTIL_GETUNIT_NPC, 612);
+	new TDW_PATHL_EnemyLocation("Bishibosh",                D2JSP_AREA_COLD_PLAINS, 44, D2JSP_UTIL_GETUNIT_NPC, 704);
+TDW_PATHL_EnemyList["Coldcrow"]                 =
+//	new TDW_PATHL_EnemyLocation("Coldcrow",                 D2JSP_AREA_CAVE_LEVEL_1, [99, 100, 101, 102]);
+	new TDW_PATHL_EnemyLocation("Coldcrow",                 D2JSP_AREA_CAVE_LEVEL_1, [99, 100, 101, 102], D2JSP_UTIL_GETUNIT_NPC, 706);
+TDW_PATHL_EnemyList["Blood Raven"]              =
+//	new TDW_PATHL_EnemyLocation("Blood Raven",              D2JSP_AREA_BURIAL_GROUNDS, null, D2JSP_UTIL_GETUNIT_NPC, 580);
+	new TDW_PATHL_EnemyLocation("Blood Raven",              D2JSP_AREA_BURIAL_GROUNDS, null, D2JSP_UTIL_GETUNIT_NPC, 775);
+TDW_PATHL_EnemyList["Bonebreaker"]              =
+//	new TDW_PATHL_EnemyLocation("Bonebreaker",              D2JSP_AREA_CRYPT, [147, 148, 149, 150], D2JSP_UTIL_GETUNIT_NPC, 613);
+	new TDW_PATHL_EnemyLocation("Bonebreaker",              D2JSP_AREA_CRYPT, [147, 148, 149, 150], D2JSP_UTIL_GETUNIT_NPC, 705);
+TDW_PATHL_EnemyList["Rakanishu"]                =
+//	new TDW_PATHL_EnemyLocation("Rakanishu",                D2JSP_AREA_STONY_FIELD, 160);
+	new TDW_PATHL_EnemyLocation("Rakanishu",                D2JSP_AREA_STONY_FIELD, 160, D2JSP_UTIL_GETUNIT_NPC, 707);
+TDW_PATHL_EnemyList["Griswold"]                 =
+//	new TDW_PATHL_EnemyLocation("Griswold",                 D2JSP_AREA_TRISTRAM, null, D2JSP_UTIL_GETUNIT_NPC, 617);
+	new TDW_PATHL_EnemyLocation("Griswold",                 D2JSP_AREA_TRISTRAM, null, D2JSP_UTIL_GETUNIT_NPC, 709);
+TDW_PATHL_EnemyList["Treehead Woodfist"]        =
+//	new TDW_PATHL_EnemyLocation("Treehead Woodfist",        D2JSP_AREA_DARK_WOOD, 161);
+	new TDW_PATHL_EnemyLocation("Treehead Woodfist",        D2JSP_AREA_DARK_WOOD, 161, D2JSP_UTIL_GETUNIT_NPC, 708);
+TDW_PATHL_EnemyList["The Countess"]             =
+//	new TDW_PATHL_EnemyLocation("The Countess",             D2JSP_AREA_TOWER_CELLAR_LEVEL_5, null, D2JSP_UTIL_GETUNIT_NPC, 618);
+	new TDW_PATHL_EnemyLocation("The Countess",             D2JSP_AREA_TOWER_CELLAR_LEVEL_5, null, D2JSP_UTIL_GETUNIT_NPC, 710);
+TDW_PATHL_EnemyList["The Smith"]                =
+//	new TDW_PATHL_EnemyLocation("The Smith",                D2JSP_AREA_BARRACKS, [202, 203, 204, 205]);
+	new TDW_PATHL_EnemyLocation("The Smith",                D2JSP_AREA_BARRACKS, [202, 203, 204, 205], D2JSP_UTIL_GETUNIT_NPC, 724);
+TDW_PATHL_EnemyList["Pitspawn Fouldog"]         =
+//	new TDW_PATHL_EnemyLocation("Pitspawn Fouldog",         D2JSP_AREA_JAIL_LEVEL_2, [252, 253, 254, 255]);
+	new TDW_PATHL_EnemyLocation("Pitspawn Fouldog",         D2JSP_AREA_JAIL_LEVEL_2, [252, 253, 254, 255], D2JSP_UTIL_GETUNIT_NPC, 711);
+TDW_PATHL_EnemyList["Bone Ash"]                 =
+//	new TDW_PATHL_EnemyLocation("Bone Ash",                 D2JSP_AREA_CATHEDRAL, null, D2JSP_UTIL_GETUNIT_NPC, 621);
+	new TDW_PATHL_EnemyLocation("Bone Ash",                 D2JSP_AREA_CATHEDRAL, null, D2JSP_UTIL_GETUNIT_NPC, 713);
+TDW_PATHL_EnemyList["Andariel"]                 =
+	new TDW_PATHL_EnemyLocation("Andariel",                 D2JSP_AREA_CATACOMBS_LEVEL_4, null, D2JSP_UTIL_GETUNIT_NPC, 156);
+TDW_PATHL_EnemyList["The Cow King"]             =
+	new TDW_PATHL_EnemyLocation("The Cow King",             D2JSP_AREA_MOO_MOO_FARM, 50, D2JSP_UTIL_GETUNIT_NPC, 743);
+TDW_PATHL_EnemyList["Radament"]                 =
+//	new TDW_PATHL_EnemyLocation("Radament",                 D2JSP_AREA_A2_SEWERS_LEVEL_3, [341, 342, 343, 344]);
+	new TDW_PATHL_EnemyLocation("Radament",                 D2JSP_AREA_A2_SEWERS_LEVEL_3, [341, 342, 343, 344], D2JSP_UTIL_GETUNIT_NPC, 714);
+TDW_PATHL_EnemyList["Creeping Feature"]         =
+//	new TDW_PATHL_EnemyLocation("Creeping Feature",         D2JSP_AREA_STONY_TOMB_LEVEL_2, null, D2JSP_UTIL_GETUNIT_NPC, 626);
+	new TDW_PATHL_EnemyLocation("Creeping Feature",         D2JSP_AREA_STONY_TOMB_LEVEL_2, [464, 465, 466, 467], D2JSP_UTIL_GETUNIT_NPC, 718);
+TDW_PATHL_EnemyList["Bloodwitch the Wild"]      =
+//	new TDW_PATHL_EnemyLocation("Bloodwitch the Wild",      D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3, [456, 457, 458, 459]);
+	new TDW_PATHL_EnemyLocation("Bloodwitch the Wild",      D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3, [456, 457, 458, 459], D2JSP_UTIL_GETUNIT_NPC, 715);
+TDW_PATHL_EnemyList["Beetleburst"]              =
+//	new TDW_PATHL_EnemyLocation("Beetleburst",              D2JSP_AREA_FAR_OASIS, 396, D2JSP_UTIL_GETUNIT_NPC, 625);
+	new TDW_PATHL_EnemyLocation("Beetleburst",              D2JSP_AREA_FAR_OASIS, 396, D2JSP_UTIL_GETUNIT_NPC, 717);
+TDW_PATHL_EnemyList["Dark Elder"]               =
+//	new TDW_PATHL_EnemyLocation("Dark Elder",               D2JSP_AREA_LOST_CITY, 413, D2JSP_UTIL_GETUNIT_NPC, 629);
+	new TDW_PATHL_EnemyLocation("Dark Elder",               D2JSP_AREA_LOST_CITY, 413, D2JSP_UTIL_GETUNIT_NPC, 721);
+TDW_PATHL_EnemyList["Coldworm the Burrower"]    =
+//	new TDW_PATHL_EnemyLocation("Coldworm the Burrower",    D2JSP_AREA_MAGGOT_LAIR_LEVEL_3, 509);
+	new TDW_PATHL_EnemyLocation("Coldworm the Burrower",    D2JSP_AREA_MAGGOT_LAIR_LEVEL_3, 509, D2JSP_UTIL_GETUNIT_NPC, 719);
+TDW_PATHL_EnemyList["Fangskin"]                 =
+//	new TDW_PATHL_EnemyLocation("Fangskin",                 D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2);
+	new TDW_PATHL_EnemyLocation("Fangskin",                 D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2, null, D2JSP_UTIL_GETUNIT_NPC, 716);
+TDW_PATHL_EnemyList["Fire Eye"]                 =
+//	new TDW_PATHL_EnemyLocation("Fire Eye",                 D2JSP_AREA_PALACE_CELLAR_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 628);
+	new TDW_PATHL_EnemyLocation("Fire Eye",                 D2JSP_AREA_PALACE_CELLAR_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 720);
+TDW_PATHL_EnemyList["The Summoner"]             =
+	new TDW_PATHL_EnemyLocation("The Summoner",             D2JSP_AREA_ARCANE_SANCTUARY, [525, 526, 527, 528], D2JSP_UTIL_GETUNIT_NPC, 250);
+TDW_PATHL_EnemyList["Ancient Kaa the Soulless"] =
+//	new TDW_PATHL_EnemyLocation("Ancient Kaa the Soulless", D2JSP_AREA_HAREM_LEVEL_1, [468, 469, 470, 471]);
+	new TDW_PATHL_EnemyLocation("Ancient Kaa the Soulless", D2JSP_AREA_HAREM_LEVEL_1, [468, 469, 470, 471], D2JSP_UTIL_GETUNIT_NPC, 723);
+TDW_PATHL_EnemyList["Duriel"]                   =
+	new TDW_PATHL_EnemyLocation("Duriel",                   D2JSP_AREA_DURIELS_LAIR, null, D2JSP_UTIL_GETUNIT_NPC, 211);
+TDW_PATHL_EnemyList["Sszark the Burning"]       =
+//	new TDW_PATHL_EnemyLocation("Sszark the Burning",       D2JSP_AREA_SPIDER_CAVERN, null, D2JSP_UTIL_GETUNIT_NPC, 633);
+	new TDW_PATHL_EnemyLocation("Sszark the Burning",       D2JSP_AREA_SPIDER_CAVERN, null, D2JSP_UTIL_GETUNIT_NPC, 725);
+TDW_PATHL_EnemyList["Witch Doctor Endugu"]      =
+//	new TDW_PATHL_EnemyLocation("Witch Doctor Endugu",      D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 634);
+// Could be 327, 328, 726, 780, 781 or 793
+	new TDW_PATHL_EnemyLocation("Witch Doctor Endugu",      D2JSP_AREA_FLAYER_DUNGEON_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 726);
+TDW_PATHL_EnemyList["Icehawk Riftwing"]         =
+//	new TDW_PATHL_EnemyLocation("Icehawk Riftwing",         D2JSP_AREA_A3_SEWERS_LEVEL_1, [739, 740, 741, 742], D2JSP_UTIL_GETUNIT_NPC, 637);
+	new TDW_PATHL_EnemyLocation("Icehawk Riftwing",         D2JSP_AREA_A3_SEWERS_LEVEL_1, [739, 740, 741, 742], D2JSP_UTIL_GETUNIT_NPC, 729);
+TDW_PATHL_EnemyList["Stormtree"]                =
+//	new TDW_PATHL_EnemyLocation("Stormtree",                D2JSP_AREA_FLAYER_JUNGLE, 574, D2JSP_UTIL_GETUNIT_NPC, 635);
+// Could be 328, 727, 780, 781
+	new TDW_PATHL_EnemyLocation("Stormtree",                D2JSP_AREA_FLAYER_JUNGLE, 574, D2JSP_UTIL_GETUNIT_NPC, 727);
+TDW_PATHL_EnemyList["Battlemaid Sarina"]        =
+//	new TDW_PATHL_EnemyLocation("Battlemaid Sarina",        D2JSP_AREA_RUINED_TEMPLE, null, D2JSP_UTIL_GETUNIT_NPC, 636);
+	new TDW_PATHL_EnemyLocation("Battlemaid Sarina",        D2JSP_AREA_RUINED_TEMPLE, null, D2JSP_UTIL_GETUNIT_NPC, 728);
+TDW_PATHL_EnemyList["Ismail Vilehand"]          =
+//	new TDW_PATHL_EnemyLocation("Ismail Vilehand",          D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 638);
+	// Could be 730, 731 or 732
+	new TDW_PATHL_EnemyLocation("Ismail Vilehand",          D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 730);
+TDW_PATHL_EnemyList["Geleb Flamefinger"]        =
+//	new TDW_PATHL_EnemyLocation("Geleb Flamefinger",        D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 639);
+	// Could be 730, 731 or 732
+	new TDW_PATHL_EnemyLocation("Geleb Flamefinger",        D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 731);
+TDW_PATHL_EnemyList["Toorc Icefist"]            =
+//	new TDW_PATHL_EnemyLocation("Toorc Icefist",            D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 641);
+	// Could be 730, 731 or 732
+	new TDW_PATHL_EnemyLocation("Toorc Icefist",            D2JSP_AREA_TRAVINCAL, 654, D2JSP_UTIL_GETUNIT_NPC, 733);
+TDW_PATHL_EnemyList["Maffer Dragonhand"]        =
+//	new TDW_PATHL_EnemyLocation("Maffer Dragonhand",        D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 643);
+	new TDW_PATHL_EnemyLocation("Maffer Dragonhand",        D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 735);
+TDW_PATHL_EnemyList["Wyand Voidbringer"]        =
+//	new TDW_PATHL_EnemyLocation("Wyand Voidbringer",        D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 642);
+	new TDW_PATHL_EnemyLocation("Wyand Voidbringer",        D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 734);
+TDW_PATHL_EnemyList["Bremm Sparkfist"]          =
+//	new TDW_PATHL_EnemyLocation("Bremm Sparkfist",          D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 640);
+	new TDW_PATHL_EnemyLocation("Bremm Sparkfist",          D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 732);
+TDW_PATHL_EnemyList["Mephisto"]                 =
+	new TDW_PATHL_EnemyLocation("Mephisto",                 D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3, null, D2JSP_UTIL_GETUNIT_NPC, 242);
+TDW_PATHL_EnemyList["Izual"]                    =
+//	new TDW_PATHL_EnemyLocation("Izual",                    D2JSP_AREA_PLAINS_OF_DESPAIR, 822);
+	new TDW_PATHL_EnemyLocation("Izual",                    D2JSP_AREA_PLAINS_OF_DESPAIR, 822, D2JSP_UTIL_GETUNIT_NPC, 256);
+TDW_PATHL_EnemyList["Hephasto The Armorer"]     =
+	new TDW_PATHL_EnemyLocation("Hephasto The Armorer",     D2JSP_AREA_RIVER_OF_FLAME, [853, 854], D2JSP_UTIL_GETUNIT_NPC, 745);
+TDW_PATHL_EnemyList["Infector of Souls"]        =
+	new TDW_PATHL_EnemyLocation("Infector of Souls",        D2JSP_AREA_CHAOS_SANCTUM, 859, D2JSP_UTIL_GETUNIT_OBJECT, [392, 393]);
+TDW_PATHL_EnemyList["Lord De Seis"]             =
+	new TDW_PATHL_EnemyLocation("Lord De Seis",             D2JSP_AREA_CHAOS_SANCTUM, 861, D2JSP_UTIL_GETUNIT_OBJECT, 394);
+TDW_PATHL_EnemyList["Grand Vizier of Chaos"]    =
+	new TDW_PATHL_EnemyLocation("Grand Vizier of Chaos",    D2JSP_AREA_CHAOS_SANCTUM, 858, D2JSP_UTIL_GETUNIT_OBJECT, [395, 396]);
+TDW_PATHL_EnemyList["Diablo"]                   =
+	new TDW_PATHL_EnemyLocation("Diablo",                   D2JSP_AREA_CHAOS_SANCTUM, 862);
+TDW_PATHL_EnemyList["Dac Farren"]               =
+// Dac: was 660.
+//	new TDW_PATHL_EnemyLocation("Dac Farren",               D2JSP_AREA_BLOODY_FOOTHILLS, 871, D2JSP_UTIL_GETUNIT_NPC, 660);
+	new TDW_PATHL_EnemyLocation("Dac Farren",               D2JSP_AREA_BLOODY_FOOTHILLS, 871, D2JSP_UTIL_GETUNIT_NPC, 752);
+TDW_PATHL_EnemyList["Shenk the Overseer"]       =
+// Shenk: was 654, now is 498, 746 or 794
+//	new TDW_PATHL_EnemyLocation("Shenk the Overseer",       D2JSP_AREA_BLOODY_FOOTHILLS, 878, D2JSP_UTIL_GETUNIT_NPC, 654);
+	new TDW_PATHL_EnemyLocation("Shenk the Overseer",       D2JSP_AREA_BLOODY_FOOTHILLS, 878, D2JSP_UTIL_GETUNIT_NPC, 746);
+TDW_PATHL_EnemyList["Eldritch the Rectifier"]   =
+// Eldritch: was 661
+//	new TDW_PATHL_EnemyLocation("Eldritch the Rectifier",   D2JSP_AREA_RIGID_HIGHLANDS, 880, D2JSP_UTIL_GETUNIT_NPC, 661);
+	new TDW_PATHL_EnemyLocation("Eldritch the Rectifier",   D2JSP_AREA_RIGID_HIGHLANDS, 880, D2JSP_UTIL_GETUNIT_NPC, 753);
+TDW_PATHL_EnemyList["Eyeback the Unleashed"]    =
+//	new TDW_PATHL_EnemyLocation("Eyeback the Unleashed",    D2JSP_AREA_RIGID_HIGHLANDS, [909, 910], D2JSP_UTIL_GETUNIT_NPC, 662);
+	new TDW_PATHL_EnemyLocation("Eyeback the Unleashed",    D2JSP_AREA_RIGID_HIGHLANDS, [909, 910], D2JSP_UTIL_GETUNIT_NPC, 754);
+TDW_PATHL_EnemyList["Thresh Socket"]            =
+//	new TDW_PATHL_EnemyLocation("Thresh Socket",            D2JSP_AREA_RIGID_HIGHLANDS, [931, 932, 933, 934, 935, 936, 937, 938], D2JSP_UTIL_GETUNIT_NPC, 663, false);
+	// NOTE: Area changed from Frigid Highlands to Arreat Plateau.
+	new TDW_PATHL_EnemyLocation("Thresh Socket",            D2JSP_AREA_ARREAT_PLATEAU, [913, 914], D2JSP_UTIL_GETUNIT_NPC, 755);
+/*
+TDW_PATHL_EnemyList["Sharptooth Slayer"]        =
+	new TDW_PATHL_EnemyLocation("Sharptooth Slayer",        D2JSP_AREA_ARREAT_PLATEAU, [913, 914], D2JSP_UTIL_GETUNIT_TILE, 71);
+*/
+TDW_PATHL_EnemyList["Frozenstein"]              =
+//	new TDW_PATHL_EnemyLocation("Frozenstein",              D2JSP_AREA_CELLAR_OF_PITY, null, D2JSP_UTIL_GETUNIT_OBJECT, 460);
+	new TDW_PATHL_EnemyLocation("Frozenstein",              D2JSP_AREA_CELLAR_OF_PITY, null, D2JSP_UTIL_GETUNIT_NPC, 763);
+TDW_PATHL_EnemyList["Bonesaw Breaker"]          =
+//	new TDW_PATHL_EnemyLocation("Bonesaw Breaker",          D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2, null, D2JSP_UTIL_GETUNIT_OBJECT, 455);
+	new TDW_PATHL_EnemyLocation("Bonesaw Breaker",          D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_2, null, D2JSP_UTIL_GETUNIT_NPC, 751);
+TDW_PATHL_EnemyList["Pindleskin"]               =
+//	new TDW_PATHL_EnemyLocation("Pindleskin",               D2JSP_AREA_NIHLATHAKS_TEMPLE, null, D2JSP_UTIL_GETUNIT_NPC, 664);
+	new TDW_PATHL_EnemyLocation("Pindleskin",               D2JSP_AREA_NIHLATHAKS_TEMPLE, null, D2JSP_UTIL_GETUNIT_NPC, 756);
+TDW_PATHL_EnemyList["Nihlathak"]                =
+	new TDW_PATHL_EnemyLocation("Nihlathak",                D2JSP_AREA_HALLS_OF_VAUGHT, 864, D2JSP_UTIL_GETUNIT_OBJECT, 462);
+TDW_PATHL_EnemyList["Snapchip Shatter"]         =
+//	new TDW_PATHL_EnemyLocation("Snapchip Shatter",         D2JSP_AREA_GLACIAL_CAVES_LEVEL_2, null, D2JSP_UTIL_GETUNIT_OBJECT, 397);
+	new TDW_PATHL_EnemyLocation("Snapchip Shatter",         D2JSP_AREA_GLACIAL_CAVES_LEVEL_2, null, D2JSP_UTIL_GETUNIT_NPC, 757);
+TDW_PATHL_EnemyList["Talic"]                    =
+	new TDW_PATHL_EnemyLocation("Talic",                    D2JSP_AREA_ROCKY_SUMMIT);
+TDW_PATHL_EnemyList["Korlic"]                   =
+	new TDW_PATHL_EnemyLocation("Korlic",                   D2JSP_AREA_ROCKY_SUMMIT);
+TDW_PATHL_EnemyList["Madawc"]                   =
+	new TDW_PATHL_EnemyLocation("Madawc",                   D2JSP_AREA_ROCKY_SUMMIT);
+TDW_PATHL_EnemyList["Colenzo the Annihilator"]  =
+	new TDW_PATHL_EnemyLocation("Colenzo the Annihilator",  D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Achmel the Cursed"]        =
+	new TDW_PATHL_EnemyLocation("Achmel the Cursed",        D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Bartuc the Bloody"]        =
+	new TDW_PATHL_EnemyLocation("Bartuc the Bloody",        D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Ventar the Unholy"]        =
+	new TDW_PATHL_EnemyLocation("Ventar the Unholy",        D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Lister the Tormentor"]     =
+	new TDW_PATHL_EnemyLocation("Lister the Tormentor",     D2JSP_AREA_THRONE_OF_DESTRUCTION);
+TDW_PATHL_EnemyList["Baal"]                     =
+	new TDW_PATHL_EnemyLocation("Baal",                     D2JSP_AREA_THE_WORLDSTONE_CHAMBER);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+for (var this_prop in D2JSP_NPC_SUEnemyHashSynonym) {
+	if (D2JSP_NPC_SUEnemyHashSynonym[this_prop] in TDW_PATHL_EnemyList)
+		TDW_PATHL_EnemyList[this_prop] =
+			TDW_PATHL_EnemyList[D2JSP_NPC_SUEnemyHashSynonym[this_prop]];
+}
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Fix-up of the area linkages...
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FixupLinkage(in_area)
+{
+	TDW_PATH_AreaLink[in_area].area         = in_area;
+	TDW_PATH_AreaLink[in_area].is_town      = D2JSP_AREA_IsTown(in_area);
+	TDW_PATH_AreaLink[in_area].has_waypoint = D2JSP_AREA_HasWayPoint(in_area);
+	for (var count_2 = 0; count_2 < TDW_PATH_AreaLink[in_area].link_spec.length;
+		count_2++) {
+		if (TDW_PATH_AreaLink[in_area].link_spec[count_2] instanceof
+			TDW_PATH_LinkExit)
+			TDW_PATH_AreaLink[in_area].link_spec[count_2].destination_area =
+				in_area;
+	}
+}
+for (var count_1 = 1; count_1 < TDW_PATH_AreaLink.length; count_1++)
+	TDW_PATH_FixupLinkage(count_1);
+runGC();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_AreaLinkFixup = [false, false, false, false, false];
+/*
+TDW_PATH_FixUpAct();							// Fix-up now for the current act.
+if (me.act == 3) {
+	for (var count_1 = 0; count_1 < TDW_PATH_AreaLink[D2JSP_AREA_GREAT_MARSH].
+		link_spec.length; count_1++)
+		print(TDW_PATH_AreaLink[D2JSP_AREA_GREAT_MARSH].link_spec[count_1]);
+}
+*/
+//runGC();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FixUpAct()
+{
+	if (TDW_PATH_AreaLinkFixup[me.act - 1])
+		return;
+	else if (me.act == 1)
+		;
+	else if (me.act == 2) {
+		if (D2JSP_AREA_IsValidInGame(getRoom(0).correcttomb) &&
+			(D2JSP_AREA_GetAct(getRoom(0).correcttomb) == 2)) {
+			TDW_PATH_AreaLink[D2JSP_AREA_DURIELS_LAIR] = new TDW_PATH_LinkArea(
+				new TDW_PATH_LinkObject(getRoom(0).correcttomb, [460, 461, 462, 463],
+					100, D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_DURIELS_LAIR, null,
+					TDW_PATH_LINK_FLAG_NON_PRESET_FIRST));
+			TDW_PATH_FixupLinkage(D2JSP_AREA_DURIELS_LAIR);
+		}
+		else {
+			D2JSP_UTIL_LOG_GetALog().logWarning("Unable to fixup Act 2 path " +
+				"linkages because getRoom(0).correcttomb is invalid (" +
+				getRoom(0).correcttomb + ") --- trying alternate method...");
+			var room_spec = [460, 461, 462, 463];
+			for (var count_1 = D2JSP_AREA_TAL_RASHAS_TOMB1;
+				count_1 <= D2JSP_AREA_TAL_RASHAS_TOMB7; count_1++) {
+				var this_room = getRoom(count_1);
+				if (this_room) {
+					do {
+						for (var count_2 = 0; count_2 < room_spec.length; count_2++) {
+							if (this_room.number == room_spec[count_2]) {
+								TDW_PATH_AreaLink[D2JSP_AREA_DURIELS_LAIR] =
+									new TDW_PATH_LinkArea(
+										new TDW_PATH_LinkObject(count_1,
+										[460, 461, 462, 463], 100,
+										D2JSP_MODE_OBJECT_OPENED, D2JSP_AREA_DURIELS_LAIR,
+										null, TDW_PATH_LINK_FLAG_NON_PRESET_FIRST));
+								TDW_PATH_FixupLinkage(D2JSP_AREA_DURIELS_LAIR);
+								TDW_PATH_AreaLinkFixup[me.act - 1] = true;
+								D2JSP_UTIL_LOG_GetALog().logInfo("Alternate method " +
+									"of finding the True Tomb of Tal Rasha succeeded: " +
+									"The True Tomb is in area " + count_1 + ".");
+								return;
+							}
+						}
+					} while (this_room && this_room.getNext(count_1));
+				}
+			}
+			D2JSP_UTIL_LOG_GetALog().logError("Alternate method of finding the " +
+				"True Tomb of Tal Rasha failed.");
+			return;
+		}
+	}
+//	CODE NOTE: Needs some efficiency improvements.
+	else if (me.act == 3) {
+/*
+		var a3_gm_links = [D2JSP_AREA_SPIDER_FOREST, D2JSP_AREA_FLAYER_JUNGLE];
+		for (var count_1 = 0; count_1 < a3_gm_links.length; count_1++) {
+			if (TDW_PATH_DetermineCommonEdge(D2JSP_AREA_GREAT_MARSH,
+				a3_gm_links[count_1]) != null) {
+				runGC();
+				TDW_PATH_AreaLink[D2JSP_AREA_GREAT_MARSH].link_spec.
+					push(new TDW_PATH_LinkExit(a3_gm_links[count_1],
+						D2JSP_AREA_GREAT_MARSH));
+				TDW_PATH_AreaLink[a3_gm_links[count_1]].link_spec.
+					push(new TDW_PATH_LinkExit(D2JSP_AREA_GREAT_MARSH,
+						a3_gm_links[count_1]));
+				TDW_PATH_FixupLinkage(D2JSP_AREA_GREAT_MARSH);
+				TDW_PATH_FixupLinkage(a3_gm_links[count_1]);
+D2JSP_UTIL_LOG_GetALog().logInfo("***** TDW_PATH_FixUpAct(3): Did element " + count_1);
+//D2JSP_UTIL_LOG_GetALog().flushLog();
+			}
+		}
+*/
+		var a3_links = [D2JSP_AREA_SPIDER_FOREST, D2JSP_AREA_GREAT_MARSH,
+			D2JSP_AREA_FLAYER_JUNGLE];
+		for (var count_1 = 0; count_1 < a3_links.length; count_1++) {
+			for (var count_2 = 0; count_2 < a3_links.length; count_2++) {
+				if ((count_1 != count_2) && 
+					(TDW_PATH_DetermineCommonEdge(a3_links[count_1],
+					a3_links[count_2]) != null)) {
+					TDW_PATH_AreaLink[a3_links[count_1]].link_spec.
+						push(new TDW_PATH_LinkExit(a3_links[count_2],
+							a3_links[count_1]));
+					TDW_PATH_FixupLinkage(a3_links[count_1]);
+					TDW_PATH_FixupLinkage(a3_links[count_2]);
+				}
+			}
+		}
+	}
+	else if (me.act == 4)
+		;
+	else if (me.act == 5)
+		;
+
+	TDW_PATH_AreaLinkFixup[me.act - 1] = true;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DefaultLinkAccessStrategy(access_strategy, ascb_type,
+	ascb_data)
+{
+	switch (ascb_type) {
+		case TDW_PATH_ASCB_MSG_STATUS					:
+			D2JSP_UTIL_LOG_GetALog().logInfo(ascb_data);
+			break;
+		case TDW_PATH_ASCB_MSG_WARNING				:
+			D2JSP_UTIL_LOG_GetALog().logWarning(D2JSP_UTIL_COLOR_YELLOW +
+				ascb_data);
+			break;
+		case TDW_PATH_ASCB_MSG_ERROR					:
+			D2JSP_UTIL_LOG_GetALog().logError(D2JSP_UTIL_COLOR_RED + ascb_data);
+			break;
+		case TDW_PATH_ASCB_GOTO_XYPAIR				:
+		case TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL		:
+		case TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL_ONLY	:
+			if (TDW_MOVE_MoveToXYPair(ascb_data))
+				return(-1);
+			break;
+		default												:
+			break;
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetDefaultLinkAccessStrategy()
+{
+	return(new TDW_PATH_LinkAccessStrategy(TDW_PATH_DefaultLinkAccessStrategy,
+		null, 5, 0, 0, null));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetLink(area)
+{
+	area = (typeof(area) == "number") ? area : me.area;
+
+//	TDW_PATH_FixUpAct();
+
+	return((D2JSP_AREA_IsValidInGame(area)) ? TDW_PATH_AreaLink[area] : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetLinkForSource(area, source_area)
+{
+	var area_link = TDW_PATH_GetLink(area);
+
+	return((area_link != null) ? area_link.getLinkForSource(source_area) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetLinkForSourceList(source_area_list, start_area)
+{
+	var path_links = new Array();
+
+	start_area = (typeof(start_area) == "number") ? start_area : me.area;
+
+//	TDW_PATH_FixUpAct();
+
+	if (!D2JSP_AREA_IsValidInGame(start_area)) {
+		D2JSP_UTIL_LOG_GetALog().logError("Start area " + start_area +
+			" is not valid in game.");
+		return(null);
+	}
+
+	source_area_list = (D2JSP_UTIL_GEN_TypeOfNumber(source_area_list)) ?
+		[source_area_list] : source_area_list;
+
+	if (!D2JSP_UTIL_GEN_TypeOfArrayIndexed(source_area_list)) {
+		D2JSP_UTIL_LOG_GetALog().logError("Invalid list of source areas.");
+		return(null);
+	}
+
+	for (var count_1 = 0; count_1 < source_area_list.length; count_1++) {
+		if (!D2JSP_AREA_IsValidInGame(source_area_list[count_1])) {
+			D2JSP_UTIL_LOG_GetALog().logError("Error in source link list " +
+				"element index " + count_1 + ": Area " + source_area_list[count_1] +
+				" is not valid in game.");
+			return(null);
+		}
+		var my_link = TDW_PATH_GetLinkForSource(source_area_list[count_1],
+			start_area);
+		if (my_link == null) {
+			D2JSP_UTIL_LOG_GetALog().logError("Error in source link list " +
+				"element index " + count_1 + ": Unable to find a path linkage " +
+				"from area " + start_area + " (" +
+				D2JSP_AREA_AreaToName(start_area) + ") to " + source_area_list +
+				" (" + D2JSP_AREA_AreaToName(source_area_list[count_1]) + ").");
+			return(null);
+		}
+//print("LINK " + count_1 + ": " + my_link);
+		path_links.push(my_link);
+		start_area = source_area_list[count_1];
+	}
+
+	return(path_links);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoSourceList(source_area_list, start_area, access_strategy)
+{
+	var return_code = 0;
+	var path_links;
+
+	source_area_list = (D2JSP_UTIL_GEN_TypeOfNumber(source_area_list)) ?
+		[source_area_list] : source_area_list;
+	access_strategy  = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if ((path_links = TDW_PATH_GetLinkForSourceList(source_area_list,
+		start_area)) == null) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Unable to construct a path linkage from " +
+			D2JSP_AREA_AreaToName(start_area) + " to " +
+			D2JSP_AREA_AreaToName(source_area_list[source_area_list.length - 1]) +
+			".");
+		return_code = -1;
+	}
+	else
+		return_code = TDW_PATH_DoPathList(path_links, access_strategy);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathList(path_list, access_strategy)
+{
+	var return_code = 0;
+
+	for (var count_1 = 0; count_1 < path_list.length; count_1++) {
+		if ((return_code = TDW_PATH_DoPathListElement(path_list[count_1],
+			access_strategy)) != 0)
+			break;
+		runGC();
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElement(path_element, access_strategy)
+{
+	var return_code = 0;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if (path_element instanceof TDW_PATH_LinkExit)
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"TDW_PATH_DoPathListElementExit = " + path_element);
+	else if (path_element instanceof TDW_PATH_LinkObject)
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"TDW_PATH_DoPathListElementObject = " + path_element);
+	else if (path_element instanceof TDW_PATH_LinkTile)
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"TDW_PATH_DoPathListElementTile = " + path_element);
+	else if (path_element instanceof TDW_PATH_LinkWaypoint)
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"TDW_PATH_DoPathListElementWaypoint = " + path_element);
+	else if (path_element instanceof TDW_PATH_LinkTownReturn)
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"TDW_PATH_DoPathListElementTownReturn = " + path_element);
+	else if (path_element instanceof TDW_PATH_LinkGotoXY)
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"TDW_PATH_DoPathListElementGotoXY = " + path_element);
+	else if (path_element instanceof TDW_PATH_LinkTownMove)
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"TDW_PATH_DoPathListElementTownMove = " + path_element);
+	else
+		D2JSP_UTIL_LOG_GetALog().logDetail("ELEMENT TYPE = " +
+			"*INVALID* = " + path_element);
+
+	if (path_element instanceof TDW_PATH_LinkExit)
+		return_code = TDW_PATH_DoPathListElementExit(path_element,
+			access_strategy);
+	else if (path_element instanceof TDW_PATH_LinkObject)
+		return_code = TDW_PATH_DoPathListElementObject(path_element,
+			access_strategy);
+	else if (path_element instanceof TDW_PATH_LinkTile)
+		return_code = TDW_PATH_DoPathListElementTile(path_element,
+			access_strategy);
+	else if (path_element instanceof TDW_PATH_LinkWaypoint)
+		return_code = TDW_PATH_DoPathListElementWaypoint(path_element,
+			access_strategy);
+	else if (path_element instanceof TDW_PATH_LinkTownReturn)
+		return_code = TDW_PATH_DoPathListElementTownReturn(path_element,
+			access_strategy);
+	else if (path_element instanceof TDW_PATH_LinkGotoXY)
+		return_code = TDW_PATH_DoPathListElementGotoXY(path_element,
+			access_strategy);
+	else if (path_element instanceof TDW_PATH_LinkTownMove)
+		return_code = TDW_PATH_DoPathListElementTownMove(path_element,
+			access_strategy);
+	else
+		return_code = -1;
+
+	if (!return_code)
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_STATUS, "Now in " + D2JSP_AREA_AreaToName() + ".");
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementExit(path_element, access_strategy)
+{
+	var return_code;
+
+	if (D2JSP_AREA_IsTown())
+		return_code = TDW_PATH_DoPathListElementExitTownOut(path_element,
+			access_strategy);
+	else
+		return_code = TDW_PATH_DoPathListElementExitBasic(path_element,
+			access_strategy);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementExitTownOut(path_element, access_strategy)
+{
+	var return_code = 0;
+	var start_area  = me.area;
+
+	if (!D2JSP_AREA_IsTown()) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") is not in town (for this act " +
+			"it is " + D2JSP_AREA_AreaToName(D2JSP_AREA_AreaToTown()) + ").");
+		return_code = -1;
+	}
+	else {
+		var dir_deltas = D2JSP_ROOM_GetDirectionDeltas();
+		switch (me.act) {
+			case	1	:
+				var area_exit = TDW_PATH_GetAreaExit(D2JSP_AREA_ROGUE_ENCAMPMENT,
+					D2JSP_AREA_BLOOD_MOOR);
+				TDW_MOVE_COMPAT_TownMoveExit();
+				if (area_exit) {
+					while (me.area == start_area)
+						TDW_MOVE_MoveToXYPair([
+							me.x + (dir_deltas[area_exit.direction_delta][0] * 5),
+							me.y + (dir_deltas[area_exit.direction_delta][1] * 5)], 2);
+				}
+				break;
+			case	2	:
+				common_edge = TDW_PATH_DetermineCommonEdge(D2JSP_AREA_LUT_GHOLEIN,
+					D2JSP_AREA_ROCKY_WASTE);
+				if (common_edge == 0) {
+					TDW_MOVE_COMPAT_TownMoveXY(2, 5096, 5009);
+					return_code = TDW_PATH_MoveToEdgeWithDelta(common_edge,
+						access_strategy);
+				}
+				else if (common_edge == 1) {
+					TDW_MOVE_COMPAT_TownMoveXY(2, 5008, 5064);
+					return_code = TDW_PATH_MoveToEdgeWithDelta(common_edge,
+						access_strategy);
+				}
+				else {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Unanticipated common edge (" +
+						common_edge + ") from area " + path_element.source_area +
+						" (" + D2JSP_AREA_AreaToName(path_element.source_area) +
+						" to area " + path_element.destination_area + " (" + 
+						D2JSP_AREA_AreaToName(path_element.destination_area) + ".");
+					return_code = -1;
+				}
+				break;
+			case	3	:
+				var area_exit = TDW_PATH_GetAreaExit(D2JSP_AREA_KURAST_DOCKTOWN,
+					D2JSP_AREA_SPIDER_FOREST);
+				TDW_MOVE_COMPAT_TownMoveExit();
+				if (area_exit) {
+					while (me.area == start_area)
+						TDW_MOVE_MoveToXYPair([
+							me.x + (dir_deltas[area_exit.direction_delta][0] * 5),
+							me.y + (dir_deltas[area_exit.direction_delta][1] * 5)], 2);
+				}
+				break;
+			case	4	:
+				TDW_MOVE_COMPAT_TownMoveExit();
+				var move_list = [	[5158, 5086], [5160, 5086], [5167, 5088],
+										[5175, 5093], [5184, 5096]];
+				while (move_list.length)
+					TDW_MOVE_MoveToXYPair(move_list.shift(), 2);
+				break;
+			case	5	:
+				TDW_MOVE_COMPAT_TownMove("gate");
+//				TDW_MOVE_COMPAT_TownMoveExit();
+				var the_gate = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "gate");
+				if (!the_gate) {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Unable to locate the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + ".");
+					return_code = -1;
+					break;
+				}
+				if (the_gate.mode == D2JSP_MODE_OBJECT_IDLE) {
+					TDW_MOVE_MoveToObject(the_gate);
+					D2JSP_UTIL_InteractObject(the_gate);
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Opened the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + ".");
+				}
+				if (the_gate.mode != D2JSP_MODE_OBJECT_OPENED)
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Waiting for the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + " open to complete.");
+				// We'll wait up to 'prox 10 seconds...
+				for (var count_1 = 0; count_1 < 1000; count_1++) {
+					the_gate = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "gate");
+					if (!the_gate) {
+						access_strategy.callback_func(access_strategy,
+							TDW_PATH_ASCB_MSG_ERROR, "Unable to re-locate the town " +
+							"gate exit from " + D2JSP_AREA_AreaToName() + ".");
+						return_code = -1;
+						break;
+					}
+					if (the_gate.mode == D2JSP_MODE_OBJECT_OPENED)
+						break;
+					delay(10);
+				}
+				if (the_gate.mode == D2JSP_MODE_OBJECT_OPENED) {
+					while (me.area == start_area)
+						TDW_MOVE_MoveToXYPair([
+							me.x + (dir_deltas[1][0] * 5),
+							me.y + (dir_deltas[1][1] * 5)], 2);
+				}
+				else {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Attempt to open the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + " failed --- " +
+						"waited ten seconds without gate opening.");
+					return_code = -1;
+				}
+				break;
+			default	:
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Invalid act encountered (" + 
+						me.act + ").");
+				return_code = -1;
+				break;
+		}
+		if (!D2JSP_AREA_IsTown())
+			return_code = access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_EXIT_TOWN, start_area);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementExitTownIn(path_element, access_strategy)
+{
+	var return_code = 0;
+	var start_area  = me.area;
+
+	if (!D2JSP_AREA_IsTown(path_element.destination_area)) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Destination area (" +
+			path_element.destination_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.destination_area) +
+			") is not in town (for this act it is " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_AreaToTown()) + ").");
+		return_code = -1;
+	}
+	else {
+		var dir_deltas = D2JSP_ROOM_GetDirectionDeltas();
+		switch (me.act) {
+			case	1	:
+/*
+				var common_edge = TDW_PATH_DetermineCommonEdge(
+					D2JSP_AREA_BLOOD_MOOR, D2JSP_AREA_ROGUE_ENCAMPMENT);
+				if (common_edge == 1) {
+					for (var count_1 = 0; count_1 < 7; count_1++)
+						TDW_MOVE_MoveToXY(me.x + (dir_deltas[common_edge][0] * 5),
+							me.y + (dir_deltas[common_edge][1] * 5), 2);
+				}
+				var target_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, 39);
+				if (!target_obj) {			// If not null, Scav can find it.
+					var coords_list = TDW_PATH_GetPresetCoordsList(null,
+						D2JSP_UTIL_GETUNIT_OBJECT, 39);
+					if (coords_list && coords_list.length)
+						TDW_MOVE_MoveToXY(coords_list[0].area_x,
+							coords_list[0].area_y, 10);
+				}
+*/
+				var area_exit = TDW_PATH_GetAreaExit(D2JSP_AREA_BLOOD_MOOR,
+					D2JSP_AREA_ROGUE_ENCAMPMENT);
+print("area_exit = " + area_exit);
+				if (area_exit.direction_delta == 1) {
+					for (var count_1 = 0; count_1 < 7; count_1++)
+						TDW_MOVE_MoveToXY(
+							me.x + (dir_deltas[area_exit.direction_delta][0] * 5),
+							me.y + (dir_deltas[area_exit.direction_delta][1] * 5), 2);
+				}
+				TDW_MOVE_TownReturnFinalize();
+				break;
+			case	2	:
+				var common_edge = TDW_PATH_DetermineCommonEdge(D2JSP_AREA_ROCKY_WASTE,
+					D2JSP_AREA_LUT_GHOLEIN);
+				if (common_edge == 2) {
+					TDW_MOVE_MoveToXY(5096, 5009);
+					TDW_MOVE_COMPAT_TownMove("Drognan");
+				}
+				else if (common_edge == 3) {
+					TDW_MOVE_MoveToXY(5008, 5064);
+					TDW_MOVE_COMPAT_TownMove("Greiz");
+				}
+				else {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Unanticipated common edge (" +
+						common_edge + ") from area " + path_element.source_area +
+						" (" + D2JSP_AREA_AreaToName(path_element.source_area) +
+						" to area " + path_element.destination_area + " (" + 
+						D2JSP_AREA_AreaToName(path_element.destination_area) + ".");
+					return_code = -1;
+				}
+				break;
+			case	3	:
+/*
+				var common_edge = TDW_PATH_DetermineCommonEdge(
+					D2JSP_AREA_SPIDER_FOREST, D2JSP_AREA_KURAST_DOCKTOWN);
+				for (var count_1 = 0; count_1 < 7; count_1++) {
+					TDW_MOVE_MoveToXY(me.x + (dir_deltas[2][0] * 5),
+						me.y + (dir_deltas[2][1] * 5), 2);
+					var stash_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank");
+					if (stash_obj && (myDist(stash_obj.x, stash_obj.y) < 10))
+						break;
+				}
+*/
+				var area_exit = TDW_PATH_GetAreaExit(D2JSP_AREA_SPIDER_FOREST,
+					D2JSP_AREA_KURAST_DOCKTOWN);
+				while (true) {
+					TDW_MOVE_MoveToXY(
+						me.x + (dir_deltas[area_exit.direction_delta][0] * 5),
+						me.y + (dir_deltas[area_exit.direction_delta][1] * 5), 2);
+					if (me.area == D2JSP_AREA_KURAST_DOCKTOWN) {
+						var stash_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank");
+						if (stash_obj && (myDist(stash_obj.x, stash_obj.y) < 10))
+							break;
+					}
+				}
+				break;
+			case	4	:
+				break;
+			case	5	:
+				var the_gate = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "gate");
+				if (!the_gate) {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Unable to locate the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + ".");
+					return_code = -1;
+					break;
+				}
+				if (the_gate.mode == D2JSP_MODE_OBJECT_IDLE) {
+					TDW_MOVE_MoveToObject(the_gate);
+					D2JSP_UTIL_InteractObject(the_gate);
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Opened the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + ".");
+				}
+				if (the_gate.mode != D2JSP_MODE_OBJECT_OPENED)
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Waiting for the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + " open to complete.");
+				// We'll wait up to 'prox 10 seconds...
+				for (var count_1 = 0; count_1 < 1000; count_1++) {
+					the_gate = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "gate");
+					if (!the_gate) {
+						access_strategy.callback_func(access_strategy,
+							TDW_PATH_ASCB_MSG_ERROR, "Unable to re-locate the town " +
+							"gate exit from " + D2JSP_AREA_AreaToName() + ".");
+						return_code = -1;
+						break;
+					}
+					if (the_gate.mode == D2JSP_MODE_OBJECT_OPENED)
+						break;
+					delay(10);
+				}
+				if (the_gate.mode == D2JSP_MODE_OBJECT_OPENED) {
+					TDW_MOVE_MoveToXYPair([
+						me.x + (dir_deltas[3][0] * 10),
+						me.y + (dir_deltas[3][1] * 10)], 2);
+				}
+				else {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Attempt to open the town gate " +
+						"exit from " + D2JSP_AREA_AreaToName() + " failed --- " +
+						"waited ten seconds without gate opening.");
+					return_code = -1;
+				}
+				break;
+			default	:
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Invalid act encountered (" + 
+						me.act + ").");
+				return_code = -1;
+				break;
+		}
+		if (D2JSP_AREA_IsTown())
+			return_code = access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_ENTER_TOWN, start_area);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementExitBasic(path_element, access_strategy)
+{
+	var start_area = me.area;
+	var dir_deltas = D2JSP_ROOM_GetDirectionDeltas();
+
+/*
+	var area_exit = TDW_PATH_GetAreaExit(path_element.source_area,
+		path_element.destination_area);
+*/
+
+	var area_exit = path_element.getLocation();
+
+	if (!area_exit) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Unable to locate a common edge exit " +
+			"between " + D2JSP_AREA_AreaToName(path_element.source_area) +
+			" and " + D2JSP_AREA_AreaToName(path_element.destination_area) + ".");
+		return(-1);
+	}
+
+//	var edge_list = TDW_PATH_GetAccessibleEdgeSimple(area_exit.direction_delta);
+	var edge_list = [area_exit.exit_coord];
+
+	for (var count_2 = 0; count_2 < edge_list.length; count_2++) {
+//print("***** ATTEMPT " + count_1 + " / " + count_2);
+		if (access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_GOTO_XYPAIR, edge_list[count_2]))
+			return(-1);
+//print("Did initial move (" + me.area + ")");
+		if (me.area == path_element.destination_area)
+			break;
+		if (D2JSP_SYLIB_myDistPair(edge_list[count_2])) {
+			if (access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_GOTO_XYPAIR, edge_list[count_2]))
+				return(-1);
+//print("Did closing distance move (" + me.area + ")");
+		}
+		if (me.area == path_element.destination_area) {
+			return_code = access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_AREA_CHANGE, path_element.source_area,
+				path_element.destination_area);
+			break;
+		}
+		// Move in the direction of the connected area (by 10 units)...
+		if (access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL_ONLY,
+			[edge_list[count_2][0] + (dir_deltas[area_exit.direction_delta][0] * 10),
+			edge_list[count_2][1] + (dir_deltas[area_exit.direction_delta][1] * 10)]))
+			return(-1);
+//print("Did delta move (" + me.area + ")");
+		// Check to see if we've changed our area. Handle 1 sec of lag...
+		for (var count_3 = 0; count_3 < 10; count_3++) {
+			if (me.area != start_area)
+				break;
+			delay(100);
+		}
+		if (me.area == path_element.destination_area) {
+			return_code = access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_AREA_CHANGE, path_element.source_area,
+				path_element.destination_area);
+			break;
+		}
+		// Move back into the original area so pathing works correctly.
+		if (access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL_ONLY, edge_list[count_2]))
+			return(-1);
+		for (var count_3 = 0; count_3 < 10; count_3++) {
+			if (me.area == start_area)
+				break;
+			delay(100);
+		}
+	}
+
+	if (me.area == path_element.destination_area) {
+		if (D2JSP_AREA_IsTown(path_element.destination_area))
+			return_code = TDW_PATH_DoPathListElementExitTownIn(path_element,
+				access_strategy);
+	}
+	else {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Unable to locate " +
+			D2JSP_AREA_AreaToName(path_element.destination_area) + ".");
+/*
+var old_log_screen_flag = TDW_BOT_Log.screenOff();
+TDW_BOT_Log.logInfo(path_element.source_area + " = " + D2JSP_AREA_AreaToName(path_element.source_area));
+var tmp_list = TDW_PATH_MapGlobal.area_list[path_element.source_area].getStringList();
+TDW_BOT_Log.logInfo("------------------------------------------------------------");
+while (tmp_list.length)
+	TDW_BOT_Log.logInfo(tmp_list.shift());
+var tmp_list = TDW_PATH_MapGlobal.area_list[path_element.source_area].getStringValueList();
+TDW_BOT_Log.logInfo("------------------------------------------------------------");
+while (tmp_list.length)
+	TDW_BOT_Log.logInfo(tmp_list.shift());
+TDW_BOT_Log.logInfo("============================================================");
+var tmp_list = TDW_PATH_MapGlobal.area_list[path_element.destination_area].getStringList();
+TDW_BOT_Log.logInfo("------------------------------------------------------------");
+while (tmp_list.length)
+	TDW_BOT_Log.logInfo(tmp_list.shift());
+TDW_BOT_Log.logInfo(path_element.destination_area + " = " + D2JSP_AREA_AreaToName(path_element.destination_area));
+var tmp_list = TDW_PATH_MapGlobal.area_list[path_element.destination_area].getStringValueList();
+TDW_BOT_Log.logInfo("------------------------------------------------------------");
+while (tmp_list.length)
+	TDW_BOT_Log.logInfo(tmp_list.shift());
+TDW_BOT_Log.logInfo("============================================================");
+if (old_log_screen_flag)
+	TDW_BOT_Log.screenOn();
+print("STOPPING");
+stop();
+*/
+		return(-1);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementObject(path_element, access_strategy)
+{
+	var return_code = 0;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if (me.area != path_element.source_area) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") is not the specified path list " +
+			"element area (" + path_element.source_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.source_area) + ").");
+		return_code = -1;
+	}
+	else {
+		var start_area   = me.area;
+		var exclude_list = new Array();
+/*
+		var coord_list   = TDW_PATH_GetPresetCoordsList(path_element.room_spec,
+			D2JSP_UTIL_GETUNIT_OBJECT, path_element.unit_id_spec,
+			(path_element.link_flags & TDW_PATH_LINK_FLAG_MULTIPLE) ?
+			false : true);
+*/
+		var coord_list = path_element.getLocation();
+		if (!coord_list.length) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_STATUS, "Failed to find any preset units of " +
+				"type " + D2JSP_UTIL_GETUNIT_OBJECT + " (object) for the classid " +
+				"specification [" + path_element.unit_id_spec + "]. Re-trying " +
+				"using non-preset logic.");
+			coord_list = TDW_PATH_GetCenterAccessibleList(0, path_element.room_spec);
+		}
+		coord_list = D2JSP_UTIL_PATH_ProgressivePathSort(coord_list);
+		while (coord_list.length) {
+			if (access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[0]))
+				return(-1);
+			var object_area = me.area;
+			var object_obj  =
+				TDW_MOVE_LookForObjectByClassid(path_element.unit_id_spec, 5, 50);
+			if (object_obj) {
+				if (!((object_obj.x + "|" + object_obj.y) in exclude_list)) {
+					exclude_list[object_obj.x + "|" + object_obj.y] = true;
+					var object_classid = object_obj.classid;
+					if (access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_GOTO_XYPAIR, [object_obj.x, object_obj.y]))
+						return(-1);
+					if (path_element.location_list == null)
+						path_element.location_list = [object_obj.x, object_obj.y];
+					if (path_element.linked_object instanceof TDW_PATH_LinkExit) {
+						if (TDW_MOVE_InteractWithUnitToMode(object_obj,
+							path_element.desired_mode, false, 5, 50))
+							return(-1);
+						if ((return_code = TDW_PATH_DoPathListElement(
+							path_element.linked_object, access_strategy)))
+							return(return_code);
+					}
+					else if (path_element.linked_object instanceof
+						TDW_PATH_LinkTile) {
+						if (TDW_MOVE_InteractWithUnitToMode(object_obj,
+							path_element.desired_mode, false, 5, 50))
+							return(-1);
+						if (TDW_BOT_MOVE_GotoTileAndTakeTile(
+							path_element.linked_object.unit_id_spec))
+							return(-1);
+					}
+					else if (TDW_MOVE_TakeUnitToArea(object_obj))
+						return(-1);
+					if (me.area == path_element.destination_area) {
+						return_code = access_strategy.callback_func(access_strategy,
+							TDW_PATH_ASCB_AREA_CHANGE, path_element.source_area,
+							path_element.destination_area);
+						break;
+					}
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Entered " +
+						D2JSP_AREA_AreaToName() +
+						" in error. Will exit and re-try...");
+					if ((return_code = TDW_PATH_DoSourceList(object_area, null,
+						access_strategy)))
+						return(return_code);
+				}
+			}
+			coord_list.shift();
+			runGC();
+		}
+		if (me.area != path_element.destination_area) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_ERROR, "Unable to find the entrance to " +
+				D2JSP_AREA_AreaToName(path_element.destination_area) +
+				" (path element = " + path_element + ")");
+			return(-1);
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementTile(path_element, access_strategy)
+{
+	var return_code = 0;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if (me.area != path_element.source_area) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") is not the specified path list " +
+			"element area (" + path_element.source_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.source_area) + ").");
+		return_code = -1;
+	}
+	else {
+		var start_area   = me.area;
+		var exclude_list = new Array();
+/*
+		var coord_list   = TDW_PATH_GetPresetCoordsList(path_element.room_spec,
+			D2JSP_UTIL_GETUNIT_TILE, path_element.unit_id_spec,
+			(path_element.link_flags & TDW_PATH_LINK_FLAG_MULTIPLE) ?
+			false : true);
+*/
+		var coord_list = path_element.getLocation();
+		if (!coord_list.length)
+			coord_list = TDW_PATH_GetCenterAccessibleList(0, path_element.room_spec);
+		coord_list = D2JSP_UTIL_PATH_ProgressivePathSort(coord_list);
+		while (coord_list.length) {
+			if (access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[0]))
+				return(-1);
+			var tile_area = me.area;
+			var tile_obj  =
+				TDW_MOVE_LookForTileByClassid(path_element.unit_id_spec, 5, 50);
+			if (tile_obj) {
+				if (!((tile_obj.x + "|" + tile_obj.y) in exclude_list)) {
+					exclude_list[tile_obj.x + "|" + tile_obj.y] = true;
+					var tile_classid = tile_obj.classid;
+					if (access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_GOTO_XYPAIR, [tile_obj.x, tile_obj.y]))
+						return(-1);
+					if (path_element.location_list == null)
+						path_element.location_list = [tile_obj.x, tile_obj.y];
+					if (path_element.linked_object instanceof TDW_PATH_LinkExit) {
+						access_strategy.callback_func(access_strategy,
+							TDW_PATH_ASCB_MSG_ERROR, "Tile linkages which contain " +
+							"exit linkages are not supported.");
+						return(-1);
+					}
+					else if (path_element.linked_object instanceof
+						TDW_PATH_LinkObject) {
+						var object_obj = TDW_MOVE_LookForObjectByClassid(
+							path_element.linked_object.unit_id_spec, 5, 50);
+						if (!object_obj) {
+							access_strategy.callback_func(access_strategy,
+								TDW_PATH_ASCB_MSG_STATUS, "Unable to locate object [" +
+								path_element.linked_object.unit_id_spec +
+								"] --- continuing.");
+							coord_list.shift();
+							continue;
+						}
+						if (TDW_MOVE_InteractWithUnitToMode(object_obj,
+							path_element.linked_object.desired_mode, false, 5, 50))
+							return(-1);
+					}
+					if (TDW_BOT_MOVE_TakeTile(tile_obj))
+						return(-1);
+					if (me.area == path_element.destination_area) {
+						return_code = access_strategy.callback_func(access_strategy,
+							TDW_PATH_ASCB_AREA_CHANGE, path_element.source_area,
+							path_element.destination_area);
+						break;
+					}
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Entered " +
+						D2JSP_AREA_AreaToName() +
+						" in error. Will exit and re-try...");
+					if ((return_code = TDW_PATH_DoSourceList(tile_area, null,
+						access_strategy)))
+						return(return_code);
+				}
+			}
+			coord_list.shift();
+		}
+		if (me.area != path_element.destination_area) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_ERROR, "Unable to find the entrance to " +
+				D2JSP_AREA_AreaToName(path_element.destination_area) + ".");
+			return(-1);
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementWaypoint(path_element, access_strategy)
+{
+	var return_code = 0;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if ((me.area != path_element.source_area) && (!D2JSP_AREA_HasWayPoint())) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") is not the specified path list " +
+			"element area (" + path_element.source_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.source_area) + ").");
+		return_code = -1;
+	}
+	else if (!D2JSP_AREA_HasWayPoint()) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") does not have a waypoint.");
+		return_code = -1;
+	}
+	else if (!D2JSP_AREA_HasWayPoint(path_element.destination_area)) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "The destination area (" +
+			path_element.destination_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.destination_area) +
+			") does not have a waypoint.");
+		return_code = -1;
+	}
+	else if (!D2JSP_AREA_IsTown()) {
+/*
+		var wp_indices   = D2JSP_AREA_AreaToWayPointIndices();
+		var waypoint_obj = D2JSP_AREA_WaypointObjList[wp_indices[0]]
+			[wp_indices[1]];
+		var coord_list   = TDW_PATH_GetPresetCoordsList(waypoint_obj.room_spec,
+			D2JSP_UTIL_GETUNIT_OBJECT, waypoint_obj.unit_id_spec, true);
+*/
+		var coord_list = path_element.getLocation();
+		if (!coord_list.length) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_ERROR, "Unable to locate the waypoint in " +
+				"area " + path_element.source_area + " (" +
+				D2JSP_AREA_AreaToName(path_element.source_area) +
+				") --- (room spec = [" + waypoint_obj.room_spec +
+				"], unit id spec = [" + waypoint_obj.unit_id_spec + "]).");
+			return_code = -1;
+		}
+		else if (access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[0])) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_ERROR, "Unable to get to the waypoint in " +
+				"area " + path_element.source_area + " (" +
+				D2JSP_AREA_AreaToName(path_element.source_area) +
+				") --- (room spec = [" + waypoint_obj.room_spec +
+				"], unit id spec = [" + waypoint_obj.unit_id_spec + "]).");
+			return_code = -1;
+		}
+		else
+			TDW_MOVE_WaypointUse(path_element.destination_area);
+	}
+	else
+		TDW_MOVE_WaypointUseInTown(path_element.destination_area);
+
+	if (me.area == path_element.destination_area)
+		return_code = access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_AREA_CHANGE, path_element.source_area,
+			path_element.destination_area);
+	else if (!return_code) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Attempt to take a waypoint to area (" +
+			path_element.destination_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.destination_area) +
+			") failed.");
+		return_code = -1;
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementTownReturn(path_element, access_strategy)
+{
+	var return_code = 0;
+
+	path_element    = new TDW_PATH_LinkTownReturn();
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if (me.area != path_element.source_area) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") is not the specified path list " +
+			"element area (" + path_element.source_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.source_area) + ").");
+		return_code = -1;
+	}
+	else if (D2JSP_AREA_IsTown())			//	If already in town, then done.
+		;
+	else {
+		var way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+		if (way_point_obj && (myDist(way_point_obj.x, way_point_obj.y) < 10))
+			TDW_MOVE_WaypointUse(path_element.destination_area);
+		if (me.area != path_element.destination_area) {
+			if (!TDW_MOVE_PortalToTown(null, null, 50, 50))
+				TDW_MOVE_TownReturnFinalize();
+			else {
+				if (D2JSP_AREA_HasWayPoint())
+					return(TDW_PATH_DoPathListElementWaypoint(
+						new TDW_PATH_LinkWaypoint(path_element.destination_area),
+						access_strategy));
+				else {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Unable to open a portal and no " +
+						"waypoint is available in current area (" + me.area + " = " +
+						D2JSP_AREA_AreaToName(me.area) + ").");
+					return_code = -1;
+				}
+			}
+		}
+	}
+
+	if (me.area == path_element.destination_area) {
+		if (D2JSP_AREA_IsTown())
+			return_code = access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_ENTER_TOWN, path_element.source_area);
+		return_code = access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_AREA_CHANGE, path_element.source_area,
+			path_element.destination_area);
+	}
+	else if (!return_code) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Attempt to return to town area (" +
+			path_element.destination_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.destination_area) +
+			") failed.");
+		return_code = -1;
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementGotoXY(path_element, access_strategy)
+{
+	var return_code = 0;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if (me.area != path_element.source_area) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") is not the specified path list " +
+			"element area (" + path_element.source_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.source_area) + ").");
+		return_code = -1;
+	}
+	else {
+		TDW_PATH_CreateArea();
+		if (!TDW_PATH_FindRoomByXY(path_element.coord_x, path_element.coord_y)) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+				D2JSP_AREA_AreaToName(me.area) + ") does not contain the " +
+				"specified coordinates ([" + path_element.coord_x +
+				", " + path_element.coord_y + "]).");
+			return_code = -1;
+		}
+		else if (access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_GOTO_XYPAIR, [path_element.coord_x,
+			path_element.coord_y]))
+			return_code = -1;
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoPathListElementTownMove(path_element, access_strategy)
+{
+	var return_code = 0;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if (me.area != path_element.source_area) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Current area (" + me.area + " = " +
+			D2JSP_AREA_AreaToName(me.area) + ") is not the specified path list " +
+			"element area (" + path_element.source_area + " = " +
+			D2JSP_AREA_AreaToName(path_element.source_area) + ").");
+		return_code = -1;
+	}
+	else {
+		if (path_element.town_move_command.match(/^Sc_/))
+			eval(path_element.town_move_command);
+		else
+			TDW_MOVE_COMPAT_TownMove(path_element.town_move_command);
+		if (path_element.linked_object instanceof TDW_PATH_LinkExit) {
+			if ((return_code = TDW_PATH_DoPathListElement(
+				path_element.linked_object, access_strategy)))
+				return(return_code);
+		}
+		else if (path_element.linked_object instanceof TDW_PATH_LinkObject) {
+			var object_obj = TDW_MOVE_LookForObjectByClassid(
+				path_element.linked_object.unit_id_spec, 5, 50);
+			if (!object_obj) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Unable to locate object [" +
+					path_element.linked_object.unit_id_spec + "].");
+				return_code = -1;
+			}
+			else if (TDW_MOVE_TakePortal(object_obj))
+				return(-1);
+		}
+		else if (path_element.linked_object instanceof TDW_PATH_LinkTile) {
+			var object_obj = TDW_MOVE_LookForTileByClassid(
+				path_element.linked_object.unit_id_spec, 5, 50);
+			if (!object_obj) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Unable to locate tile [" +
+					path_element.linked_object.unit_id_spec + "].");
+				return_code = -1;
+			}
+			if (TDW_BOT_MOVE_GotoTileAndTakeTile(
+				path_element.linked_object.unit_id_spec))
+				return(-1);
+		}
+		if (!return_code) {
+			if (me.area == path_element.destination_area)
+				return_code = access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_AREA_CHANGE, path_element.source_area,
+					path_element.destination_area);
+			else {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Unable to find the entrance to " +
+					D2JSP_AREA_AreaToName(path_element.destination_area) +
+					" (path element = " + path_element + ")");
+				return(-1);
+			}
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_MoveToEdgeWithDelta(common_edge, access_strategy)
+{
+	var return_code = 0;
+	var start_area  = me.area;
+
+	if ((common_edge < 0) || (common_edge > 3)) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "The specified common edge (" + common_edge +
+			") in area " + start_area + " (" + D2JSP_AREA_AreaToName(start_area) +
+			" is invalid (valid range is 0 to 3, inclusive).");
+		return_code = -1;
+	}
+	else {
+		var dir_deltas = D2JSP_ROOM_GetDirectionDeltas();
+		var edge_list  = TDW_PATH_GetAccessibleEdgeSimple(common_edge);
+		if (edge_list.length) {
+			while (me.area == start_area)
+				TDW_MOVE_MoveToXYPair([me.x + (dir_deltas[common_edge][0] * 6),
+					me.y + (dir_deltas[common_edge][1] * 6)], 2);
+//			TDW_MOVE_MoveToXYPair([edge_list[0][0], edge_list[0][1]]);
+		}
+		else {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_ERROR, "The specified common edge (" + common_edge +
+				") in area " + start_area + " (" + D2JSP_AREA_AreaToName(start_area) +
+				" does not exist.");
+			return_code = -1;
+		}
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_PATH_ConstructTargetListInternal_Depth = 0;
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ConstructTargetList(dst_area, src_area, access_strategy,
+	load_flags)
+{
+	var path_links = null;
+	var log_obj    = D2JSP_UTIL_LOG_GetALog();
+
+	dst_area        = (D2JSP_UTIL_GEN_TypeOfString(dst_area) &&
+		(dst_area == parseInt(dst_area, 10))) ? parseInt(dst_area, 10) : dst_area;
+	src_area        = (src_area != null) ? src_area : me.area;
+	src_area        = (D2JSP_UTIL_GEN_TypeOfString(src_area) &&
+		(src_area == parseInt(src_area, 10))) ? parseInt(src_area, 10) : src_area;
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+
+	if (!D2JSP_AREA_IsValidInGame(dst_area))
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Destination area number " + dst_area +
+				" is not valid.");
+	else if (!D2JSP_AREA_IsValidInGame(src_area))
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Source area number " + src_area +
+				" is not valid.");
+	else if (D2JSP_AREA_GetAct(dst_area) != D2JSP_AREA_GetAct(src_area)) {
+		var src_act = D2JSP_AREA_GetAct(src_area);
+		var dst_act = D2JSP_AREA_GetAct(dst_area);
+		if ((dst_act > 1) && (!D2JSP_QUEST_IsCompletedAct(dst_act - 1)))
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_ERROR, "Destination area number " +
+				dst_area + " (" + D2JSP_AREA_AreaToName(dst_area) + ") is in Act " +
+				dst_act + ", which you can't yet enter.");
+		else if (D2JSP_AREA_IsTown(dst_area) && D2JSP_AREA_IsTown(src_area))
+			return([new TDW_PATH_LinkWaypoint(dst_area)]);
+		else if (D2JSP_AREA_IsTown(dst_area)) {
+			path_links.push(new TDW_PATH_LinkTownReturn(
+				D2JSP_AREA_AreaToTown(src_area), dst_area));
+		}
+		else if (D2JSP_AREA_IsTown(src_area)) {
+			var path_links = TDW_PATH_ConstructTargetList(dst_area,
+				D2JSP_AREA_AreaToTown(dst_area), access_strategy, load_flags);
+			if (path_links.length)
+				path_links.unshift(new TDW_PATH_LinkWaypoint(
+					D2JSP_AREA_AreaToTown(dst_area)));
+		}
+		else {
+			var path_links = TDW_PATH_ConstructTargetList(dst_area,
+				D2JSP_AREA_AreaToTown(dst_area), access_strategy, load_flags);
+			if (path_links.length)
+				path_links.unshift(new TDW_PATH_LinkTownReturn(src_area, dst_area),
+					new TDW_PATH_LinkWaypoint(D2JSP_AREA_AreaToTown(dst_area)));
+		}
+/*
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Source area number " + src_area + " (" +
+			D2JSP_AREA_AreaToName(src_area) + ") is in Act " +
+			D2JSP_AREA_GetAct(src_area) + ", but destination area number " +
+			dst_area + " (" + D2JSP_AREA_AreaToName(dst_area) + ") is in Act " +
+			D2JSP_AREA_GetAct(dst_area) + ".");
+*/
+	}
+	else {
+//print("TDW_PATH_ConstructTargetList(" + dst_area + ", " + src_area + ")");
+		if (dst_area == src_area)
+			path_links = new Array();
+		else if (D2JSP_AREA_IsTown(src_area) &&
+			D2JSP_AREA_HasWayPoint(dst_area) &&
+			D2JSP_AREA_IHaveWayPointArea(dst_area))
+			path_links = [new TDW_PATH_LinkWaypoint(dst_area)];
+		else {
+			var path_links = new Array();
+			var flag_list  = new Array(D2JSP_AREA_COUNT);
+//print("STARTING : [" + dst_area + "] = [" + src_area + "]");
+			TDW_PATH_ConstructTargetListInternal_Depth = 0;
+			TDW_PATH_ConstructTargetListInternal(path_links, flag_list, dst_area,
+				src_area, dst_area, access_strategy);
+			if ((!D2JSP_AREA_IsTown(src_area)) && ((!path_links.length) ||
+				(path_links.length > 2))) {
+				var path_links_2 = new Array();
+				var flag_list_2  = new Array(D2JSP_AREA_COUNT);
+/*
+				TDW_PATH_ConstructTargetListInternal_Depth = 0;
+				TDW_PATH_ConstructTargetListInternal(path_links_2, flag_list_2,
+					dst_area, D2JSP_AREA_AreaToTown(src_area), dst_area,
+					access_strategy);
+*/
+				path_links_2 = TDW_PATH_ConstructTargetList(dst_area,
+					D2JSP_AREA_AreaToTown(src_area), access_strategy, load_flags);
+				path_links_2.unshift(new TDW_PATH_LinkTownReturn(
+					D2JSP_AREA_AreaToTown(src_area), dst_area));
+				if (((!path_links.length) && path_links_2.length) ||
+					(path_links_2.length &&
+					(path_links.length > path_links_2.length))) {
+					if (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_DETAIL) {
+						log_obj.logDetail("TDW_PATH_ConstructTargetList(): " +
+							"area " + src_area + " to area " + dst_area + " (" +
+							D2JSP_AREA_AreaToName(src_area) + " to " +
+							D2JSP_AREA_AreaToName(dst_area) + "):");
+						log_obj.logDetail("TDW_PATH_ConstructTargetList(): " +
+							"First try path linkages:");
+						for (var count_1 = 0; count_1 < path_links.length; count_1++)
+							log_obj.logDetail("TDW_PATH_ConstructTargetList(): " +
+								D2JSP_UTIL_FORMAT_RJust(count_1, 5) + ": " +
+								path_links[count_1]);
+						log_obj.emitSep("-");
+					}
+					path_links = path_links_2;
+				}
+			}
+			if (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_DETAIL) {
+				log_obj.logDetail("TDW_PATH_ConstructTargetList(): " +
+					"area " + src_area + " to area " + dst_area + " (" +
+					D2JSP_AREA_AreaToName(src_area) + " to " +
+					D2JSP_AREA_AreaToName(dst_area) + "):");
+				log_obj.logDetail("TDW_PATH_ConstructTargetList(): " +
+					"Final path linkages:");
+				for (var count_1 = 0; count_1 < path_links.length; count_1++)
+					log_obj.logDetail("TDW_PATH_ConstructTargetList(): " +
+						D2JSP_UTIL_FORMAT_RJust(count_1, 5) + ": " +
+						path_links[count_1]);
+				log_obj.emitSep("-");
+			}
+		}
+	}
+
+	if (path_links && path_links.length &&
+		(load_flags != TDW_PATHL_AREA_LOAD_FLAG_NONE))
+		TDW_PATHL_LoadAreaLinks(path_links, access_strategy, load_flags);
+
+//print("FINAL LINK LIST: [" + path_links + "]");
+	return(path_links);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ConstructTargetListInternal(path_links, flag_list, dst_area,
+	src_area, final_dst_area, access_strategy)
+{
+	var dst_link = TDW_PATH_AreaLink[dst_area];
+
+	TDW_PATH_ConstructTargetListInternal_Depth++;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_PATH_ConstructTargetListInternal([" +
+		path_links + "], [" + flag_list + "], " + dst_area + ", " + src_area +
+		", " + final_dst_area + ", " + access_strategy +
+		"): ENTRY ---> DEPTH = " + TDW_PATH_ConstructTargetListInternal_Depth);
+
+	if (!dst_link) {
+		D2JSP_UTIL_LOG_GetALog().syncModeOn();
+		D2JSP_UTIL_LOG_GetALog().logError("Path linkage for destination area " +
+			dst_area + " (" + D2JSP_AREA_AreaToName(dst_area) +
+			"), final destination area " + final_dst_area + " (" +
+			D2JSP_AREA_AreaToName(final_dst_area) + ") has no properties.");
+		D2JSP_UTIL_LogCallStack();
+		D2JSP_UTIL_LOG_GetALog().syncModeOff();
+	}
+
+	for (var count_1 = 0; count_1 < dst_link.link_spec.length; count_1++) {
+		if (dst_link.link_spec[count_1].source_area == src_area) {
+			path_links.push(dst_link.link_spec[count_1]);
+//print("SOURCE FOUND!!! (" + dst_link.link_spec[count_1] + ")");
+//print("PUSHING 0: [" + dst_area + "] = [" + dst_link.link_spec[count_1] + "]");
+			D2JSP_UTIL_LOG_GetALog().logDebug(
+				"TDW_PATH_ConstructTargetListInternal([" + path_links + "], [" +
+				flag_list + "], " + dst_area + ", " + src_area + ", " +
+				final_dst_area + ", " + access_strategy + "): EXIT = true");
+			TDW_PATH_ConstructTargetListInternal_Depth--;
+			return(true);
+		}
+	}
+
+	if (D2JSP_AREA_IsTown(src_area)) {
+		for (var count_1 = 0; count_1 < dst_link.link_spec.length; count_1++) {
+			if (D2JSP_AREA_HasWayPoint(dst_link.link_spec[count_1].source_area) &&
+				D2JSP_AREA_IHaveWayPointArea(
+				dst_link.link_spec[count_1].source_area)) {
+				path_links.push(new TDW_PATH_LinkWaypoint(
+					dst_link.link_spec[count_1].source_area));
+				path_links.push(dst_link.link_spec[count_1]);
+//print("WAYPOINT LINKAGE FOUND!!! (" + path_links[path_links.length - 2] + ")");
+//print("PUSHING 1: [" + dst_area + "] = [" + dst_link.link_spec[count_1] + "]");
+				D2JSP_UTIL_LOG_GetALog().logDebug(
+					"TDW_PATH_ConstructTargetListInternal([" + path_links + "], [" +
+					flag_list + "], " + dst_area + ", " + src_area + ", " +
+					final_dst_area + ", " + access_strategy + "): EXIT = true");
+				TDW_PATH_ConstructTargetListInternal_Depth--;
+				return(true);
+			}
+		}
+	}
+
+	for (var count_1 = 0; count_1 < dst_link.link_spec.length; count_1++) {
+		if (!flag_list[dst_link.link_spec[count_1].source_area]) {
+			flag_list[dst_link.link_spec[count_1].source_area] = true;
+			if (TDW_PATH_ConstructTargetListInternal(path_links, flag_list,
+				dst_link.link_spec[count_1].source_area, src_area, final_dst_area,
+				access_strategy)) {
+				if (path_links.length &&
+					(path_links[path_links.length - 1].destination_area ==
+					final_dst_area)) {
+					D2JSP_UTIL_LOG_GetALog().logDebug(
+						"TDW_PATH_ConstructTargetListInternal([" + path_links +
+						"], [" + flag_list + "], " + dst_area + ", " + src_area +
+						", " + final_dst_area + ", " + access_strategy +
+						"): EXIT = true");
+					TDW_PATH_ConstructTargetListInternal_Depth--;
+					return(true);
+				}
+//print("LINK LIST A: [" + path_links + "] = " + path_links.length);
+				path_links.push(dst_link.link_spec[count_1]);
+//print("LINK LIST B: [" + path_links + "] = " + path_links.length);
+//print("PUSHING 2: [" + dst_area + "] = [" + dst_link.link_spec[count_1] + "]");
+				D2JSP_UTIL_LOG_GetALog().logDebug(
+					"TDW_PATH_ConstructTargetListInternal([" + path_links +
+					"], [" + flag_list + "], " + dst_area + ", " + src_area +
+					", " + final_dst_area + ", " + access_strategy +
+					"): EXIT = true");
+				TDW_PATH_ConstructTargetListInternal_Depth--;
+				return(true);
+			}
+		}
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_PATH_ConstructTargetListInternal([" +
+		path_links + "], [" + flag_list + "], " + dst_area + ", " + src_area +
+		", " + final_dst_area + ", " + access_strategy + "): EXIT = false");
+
+	TDW_PATH_ConstructTargetListInternal_Depth--;
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GotoTargetArea(dst_area, access_strategy, load_flags)
+{
+	var return_code = 0;
+	var log_obj     = D2JSP_UTIL_LOG_GetALog();
+	var path_links;
+
+	if (dst_area != me.area) {
+		access_strategy =
+			(access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+			access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+		path_links      =
+			TDW_PATH_ConstructTargetList(dst_area, me.area, access_strategy,
+			load_flags);
+		if ((path_links == null) || (!path_links.length)) {
+			log_obj.logError("TDW_PATH_ConstructTargetList(): area " +
+				me.area + " to area " + dst_area + " (" +
+				D2JSP_AREA_AreaToName(me.area) + " to " +
+				D2JSP_AREA_AreaToName(dst_area) + ") failed (" + path_links +
+				")");
+print("********** FIX-UP = " + TDW_PATH_AreaLinkFixup[me.act - 1]);
+			return_code = -1;
+		}
+		else if (path_links.length) {
+			if (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_DETAIL) {
+				for (var count_1 = 0; count_1 < path_links.length; count_1++)
+					log_obj.logDetail("TDW_PATH_GotoTargetArea(): " +
+						D2JSP_UTIL_FORMAT_RJust(count_1, 5) + ": " +
+						path_links[count_1]);
+			}
+			if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_MASK)
+				TDW_PATHL_LoadAreaLinks(path_links, access_strategy, load_flags);
+			return_code = TDW_PATH_DoPathList(path_links, access_strategy);
+		}
+	}
+	else
+		path_links = new Array();
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_LoadAreaLinksMulti(area_list, access_strategy, load_flags)
+{
+	var tmp_area_list = new Array();
+	var last_area     = me.area;
+
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		if (D2JSP_AREA_IsValidInGame(area_list[count_1]) &&
+			(me.act == D2JSP_AREA_GetAct(area_list[count_1])))
+			tmp_area_list.push(area_list[count_1]);
+	}
+
+	if (tmp_area_list.length)
+		TDW_PATH_FixUpAct();
+
+	for (var count_1 = 0; count_1 < tmp_area_list.length; count_1++) {
+		var path_links = TDW_PATH_ConstructTargetList(tmp_area_list[count_1],
+			last_area, access_strategy, load_flags);
+		last_area = (path_links && path_links.length) ?
+			path_links[path_links.length - 1].destination_area :
+			tmp_area_list[count_1];
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_LoadAreaLinks(path_links, access_strategy, load_flags)
+{
+	if ((path_links != null) && (load_flags & TDW_PATHL_AREA_LOAD_FLAG_ALL)) {
+		var log_obj = D2JSP_UTIL_LOG_GetALog();
+		access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+			access_strategy : TDW_PATH_GetDefaultLinkAccessStrategy();
+		for (var count_1 = 0; count_1 < path_links.length; count_1++) {
+			var path_element = path_links[count_1];
+			if (D2JSP_AREA_GetAct(path_element.destination_area) != me.act)
+				continue;
+			TDW_PATH_FixUpAct();
+			log_obj.logDetail("LOAD ELEMENT TYPE = " +
+				path_element.toClassName() + " = " + path_element);
+			TDW_PATH_CreateArea(path_element.source_area);
+			TDW_PATH_CreateArea(path_element.destination_area);
+			TDW_PATHL_LoadAreaLinksElement(path_element, access_strategy);
+			TDW_PATHL_LoadAreaLinksElement(path_element.linked_object,
+				access_strategy);
+			if (path_element instanceof TDW_PATH_LinkExit) {
+				if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_SRC)
+					TDW_PATHL_LoadAreaLinksAllExits(path_element.source_area);
+				if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_EXITS_ALL_DST)
+					TDW_PATHL_LoadAreaLinksAllExits(path_element.destination_area);
+			}
+			if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_SRC)
+				TDW_PATH_MapGlobal.area_list[path_element.source_area].
+					getPresetList();
+			if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PRESET_UNITS_DST)
+				TDW_PATH_MapGlobal.area_list[path_element.destination_area].
+					getPresetList();
+			if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_ALL) {
+				TDW_PATH_CreateCollisionInfo(path_element.source_area);
+				TDW_PATH_CreateCollisionInfo(path_element.destination_area);
+				if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA) {
+					TDW_PATH_BuildMap(path_element.source_area,
+						TDW_PATH_MAP_BUILD_FLAG_NONE);
+					TDW_PATH_BuildMap(path_element.destination_area,
+						TDW_PATH_MAP_BUILD_FLAG_NONE);
+				}
+			}
+			else if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX) {
+				if (D2JSP_AREA_IsComplex(path_element.source_area)) {
+					TDW_PATH_CreateCollisionInfo(path_element.source_area);
+					if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA)
+						TDW_PATH_BuildMap(path_element.source_area,
+							TDW_PATH_MAP_BUILD_FLAG_NONE);
+				}
+				else if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA)
+					TDW_PATH_BuildMap(path_element.source_area,
+						TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK);
+				if (D2JSP_AREA_IsComplex(path_element.destination_area)) {
+					TDW_PATH_CreateCollisionInfo(path_element.destination_area);
+					if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA)
+						TDW_PATH_BuildMap(path_element.destination_area,
+							TDW_PATH_MAP_BUILD_FLAG_NONE);
+				}
+				else if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA)
+					TDW_PATH_BuildMap(path_element.destination_area,
+						TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK);
+			}
+			else if (load_flags & TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA) {
+				TDW_PATH_BuildMap(path_element.source_area,
+					TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK);
+				TDW_PATH_BuildMap(path_element.destination_area,
+					TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK);
+			}
+		}
+		runGC();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_LoadAreaLinksElement(path_element, access_strategy)
+{
+	if (path_element instanceof TDW_PATH_LinkExit)
+		path_element.getLocation();
+/*
+	else if (path_element instanceof TDW_PATH_LinkObject)
+		TDW_PATH_MapGlobal.area_list[path_element.source_area].
+			getPresetList(path_element.room_spec, D2JSP_UTIL_GETUNIT_OBJECT,
+			path_element.unit_id_spec,
+			(path_element.link_flags & TDW_PATH_LINK_FLAG_MULTIPLE) ?
+			false : true);
+*/
+	else if (path_element instanceof TDW_PATH_LinkObject)
+		path_element.getLocation();
+	else if (path_element instanceof TDW_PATH_LinkTile) {
+		path_element.getLocation();
+/*
+		TDW_PATH_MapGlobal.area_list[path_element.source_area].
+			getPresetList(path_element.room_spec, D2JSP_UTIL_GETUNIT_TILE,
+			path_element.unit_id_spec,
+			(path_element.link_flags & TDW_PATH_LINK_FLAG_MULTIPLE) ?
+			false : true);
+*/
+	}
+	else if (path_element instanceof TDW_PATH_LinkWaypoint) {
+		path_element.getLocation();
+/*
+		if (D2JSP_AREA_HasWayPoint(path_element.source_area)) {
+			var wp_indices   = D2JSP_AREA_AreaToWayPointIndices();
+			var waypoint_obj = D2JSP_AREA_WaypointObjList[wp_indices[0]]
+				[wp_indices[1]];
+			TDW_PATH_MapGlobal.area_list[path_element.source_area].
+				getPresetList(path_element.room_spec, D2JSP_UTIL_GETUNIT_OBJECT,
+				waypoint_obj.unit_id_spec, true);
+		}
+*/
+	}
+	else if (path_element instanceof TDW_PATH_LinkTownReturn) {
+		if (D2JSP_AREA_HasWayPoint())
+			return(TDW_PATHL_LoadAreaLinksElement(
+				new TDW_PATH_LinkWaypoint(path_element.destination_area),
+				access_strategy));
+	}
+	else if (path_element instanceof TDW_PATH_LinkGotoXY)
+		;
+	else if (path_element instanceof TDW_PATH_LinkTownMove)
+		;
+
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_LoadAreaLinksAllExits(path_area)
+{
+	if (D2JSP_AREA_IsValidInGame(path_area) &&
+		(me.act == D2JSP_AREA_GetAct(path_area))) {
+print("TDW_PATHL_LoadAreaLinksAllExits(" + path_area + ")");
+		TDW_PATH_FixUpAct();
+		for (var count_1 = 0;
+			count_1 <= TDW_PATH_AreaLink[path_area].link_spec.length; count_1++) {
+			var area_link = TDW_PATH_AreaLink[path_area].link_spec[count_1];
+			if (area_link instanceof TDW_PATH_LinkExit)
+//				TDW_PATH_DetermineCommonEdge(area_link.source_area,
+//					area_link.destination_area);
+				TDW_PATH_GetAreaExit(area_link.destination_area,
+					area_link.source_area);
+		}
+		runGC();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_GetSpecialChestListForArea(dst_area)
+{
+	var chest_list = new Array();
+
+	for (var count_1 = 0; count_1 < TDW_PATHL_SpecialChestList.length;
+		count_1++) {
+		if (dst_area == TDW_PATHL_SpecialChestList[count_1].dst_area)
+			chest_list.push(TDW_PATHL_SpecialChestList[count_1]);
+	}
+
+	return(D2JSP_UTIL_GEN_CloneObject(chest_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_FindSpecialChestListInAreaPresetList(in_chest_list)
+{
+	var out_chest_list = new Array();
+
+	in_chest_list = D2JSP_UTIL_GEN_TypeOfArrayIndexed(in_chest_list) ?
+		in_chest_list : TDW_PATHL_GetSpecialChestListForArea(me.area);
+
+/*
+	if (in_chest_list.length == 1)
+		out_chest_list = TDW_PATH_GetPresetList(in_chest_list[0].room_spec,
+			D2JSP_UTIL_GETUNIT_OBJECT, in_chest_list[0].unit_id_spec,
+			in_chest_list[0].first_only_flag);
+	else if (in_chest_list.length > 1) {
+		var this_chest = new TDW_PATHL_SpecialChests(me.area);
+		for (var count_1 = 0; count_1 < in_chest_list.length; count_1++) {
+			if (in_chest_list[count_1].dst_area == me.area) {
+				this_chest.room_spec    =
+					this_chest.room_spec.concat(in_chest_list[count_1].room_spec);
+				this_chest.unit_id_spec =
+					this_chest.unit_id_spec.concat(in_chest_list[count_1].unit_id_spec);
+			}
+		}
+		if (this_chest.unit_id_spec.length)
+			out_chest_list = TDW_PATH_GetPresetList(this_chest.room_spec,
+				D2JSP_UTIL_GETUNIT_OBJECT, this_chest.unit_id_spec, false);
+	}
+*/
+
+	if (in_chest_list.length == 1)
+		out_chest_list = D2JSP_ROOM_GetPresetListForArea(in_chest_list[0].dst_area,
+			D2JSP_UTIL_GETUNIT_OBJECT, in_chest_list[0].unit_id_spec,
+			in_chest_list[0].room_spec, in_chest_list[0].first_only_flag);
+	else if (in_chest_list.length > 1) {
+		var this_chest = new TDW_PATHL_SpecialChests(me.area);
+		for (var count_1 = 0; count_1 < in_chest_list.length; count_1++) {
+			if (in_chest_list[count_1].dst_area == me.area) {
+				this_chest.room_spec    =
+					this_chest.room_spec.concat(in_chest_list[count_1].room_spec);
+				this_chest.unit_id_spec =
+					this_chest.unit_id_spec.concat(in_chest_list[count_1].unit_id_spec);
+			}
+		}
+		if (this_chest.unit_id_spec.length)
+			out_chest_list = D2JSP_ROOM_GetPresetListForArea(this_chest.dst_area,
+				D2JSP_UTIL_GETUNIT_OBJECT, this_chest.unit_id_spec,
+				this_chest.room_spec, false);
+	}
+
+	return(out_chest_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_FindSpecialChestListInAreaPresetCoordsList(in_chest_list)
+{
+	return(D2JSP_ROOM_PresetListToCoords(
+		TDW_PATHL_FindSpecialChestListInAreaPresetList(in_chest_list)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_GetEnemyByName(npc_name)
+{
+	return((npc_name in TDW_PATHL_EnemyList) ? TDW_PATHL_EnemyList[npc_name] :
+		null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_GetEnemyListForArea(dst_area)
+{
+	var enemy_list = new Array();
+	var name_hash  = new Array();
+
+	for (var this_prop in TDW_PATHL_EnemyList) {
+		if ((dst_area == TDW_PATHL_EnemyList[this_prop].dst_area) &&
+			(!(TDW_PATHL_EnemyList[this_prop].npc_name in name_hash))) {
+			enemy_list.push(TDW_PATHL_EnemyList[this_prop]);
+			name_hash[TDW_PATHL_EnemyList[this_prop].npc_name] = true;
+		}
+	}
+
+	return(D2JSP_UTIL_GEN_CloneObject(enemy_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_FindEnemyListInAreaPresetList(in_enemy_list)
+{
+	var out_enemy_list = new Array();
+
+	in_enemy_list = D2JSP_UTIL_GEN_TypeOfArrayIndexed(in_enemy_list) ?
+		in_enemy_list : TDW_PATHL_GetEnemyListForArea(me.area);
+
+	if (in_enemy_list.length == 1)
+		out_enemy_list = TDW_PATH_GetPresetList(in_enemy_list[0].room_spec,
+			unit_type, in_enemy_list[0].unit_id_spec, true);
+	else if (in_enemy_list.length > 1) {
+		for (var count_1 = 0; count_1 < in_enemy_list.length; count_1++) {
+			if (in_enemy_list[count_1].dst_area == me.area)
+				out_enemy_list = out_enemy_list.concat(TDW_PATH_GetPresetList(
+					in_enemy_list[count_1].room_spec,
+					in_enemy_list[count_1].unit_id_type,
+					in_enemy_list[count_1].unit_id_spec,
+					in_enemy_list[count_1].first_only_flag));
+		}
+	}
+
+	return(out_enemy_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATHL_FindEnemyListInAreaPresetCoordsList(in_enemy_list)
+{
+	return(D2JSP_ROOM_PresetListToCoords(
+		TDW_PATHL_FindEnemyListInAreaPresetList(in_enemy_list)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_HasWaypointAccess(dst_area, access_strategy)
+{
+	if (D2JSP_AREA_IsValidInGame(dst_area) && D2JSP_AREA_HasWayPoint(dst_area) &&
+		(access_strategy instanceof TDW_PATH_LinkAccessStrategy) &&
+		D2JSP_UTIL_GEN_TypeOfArrayIndexed(access_strategy.wp_access)) {
+		var wp_indices = D2JSP_AREA_AreaToWayPointIndices(dst_area);
+		if ((access_strategy.wp_access.length < wp_indices[0]) &&
+			D2JSP_UTIL_GEN_TypeOfArrayIndexed(access_strategy.wp_access
+			[wp_indices[0]]) &&
+			(access_strategy.wp_access[wp_indices[0]].length < wp_indices[1]))
+			return(access_strategy.wp_access[wp_indices[0]][wp_indices[1]]);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+/*
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetLinkPath(access_strategy, destination_area, source_area)
+{
+	var out_list = null;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : (new TDW_PATH_LinkAccessStrategy());
+
+//	TDW_PATH_FixUpAct();
+
+	if (D2JSP_AREA_IsValidInGame(destination_area)) {
+		source_area = (source_area) ? source_area : me.area;
+		if (D2JSP_AREA_IsValidInGame(source_area)) {
+			var visited_list = 
+			out_list = TDW_PATH_GetLinkPathInternal(access_strategy,
+				destination_area, source_area, new Array());
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetLinkPathInternal(access_strategy, destination_area,
+	source_area, visited_list)
+{
+	var out_list = new Array();
+
+print("***** [" + source_area + " ---> " + destination_area);
+	if (destination_area == source_area)
+{
+	print("STOPPING");
+	stop();
+		return(null);
+}
+
+//	TDW_PATH_FixUpAct();
+
+	var src_link = TDW_PATH_AreaLink[source_area];
+	for (var count_1 = 0; count_1 < src_link.link_spec.length; count_1++) {
+		if (!((src_link.getLinkedArea(count_1) + "") in visited_list)) {
+			var tmp_list = TDW_PATH_GetLinkPathInternal(access_strategy,
+				destination_area, src_link.getLinkedArea(count_1), visited_list);
+			if (tmp_list != null)
+				out_list.push(tmp_list);
+			visited_list[src_link.getLinkedArea(count_1) + ""] = true;
+		}
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DoLinkPath(destination_area, access_strategy)
+{
+	
+}
+// ////////////////////////////////////////////////////////////////////////////
+*/
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(TDW_INCLUDE_GUARD_PathLink_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+var TEST_FileHandle = null;
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var file_name = "output/RegressionTest.TDW_PathLink.d2l.txt";
+
+/*
+print("**********************************************************************");
+print(TDW_PATH_ConstructTargetList(D2JSP_AREA_DARK_WOOD, D2JSP_AREA_TAMOE_HIGHLAND));
+print("**********************************************************************");
+print(TDW_PATH_ConstructTargetList(D2JSP_AREA_DARK_WOOD, D2JSP_AREA_MONASTERY_GATE));
+print("**********************************************************************");
+print(TDW_PATH_ConstructTargetList(D2JSP_AREA_DISUSED_RELIQUARY, D2JSP_AREA_FLAYER_JUNGLE));
+print("STOPPING ***********************************");
+stop();
+*/
+
+	if ((TEST_FileHandle = fileOpen(file_name, 1)) != null) {
+		print("Writing 'TDW_PathLink.d2l' regression test output file to '" +
+			file_name + "'.");
+		var start_act = me.act;
+		for (var count_1 = 1; count_1 <= 5; count_1++) {
+//for (var count_1 = 3; count_1 <= 3; count_1++) {
+			print("Performing fix-ups for Act " + count_1);
+			TDW_MOVE_COMPAT_TownMove(count_1, "waypoint");
+			delay(1000);
+			TDW_PATH_FixUpAct();
+		}
+		if (start_act != me.act);
+			TDW_MOVE_COMPAT_TownMove(start_act, "waypoint");
+		for (var count_1 = 1; count_1 < TDW_PATH_AreaLink.length; count_1++)
+			ShowLinkage(TDW_PATH_AreaLink[count_1])
+/*
+TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+print("Common edge for RE and BM = " + TDW_PATH_DetermineCommonEdge(1, 2));
+var r = getRoom(1);
+print("RE new vars: [" +
+	(r.levelx * 5) + ", " + (r.levely * 5) + "] ---> [" +
+	(r.levelx2 * 5) + ", " + (r.levely2 * 5) + "]");
+print("RE extents : [" +
+	TDW_PATH_MapGlobal.area_list[1].x_1 + ", " +
+		TDW_PATH_MapGlobal.area_list[1].y_1 + "] ---> [" +
+	TDW_PATH_MapGlobal.area_list[1].x_2 + ", " +
+		TDW_PATH_MapGlobal.area_list[1].y_2 + "]");
+var r = getRoom(2);
+print("BM new vars: [" +
+	(r.levelx * 5) + ", " + (r.levely * 5) + "] ---> [" +
+	(r.levelx2 * 5) + ", " + (r.levely2 * 5) + "]");
+print("BM extents : [" +
+	TDW_PATH_MapGlobal.area_list[2].x_1 + ", " +
+		TDW_PATH_MapGlobal.area_list[1].y_1 + "] ---> [" +
+	TDW_PATH_MapGlobal.area_list[2].x_2 + ", " +
+		TDW_PATH_MapGlobal.area_list[2].y_2 + "]");
+*/
+		TEST_FileHandle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ShowLinkage(in_link)
+{
+//	TDW_PATH_FixUpAct();
+
+	TEST_FileHandle.writeLine("==========================================================");
+	TEST_FileHandle.writeLine("==========================================================");
+	TEST_FileHandle.writeLine("Area " + in_link.area + " (" +
+		D2JSP_AREA_AreaToName(in_link.area) + ")");
+	TEST_FileHandle.writeLine("Link Specification Count: " + in_link.link_spec.length);
+	TEST_FileHandle.writeLine("==========================================================");
+
+	for (var count_1 = 0; count_1 < in_link.link_spec.length; count_1++) {
+		if (count_1)
+			TEST_FileHandle.writeLine("----------------------------------------------------------");
+//		TEST_FileHandle.writeLine("Link number " + (count_1 + 1) + ":");
+TEST_FileHandle.writeLine("Link number " + (count_1 + 1) + " (" +
+	in_link.link_spec[count_1] + "):");
+		TEST_FileHandle.writeLine("---- ------ " + D2JSP_UTIL_FORMAT_LJust("",
+			((count_1 + 1) + "").length + 1, "-"));
+/*
+		if (D2JSP_UTIL_GEN_TypeOfNumber(in_link.link_spec[count_1]))
+			TEST_FileHandle.writeLine("Simple exit linkage to area " + in_link.link_spec[count_1] +
+				" (" + D2JSP_AREA_AreaToName(in_link.link_spec[count_1]) + ")");
+		else {
+			var string_list = in_link.link_spec[count_1].toStringList();
+			while (string_list.length)
+				TEST_FileHandle.writeLine(string_list.shift());
+		}
+*/
+		var string_list = in_link.link_spec[count_1].toStringList();
+		while (string_list.length)
+			TEST_FileHandle.writeLine(string_list.shift());
+	}
+
+	TEST_FileHandle.writeLine("==========================================================");
+	TEST_FileHandle.writeLine("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (false) {
+
+

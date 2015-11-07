@@ -1,0 +1,408 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Required include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/TDW_Ini.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var isf_cfg;
+	var error_list = new Array();
+
+	if (!(isf_cfg = ISF_CreateBM(null, null, null, ISF_PARSE_FLAG_BM_FILE_DETAIL,
+		error_list))) {
+		print(error_list.length + " errors occurred:");
+		while (error_list.length)
+			print(">>> " + error_list.shift());
+	}
+
+	print("Done");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_CreateBM(snagit_file_name, bmitems_file_name, isf_file_name,
+	in_flags, error_list)
+{
+	var new_isf_cfg = null;
+	var isf_cmp     = new Array();
+	var snag_list   = new Array();
+	var item_list   = new Array();
+	var isf_list    = new Array();
+	var all_list    = new Array();
+	var tmp_list    = new Array();
+	var out_file_name;
+	var file_handle;
+
+	error_list        = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(error_list)) ?
+		error_list : (new Array());
+	error_list.length = 0;
+	snagit_file_name  = (snagit_file_name  != null) ? snagit_file_name  :
+		"settings/snagit.ini";
+	bmitems_file_name = (bmitems_file_name != null) ? bmitems_file_name :
+		"settings/bmitems.ini";
+	isf_file_name     = (isf_file_name     != null) ? isf_file_name     :
+		"settings/ISF.BM_Added.cfg";
+
+	if ((snagit_file_name != "") &&
+		ISF_CBM_LoadBMItems(snagit_file_name, in_flags, snag_list, error_list))
+		return(null);
+
+	if ((bmitems_file_name != "") &&
+		ISF_CBM_LoadBMItems(bmitems_file_name, in_flags, item_list, error_list))
+		return(null);
+
+/*
+	print("Loading ISF added items file INI file '" + isf_file_name + "'...");
+	if (isf_file_name != "") {
+		if ((file_handle = fileOpen(isf_file_name, 0)) != null) {
+			while (!file_handle.eof)
+				isf_list.push(file_handle.readLine());
+			file_handle.close();
+		}
+		else {
+			error_list.push("Unable to open ISF BM added file '" + isf_file_name +
+				"' for reading.");
+			return(null);
+		}
+	}
+*/
+
+	all_list = snag_list.concat(item_list, isf_list);
+
+	if (!all_list.length) {
+		error_list.push("No configuration files loaded.");
+		return(null);
+	}
+
+	out_file_name = "settings/ISF_BM_Conversion." + 
+		D2JSP_UTIL_FORMAT_GetUserDottedStringFixed() + ".cfg";
+
+	if (in_flags & (ISF_PARSE_FLAG_BM_FILE_SAVE | ISF_PARSE_FLAG_BM_FILE_DETAIL |
+		ISF_PARSE_FLAG_BM_FILE_XLATES)) {
+		if ((file_handle = fileOpen(out_file_name, 1)) != null) {
+			for (count_1 = 0; count_1 < all_list.length; count_1++) {
+				for (count_2 = 0; count_2 < all_list[count_1][3].length; count_2++)
+					file_handle.writeLine(all_list[count_1][3][count_2]);
+				file_handle.writeLine("");
+			}
+			file_handle.close();
+		}
+		else {
+			error_list.push("Unable to open ISF BM translation output file '" +
+				out_file_name + "' for writing.");
+			return(null);
+		}			
+		return(ISF_Create(out_file_name, in_flags, error_list));
+	}
+	else {
+		for (count_1 = 0; count_1 < all_list.length; count_1++) {
+			for (count_2 = 0; count_2 < all_list[count_1][3].length; count_2++) {
+				if (all_list[count_1][0])
+					tmp_list.push(all_list[count_1][3][0]);
+			}
+		}
+		return(ISF_Create(tmp_list, in_flags, error_list));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_CBM_LoadBMItems(bm_file_name, in_flags, out_list, error_list)
+{
+	var return_code    = 0;
+	var qspec_list     = new Array();
+	var isf_cfg        = new Array();
+	var isf_error_list = new Array();
+	var line_list      = new Array();
+	var my_ini;
+	var this_section;
+	var this_item;
+	var count_1;
+	var count_2;
+	var count_3;
+	var is_boolean;
+	var is_integer;
+	var this_ispec;
+	var this_spec;
+	var this_spec_cmp;
+
+	print("Loading INI file '" + bm_file_name + "'...");
+
+	my_ini = new TDW_INI_File(bm_file_name);
+
+	if (my_ini.error_list.length) {
+		error_list.push("Error(s) occurred loading INI from input file '" +
+			bm_file_name + "':");
+		error_list = error_list.concat(my_ini.getErrorList());
+	}
+
+	if (!my_ini.section_list.length) {
+		error_list.unshift("No sections were found in INI file '" + bm_file_name +
+			"'.");
+		return(-1);
+	}
+
+//	my_ini.writeToFileName(bm_file_name + ".INI_LOAD.txt");
+
+	out_list.push([0, "", null, [
+		"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+		"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+		"; Data parsed from file '" + bm_file_name + "' on " + (new Date()),
+		"; A total " + my_ini.section_list.length + " sections were in the file" +
+		" (including the configuration section, which is not included here).",
+		"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "=")
+		]]);
+
+	// Skip the first section, as that's for configuration...
+	for (count_1 = 1; count_1 < my_ini.section_list.length; count_1++) {
+		this_section  = my_ini.section_list[count_1];
+		this_ispec    = "";
+		qspec_list    = new Array();
+		this_spec     = "";
+		this_spec_cmp = null;
+		line_list     = new Array();
+		pickup_flag   = true;
+		if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+			line_list.push("; ***** BlueMoon INI Format Entry Number " + count_1 +
+				" | Line Number " + this_section.line_number + " | File Name " +
+				bm_file_name);
+		if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+			line_list.push("; [" + this_section.section_name + "]");
+		for (count_2 = 0; count_2 < this_section.item_list.length; count_2++) {
+			this_item   = this_section.item_list[count_2];
+			this_line   = this_item + "";
+			this_lvalue = D2JSP_UTIL_FORMAT_Trim(this_item.name.
+				replace(/^"+|"+$/g, ""));
+			this_op     = D2JSP_UTIL_FORMAT_Trim(this_item.op.
+				replace(/^"+|"+$/g, ""));
+			this_rvalue = D2JSP_UTIL_FORMAT_Trim(this_item.value.
+				replace(/^"+|"+$/g, ""));
+			is_boolean = ("01".indexOf(this_rvalue) > -1) ? true : false;
+			is_integer = D2JSP_UTIL_FORMAT_IsInteger(this_rvalue);
+			if ("=!<>".indexOf(this_op) == -1) {
+				if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line + " --- Invalid operator.");
+			}
+			else if (this_lvalue.toLowerCase() == "show") {
+				if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line + " --- Ignored, not needed.");
+			}
+			else if (this_lvalue.toLowerCase() == "hide") {
+				if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line + " --- Ignored, not needed.");
+			}
+			else if (this_lvalue.toLowerCase() == "description") {
+				if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line + " --- Ignored, not needed.");
+			}
+			else if (this_lvalue.toLowerCase() == "iditem") {
+				if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line + " --- Ignored, not needed.");
+			}
+			else if ((this_lvalue.toLowerCase() == "item") ||
+				(this_lvalue.toLowerCase() == "code")) {
+				if (this_op != "=") {
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line +
+							" --- ERROR: Expected an equals sign ('=').");
+				}
+				else {
+					if (this_rvalue.match(/^\d+$/)) {
+						if (D2JSP_ITEMTYPE_TypeIsValid(parseInt(this_rvalue, 10))) {
+							this_ispec = "Type " + D2JSP_ITEMTYPE_TypeToName(
+								parseInt(this_rvalue, 10));
+							if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+								line_list.push("; " + this_line);
+						}
+						else if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+							line_list.push("; " + this_line +
+								" --- ERROR: Invalid item type number.");
+					}
+					else if (D2JSP_ITEM_IsValidCode(this_rvalue)) {
+						this_ispec = this_rvalue;
+						if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+							line_list.push("; " + this_line);
+					}
+					else if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line +
+							" --- ERROR: Invalid item code ('" + this_item.value +
+							"').");
+				}
+			}
+			else if ((this_lvalue.toLowerCase() == "qual") ||
+				(this_lvalue.toLowerCase() == "level")) {
+				if (D2JSP_ITEM_QualityParseToNumber(this_rvalue) > -1) {
+					qspec_list.push("Quality " + this_op + " " +
+						D2JSP_ITEM_QualityParseToName(this_rvalue));
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line);
+				}
+				else if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line +
+						" --- ERROR: Invalid '" + this_item.name + "' specifier.");
+			}
+			else if (this_lvalue.toLowerCase() == "classlevel") {
+				if (D2JSP_ITEM_ItemClassParseToNumber(this_rvalue) > -1) {
+					qspec_list.push("Item Class " + this_op + " " +
+						D2JSP_ITEM_ItemClassParseToName(this_rvalue));
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line);
+				}
+				else if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line +
+						" --- ERROR: Invalid '" + this_item.name + "' specifier.");
+			}
+			else if (this_lvalue.toLowerCase() == "hassockets") {
+				if (is_boolean) {
+					qspec_list.push("HasSockets = " +
+						((this_rvalue == "0") ? "false" : "true"));
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line);
+				}
+				else if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line +
+						" --- ERROR: rvalue ('" + this_item.value +
+					"') is not a boolean.");
+			}
+			else if (this_lvalue.toLowerCase() == "identified") {
+				if (is_boolean) {
+					qspec_list.push("IsIdentified = " +
+						((this_rvalue == "0") ? "false" : "true"));
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line);
+				}
+				else if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line +
+						" --- ERROR: rvalue ('" + this_item.value +
+					"') is not a boolean.");
+			}
+			else if (this_lvalue.toLowerCase() == "isethereal") {
+				if (is_boolean) {
+					qspec_list.push("IsEthereal = " +
+						((this_rvalue == "0") ? "false" : "true"));
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line);
+				}
+				else if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line +
+						" --- ERROR: rvalue ('" + this_item.value +
+					"') is not a boolean.");
+			}
+			else if (this_lvalue.toLowerCase() == "pickup") {
+				if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+					line_list.push("; " + this_line +
+						" --- Entire entry will be ignored.");
+				pickup_flag = false;
+			}
+			else {
+				if (D2JSP_STAT_ParseToNumber(this_lvalue) == -1) {
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line +
+							" --- ERROR: lvalue ('" + this_item.name +
+							"') not a valid stat.");
+				}
+				else if (!is_integer) {
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line +
+							" --- ERROR: rvalue ('" + this_item.value +
+							"not a valid stat value --- expected an integral value.");
+				}
+				else {
+					qspec_list.push(D2JSP_STAT_ParseToName(this_lvalue) + " " +
+						this_op + " " + this_rvalue);
+					if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+						line_list.push("; " + this_line);
+				}
+			}
+		}
+		if (!pickup_flag) {
+			this_spec = (this_ispec == "") ? "" :
+				(this_ispec + ((qspec_list.length) ? " : " : "") +
+				qspec_list.join(" : "));
+			if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+				line_list.push("; " + this_spec + ((this_ispec == "") ? "" :
+					" <--- ") + "Entry ignored because the 'pickup' flag is false.");
+			this_spec = "";
+		}
+		else if (this_ispec == "") {
+			if (in_flags & ISF_PARSE_FLAG_BM_FILE_DETAIL)
+				line_list.push("; --- WARNING: No item code or type specified.");
+			this_spec = "";
+		}
+		else {
+			this_spec = this_ispec + ((qspec_list.length) ? " : " : "") +
+				qspec_list.join(" : ");
+			if (!ISF_LoadConfigFromList([this_spec], ISF_PARSE_FLAG_NONE,
+				isf_error_list, isf_cfg)) {
+				if (in_flags & ISF_PARSE_FLAG_BM_FILE_XLATES)
+					line_list = line_list.concat(ISF_CBM_GetXLates(isf_cfg));
+				line_list.push(this_spec);
+				this_spec_cmp = D2JSP_UTIL_GEN_CloneObject(
+					isf_cfg[ISF_COMPILED_DATA_SPEC_LIST][0]);
+			}
+			else {
+				line_list.push("; " + this_spec + " <--- FAILED TO COMPILE");
+				for (count_3 = 0; count_3 < isf_error_list.length; count_3++)
+					line_list.push("; --- COMPILATION ERROR: " + isf_error_list[0]);
+				this_spec = "";
+			}
+		}
+		out_list.push([count_1, this_spec, this_spec_cmp, line_list]);
+	}
+
+	out_list.push([0, "", null, [
+		"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+		"; End of data parsed from file '" + bm_file_name + "'",
+		"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "="),
+		"; " + D2JSP_UTIL_FORMAT_RJust("", 78, "=")
+	]]);
+
+	return(0);		
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_CBM_GetXLates(isf_cfg)
+{
+	var out_list = new Array();
+
+	out_list = ISF_CBM_GetXLatesBasic(ISF_COMPILED_DATA_PICKUP,
+		isf_cfg);
+
+	return(out_list.concat(ISF_CBM_GetXLatesBasic(
+		ISF_COMPILED_DATA_EVAL, isf_cfg)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_CBM_GetXLatesBasic(eval_index, isf_cfg)
+{
+	var out_list = new Array();
+	var this_code;
+	var this_prior;
+	var count_1;
+
+	for (this_prior = 0; this_prior < isf_cfg[eval_index].length; this_prior++) {
+		for (this_code in isf_cfg[eval_index][this_prior]) {
+			for (count_1 = 0;
+				count_1 < isf_cfg[eval_index][this_prior][this_code].length;
+				count_1++) {
+				out_list.push("; " + ((eval_index == ISF_COMPILED_DATA_EVAL) ?
+					"EVALUATE: " : "PICKUP  : ") + this_prior + "\t" + this_code +
+					"\t" + count_1 + "\t" + 
+					isf_cfg[eval_index][this_prior][this_code][count_1][1]);
+			}
+		}
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

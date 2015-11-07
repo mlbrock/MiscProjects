@@ -1,0 +1,1853 @@
+var TDW_RUSH_C2S_CmdHeader = ">";
+var TDW_RUSH_S2C_CmdHeader = "&";
+
+var TDW_RUSH_S2C_CmdSource = null;
+var TDW_RUSH_S2C_CmdParams = null;
+
+var TDW_RUSH_S2C_ServerName = null;
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_RUSH_QuestRequestReady = false;
+var TDW_RUSH_QuestRequest      = new Array();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_RC_ValidCommandList    = new Array();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_RC_NeedPublicServer    = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_MOVE_LocationCSHideout = [ 7763,  5267];
+
+include("TDW/TDW_BotSupport.d2l");
+
+includeonce("mlmap.d2l");
+
+const RC_PublicOverhead = 1;
+
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_RC_QUEST_NEED_FLAG_NONE      = 0x0000;
+var TDW_RC_QUEST_NEED_FLAG_SKILL     = 0x0001;
+var TDW_RC_QUEST_NEED_FLAG_STAT      = 0x0002;
+var TDW_RC_QUEST_NEED_FLAG_CAIN      = 0x0004;
+var TDW_RC_QUEST_NEED_FLAG_BENEFIT   = 0x0008;
+var TDW_RC_QUEST_NEED_FLAG_MISC      = 0x0010;
+var TDW_RC_QUEST_NEED_FLAG_WAYPOINT  = 0x0020;
+var TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC = 0x1000;
+var TDW_RC_QUEST_NEED_FLAG_NO_GOLD   = 0x2000;
+var TDW_RC_QUEST_NEED_NOT_PRIMARY    = 0x4000;
+var TDW_RC_QUEST_NEED_PASSIVE_ONLY   = 0xc000;
+
+var TDW_RC_QUEST_NEED_FLAG_ALL       = TDW_RC_QUEST_NEED_FLAG_SKILL     |
+                                       TDW_RC_QUEST_NEED_FLAG_STAT      |
+                                       TDW_RC_QUEST_NEED_FLAG_CAIN      |
+                                       TDW_RC_QUEST_NEED_FLAG_BENEFIT   |
+                                       TDW_RC_QUEST_NEED_FLAG_MISC      |
+                                       TDW_RC_QUEST_NEED_FLAG_WAYPOINT;
+
+var TDW_RC_QUEST_NEED_FLAG_MASK      = TDW_RC_QUEST_NEED_FLAG_SKILL     |
+                                       TDW_RC_QUEST_NEED_FLAG_STAT      |
+                                       TDW_RC_QUEST_NEED_FLAG_CAIN      |
+                                       TDW_RC_QUEST_NEED_FLAG_BENEFIT   |
+                                       TDW_RC_QUEST_NEED_FLAG_MISC      |
+                                       TDW_RC_QUEST_NEED_FLAG_WAYPOINT  |
+                                       TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC |
+                                       TDW_RC_QUEST_NEED_FLAG_NO_GOLD   |
+													TDW_RC_QUEST_NEED_NOT_PRIMARY;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_RC_HumanServer = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	config_list["skill.attack.local"]               = new Array();
+	config_list["skill.attack.ranged"]              = new Array();
+	config_list["chicken.me.hp"]                    = 0;
+	config_list["chicken.me.mp"]                    = 0;
+	config_list["chicken.mercenary.hp"]             = 0;
+	config_list["town.revive.mercenary"]            = false;
+	config_list["town.heal.me.hp"]                  = 0;
+	config_list["town.heal.me.mp"]                  = 0;
+	config_list["town.heal.mercenary.hp"]           = 0;
+	config_list["potion.me.hp.health"]              = 0;
+	config_list["potion.mercenary.hp.health"]       = 0;
+	config_list["potion.me.hp.rejuvenation"]        = 0;
+	config_list["potion.mercenary.hp.rejuvenation"] = 0;
+	config_list["mercernary.needed"]                = false;
+	config_list["mysnagit.pop.chests"]              = false;
+	config_list["mysnagit.gold.flag"]               = false;
+	config_list["town.logic.belt.discard.unused"]   = false;
+
+	TDW_RC_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_Quest(act, server_cmd, start_area, end_area, response_cmd)
+{
+	this.act          = act;
+	this.server_cmd   = server_cmd;
+	this.start_area   = start_area;
+	this.end_area     = end_area;
+	this.response_cmd = response_cmd;
+
+	this.toString     = function() {
+		return(
+			"act = "          + this.act        + ", " +
+			"server_cmd = "   + this.server_cmd + ", " +
+			"response_cmd = " + this.response_cmd);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_Start(config_list)
+{
+/*
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/TDW_RushClient." + me.realm +
+		"." + me.account + "." + me.name + ".log", "TDW_RushCLient");
+	var starting_act;
+	var act_index;
+
+TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+TDW_BOT_Log.syncModeOn();
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	me.randommove = true;
+
+	starting_act  = me.act;
+
+	TDW_BOT_CTX_ContextCreate(TDW_BOT_ConfigureList, config_list,
+		"Rush Client Bot Configuration");
+
+	if (D2JSP_COMM_PickupForCorpse()) {
+		D2JSP_UTIL_LOG_GetALog().logError("Unable to pickup corpse --- probably "+
+			"not prudent to continue");
+		return(-1);
+	}
+*/
+
+TDW_BOT_ConfigureList["operation.log.level.file"] = D2JSP_UTIL_LOG_Level_MINUTIAE;
+TDW_BOT_ConfigureList["operation.log.sync.mode"]  = true;
+
+	if (D2JSP_ITEM_MyGoldTotal() < (1125 + 900 + 480))
+		TDW_BOT_MOVE_TownLogic_NoPurchaseStuffFlag = true;
+
+	var init_err_msg = TDW_BOT_Init("TDW_RushClient", null, config_list,
+		TDW_BOT_INIT_FLAG_NON_POWER_BOT);
+
+TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+TDW_BOT_Log.syncModeOn();
+
+//	if (init_err_msg)
+//		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+	if (init_err_msg)
+		TDW_BOT_Log.logWarning(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	var quest_flags = TDW_RC_QUEST_NEED_FLAG_NONE;
+//var quest_flags = TDW_RC_QUEST_NEED_FLAG_SKILL;
+
+if (me.name == "TMP_E")
+	quest_flags |= TDW_RC_QUEST_NEED_PASSIVE_ONLY;
+
+	var quest_list = TDW_RC_GetNeededQuests(quest_flags |
+		TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC | TDW_RC_QUEST_NEED_FLAG_NO_GOLD);
+
+	if (!quest_list.length) {
+		TDW_BOT_Log.logInfo("No quests need to be done in this difficulty --- " +
+			"stopping");
+		stop();
+	}
+
+	TDW_MOVE_COMPAT_TownMove(me.act, "portalspot");
+
+	var last_action_time = getTickCount();
+
+//	CODE NOTE: Fix me in a new core release!
+	while (D2JSP_COMM_GetPlayerCount() == 1) {
+		D2JSP_UTIL_BNET_OverheadSafe("Awaiting other characters...");
+		if ((last_action_time + 60000) <= getTickCount()) {
+			TDW_RC_KeepAlive();
+			last_action_time = getTickCount();
+		}
+		else
+			delay(500);
+	}
+
+	last_action_time = getTickCount();
+
+	if (TDW_RC_HumanServer) {
+//	CODE NOTE: Fix me in a new core release!
+		while (D2JSP_COMM_GetMyPartyPlayerCount() < 2) {
+			D2JSP_UTIL_BNET_OverheadSafe("Awaiting characters in my party...");
+			if ((last_action_time + 60000) <= getTickCount()) {
+				TDW_RC_KeepAlive();
+				last_action_time = getTickCount();
+			}
+			else
+				delay(500);
+		}
+		while (true) {
+			quest_list = TDW_RC_GetNeededQuests(TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC |
+				TDW_RC_QUEST_NEED_FLAG_NO_GOLD);
+			if (!quest_list.length)
+				break;
+			TDW_RC_ValidCommandList = TDW_RC_GetNeededCommands(quest_list);
+			if (me.act != quest_list[0].act)
+				TDW_MOVE_COMPAT_TownMove(quest_list[0].act, "portalspot");
+			TDW_RC_HandleQuestRequest("Awaiting player command.");
+		}
+	}
+	else {
+		TDW_RC_GetReadyStatus();
+		TDW_RC_DoQuestElement(new TDW_RC_Quest(me.act, "Public",
+			D2JSP_AREA_ActToTown(me.act),
+			D2JSP_AREA_ActToTown(me.act),
+			null));
+		delay(1000);
+		while (D2JSP_ITEM_MyGoldTotal() < 5000) {
+TDW_BOT_Log.logInfo("***** My total gold = " + D2JSP_ITEM_MyGoldTotal());
+			quest_list = new Array();
+/*
+			quest_list.push(new TDW_RC_Quest(me.act, "Public",
+				D2JSP_AREA_ActToTown(me.act),
+				D2JSP_AREA_ActToTown(me.act),
+				null));
+*/
+			quest_list.push(new TDW_RC_Quest(me.act,
+				"GimmeGoldPlz=" + (10000 - D2JSP_ITEM_MyGoldTotal()) +
+				"|" + me.x + "," + me.y,
+				D2JSP_AREA_ActToTown(me.act),
+				D2JSP_AREA_ActToTown(me.act),
+				"PickupGoldPlz"));
+			TDW_RC_ValidCommandList = TDW_RC_GetNeededCommands(quest_list);
+			while (quest_list.length)
+				TDW_RC_DoQuestElement(quest_list.shift());
+			TDW_RC_GetReadyStatus();
+			break;
+		}
+/*
+		TDW_BOT_MOVE_TownLogic_NoPurchaseStuffFlag = false;
+		if (TDW_BOT_MOVE_TownLogic(((TDW_BOT_ContextList["mercernary.needed"]) ?
+			TDW_BOT_MOVE_TOWN_FLAG_MERC_NEEDED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+			((TDW_BOT_ContextList["mercernary.wanted"]) ?
+			TDW_BOT_MOVE_TOWN_FLAG_MERC_WANTED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+			TDW_BOT_MOVE_TOWN_FLAG_FORCE_GOLD, TDW_ISF_Cfg))
+			TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+*/
+		quest_list = TDW_RC_GetNeededQuests(quest_flags |
+			TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC);
+		do {
+			TDW_RC_ValidCommandList = TDW_RC_GetNeededCommands(quest_list);
+			if (quest_list.length)
+				TDW_RC_DoQuestElement(quest_list[0])
+			quest_list = TDW_RC_GetNeededQuests(quest_flags |
+				TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC);
+			if (quest_list.length &&
+				(!(quest_flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY)))
+				TDW_RC_GetReadyStatus();
+		} while (quest_list.length);
+	}
+
+	print("Script ending");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_GetNeededQuests(flags)
+{
+	var quest_list = new Array();
+
+	if ((flags & TDW_RC_QUEST_NEED_FLAG_SKILL) &&
+		D2JSP_QUEST_GetQuestCanComplete(1, 1)) {
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY)) {
+			quest_list.push(new TDW_RC_Quest(1, "Den",
+				D2JSP_AREA_ROGUE_ENCAMPMENT,
+				D2JSP_AREA_DEN_OF_EVIL, "A1Q1_1"));
+			quest_list.push(new TDW_RC_Quest(1, null,
+				D2JSP_AREA_DEN_OF_EVIL,
+				D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q1_2"));
+		}
+		else {
+			quest_list.push(new TDW_RC_Quest(1, null,
+				D2JSP_AREA_ROGUE_ENCAMPMENT,
+				D2JSP_AREA_DEN_OF_EVIL, "A1Q1_1"));
+			quest_list.push(new TDW_RC_Quest(1, null,
+				D2JSP_AREA_DEN_OF_EVIL,
+				D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q1_2"));
+		}
+	}
+
+	if ((flags & TDW_RC_QUEST_NEED_FLAG_CAIN) &&
+		D2JSP_QUEST_GetQuestCanComplete(1, 3)) {
+		if (!(flags & TDW_RC_QUEST_NEED_NOT_PRIMARY)) {
+			if (!D2JSP_QUEST_GetQuestBit(1, 3,
+				D2JSP_QUEST_BIT_A1_Q3_ACTIVATED_CAIRN_STONES)) {
+				if ((!D2JSP_ITEM_HasScrollOfInifuss()) &&
+					(!D2JSP_ITEM_HasKeyToTheCairnStones())) {
+					quest_list.push(new TDW_RC_Quest(1, "Scroll",
+						D2JSP_AREA_ROGUE_ENCAMPMENT,
+						D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q3_1"));
+					quest_list.push(new TDW_RC_Quest(1, "Stones",
+						D2JSP_AREA_ROGUE_ENCAMPMENT,
+						D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q3_2"));
+					quest_list.push(new TDW_RC_Quest(1, "Cain",
+						D2JSP_AREA_ROGUE_ENCAMPMENT,
+						D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q3_3"));
+				}
+				else if (D2JSP_ITEM_HasScrollOfInifuss() ||
+					D2JSP_ITEM_HasKeyToTheCairnStones()) {
+					quest_list.push(new TDW_RC_Quest(1, "Stones",
+						D2JSP_AREA_ROGUE_ENCAMPMENT,
+						D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q3_2"));
+					quest_list.push(new TDW_RC_Quest(1, "Cain",
+						D2JSP_AREA_ROGUE_ENCAMPMENT,
+						D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q3_3"));
+				}
+			}
+			else
+				quest_list.push(new TDW_RC_Quest(1, "Cain",
+					D2JSP_AREA_ROGUE_ENCAMPMENT,
+					D2JSP_AREA_ROGUE_ENCAMPMENT, "A1Q3_3"));
+		}
+	}
+
+	if (D2JSP_QUEST_GetQuestCanComplete(1, 6)) {
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY)) {
+			quest_list.push(new TDW_RC_Quest(1, "A1Q6",
+				D2JSP_AREA_ROGUE_ENCAMPMENT,
+				D2JSP_AREA_CATACOMBS_LEVEL_4,
+				"A1Q6_1"));
+			quest_list.push(new TDW_RC_Quest(1, null,
+				D2JSP_AREA_CATACOMBS_LEVEL_4,
+				D2JSP_AREA_LUT_GHOLEIN,
+				"A1Q6_2"));
+		}
+		else {
+			quest_list.push(new TDW_RC_Quest(1, null,
+				D2JSP_AREA_ROGUE_ENCAMPMENT,
+				D2JSP_AREA_CATACOMBS_LEVEL_4,
+				"A1Q6_1"));
+			quest_list.push(new TDW_RC_Quest(1, null,
+				D2JSP_AREA_CATACOMBS_LEVEL_4,
+				D2JSP_AREA_LUT_GHOLEIN,
+				"A1Q6_2"));
+		}
+	}
+
+	if (D2JSP_QUEST_GetQuestDone(1, 6) &&
+		(flags & TDW_RC_QUEST_NEED_FLAG_SKILL) &&
+		D2JSP_QUEST_GetQuestCanComplete(2, 1)) {
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY)) {
+			quest_list.push(new TDW_RC_Quest(2, "Radament",
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_A2_SEWERS_LEVEL_3, "A2Q1_1"));
+			quest_list.push(new TDW_RC_Quest(2, null,
+				D2JSP_AREA_A2_SEWERS_LEVEL_3,
+				D2JSP_AREA_LUT_GHOLEIN, "A2Q1_2"));
+		}
+		else {
+			quest_list.push(new TDW_RC_Quest(2, null,
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_A2_SEWERS_LEVEL_3, "A2Q1_1"));
+			quest_list.push(new TDW_RC_Quest(2, null,
+				D2JSP_AREA_A2_SEWERS_LEVEL_3,
+				D2JSP_AREA_LUT_GHOLEIN, "A2Q1_2"));
+		}
+	}
+
+	if (D2JSP_QUEST_GetQuestDone(1, 6) &&
+		(!D2JSP_ITEM_HasHoradricCube())) {
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+			quest_list.push(new TDW_RC_Quest(2, "cube",
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_LUT_GHOLEIN,
+				"A2Q2_1"));
+		else
+			quest_list.push(new TDW_RC_Quest(2, null,
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_LUT_GHOLEIN,
+				"A2Q2_1"));
+	}
+
+	if (D2JSP_QUEST_GetQuestDone(1, 6) &&
+		D2JSP_QUEST_GetQuestCanComplete(2, 6)) {
+		if (!D2JSP_QUEST_GetQuestBit(2, 2,
+			D2JSP_QUEST_BIT_A2_Q2_MAKE_STAFF_HORADRIC)) {
+			if (!D2JSP_ITEM_HasHoradricStaff()) {
+				if (!D2JSP_ITEM_HasStaffOfKings()) {
+					if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+						quest_list.push(new TDW_RC_Quest(2, "staff",
+							D2JSP_AREA_LUT_GHOLEIN,
+							D2JSP_AREA_LUT_GHOLEIN,
+							"A2Q2_2"));
+					else
+						quest_list.push(new TDW_RC_Quest(2, null,
+							D2JSP_AREA_LUT_GHOLEIN,
+							D2JSP_AREA_LUT_GHOLEIN,
+							"A2Q2_2"));
+				}
+				if (!D2JSP_ITEM_HasViperAmulet()) {
+					if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+						quest_list.push(new TDW_RC_Quest(2, "viper",
+							D2JSP_AREA_LUT_GHOLEIN,
+							D2JSP_AREA_LUT_GHOLEIN,
+							"A2Q2_3"));
+					else
+						quest_list.push(new TDW_RC_Quest(2, null,
+							D2JSP_AREA_LUT_GHOLEIN,
+							D2JSP_AREA_LUT_GHOLEIN,
+							"A2Q2_3"));
+				}
+			}
+		}
+		if (D2JSP_QUEST_GetQuestCanComplete(2, 5)) {
+			if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY)) {
+				quest_list.push(new TDW_RC_Quest(2, "summoner",
+					D2JSP_AREA_LUT_GHOLEIN,
+					D2JSP_AREA_LUT_GHOLEIN,
+					"A2Q5_1"));
+				quest_list.push(new TDW_RC_Quest(2, null,
+					D2JSP_AREA_LUT_GHOLEIN,
+					D2JSP_AREA_LUT_GHOLEIN,
+					"A2Q5_2"));
+			}
+			else {
+				quest_list.push(new TDW_RC_Quest(2, null,
+					D2JSP_AREA_LUT_GHOLEIN,
+					D2JSP_AREA_LUT_GHOLEIN,
+					"A2Q5_1"));
+				quest_list.push(new TDW_RC_Quest(2, null,
+					D2JSP_AREA_LUT_GHOLEIN,
+					D2JSP_AREA_LUT_GHOLEIN,
+					"A2Q5_2"));
+			}
+		}
+		if (D2JSP_ITEM_HasHoradricStaff() ||
+			(D2JSP_ITEM_HasStaffOfKings() && D2JSP_ITEM_HasViperAmulet())) {
+			if (!(flags & TDW_RC_QUEST_NEED_NOT_PRIMARY))
+				quest_list.push(new TDW_RC_Quest(2, "orifice",
+					D2JSP_AREA_LUT_GHOLEIN,
+					D2JSP_AREA_LUT_GHOLEIN,
+					"A2Q6_1"));
+		}
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+			quest_list.push(new TDW_RC_Quest(2, "duriel",
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_KURAST_DOCKTOWN,
+				"A2Q6_2"));
+		else
+			quest_list.push(new TDW_RC_Quest(2, null,
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_KURAST_DOCKTOWN,
+				"A2Q6_2"));
+	}
+	else if (D2JSP_QUEST_GetQuestDone(2, 6) &&
+		(!D2JSP_QUEST_IsStartedAct(3))) {
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+			quest_list.push(new TDW_RC_Quest(2, "duriel",
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_KURAST_DOCKTOWN,
+				"A2Q6_2"));
+		else
+			quest_list.push(new TDW_RC_Quest(2, null,
+				D2JSP_AREA_LUT_GHOLEIN,
+				D2JSP_AREA_KURAST_DOCKTOWN,
+				"A2Q6_2"));
+	}
+
+	if (D2JSP_QUEST_GetQuestDone(2, 6) &&
+		D2JSP_QUEST_GetQuestCanComplete(3, 6)) {
+		if (D2JSP_QUEST_GetQuestCanComplete(3, 5)) {
+			if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+				quest_list.push(new TDW_RC_Quest(3, "Council",
+					D2JSP_AREA_KURAST_DOCKTOWN,
+					D2JSP_AREA_TRAVINCAL,
+					"A3Q5_1"));
+			else
+				quest_list.push(new TDW_RC_Quest(3, null,
+					D2JSP_AREA_KURAST_DOCKTOWN,
+					D2JSP_AREA_TRAVINCAL,
+					"A3Q5_1"));
+			quest_list.push(new TDW_RC_Quest(3, null,
+				D2JSP_AREA_TRAVINCAL,
+				D2JSP_AREA_KURAST_DOCKTOWN,
+				"A3Q5_2"));
+		}
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+			quest_list.push(new TDW_RC_Quest(3, "Mephisto",
+				D2JSP_AREA_KURAST_DOCKTOWN,
+				D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+				"A3Q6_1"));
+		else
+			quest_list.push(new TDW_RC_Quest(3, null,
+				D2JSP_AREA_KURAST_DOCKTOWN,
+				D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+				"A3Q6_1"));
+		quest_list.push(new TDW_RC_Quest(3, null,
+			D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+			D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+			"A3Q6_2"));
+	}
+
+	if (D2JSP_QUEST_GetQuestDone(3, 6) &&
+		(flags & TDW_RC_QUEST_NEED_FLAG_SKILL) &&
+		D2JSP_QUEST_GetQuestCanComplete(4, 1)) {
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+			quest_list.push(new TDW_RC_Quest(4, "Izual",
+				D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+				D2JSP_AREA_PLAINS_OF_DESPAIR, "A4Q1_1"));
+		else
+			quest_list.push(new TDW_RC_Quest(4, null,
+				D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+				D2JSP_AREA_PLAINS_OF_DESPAIR, "A4Q1_1"));
+		quest_list.push(new TDW_RC_Quest(4, null,
+			D2JSP_AREA_PLAINS_OF_DESPAIR,
+			D2JSP_AREA_THE_PANDEMONIUM_FORTRESS, "A4Q1_2"));
+	}
+
+	if (D2JSP_QUEST_GetQuestDone(3, 6) &&
+		D2JSP_QUEST_GetQuestCanComplete(4, 3)) {
+		if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+			quest_list.push(new TDW_RC_Quest(4, "A4Q3",
+				D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+				D2JSP_AREA_CHAOS_SANCTUM,
+				"A4Q3_1"));
+		else
+			quest_list.push(new TDW_RC_Quest(4, null,
+				D2JSP_AREA_THE_PANDEMONIUM_FORTRESS,
+				D2JSP_AREA_CHAOS_SANCTUM,
+				"A4Q3_1"));
+		quest_list.push(new TDW_RC_Quest(4, null,
+			D2JSP_AREA_CHAOS_SANCTUM,
+			D2JSP_AREA_HARROGATH,
+			"A4Q3_2"));
+	}
+
+	if (D2JSP_QUEST_GetQuestDone(4, 3) &&
+		(me.getStat(D2JSP_STAT_LEVEL) >= ((me.diff + 1) * 20))) {
+		if (D2JSP_QUEST_GetQuestCanComplete(5, 5)) {
+			if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+				quest_list.push(new TDW_RC_Quest(5, "Ancients",
+					D2JSP_AREA_HARROGATH,
+					D2JSP_AREA_ROCKY_SUMMIT,
+					"A5Q5_1"));
+			else
+				quest_list.push(new TDW_RC_Quest(5, null,
+					D2JSP_AREA_HARROGATH,
+					D2JSP_AREA_ROCKY_SUMMIT,
+					"A5Q5_1"));
+			quest_list.push(new TDW_RC_Quest(5, null,
+				D2JSP_AREA_ROCKY_SUMMIT,
+				D2JSP_AREA_HARROGATH,
+				"A5Q5_2"));
+		}
+		if (D2JSP_QUEST_GetQuestCanComplete(5, 6)) {
+			if (!(flags & TDW_RC_QUEST_NEED_PASSIVE_ONLY))
+				quest_list.push(new TDW_RC_Quest(5, "A5Q6",
+					D2JSP_AREA_HARROGATH,
+					D2JSP_AREA_THE_WORLDSTONE_CHAMBER,
+					"A5Q6_1"));
+			else
+				quest_list.push(new TDW_RC_Quest(5, null,
+					D2JSP_AREA_HARROGATH,
+					D2JSP_AREA_THE_WORLDSTONE_CHAMBER,
+					"A5Q6_1"));
+			quest_list.push(new TDW_RC_Quest(5, null,
+				D2JSP_AREA_THE_WORLDSTONE_CHAMBER,
+				D2JSP_AREA_HARROGATH,
+				"A5Q6_2"));
+		}
+	}
+
+	if (flags & TDW_RC_QUEST_NEED_FLAG_WAYPOINT) {
+		var wp_access = TDW_MOVE_WaypointAccessData;
+		for (var count_1 = 0; count_1 < wp_access.length; count_1++) {
+			if (!wp_access[count_1][0])
+				break;
+			for (var count_2 = 0; count_2 < wp_access[count_1].length; count_2++) {
+				var this_wp_area = D2JSP_WayPoints[count_1][count_2];
+				if (wp_access[count_1][count_2])
+					continue;
+				else if (this_wp_area == D2JSP_AREA_HALLS_OF_DEATHS_CALLING)
+					continue;
+				else if ((!D2JSP_QUEST_GetQuestDone(2, 3)) &&
+					(this_wp_area == D2JSP_AREA_PALACE_CELLAR_LEVEL_1))
+					continue;
+				else if ((!D2JSP_QUEST_GetQuestDone(2, 3)) &&
+					(this_wp_area == D2JSP_AREA_ARCANE_SANCTUARY))
+					continue;
+				else if ((!D2JSP_QUEST_GetQuestDone(2, 5)) &&
+					(this_wp_area == D2JSP_AREA_CANYON_OF_THE_MAGI))
+					continue;
+				else if ((!D2JSP_QUEST_GetQuestDone(3, 5)) &&
+					(this_wp_area == D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2))
+					continue;
+				else if ((!D2JSP_QUEST_GetQuestDone(5, 5)) &&
+					(this_wp_area == D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2))
+					continue;
+					quest_list.push(new TDW_RC_Quest(count_1 + 1,
+						"GiveWP " + this_wp_area,
+						D2JSP_AREA_AreaToTown(this_wp_area),
+						D2JSP_AREA_AreaToTown(this_wp_area),
+						"AcquireWaypoint=" + this_wp_area));
+			}
+		}
+	}
+
+	if ((D2JSP_ITEM_MyGoldTotal() < 10000) &&
+		(!(flags & TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC)))
+		quest_list.unshift(new TDW_RC_Quest(me.act,
+			"GimmeGoldPlz=" + (10000 - D2JSP_ITEM_MyGoldTotal()) +
+			"|" + me.x + "," + me.y,
+			D2JSP_AREA_ActToTown(me.act),
+			D2JSP_AREA_ActToTown(me.act),
+			"PickupGoldPlz"));
+	else if (D2JSP_ITEM_MyGoldTotal() >= 5000)
+		TDW_RC_FillTBK();
+
+	if (quest_list.length &&
+		((!(flags & TDW_RC_QUEST_NEED_FLAG_NO_PUBLIC)) || TDW_RC_NeedPublicServer)) {
+		quest_list.unshift(new TDW_RC_Quest(me.act, "Public",
+			D2JSP_AREA_ActToTown(me.act),
+			D2JSP_AREA_ActToTown(me.act),
+			null));
+		if (TDW_RUSH_S2C_ServerName != null)
+			TDW_RC_NeedPublicServer = false;
+	}
+
+	return(quest_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_GetNeededCommands(quest_list)
+{
+	var command_list = new Array();
+
+TDW_BOT_Log.logInfoQuiet("===================================================");
+	for (var count_1 = 0; count_1 < quest_list.length; count_1++) {
+//TDW_BOT_Log.logInfo("***** QUEST CMD: [" + quest_list[count_1] + "]");
+		if (quest_list[count_1].response_cmd != null)
+			command_list[quest_list[count_1].response_cmd.toLowerCase()] = true;
+TDW_BOT_Log.logInfoQuiet(D2JSP_UTIL_FORMAT_RJust(count_1, 3) + ": " +
+	D2JSP_UTIL_FORMAT_LJust(quest_list[count_1].server_cmd, 20) + " ---> " +
+	quest_list[count_1].response_cmd);
+	}
+TDW_BOT_Log.logInfoQuiet("===================================================");
+
+	return(command_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_SetValidCommands(quest_list)
+{
+	TDW_RC_ValidCommandList = TDW_RC_GetNeededCommands(quest_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_FillTBK()
+{
+	var tbk_obj;
+	var tsc_count;
+
+	tbk_obj = D2JSP_COMM_GetALocalTome("tbk");
+
+	if (tbk_obj) {
+		tsc_count = tbk_obj.getStat(D2JSP_STAT_QUANTITY);
+		if ((tsc_count < 10) && D2JSP_NPC_FillTBK()) {
+			D2JSP_UTIL_LOG_GetALog().logError(
+				"Was unable to re-fill a Tome of Townportal.");
+			return(-1);
+		}
+	}
+	else if (D2JSP_NPC_PurchaseTBK()) {
+		D2JSP_UTIL_LOG_GetALog().logError(
+			"Was unable to purchase a Tome of Townportal.");
+		return(-1);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_DoQuestList(quest_list)
+{
+	while (quest_list.length)
+		TDW_RC_DoQuestElement(quest_list.shift());
+
+	TDW_RC_S2C_ReturnToTown();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_DoQuestElement(quest_element)
+{
+/*
+	while (true) {
+		if (D2JSP_AREA_IsTown(quest_element.start_area)) {
+			TDW_RC_S2C_ReturnToTown();
+			TDW_RC_GetReadyStatus();
+			TDW_MOVE_COMPAT_TownMove(quest_element.act, "portalspot");
+		}
+//		TDW_RC_ValidCommandList = D2JSP_UTIL_GEN_CloneObject(quest_element[2]);
+		if (quest_element.server_cmd != null)
+			D2JSP_UTIL_BNET_SaySafe(">" + quest_element.server_cmd);
+		if (!TDW_RC_HandleQuestRequest())
+			break;
+	}
+*/
+	TDW_BOT_Log.logDebug("TDW_RC_DoQuestElement(" + quest_element + "): ENTRY");
+
+	if (me.act != quest_element.act)
+		TDW_MOVE_COMPAT_TownMove(quest_element.act, "portalspot");
+
+	if (quest_element.server_cmd != null)
+		D2JSP_UTIL_BNET_SaySafe(">" + quest_element.server_cmd);
+
+	if (quest_element.response_cmd != null) {
+		if (!D2JSP_UTIL_GEN_HashedArrayHasElements(TDW_RC_ValidCommandList))
+			TDW_RC_ValidCommandList[quest_element.response_cmd.toLowerCase()] = true;
+	}
+
+	for (var this_prop in TDW_RC_ValidCommandList)
+		TDW_BOT_Log.logDetail("VALID RESPONSE COMMAND: [" + this_prop + "]");
+
+	if (D2JSP_UTIL_GEN_HashedArrayHasElements(TDW_RC_ValidCommandList))
+		TDW_RC_HandleQuestRequest();
+
+	TDW_BOT_Log.logDebug("TDW_RC_DoQuestElement(" + quest_element + "): EXIT");
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_HandleQuestRequest(overhead_text)
+{
+	var return_code     = 0;
+	var pickup_gold_cmd = "&PickupGoldPlz:" + me.name + "=";
+
+print("pickup_gold_cmd = [" + pickup_gold_cmd + "]");
+	TDW_RUSH_QuestRequest      = new Array();
+	TDW_RUSH_QuestRequestReady = true;
+
+	overhead_text = (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(overhead_text)) ?
+		overhead_text : "Ready";
+
+/*
+TDW_BOT_Log.logInfo("==================================================");
+for (var this_prop in TDW_RC_ValidCommandList)
+	TDW_BOT_Log.logInfo("RESPONSE CMD: " + this_prop);
+TDW_BOT_Log.logInfo("==================================================");
+*/
+
+	while (true) {
+		if (TDW_RUSH_QuestRequest.length) {
+			D2JSP_UTIL_BNET_OverheadSafe("");
+			TDW_RUSH_QuestRequestReady = false;
+			TDW_RUSH_QuestRequest[0][0].replace(/^\s+|\s+$/g, "");
+			TDW_RUSH_QuestRequest[0][1].replace(/^\s+|\s+$/g, "");
+			TDW_RUSH_QuestRequest[0][0].replace(/\s+/g, " ");
+			TDW_RUSH_QuestRequest[0][1].replace(/\s+/g, " ");
+			var this_cmd     = TDW_RUSH_QuestRequest.shift();
+			var this_src     = this_cmd[0];
+			var this_params  = this_cmd[1];
+			var this_params  = this_params.split(/[\s]/);
+			var this_request = this_params[0];
+//	CODE NOTE: Fix me in a new core release!
+			var player_obj   = D2JSP_COMM_IsInMyParty(this_src);
+//var player_obj = true;
+			this_params.shift();
+			if (!player_obj)
+				TDW_BOT_Log.logInfo("Ignored quest command request '" +
+					this_request + "' because the requestor (" + this_src +
+					") is not in my party.");
+			else if ((this_src != TDW_RUSH_S2C_ServerName) &&
+				(!TDW_RC_HumanServer))
+				TDW_BOT_Log.logInfo("Ignored quest command request '" +
+					this_request + "' because the requestor (" + this_src +
+					") is not the TDW Rush Server.");
+			else if ((this_request.length < 2) ||
+				(this_request.charAt(0) != TDW_RUSH_S2C_CmdHeader))
+				print("Invalid TDW RC quest request (" + this_request + ")");
+			else if (this_request.toLowerCase() == "&cancelquestrequest") {
+				TDW_BOT_Log.logInfo("Quest cancelled by the TDW Rush Server " +
+					this_src + ".");
+				TDW_RC_S2C_ReturnToTown();
+				TDW_MOVE_COMPAT_TownMove("portalspot");
+				return(-1);
+			}
+			else if (this_request.toLowerCase() == "&serverrestart") {
+				TDW_BOT_Log.logInfo("Quest cancelled because the TDW Rush Server " +
+					this_src + " has (re-)started.");
+				TDW_RC_NeedPublicServer = true;
+				TDW_RC_S2C_ReturnToTown();
+				TDW_MOVE_COMPAT_TownMove("portalspot");
+				return(-1);
+			}
+			else if (this_request.toLowerCase() == "&returntotown") {
+				TDW_BOT_Log.logInfo("Returning to town per the the TDW Rush Server " +
+					this_src + " command.");
+				TDW_RC_S2C_ReturnToTown();
+				return(0);
+			}
+			else if (!this_request.indexOf(pickup_gold_cmd)) {
+				if (D2JSP_UTIL_FORMAT_IsDigit(
+					this_request.substr(pickup_gold_cmd.length))) {
+					TDW_RC_S2C_PickupGoldPlz(parseInt(
+						this_request.substr(pickup_gold_cmd.length), 10));
+					delete TDW_RC_ValidCommandList["PickupGoldPlz"];
+					return(0);
+				}
+				else
+					TDW_BOT_Log.logInfo("Ignored gold pickup command request '" +
+						this_request + "' because the gold amount could not be " +
+						"parsed.");
+			}
+			else {
+				this_request = this_request.substr(1);
+				this_params  = (this_params != null) ? this_params : (new Array());
+				var func_name;
+				if (this_request.toLowerCase().match(/^AcquireWaypoint=\d+$/i))
+					func_name = "TDW_RC_S2C_AcquireWaypoint";
+				else
+					func_name = "TDW_RC_S2C_" + this_request;
+				TDW_RUSH_S2C_CmdSource = this_src;
+				TDW_RUSH_S2C_CmdParams = this_params;
+				if (!(this_request.toLowerCase() in TDW_RC_ValidCommandList))
+					print("Unexpected TDW RC quest request ('" + this_request +
+						"') --- ignored.");
+				else {
+					if (eval("typeof(" + func_name + ")") == "function") {
+						delete TDW_RC_ValidCommandList[this_request.toLowerCase()];
+						eval("return_code = " + func_name + "(\"" + this_request +
+							"\");");
+/*
+						if (return_code)
+							return(return_code);
+						if (!D2JSP_UTIL_GEN_HashedArrayHasElements(TDW_RC_ValidCommandList))
+							return(0);
+*/
+						return(return_code);
+					}
+					else 
+						print("Invalid TDW RC quest request ('" + this_request + "')");
+				}
+			}
+			TDW_RUSH_QuestRequest      = new Array();
+			TDW_RUSH_QuestRequestReady = true;
+		}
+		if (TDW_RC_HumanServer == true) {
+//	CODE NOTE: Fix me in a new core release!
+			if (D2JSP_COMM_GetMyPartyPlayerCount() < 2) {
+				TDW_BOT_Log.logInfo("Quest cancelled because you are not partied " +
+					"with a human rusher.");
+				return(-1);
+			}
+			D2JSP_UTIL_BNET_OverheadSafe(overhead_text);
+			delay(250);
+			continue;
+		}
+		else if (TDW_RUSH_S2C_ServerName == null) {
+			TDW_BOT_Log.logInfo("Quest cancelled because you are not partied " +
+				"with a TDW Rush Server.");
+			TDW_RC_NeedPublicServer = true;
+			TDW_RC_S2C_ReturnToTown();
+			TDW_MOVE_COMPAT_TownMove("portalspot");
+			return(-1);
+		}
+		D2JSP_UTIL_BNET_OverheadSafe(overhead_text);
+		delay(250);
+		if (!D2JSP_UTIL_GEN_HashedArrayHasElements(TDW_RC_ValidCommandList))
+			break;
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_GetReadyStatus()
+{
+	var loop_count       = 0;
+	var last_action_time = getTickCount();
+
+	TDW_RUSH_QuestRequest      = new Array();
+	TDW_RUSH_QuestRequestReady = true;
+
+	overhead_text = "Waiting for server ready";
+
+	while (true) {
+		if (!(loop_count % 40))
+			D2JSP_UTIL_BNET_SaySafe(">query:serverisready");
+		if (TDW_RUSH_QuestRequest.length) {
+			D2JSP_UTIL_BNET_OverheadSafe("");
+			TDW_RUSH_QuestRequestReady = false;
+			TDW_RUSH_QuestRequest[0][0].replace(/^\s+|\s+$/g, "");
+			TDW_RUSH_QuestRequest[0][1].replace(/^\s+|\s+$/g, "");
+			TDW_RUSH_QuestRequest[0][0].replace(/\s+/g, " ");
+			TDW_RUSH_QuestRequest[0][1].replace(/\s+/g, " ");
+			var this_cmd     = TDW_RUSH_QuestRequest.shift();
+			var this_src     = this_cmd[0];
+			var this_params  = this_cmd[1];
+			var this_params  = this_params.split(/[\s]/);
+			var this_request = this_params[0];
+			var player_obj   = D2JSP_COMM_IsInMyParty(this_src);
+			this_params.shift();
+			if (this_request.toLowerCase() == "&serverrestart") {
+				loop_count       = 39;
+				last_action_time = getTickCount();
+				TDW_RC_NeedPublicServer = true;
+			}
+			else if (this_request.toLowerCase() == "?serverisready") {
+				if (player_obj) {
+					TDW_RUSH_S2C_ServerName = this_src;
+					return(0);
+				}
+				if ((player_obj = D2JSP_COMM_GetPlayerByName(this_src)) != null) {
+					var tmp_string = "";
+					for (var this_prop in player_obj)
+						tmp_string += ((tmp_string == "") ? "" : ", ") +
+							this_prop + " = " + player_obj[this_prop];
+					TDW_BOT_Log.logDetail("About to perform a " +
+						"clickParty(" + player_obj + " = [" + tmp_string + "], " +
+						"D2JSP_UTIL_PARTY_MODE_PARTY = " +
+						D2JSP_UTIL_PARTY_MODE_PARTY + ")");
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					TDW_BOT_Log.logInfo("Offered a party " +
+						"invitation to player " + this_src + ".");
+					loop_count = 40 - 9;
+				}
+			}
+			TDW_RUSH_QuestRequest      = new Array();
+			TDW_RUSH_QuestRequestReady = true;
+		}
+		if ((D2JSP_COMM_GetPlayerCount() < 2) &&
+			((last_action_time + 60000) <= getTickCount())) {
+			TDW_RC_KeepAlive();
+			last_action_time = getTickCount();
+			D2JSP_UTIL_BNET_OverheadSafe(overhead_text);
+		}
+		else {
+			D2JSP_UTIL_BNET_OverheadSafe(overhead_text);
+			delay(250);
+		}
+		loop_count++;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_KeepAlive()
+{
+	if (D2JSP_AREA_IsTown() && (D2JSP_COMM_GetPlayerCount() < 2)) {
+		var start_coord = [me.x, me.y];
+		var npc_index   = D2JSP_UTIL_GEN_RandomRange(0,
+			D2JSP_NPC_VENDOR_VendorList[me.act - 1].length - 1);
+		D2JSP_UTIL_BNET_OverheadSafe("Keep-alive movement target: " +
+			D2JSP_NPC_VENDOR_VendorList[me.act - 1][npc_index]);
+		D2JSP_NPC_MoveToNPC(D2JSP_NPC_VENDOR_VendorList[me.act - 1][npc_index]);
+		var my_wait = D2JSP_UTIL_GEN_RandomRange(1, 10);
+		while (my_wait) {
+			D2JSP_UTIL_BNET_OverheadSafe("Waiting " + my_wait-- + " seconds...");
+			for (var count_1 = 0; count_1 < 4; count_1++) {
+				if (D2JSP_COMM_GetPlayerCount() > 1) {
+					my_wait = 0;
+					break;
+				}
+				delay(250);
+			}
+		}
+		D2JSP_UTIL_BNET_OverheadSafe("Keep-alive movement target: starting point");
+		TDW_MOVE_COMPAT_TownMoveXY(me.act, start_coord[0], start_coord[1]);
+		D2JSP_UTIL_BNET_OverheadSafe("");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_S2C_PickupGoldPlz(gold_amount)
+{
+	if (me.getStat(D2JSP_STAT_GOLD) < D2JSP_ITEM_MaxGoldInInventory()) {
+		var start_gold = me.getStat(D2JSP_STAT_GOLD);
+		for (var count_1 = 0; count_1 < 10; count_1++) {
+			var this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, "gld",
+				ISF_ITEM_PICKUP_MODE_FLAGS);
+			if (this_obj) {
+				do {
+					var gold_list = new Array();
+					if (this_obj.getStat(D2JSP_STAT_GOLD) == gold_amount)
+						gold_list.push(new ISF_PUSpec(this_obj,
+							ISF_SPEC_ITEM_PRIORITY_GOLD,
+							Dist(me.x, me.y, this_obj.x, this_obj.y), false,
+							this_obj.getStat(D2JSP_STAT_GOLD)));
+					if (gold_list.length) {
+						ISF_PUSpecSortItemsList(gold_list);
+						ISF_DoPickupBasic(null, [gold_list[0]],
+							ISF_PICKUP_FLAG_GOLD | ISF_PICKUP_FLAG_FAST_USE_ANY);
+						delay(500);
+						break;
+					}
+				} while (this_obj && this_obj.getNext("gld",
+					ISF_ITEM_PICKUP_MODE_FLAGS));
+			}
+			delay(500);
+			if (start_gold < me.getStat(D2JSP_STAT_GOLD))
+				break;
+		}
+	}
+
+	if (D2JSP_ITEM_MyGoldTotal() >= 5000) {
+		TDW_BOT_MOVE_TownLogic_NoPurchaseStuffFlag = false;
+		if (TDW_BOT_MOVE_TownLogic(((TDW_BOT_ContextList["mercernary.needed"]) ?
+			TDW_BOT_MOVE_TOWN_FLAG_MERC_NEEDED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+			((TDW_BOT_ContextList["mercernary.wanted"]) ?
+			TDW_BOT_MOVE_TOWN_FLAG_MERC_WANTED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+			TDW_BOT_MOVE_TOWN_FLAG_FORCE_GOLD, TDW_ISF_Cfg))
+			TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+	}
+	else if (D2JSP_ITEM_MyGoldTotal() >= 2000)
+		TDW_RC_FillTBK();
+
+	D2JSP_COMM_ExcessGoldToStash();
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_S2C_TakeServerPortal(target_area)
+{
+	var this_portal = TDW_MOVE_LookForPortal(target_area,
+		TDW_RUSH_S2C_CmdSource, 1, 50, true);
+
+	if ((!this_portal) || (myDist(this_portal.x, this_portal.y) >= 5))
+		TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(target_area), "portalspot");
+
+	TDW_MOVE_LookForAndTakePortal(target_area, TDW_RUSH_S2C_CmdSource,
+		500, 50, true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_S2C_ReturnToTown()
+{
+	TDW_MOVE_ReturnToTown(null, null, 500, 50);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_S2C_AcquireWaypoint(this_request)
+{
+	var tmp_list = this_request.match(/^AcquireWaypoint=(\d+)\s*$/i);
+
+	if ((!tmp_list) || (tmp_list.length != 2)) {
+		TDW_BOT_Log.logError("Invalid waypoint acquisition command from " +
+			"TDW Rush Server ('" + this_request + "').");
+		return(-1);
+	}
+
+	var area_number = parseInt(tmp_list[1]);
+
+	if (!D2JSP_AREA_IsValidInGame(area_number)) {
+		TDW_BOT_Log.logError("Invalid area specified for waypoint acquisition (" +
+			area_number + ").");
+		return(-1);
+	}
+	else if (!D2JSP_AREA_HasWayPoint(area_number)) {
+		TDW_BOT_Log.logError("Area specified for waypoint acquisition (" +
+			area_number + " = '" + D2JSP_AREA_AreaToName(area_number) +
+			"') does not have a waypoint.");
+		return(-1);
+	}
+
+	var act_number = D2JSP_AREA_GetAct(area_number);
+
+	if (!D2JSP_AREA_IsTown())
+		TDW_RC_S2C_ReturnToTown();
+
+	TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(area_number), "portalspot");
+
+	TDW_RC_S2C_TakeServerPortal(-1);
+
+	delay(1000);
+
+	var way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+
+	var wp_area = me.area;
+
+	if (way_point_obj) {
+		TDW_MOVE_MoveToObject(way_point_obj);
+		TDW_MOVE_WaypointUse(D2JSP_AREA_AreaToTown());
+		TDW_MOVE_GetMyWayPointAccess();
+	}
+	else
+		TDW_RC_S2C_ReturnToTown();
+
+	if (!D2JSP_AREA_IsLastInAct(wp_area))
+		TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(wp_area), "portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Den monsters are to be killed.
+function TDW_RC_S2C_A1Q1_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(1, 1)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_DEN_OF_EVIL);
+		return_code = TDW_RC_HandleQuestRequest("Waiting for the death of " +
+			"all the monsters in the Den of Evil");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Den monsters are dead.
+function TDW_RC_S2C_A1Q1_2()
+{
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	var npc_obj = D2JSP_NPC_InteractWithNPC("Akara");
+	if (npc_obj)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Get the Scroll of Inifuss
+function TDW_RC_S2C_A1Q3_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(1, 3) &&
+		(!D2JSP_ITEM_HasScrollOfInifuss()) &&
+		(!D2JSP_ITEM_HasKeyToTheCairnStones())) {
+		if (!D2JSP_ITEM_CONT_HasAvailableSpace(2, 2,
+			D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+			D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_INVENTORY, 2, 2, "tbk");
+			if (!D2JSP_ITEM_CONT_HasAvailableSpace(2, 2,
+				D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+				TDW_BOT_Log.logError("No space for the Scroll of Inifuss");
+				return(0);
+			}
+		}
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_DARK_WOOD);
+		TDW_BOT_RUSH_ManageQuestUnit(false, "Tree of Inifuss", 30,
+			D2JSP_MODE_OBJECT_OPERATING, "Scroll of Inifuss", "bks", true);
+		TDW_BOT_MOVE_RecoverInTown(false);
+	}
+
+	if (D2JSP_QUEST_GetQuestCanComplete(1, 3) &&
+		(D2JSP_ITEM_HasScrollOfInifuss() ||
+		D2JSP_ITEM_HasKeyToTheCairnStones())) {
+		if (D2JSP_ITEM_HasScrollOfInifuss()) {
+			var npc_obj = D2JSP_NPC_InteractWithNPC("Akara");
+			if (npc_obj)
+				D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		}
+		TDW_MOVE_COMPAT_TownMove("portalspot");
+		TDW_RC_GetReadyStatus();
+//		D2JSP_UTIL_BNET_SaySafe(">stones");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Open the Cairn Stones
+function TDW_RC_S2C_A1Q3_2()
+{
+	var return_code = 0;
+
+	if (D2JSP_ITEM_HasScrollOfInifuss()) {
+		var npc_obj = D2JSP_NPC_InteractWithNPC("Akara");
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	}
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+
+	if (D2JSP_QUEST_GetQuestCanComplete(1, 3) &&
+		D2JSP_ITEM_HasKeyToTheCairnStones()) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_STONY_FIELD);
+		while (D2JSP_COMM_CountIdleCairnStones()) {
+			for (var count_1 = 0; count_1 < TDW_MOVE_Act1_CairnStones.length;
+				count_1++) {
+				target_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT,
+					TDW_MOVE_Act1_CairnStones[count_1]);
+				if (target_obj && (target_obj.mode == D2JSP_MODE_OBJECT_IDLE)) {
+					TDW_MOVE_MoveToObject(target_obj);
+					D2JSP_UTIL_InteractObject(target_obj);
+					delay(500);
+				}
+			}
+		}
+		TDW_RC_S2C_ReturnToTown()
+		TDW_MOVE_COMPAT_TownMove("portalspot");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Free Cain from his gibbit.
+function TDW_RC_S2C_A1Q3_3()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(1, 3) &&
+		(!D2JSP_ITEM_HasScrollOfInifuss()) &&
+		(!D2JSP_ITEM_HasKeyToTheCairnStones())) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_TRISTRAM);
+		// Open Cain's gibbet.
+		TDW_BOT_RUSH_ManageQuestUnit(false, "Gibbet", 26,
+			D2JSP_MODE_OBJECT_OPENED);
+		for (var count_1 = 0; count_1 < 200; count_1++) {
+			var cain_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, 146);
+			if (cain_obj && (cain_obj.mode == D2JSP_MODE_NPC_DEAD))
+				break;
+			delay(50);
+		}
+		TDW_RC_S2C_ReturnToTown()
+		var npc_obj = D2JSP_NPC_InteractWithNPC("Akara");
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		TDW_MOVE_COMPAT_TownMove("stash");
+		npc_obj = D2JSP_NPC_InteractWithNPC("Deckard Cain");
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Andariel is to be killed.
+function TDW_RC_S2C_A1Q6_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(1, 6)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_CATACOMBS_LEVEL_4);
+/*
+		while (true) {
+			if ((return_code =
+				TDW_RC_HandleQuestRequest("Waiting for Andariel's death")))
+				return(return_code);
+			if (me.act == 2)
+				break;
+			delay(500);
+		}
+*/
+		return_code = TDW_RC_HandleQuestRequest("Waiting for Andariel's death");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Andariel is dead.
+function TDW_RC_S2C_A1Q6_2()
+{
+	if (!D2JSP_QUEST_IsStartedAct(2)) {
+		D2JSP_UTIL_BNET_OverheadSafe("Finalizing Act 1");
+		D2JSP_NPC_FinalizeAct1();
+		TDW_BOT_MOVE_RecoverInTown(false);
+		TDW_MOVE_COMPAT_TownMove("portalspot");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Radament is to be killed.
+function TDW_RC_S2C_A2Q1_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(2, 1)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_A2_SEWERS_LEVEL_3);
+		return_code = TDW_RC_HandleQuestRequest("Waiting for the imminent " +
+			"death of Radament");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Radament is are dead.
+function TDW_RC_S2C_A2Q1_2()
+{
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_A2_SEWERS_LEVEL_3);
+
+	TDW_BOT_RUSH_ManageQuestUnit(false, null, null, null,
+		"Book of Skill", "ass", true);
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	var npc_obj = D2JSP_NPC_InteractWithNPC("Atma");
+	if (npc_obj)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Get the Horadric Cube.
+function TDW_RC_S2C_A2Q2_1()
+{
+	if (!D2JSP_ITEM_HasHoradricCube()) {
+		if (!D2JSP_ITEM_CONT_HasAvailableSpace(2, 2,
+			D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+			D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_INVENTORY, 2, 2, "tbk");
+			if (!D2JSP_ITEM_CONT_HasAvailableSpace(2, 2,
+				D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+				TDW_BOT_Log.logError("No space for Horadric Cube.");
+				return(0);
+			}
+		}
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3);
+		TDW_BOT_RUSH_ManageQuestUnit(false, "Horadric Cube Chest", 354,
+			D2JSP_MODE_OBJECT_OPENED, "Horadric Cube", "Horadric Cube", true);
+		TDW_BOT_MOVE_RecoverInTown(false);
+	}
+
+	if (D2JSP_ITEM_HasHoradricCube())
+		TDW_RC_MakeStaff();
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Get the Horadric Staff.
+function TDW_RC_S2C_A2Q2_2()
+{
+	if (!D2JSP_ITEM_HasHoradricStaff()) {
+		if (!D2JSP_ITEM_CONT_HasAvailableSpace(1, 3,
+			D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+			D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_INVENTORY, 1, 3, "tbk");
+			if (!D2JSP_ITEM_CONT_HasAvailableSpace(1, 3,
+				D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+				TDW_BOT_Log.logError("No space for Shaft of the Horadric Staff.");
+				return(0);
+			}
+		}
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_MAGGOT_LAIR_LEVEL_3);
+		TDW_BOT_RUSH_ManageQuestUnit(false, "Staff of Kings Chest", 356,
+			D2JSP_MODE_OBJECT_OPENED, "Shaft of the Horadric Staff", "msf", true);
+		TDW_BOT_MOVE_RecoverInTown(false);
+	}
+
+	if (D2JSP_ITEM_HasHoradricStaff())
+		TDW_RC_MakeStaff();
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Get the Amulet of the Viper.
+function TDW_RC_S2C_A2Q2_3()
+{
+	if (!D2JSP_ITEM_HasViperAmulet()) {
+		if (!D2JSP_ITEM_CONT_HasAvailableSpace(1, 1,
+			D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+			D2JSP_COMM_ClearContainer(D2JSP_ITEM_CONT_SRC_INVENTORY, 1, 1, "tbk");
+			if (!D2JSP_ITEM_CONT_HasAvailableSpace(1, 1,
+				D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+				TDW_BOT_Log.logError("No space for Amulet of the Viper.");
+				return(0);
+			}
+		}
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2);
+		TDW_BOT_RUSH_ManageQuestUnit(true, "Altar of the Tainted Sun",
+			149, D2JSP_MODE_OBJECT_OPENED, "Amulet of the Viper", "vip", true);
+		TDW_BOT_MOVE_RecoverInTown(false);
+		var npc_obj = D2JSP_NPC_InteractWithNPC("Drognan");
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	}
+
+	if (D2JSP_ITEM_HasViperAmulet())
+		TDW_RC_MakeStaff();
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// The Summoner is to be killed.
+function TDW_RC_S2C_A2Q5_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(2, 5)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_ARCANE_SANCTUARY);
+/*
+		while (true) {
+			if ((return_code =
+				TDW_RC_HandleQuestRequest("Waiting for The Summoner's death")))
+				return(return_code);
+			if (me.area != D2JSP_AREA_ARCANE_SANCTUARY)
+				break;
+			delay(500);
+		}
+*/
+		return_code = TDW_RC_HandleQuestRequest("Waiting for The Summoner's death");
+		var npc_obj = D2JSP_NPC_InteractWithNPC("Fara", 3);
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// The Summoner is dead.
+function TDW_RC_S2C_A2Q5_2()
+{
+/*
+	if (!D2JSP_AREA_IsTown())
+		TDW_RC_S2C_ReturnToTown();
+
+	TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_ARCANE_SANCTUARY);
+
+	TDW_BOT_RUSH_ManageQuestUnit(false, "Tome", "Tome",
+		D2JSP_MODE_OBJECT_OPENED, "Horazon's Journal", null, false);
+
+	TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_CANYON_OF_THE_MAGI, null, 100,
+		50, true);
+
+	if (me.area == D2JSP_AREA_ARCANE_SANCTUARY)
+		TDW_BOT_MOVE_RecoverInTown(false);
+	else {
+		TDW_MOVE_WaypointUse(D2JSP_AREA_AreaToTown());
+		TDW_BOT_MOVE_RecoverInTown(false);
+	}
+
+	var npc_obj = D2JSP_NPC_InteractWithNPC("Fara");
+	if (npc_obj)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+
+	return(0);
+*/
+	if (!D2JSP_AREA_IsTown())
+		TDW_RC_S2C_ReturnToTown();
+
+	var npc_obj = D2JSP_NPC_InteractWithNPC("Fara", 3);
+	if (npc_obj)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Use the Horadric Staff to open Duriel's Lair.
+function TDW_RC_S2C_A2Q6_1()
+{
+	if (D2JSP_QUEST_GetQuestCanComplete(2, 6)) {
+		TDW_RC_MakeStaff();
+		if (D2JSP_ITEM_HasHoradricStaff())
+			TDW_RC_S2C_TakeServerPortal(getRoom(0).correcttomb);
+		D2JSP_COMM_InsertStaffIntoOrifice();
+		TDW_BOT_MOVE_RecoverInTown(false);
+		TDW_MOVE_COMPAT_TownMove("portalspot");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Duriel is dead.
+function TDW_RC_S2C_A2Q6_2()
+{
+	if (D2JSP_QUEST_IsStartedAct(2) && (!D2JSP_QUEST_IsStartedAct(3))) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_DURIELS_LAIR);
+		var npc_obj = D2JSP_NPC_InteractWithNPC("Tyrael", 1);
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		D2JSP_NPC_FinalizeAct2();
+		TDW_BOT_MOVE_RecoverInTown(false);
+		TDW_MOVE_COMPAT_TownMove("portalspot");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// The High Council is to be killed.
+function TDW_RC_S2C_A3Q5_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(3, 5)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_TRAVINCAL);
+/*
+		while (true) {
+			if ((return_code =
+				TDW_RC_HandleQuestRequest("Waiting for the death of the High Council")))
+				return(return_code);
+			if (me.act == 4)
+				break;
+			delay(500);
+		}
+*/
+	return_code =
+		TDW_RC_HandleQuestRequest("Waiting for the death of the High Council");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// The High Council is dead.
+function TDW_RC_S2C_A3Q5_2()
+{
+	if (!D2JSP_AREA_IsTown())
+		TDW_RC_S2C_ReturnToTown();
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+	npc_obj = D2JSP_NPC_InteractWithNPC("Deckard Cain");
+	if (npc_obj)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Mephisto is to be killed.
+function TDW_RC_S2C_A3Q6_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(3, 6)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3);
+/*
+		while (true) {
+			if ((return_code =
+				TDW_RC_HandleQuestRequest("Waiting for Mephisto's death")))
+				return(return_code);
+			if (me.act == 4)
+				break;
+			delay(500);
+		}
+*/
+	return_code = TDW_RC_HandleQuestRequest("Waiting for Mephisto's death");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Mephisto is dead.
+function TDW_RC_S2C_A3Q6_2()
+{
+	if (me.area == D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3) {
+		var this_map = new oMap();
+		this_map.InitializeMap();
+		var path_list = this_map.FindPath(me.x, me.y, 17591, 8069, 5,
+			mlREDUCEWALK, mlASTAR, 4, 1);
+		while (path_list.length) {
+			TDW_MOVE_MoveToXY(path_list[0].x, path_list[0].y);
+			path_list.shift();
+		}
+		TDW_MOVE_LookForAndTakePortal(0, "", 10);
+		TDW_BOT_MOVE_RecoverInTown(false);
+		D2JSP_NPC_FinalizeAct3();
+		TDW_MOVE_COMPAT_TownMove("portalspot");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Izual is to be killed.
+function TDW_RC_S2C_A4Q1_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(4, 1)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_PLAINS_OF_DESPAIR);
+		return_code = TDW_RC_HandleQuestRequest("Waiting for the imminent " +
+			"death of Izual");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Izual is dead.
+function TDW_RC_S2C_A4Q1_2()
+{
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	var npc_obj = D2JSP_NPC_InteractWithNPC("Tyrael");
+	if (npc_obj)
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Diablo is to be killed.
+function TDW_RC_S2C_A4Q3_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(4, 3)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_CHAOS_SANCTUM);
+		TDW_MOVE_MoveToXYPair(TDW_MOVE_LocationCSHideout);
+/*
+		while (true) {
+			if ((return_code =
+				TDW_RC_HandleQuestRequest("Waiting for Diablo's death")))
+				return(return_code);
+			if (me.act == 5)
+				break;
+			delay(500);
+		}
+*/
+		return_code = TDW_RC_HandleQuestRequest("Waiting for Diablo's death");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Diablo is dead.
+function TDW_RC_S2C_A4Q3_2()
+{
+	D2JSP_NPC_FinalizeAct4();
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// The Ancients are to be killed.
+function TDW_RC_S2C_A5Q5_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(5, 5)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_ROCKY_SUMMIT);
+		return_code = TDW_RC_HandleQuestRequest("Waiting for The Ancients' death");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// The Ancients are dead.
+function TDW_RC_S2C_A5Q5_2()
+{
+	if (me.area == D2JSP_AREA_ROCKY_SUMMIT) {
+		TDW_BOT_MOVE_RecoverInTown(false);
+		TDW_MOVE_COMPAT_TownMove("portalspot");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Baal is to be killed.
+function TDW_RC_S2C_A5Q6_1()
+{
+	var return_code = 0;
+
+	if (D2JSP_QUEST_GetQuestCanComplete(5, 6)) {
+		TDW_RC_S2C_TakeServerPortal(D2JSP_AREA_THE_WORLDSTONE_CHAMBER);
+/*
+		while (true) {
+			if ((return_code =
+				TDW_RC_HandleQuestRequest("Waiting for Baal's death")))
+				return(return_code);
+			if (me.area != D2JSP_AREA_THE_WORLDSTONE_CHAMBER)
+				break;
+			delay(500);
+		}
+*/
+		return_code = TDW_RC_HandleQuestRequest("Waiting for Baal's death");
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Baal is dead.
+function TDW_RC_S2C_A5Q6_2()
+{
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	for (var count_1 = 0; count_1 < 2; count_1++) {
+		var npc_obj = D2JSP_NPC_InteractWithNPC("Malah", 1);
+		if (npc_obj)
+			D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		delay(1000);
+	}
+
+	TDW_MOVE_COMPAT_TownMove("portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_MakeStaff()
+{
+	if ((!D2JSP_ITEM_HasHoradricStaff()) &&
+		D2JSP_ITEM_HasStaffOfKings() &&
+		D2JSP_ITEM_HasViperAmulet() &&
+		D2JSP_ITEM_HasHoradricCube()) {
+		if (!D2JSP_COMM_MakeHoradricStaff())
+			D2JSP_UTIL_BNET_SaySafe("I've transmuted the " + 
+				D2JSP_ITEM_HasHoradricStaff().name + "!");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+	else if (arguments[0].match(/^\S+ has left your party\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			if (player_name == TDW_RUSH_S2C_ServerName) {
+				log_obj.logInfo("The TDW Rush Server " + player_name +
+					"has left your party.");
+				TDW_RUSH_S2C_ServerName = null;
+			}
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			D2JSP_COMM_GetPlayerByName(player_name);
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (arguments[0].
+		match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			if (player_name == TDW_RUSH_S2C_ServerName) {
+				log_obj.logInfo("The TDW Rush Server " + player_name +
+					"has left the game.");
+				TDW_RUSH_S2C_ServerName = null;
+				TDW_RC_NeedPublicServer = true;
+			}
+		}
+	}
+	else if (arguments[0].match(/^\S+ dropped due to timeout\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			if (player_name == TDW_RUSH_S2C_ServerName) {
+				log_obj.logInfo("The TDW Rush Server " + player_name +
+					"has timed out (left the game).");
+				TDW_RUSH_S2C_ServerName = null;
+				TDW_RC_NeedPublicServer = true;
+			}
+		}
+	}
+	else if (TDW_RUSH_QuestRequestReady) {
+		var msg_data = D2JSP_UTIL_GEN_ParseNetString(arguments[0]);
+		if (msg_data && ((msg_data[1].charAt(0) == TDW_RUSH_S2C_CmdHeader) ||
+			(msg_data[1].charAt(0) == "?"))) {
+		  TDW_RUSH_QuestRequest.push(msg_data);
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

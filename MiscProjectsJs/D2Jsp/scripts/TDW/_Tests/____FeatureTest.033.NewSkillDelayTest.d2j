@@ -1,0 +1,70 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+var TestSkill = D2JSP_SKILL_FROZEN_ORB;
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/____FeatureTest.033.NewSkillDelayTest.d2j.log",
+		"FeatureTest.033", null, null, null, true);
+
+	if (me.classid != D2JSP_CLASS_ID_SORCERESS)
+		my_log.logError("This test requires a Sorceress.");
+
+	else {
+		if (me.area != D2JSP_AREA_COLD_PLAINS)
+			TDW_MOVE_WaypointUse(D2JSP_AREA_COLD_PLAINS);
+		if (me.area != D2JSP_AREA_COLD_PLAINS)
+			my_log.logError("Unable to get to " +
+				D2JSP_AREA_AreaToName(D2JSP_AREA_COLD_PLAINS) + ".");
+		else {
+			var start_value_1;
+			var start_value_2;
+			var start_time_1;
+			var start_time_2;
+			var end_time_1;
+			var end_time_2;
+			my_log.logInfo("Will test using skill " +
+				D2JSP_SKILL_SkillList[TestSkill] + ".");
+			me.setSkill(TestSkill, 1);
+			delay(500);
+			while (true) {
+				while ((me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN) ||
+					me.getState(D2JSP_STATE_SKILLDELAY))
+					delay(0);
+				me.overhead("Ready");
+				while (!me.getState(D2JSP_STATE_SKILLDELAY))
+					delay(0);
+				end_time_1 = 0;
+				end_time_2 = 0;
+				if ((start_value_1 = me.mode) !=
+					D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN)
+					start_time_1 = getTickCount();
+				if (start_value_2 = me.getState(D2JSP_STATE_SKILLDELAY))
+					start_time_2 = getTickCount();
+				me.overhead("");
+				do {
+					if ((!end_time_1) &&
+						(me.mode == D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+						end_time_1 = getTickCount();
+					if ((!end_time_2) && (!me.getState(D2JSP_STATE_SKILLDELAY)))
+						end_time_2 = getTickCount();
+					delay(0);
+				} while ((!end_time_1) || (!end_time_2));
+				my_log.logInfo("Mode Delay Milliseconds : " +
+					(end_time_1 - start_time_1));
+				my_log.logInfo("Skill Delay Milliseconds: " +
+					(end_time_2 - start_time_2));
+			}
+		}
+	}
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

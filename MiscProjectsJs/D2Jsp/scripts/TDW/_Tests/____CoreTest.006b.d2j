@@ -1,0 +1,223 @@
+/*
+	___CoreTest.006.d2j
+
+	Symptoms    :
+
+		Catastrophic failure:
+			Assertion Failure
+			Location : D2Cient\UI\npcmenu.cpp, line #4363
+			Expression : sgUIState.hDialogWaiting == NULL
+
+	Tested under :
+		D2X Product and D2 Loader for
+			29.12 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+
+		I tested with Larzuk.
+*/
+
+//includeonce("TDW/_D2JSP_Modes.d2l");
+
+var LogName   = "output/____CoreTest.006.log";
+var LogHandle = null;
+
+const D2JSP_UTIL_COLOR_WHITE = "ÿc0";
+const D2JSP_UTIL_COLOR_RED   = "ÿc1";
+
+	// Set this to 'true' to run Test Two.
+var TEST_UseBusyFlag = false;
+
+function main()
+{
+	var npc_name  = "Larzuk";
+	var test_iter = 0;
+	var junk_list = ["aqv", "cqv"];
+	var npc_obj;
+	var other_npc_obj;
+	var all_items_1;
+	var all_items_2;
+	var my_items_1;
+	var my_items_2;
+	var npc_items;
+	var count_1;
+	var count_2;
+	var quiver_obj;
+	var shop_return_code;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+
+	me.randommove = true;
+
+	if ((LogHandle = fileOpen(LogName, 1)) == null) {
+		print("Unable to open file '" + LogName + "' for writing.");
+		stop();
+	}
+
+	while (true) {
+		// Make sure we don't have any quivers...
+		while (true) {
+			for (count_1 = 0; count_1 < junk_list.length; count_1++) {
+				if ((quiver_obj = FindAnItem(me.name, junk_list[count_1])))
+					break;
+			}
+			if (!quiver_obj)
+				break;
+			me.overhead("Please remove test junk items (" + junk_list + ").");
+			delay(500);
+		}
+		// Make sure we have an NPC object and are in trade...
+		while ((!(npc_obj = getUnit(1, npc_name))) || (!getUIFlag(0x0c))) {
+			me.overhead("Please enter trade with " + npc_name + ".");
+			delay(500);
+		}
+		while (getUIFlag(0x0c)) {
+			for (var count_1 = 0; count_1 < 40; count_1++) {
+				if (getUIFlag(0x0c)) {
+					print("Detected in trade with NPC " + npc_obj.name + ".");
+					break;
+				}
+			}
+			delay(1000);
+			if (CountItemsOwned(npc_name)) {
+				print("In trade with " + npc_name + ".");
+				for (count_1 = 0; count_1 < junk_list.length; count_1++) {
+					if (!(quiver_obj =
+						FindAnItem(npc_name, junk_list[count_1]))) {
+						print("ERROR: Unable to locate a quiver of " +
+							junk_list[count_1] + " -- exiting.");
+						me.overhead(" ");
+						stop();
+					}
+					print("Trying to buy a quiver of " + quiver_obj.name + ".");
+					for (count_2 = 0; count_2 < 100; count_2++) {
+						if ((shop_return_code = quiver_obj.shop(npc_obj, 2)) == 1)
+							break;
+						delay(50);
+					}
+					print("Call to shop() = " + shop_return_code);
+					if (!shop_return_code) {
+						print("Failed to buy a " + junk_list[count_1] + ".");
+						print("Exiting...");
+						break;
+					}
+					print("Bought a quiver of " + junk_list[count_1] + " --- " +
+						"looking for it in inventory...");
+print("Sleeping 1 second...");
+delay(1000);
+if (false) {
+					LogHandle.writeLine("=====================================");
+					LogHandle.writeLine("Looking for " + junk_list[count_1]);
+					WriteItemList(me.name, junk_list[count_1]);
+}
+else {
+					for (count_2 = 0; count_2 < 100; count_2++) {
+						if ((quiver_obj = FindAnItem(me.name, junk_list[count_1])))
+							break;
+						delay(10);
+					}
+					if (quiver_obj)
+						print("Found " + quiver_obj.name + " at coordinates [" +
+							quiver_obj.x + ", " + quiver_obj.y + "]");
+					else {
+						print("Couldn't find " + junk_list[count_1] +
+							" in inventory.");
+						break;
+					}
+}
+//delay(10);
+print("Sleeping 1 second...");
+delay(1000);
+				}
+				LogHandle.writeLine("=====================================");
+				for (count_1 = 0; count_1 < junk_list.length; count_1++) {
+					LogHandle.writeLine("Final search for " + junk_list[count_1]);
+					WriteItemList(me.name, junk_list[count_1]);
+				}
+				print("Script stopping. Check inventory for quivers.");
+				stop();
+			}
+			print("Not in trade with " + npc_name + ", re-trying...");
+			delay(1000);
+			break;
+		}
+	}
+}
+
+function CountItemsOwned(parent_name)
+{
+	var item_count = 0;
+	var this_item  = getUnit(4);
+	var this_parent;
+
+	if (this_item) {
+		do {
+ 			this_parent = this_item.getParent();
+			if (this_parent &&
+				(this_parent.name.toLowerCase() == parent_name.toLowerCase())) {
+				item_count++;
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	return(item_count);
+}
+
+function CountItemsAll()
+{
+	var item_count = 0;
+	var this_item  = getUnit(4);
+
+	if (this_item) {
+		do {
+			item_count++;
+		} while (this_item && this_item.getNext());
+	}
+
+	return(item_count);
+}
+
+function FindAnItem(parent_name, item_code)
+{
+	var this_item;
+	var this_parent;
+
+	this_item  = getUnit(4, item_code);
+	if (this_item) {
+		do {
+ 			this_parent = this_item.getParent();
+			if (this_parent &&
+				(this_parent.name.toLowerCase() == parent_name.toLowerCase())) {
+				return(this_item);
+			}
+		} while (this_item && this_item.getNext(item_code));
+	}
+
+	return(null);
+}
+
+function WriteItemList(parent_name, item_code)
+{
+	var this_item;
+	var this_parent;
+
+	this_item  = getUnit(4, item_code);
+	if (this_item) {
+		do {
+ 			this_parent = this_item.getParent();
+			if (this_parent &&
+				(this_parent.name.toLowerCase() == parent_name.toLowerCase()))
+				LogHandle.writeLine(">>> " + this_item.fname + ", [" +
+					this_item.x + ", " + this_item.y + "]");
+		} while (this_item && this_item.getNext(item_code));
+	}
+}
+
+
+// Syadasti's d2jsp function library
+// Copyright (c) 2002 by Mike Gogulski
+function Dist2(x1, y1, x2, y2) {
+	return Math.floor((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)); }
+
+function Dist(x1, y1, x2, y2) {
+	return Math.floor(Math.sqrt(Dist2(x1, y1, x2, y2))); }
+

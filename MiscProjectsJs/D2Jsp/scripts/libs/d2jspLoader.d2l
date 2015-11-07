@@ -1,0 +1,182 @@
+/*
+
+ d2jspLoader.d2l v0.4 - d2jspLoader dde command library
+ Copyright (C) 2003 Gianluigi Tiesi <sherpya@hotmail.com>
+
+ History:
+ 0.1 - First release - in sync with d2jspLoader 1.12
+ 0.2 - Added onexit command - in sync with d2jspLoader 1.14
+ 0.3 - Added setvalue command and guiOnexit charscreen - in sync with d2jspLoader 1.15
+ 0.4 - Added getvalue, getname, getnames, getcurrentlocation getcharcount commands to retreive values from gui - in sync with d2jspLoader 1.16
+ Supported commands:
+ 
+ guiPrint(text); // Sends text on logwindow for current session
+ guiPrint(text,true); // Sends text on logwindow in the main log
+ 
+ guiStart(); // Starts current session
+ guiStart(true); // Starts all sessions
+
+ guiStop(); // Stops current session
+ guiStop(true); // Stops all sessions
+ 
+ guiOnExit("create", gamename); // On exit the gui will create gamename
+ guiOnExit("create", gamename, gamepass); // On exit the gui will create gamename/gamepass
+ 
+ guiOnExit("join", gamename); // On exit the gui will join gamename
+ guiOnExit("join", gamename, gamepass); // On exit the gui will join gamename/gamepass
+
+ guiOnExit("kill"); // On exit the gui will kill d2
+ guiOnExit("kill&stop");  // On exit the gui will kill d2 and stop the session
+ 
+ guiOnExit("charscreen"); // Usefull when changing only account location
+ 
+ guiSetValue("key", "value"); // Sets a configuration value,
+ // e.g. guiSetValue("AccountName", "newaccount"); use null value as value to delete a key (only for strings keys)
+
+ guiGetValue("key"); // Returns a configuration value (except Password)
+ // e.g. guiGetValue("AccountName");
+ // NOTE Value is always returned as strings then you need to call parseInt() on it if the value is a number
+ 
+ guiGetName(); // returns the name of current Session
+
+ guiGetNames(); // returns an array of all sessions
+ 
+ guiGetCurrentLocation(); returns number of selected char position (as integer), for now the value is = to guiGetValue("CharacterLocation");
+ 
+ guiGetCharCount(); returns "last seen" number of chars in current account, the value is returned as integer
+ 
+ 
+ *** NOTE: for key names refer to d2jspLoader.ini ***
+
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by the
+ Free Software Foundation; either version 2, or (at your option) any later
+ version.
+
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTIBILITY
+ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ for more details.
+*/
+
+
+var DDEServ = "d2jspLoader";
+
+function prepareMsg(nopid)
+{
+   if (nopid) return "0 ";  
+   return getMyPID() + " ";
+}
+
+function guiPrint(text, nopid)
+{     
+  if (arguments.length<2) nopid = false;
+  
+  var msg = prepareMsg(nopid); 
+  msg+="print " + text; 
+  return sendDDE(2, DDEServ, msg, "", "");
+}
+
+function guiSetValue(key, value)
+{
+  var msg = prepareMsg(false);
+  msg+="setvalue " + key + "=";
+  if (value) msg+= value;
+  return sendDDE(2, DDEServ, msg, "", "");  
+}
+
+function guiGetValue(key)
+{
+  var msg = prepareMsg(false);
+  msg+=key;
+  return sendDDE(0, DDEServ, "GetValue", msg, "");
+}
+
+function guiGetCurrentLocation()
+{
+  var msg = prepareMsg(false);
+  return parseInt(sendDDE(0, DDEServ, "GetCurrentLocation", msg, ""));  
+}
+
+function guiGetCharCount()
+{
+  var msg = prepareMsg(false);
+  return parseInt(sendDDE(0, DDEServ, "GetCharCount", msg, ""));
+}
+
+function guiGetName()
+{
+  var msg = prepareMsg(false);
+  return sendDDE(0, DDEServ, "GetName", msg, "");
+}
+
+function guiGetNames()
+{
+  var msg = prepareMsg(false);
+  res = sendDDE(0, DDEServ, "GetNames", msg, "");
+  return res.split(";");  
+}
+
+function guiStart(nopid)
+{ 
+  if (arguments.length<1) nopid = false;
+  
+  var msg = prepareMsg(nopid);
+  msg+="start";
+  return sendDDE(2, DDEServ, msg, "", "");
+}
+
+function guiStop(nopid)
+{ 
+  if (arguments.length<1) nopid = false;
+  
+  var msg = prepareMsg(nopid);
+  msg+="stop";
+  return sendDDE(2, DDEServ, msg, "", "");
+}
+
+function guiOnExit(action, gamename, gamepass)
+{
+    if (arguments.length<3) gamepass = false;
+    
+    var msg = prepareMsg(false);
+    msg+="onexit ";
+    
+    switch (action)
+    {
+        case "create":
+        {
+           msg+="create ";
+           msg+=gamename;
+           if (gamepass) msg+="/" + gamepass;
+           break;
+        }
+        
+        case "join":
+        {
+           msg+="join ";
+           msg+=gamename;
+           if (gamepass) msg+="/" + gamepass;
+           break;
+        }
+
+        case "kill":
+            msg+="kill";
+            break;
+            
+        case "kill&stop":
+            msg+="kill&stop";
+            break;
+        
+        case "charscreen":
+            msg+="charscreen";
+            break;
+            
+        default:
+            print("Invalid OnExit Command");
+            return;
+    }
+
+    return sendDDE(2, DDEServ, msg, "", "");
+}

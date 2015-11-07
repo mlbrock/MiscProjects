@@ -1,0 +1,36 @@
+/*
+var NPCList = ["Stygian Watcher", "Water Watcher", "River Stalker",
+					"Carrion Bird"];
+*/
+var NPCList = new Array();
+NPCList["Stygian Watcher"]  = true;
+NPCList["Water Watcher"]    = true;
+NPCList["River Stalker"]    = true;
+NPCList["Carrion Bird"]     = true;
+NPCList["Winged Nightmare"] = true;
+NPCList["Undead Scavenger"] = true;
+
+function main()
+{
+	print("Running...");
+
+	while (true) {
+		this_npc = getUnit(1);
+		if (this_npc) {
+			var npc_count = 0;
+			do {
+				if ((this_npc.name in NPCList) && (this_npc.mode != 0) &&
+					(this_npc.mode != 1) && (this_npc.mode != 4) &&
+					(this_npc.mode != 12)) {
+					print(this_npc.name + ": mode = " + this_npc.mode);
+					npc_count++;
+				}
+			} while (this_npc && this_npc.getNext());
+			if (npc_count)
+				print("------------------------------------------------");
+		}
+		delay(1000);
+		me.overhead("Looking for untouchables");
+	}
+}
+

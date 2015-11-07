@@ -1,0 +1,1034 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Required include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/TDW_BotSupport.d2l");
+
+includeonce("TDW/TDW_Move.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+/*
+Act 1:
+--- --
+Akara  -> Waypoint
+Charsi -> Wapoint
+Gheed  -> Portal
+
+Act 2:
+--- --
+Drognan -> Waypoint
+Elix    -> Waypoint
+Fara    -> Waypoint
+
+Act 3:
+--- --
+Asheara -> Portal
+Ormus   -> Portal
+Hratli  -> Portal
+
+Act 4:
+--- --
+Halbu   -> Portal
+Jamella -> Portal
+
+Act 5:
+--- --
+Anya    -> Red Portal
+Malah   -> Portal
+Larzuk  -> Waypoint
+*/
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_SS_NPCList = new Array();
+// Act 1
+TDW_SS_NPCList["charsi"]   =
+	[D2JSP_AREA_ROGUE_ENCAMPMENT,         "Charsi",  "waypoint", "waypoint", D2JSP_AREA_COLD_PLAINS];
+TDW_SS_NPCList["akara"]    =
+	[D2JSP_AREA_ROGUE_ENCAMPMENT,         "Akara",   "waypoint", "waypoint", D2JSP_AREA_COLD_PLAINS];
+TDW_SS_NPCList["gheed"]    =
+	[D2JSP_AREA_ROGUE_ENCAMPMENT,         "Gheed",   "waypoint", "waypoint", D2JSP_AREA_COLD_PLAINS];
+// Act 2
+TDW_SS_NPCList["fara"]     =
+	[D2JSP_AREA_LUT_GHOLEIN,              "Fara",    "waypoint", "waypoint", D2JSP_AREA_A2_SEWERS_LEVEL_2];
+TDW_SS_NPCList["elzix"]    =
+	[D2JSP_AREA_LUT_GHOLEIN,              "Elzix",   "waypoint", "waypoint", D2JSP_AREA_A2_SEWERS_LEVEL_2];
+TDW_SS_NPCList["drognan"]  =
+	[D2JSP_AREA_LUT_GHOLEIN,              "Drognan", "waypoint", "waypoint", D2JSP_AREA_A2_SEWERS_LEVEL_2];
+
+// Act 3
+TDW_SS_NPCList["ormus"]    =
+	[D2JSP_AREA_KURAST_DOCKTOWN,          "Ormus",   "waypoint", "waypoint", D2JSP_AREA_SPIDER_FOREST];
+TDW_SS_NPCList["asheara"]  =
+	[D2JSP_AREA_KURAST_DOCKTOWN,          "Asheara", "waypoint", "waypoint", D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2];
+/*
+	Not implemented as a path is needed...
+TDW_SS_NPCList["hratli"]   =
+	[D2JSP_AREA_KURAST_DOCKTOWN,          "Hratli",  "waypoint", "waypoint", D2JSP_AREA_SPIDER_FOREST];
+*/
+
+// Act 4
+TDW_SS_NPCList["jamella"]  =
+	[D2JSP_AREA_THE_PANDEMONIUM_FORTRESS, "Jamella", "waypoint", "waypoint", D2JSP_AREA_RIVER_OF_FLAME];
+TDW_SS_NPCList["halbu"]    =
+	[D2JSP_AREA_THE_PANDEMONIUM_FORTRESS, "Halbu",   "waypoint", "waypoint", D2JSP_AREA_RIVER_OF_FLAME];
+
+// Act 5
+TDW_SS_NPCList["larzuk"]   =
+	[D2JSP_AREA_HARROGATH,                "Larzuk",  "waypoint", "waypoint", D2JSP_AREA_RIGID_HIGHLANDS];
+TDW_SS_NPCList["anya"]     =
+	[D2JSP_AREA_HARROGATH,                "Anya",    "portal",   "portal",   D2JSP_AREA_NIHLATHAKS_TEMPLE];
+TDW_SS_NPCList["malah"]    =
+	[D2JSP_AREA_HARROGATH,                "Malah",   "portal",   "portal",   D2JSP_AREA_RIGID_HIGHLANDS];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_SS_AnyaPortalMoves = [
+	[10060, 13275],
+	[10068, 13308]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["operation.maximum.milliseconds"] = 60 * 60 * 1000;
+TDW_BOT_ConfigureList["operation.time.start"]           = new Date(1);
+TDW_BOT_ConfigureList["operation.time.end"]             = new Date(1);
+TDW_BOT_ConfigureList["operation.isf.file"]             = "settings/ISF.TDW_BotSpeedShop.cfg";
+TDW_BOT_ConfigureList["operation.exit.normal.stop"]     = false;
+// Should be left as 'true' until NJaguar fixes core item traversal.
+TDW_BOT_ConfigureList["operation.exit.after.purchase"]  = false;
+TDW_BOT_ConfigureList["npc.name"]                       = "Larzuk";
+TDW_BOT_ConfigureList["items.file.all"]                 = true;
+TDW_BOT_ConfigureList["items.file.bought"]              = true;
+// ////////////////////////////////////////////////////////////////////////////
+
+const TDW_SS_GameLoadMS  = 1000;
+const TDW_SS_ExitSleepMS = 3000;
+
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+//var TDW_ISF_Cfg             = null;
+var TDW_SS_TimeStart        = null;
+var TDW_SS_TimeEnd          = null;
+var TDW_SS_ContainerMapList = null;
+var TDW_SS_ItemsLogAll      = null;
+var TDW_SS_ItemsLogBought   = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+function main()
+{
+	var config_list = new Array();
+
+	if ((me.realm != "useast.battle.net") && (me.realm != ""))
+		config_list["operation.isf.file"] = "settings/ISF.TDW_BotSpeedShop.Foreign.cfg"
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	TDW_SS_Start(config_list);
+}
+
+function TDW_SS_Start(config_list)
+{
+	var error_list = new Array();
+	var time_end;
+	var error_msg_string;
+
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/TDW_SpeedShop." + me.realm +
+		"." + me.account + "." + me.name + ".log", "TDW_SpeedShop");
+
+	print("The TDW Speed Shopper is running");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+//TDW_BOT_ConfigureList["operation.exit.normal.stop"] = true;
+TDW_BOT_ConfigureList["npc.name"]                   = "Anya";
+
+//	TDW_BOT_Log.syncModeOn();
+//	TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	TDW_SS_TimeStart = new Date();
+	TDW_SS_TimeEnd   = new Date(TDW_SS_TimeStart.valueOf() +
+		TDW_BOT_ConfigureList["operation.maximum.milliseconds"]);
+	config_list["operation.time.start"] = TDW_SS_TimeStart;
+	config_list["operation.time.end"]   = TDW_SS_TimeEnd;
+
+	TDW_BOT_Log.logInfo("-----> Beginning Speed Shop run", TDW_SS_TimeStart);
+
+	me.randommove = true;
+
+	TDW_BOT_CTX_ContextCreate(TDW_BOT_ConfigureList, config_list,
+		"Speed Shopper Bot Configuration", TDW_BOT_Log);
+
+	TDW_BOT_SKILL_SpellFixUp();
+
+	print("Loading ISF configuration file '" +
+		TDW_BOT_ContextList["operation.isf.file"] + "'...");
+	if (!(TDW_ISF_Cfg =
+		ISF_Create(TDW_BOT_ContextList["operation.isf.file"],
+		ISF_PARSE_FLAG_NONE, error_list))) {
+		var this_date = new Date();
+		TDW_BOT_Log.logError("Error loading ISF configuration file '" +
+			TDW_BOT_ContextList["operation.isf.file"] + "'.");
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift(), this_date);
+		TDW_SS_DoExitWithMsg("Error loading ISF configuration file '" +
+			TDW_BOT_ContextList["operation.isf.file"] + "'.");
+	}
+
+	me.randommove    = true;
+	me.quitonhostile = true;
+	me.chickenhp     = me.hp / 4;
+	me.chickenmp     = me.mp / 4;
+
+	TDW_SS_ContainerMapList = D2JSP_ITEM_CONT_BuildMapList();
+
+	if (TDW_ISF_Cfg.cursorCheckStart())
+		TDW_SS_DoExitWithMsg("Item could not be removed from cursor");
+
+/*
+	if (TDW_ISF_Cfg.doStashing(null, ISF_STASH_FLAG_NONE) < 0)
+		TDW_SS_DoExitWithMsg("A fatal error was encountered in the stashing " +
+			" logic");
+*/
+
+	TDW_SS_OpenItemLogAll();
+	TDW_SS_OpenItemLogBought();
+	
+	TDW_SS_Loop(TDW_BOT_ContextList["npc.name"]);
+
+	time_end = new Date();
+	TDW_BOT_Log.logInfo("-----> Ending Speed Shop run (" +
+		((time_end.getTime() - TDW_SS_TimeStart.getTime()) / 1000.0) +
+		" seconds)", time_end);
+
+	print("Script completed normally.");
+
+	TDW_SS_DoQuit();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_Loop(npc_name)
+{
+	var first_time_flag = true;
+	var npc_obj       = null;
+	var sispec_list   = new Array();
+	var waypoint_list = new Array();
+	var last_item_count;
+	var this_item_count;
+	var npc_data;
+	var npc_town;
+	var npc_name;
+	var in_transit_name;
+	var out_transit_name;
+	var out_transit_dest;
+	var transit_obj_1;
+	var transit_obj_2;
+	var count_1;
+	var count_2;
+//	var results_data;
+	var item_count;
+
+	if (typeof(TDW_SS_NPCList[npc_name.toLowerCase()]) == "undefined")
+		TDW_SS_DoExitWithMsg("Specified NPC '" + npc_name + "' not found.");
+
+	npc_data         = TDW_SS_NPCList[npc_name.toLowerCase()];
+	npc_town         = npc_data[0];
+	npc_name         = npc_data[1];
+	in_transit_name  = npc_data[2];
+	out_transit_name = npc_data[3];
+	out_transit_dest = npc_data[4];
+
+	if (me.area != D2JSP_AREA_AreaToTown(npc_town))
+		TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(npc_town), "waypoint");
+
+	if (me.area != npc_town)
+		TDW_SS_DoExitWithMsg("Unable to get to " + npc_name +
+			" hometown of " + D2JSP_AREA_AreaToName(npc_town));
+
+	TDW_MOVE_COMPAT_TownMove(out_transit_name);
+
+	if (out_transit_name.toLowerCase() == "waypoint") {
+		var wp_access = TDW_MOVE_GetMyWayPointAccess();
+		for (count_1 = 1; count_1 < wp_access[me.act - 1].length; count_1++) {
+			if (wp_access[me.act - 1][count_1])
+				waypoint_list.push(D2JSP_WayPoints[me.act - 1][count_1])
+		}
+	}
+	else
+		waypoint_list = [out_transit_dest];
+
+	while (1) {
+		var this_transit_dest = out_transit_dest;
+		if (first_time_flag && (npc_name.toLowerCase() == "anya") &&
+			(out_transit_name.toLowerCase() == "portal"))
+			TDW_BOT_CHECK_DoPrecastList();
+		if (out_transit_name.toLowerCase() == "waypoint")
+			this_transit_dest = waypoint_list[rnd(0, waypoint_list.length - 1)];
+		if (TDW_SS_UseTransitObj(out_transit_name, this_transit_dest))
+			continue;
+		if (first_time_flag) {
+			if ((npc_name.toLowerCase() == "anya") &&
+				(out_transit_name.toLowerCase() == "portal")) {
+				TDW_BOT_CHECK_PrecastChecks();
+/*
+				var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+				var coord_list     = TDW_PATH_GetPresetCoordsList();
+				TDW_BOT_AttackNPCSpec.addNPC(
+					new TDW_BOT_ATTACK_SpecialNPC("Pindleskin",
+					TDW_BOT_ATTACK_NPC_FLAG_NO_INIT_MOVE |
+					TDW_BOT_ATTACK_NPC_FLAG_NO_MOVE |
+					TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 100, 10, 20,
+					null, null, null, null));
+				TDW_BOT_MOVE_TeleportToDestination([10057, 13239],
+					TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+						TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+				TDW_BOT_AttackNPCSpec.killAny();
+				coord_list = D2JSP_UTIL_PATH_ProgressivePathSort(coord_list);
+				while (coord_list.length) {
+					TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+						TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+					if (access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_GOTO_XYPAIR, coord_list[0]))
+						return(-1);
+					TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+						TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+					delay(100);
+					coord_list.shift();
+				}
+				TDW_BOT_AttackNPCSpec.killAny();
+				TDW_BOT_MOVE_TeleportToDestination([10067, 13302],
+					TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+						TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+*/
+				var current_time = new Date();
+				var end_time     = current_time.valueOf() + 60000;
+				while (end_time > current_time) {
+					D2JSP_UTIL_BNET_OverheadSafe("Clearing area: " +
+						((end_time - current_time) / 1000).toFixed(0));
+					if (myDist(TDW_SS_AnyaPortalMoves[0][0],
+						TDW_SS_AnyaPortalMoves[0][1]) > 3)
+						TDW_BOT_MOVE_TeleportToDestination(TDW_SS_AnyaPortalMoves[0],
+							TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+					else {
+						TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+						TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+					}
+					delay(250);
+					current_time = new Date();
+				}
+				TDW_BOT_MOVE_TeleportToDestination(TDW_SS_AnyaPortalMoves[1],
+					TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+					TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+				TDW_BOT_CHECK_DoPrecastList();
+			}
+		}
+		if (TDW_SS_UseTransitObj(in_transit_name, npc_town))
+			TDW_SS_DoExitWithMsg("Unable to return to " + npc_name +
+				" hometown " + D2JSP_AREA_AreaToName(npc_town));
+		if (first_time_flag) {
+			first_time_flag = false;
+			if ((npc_name.toLowerCase() == "anya") &&
+				(out_transit_name.toLowerCase() == "portal"))
+				TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_FORCE_ISF |
+					((TDW_BOT_ContextList["mercernary.needed"]) ?
+					TDW_BOT_MOVE_TOWN_FLAG_MERC_NEEDED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+					((TDW_BOT_ContextList["mercernary.wanted"]) ?
+					TDW_BOT_MOVE_TOWN_FLAG_MERC_WANTED : TDW_BOT_MOVE_TOWN_FLAG_NONE),
+					TDW_ISF_Cfg);
+		}
+		TDW_MOVE_COMPAT_TownMove(npc_name);
+		if (!(npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, npc_name)))
+			TDW_SS_DoExitWithMsg("Unable to locate " + npc_name);
+		if (myDist(npc_obj.x, npc_obj.y) > 5) {
+			TDW_MOVE_MoveToObject(npc_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(100);
+			if (myDist(npc_obj.x, npc_obj.y) > 5) {
+				D2JSP_UTIL_MoveTo(npc_obj.x, npc_obj.y);
+				D2JSP_UTIL_GEN_FuzzyDelay(100);
+			}
+		}
+		last_item_count = -1;
+		for (count_1 = 0; count_1 < 20; count_1++) {
+			D2JSP_UTIL_BNET_OverheadSafe("Opening trading with " + npc_name);
+/*
+			npc_obj.interact();
+			for (count_2 = 0; count_2 < 100; count_2++) {
+				if (getUIFlag(0x08))
+					break;
+				delay(10);
+			}
+			if (!getUIFlag(0x08))
+				continue;
+			npc_obj.useMenu(D2JSP_NPC_GetUseMenuTradeCommand(npc_obj));
+			for (count_2 = 0; count_2 < 100; count_2++) {
+				if (getUIFlag(0x0c))
+					break;
+				delay(10);
+			}
+			if (!getUIFlag(0x0c))
+				continue;
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+*/
+			if ((npc_obj = D2JSP_NPC_TradeWithNPC(npc_name)) == null)
+				break;
+			if ((this_item_count = TDW_SS_CountItems()) &&
+				(this_item_count == last_item_count)) {
+				item_count = TDW_SS_SearchItems(sispec_list);
+				if (item_count == this_item_count)
+					break;
+				item_count = 0;
+				D2JSP_UTIL_GEN_FuzzyDelay(500);
+			}
+			else
+				last_item_count = this_item_count;
+			if (myDist(npc_obj.x, npc_obj.y) > 5) {
+				TDW_MOVE_MoveToObject(npc_obj);
+				D2JSP_UTIL_GEN_FuzzyDelay(100);
+				if (myDist(npc_obj.x, npc_obj.y) > 5) {
+					D2JSP_UTIL_MoveTo(npc_obj.x, npc_obj.y);
+					D2JSP_UTIL_GEN_FuzzyDelay(100);
+				}
+			}
+			else
+				D2JSP_UTIL_GEN_FuzzyDelay(100);
+		}
+		if (item_count) {
+			if (sispec_list.length) {
+				D2JSP_UTIL_BNET_OverheadSafe("Found " + sispec_list.length + " purchaseable items of " +
+					item_count + " items in store");
+				TDW_SS_Purchase(sispec_list, TDW_SS_ContainerMapList);
+			}
+			else
+				D2JSP_UTIL_BNET_OverheadSafe("Searched " + item_count + " items in store");
+		}
+		else {
+			D2JSP_UTIL_BNET_OverheadSafe("Failed to open trading");
+			print("Failed to open trading with " + npc_name +
+					" --- aborting this cycle");
+		}
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		D2JSP_UTIL_GEN_FuzzyDelay(100);
+//		me.cancel();
+//		D2JSP_UTIL_GEN_FuzzyDelay(100);
+		if (TDW_SS_TimeEnd < (new Date())) {
+			TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN +
+				"Maximum in-game shopping time reached (" +
+				TDW_BOT_ContextList["operation.maximum.milliseconds"] +
+				" milliseconds) --- exiting the Speed Shop Bot...");
+			delay(TDW_SS_ExitSleepMS);
+			break;
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_Purchase(sispec_list, container_map_list)
+{
+	var purchase_count   = 0;
+	var failure_list     = new Array();
+	var npc_name         = TDW_BOT_ContextList["npc.name"];
+	var error_msg_string = new String();
+	var npc_obj          = null;
+	var this_obj;
+	var sispec;
+	var new_sispec;
+	var item_dest;
+	var this_parent;
+	var tmp_name;
+	var results_data;
+	var count_1;
+	var count_2;
+	var xfer_problem_flag;
+
+	TDW_BOT_Log.logInfo("======================================================");
+	TDW_BOT_Log.logInfo("Will attempt to purchase " + sispec_list.length +
+		((sispec_list.length == 1) ? " item" : " items") + " with " +
+		D2JSP_ITEM_MyGoldTotal() + " gold.");
+	TDW_BOT_Log.logInfo("------------------------------------------------------");
+
+	for (count_1 = 0; count_1 < sispec_list.length; count_1++) {
+		if (npc_obj == null) {
+			if ((npc_obj = D2JSP_NPC_TradeWithNPC(npc_name)) == null)
+				TDW_SS_DoExitWithMsg("Unable to re-acquire " + npc_name +
+					" trade screen");
+		}
+		sispec   = sispec_list[count_1];
+		tmp_name = "item " + sispec.fullNameColor + " on " + npc_name + "'s " +
+			D2JSP_ITEM_STORE_TabCodeToName(sispec.itemloc) + " at coordinates [" +
+			sispec.x + ", " + sispec.y + "]";
+		TDW_BOT_Log.logDetail("*** Attempting to purchase " + tmp_name + ".");
+		TDW_BOT_Log.logDetail("Looking for inventory space for planned purchase" +
+			" of " + sispec.fullNameColor + ".");
+		if (!(item_dest = D2JSP_ITEM_CONT_FindSpace(sispec.xsize, sispec.ysize,
+			container_map_list, D2JSP_ITEM_CONT_SRC_INVENTORY))) {
+			TDW_BOT_Log.logDetail("Inventory space for planned purchase  of " +
+				sispec.fullNameColor + " not found. Inventory map follows:");
+			D2JSP_ITEM_CONT_LogMap(D2JSP_ITEM_CONT_SRC_INVENTORY,
+				container_map_list[D2JSP_ITEM_CONT_SRC_INVENTORY]);
+			failure_list.push("Attempt to purchase " + tmp_name +
+				" failed: insufficient inventory space available.");
+			TDW_BOT_Log.logDetail(failure_list[failure_list.length - 1]);
+			continue;
+		}
+		TDW_BOT_Log.logDetail("Inventory space for planned purchase " +
+			"of " + sispec.fullNameColor + " found at coordinates [" +
+			item_dest[1] + ", " + item_dest[2] + "] (which may not be used at " +
+			"the time of actual purchase).");
+		if (!(this_obj = sispec.findItem())) {
+			failure_list.push("Attempt to purchase " + tmp_name +
+				" failed: item not found at expected location.");
+			TDW_BOT_Log.logDetail(failure_list[failure_list.length - 1]);
+			continue;
+		}
+		TDW_BOT_Log.logDetail("Purchase of " + sispec.fullNameColor +
+			" in progress.");
+		for (count_2 = 0; count_2 < 50; count_2++) {
+			if ((shop_return_code = this_obj.shop(npc_obj, 2)) == 1)
+				break;
+			delay(100);
+		}
+		if (shop_return_code == 1)
+			TDW_BOT_Log.logDetail("Sent 'shop()' request successfully to core.");
+		else {
+			failure_list.push("Attempt to purchase " + tmp_name +
+				" failed: shop() returned '" + shop_return_code + "'.");
+			continue;
+		}
+		xfer_problem_flag = true;
+		for (count_2 = 0; count_2 < 2; count_2++) {
+			if (sispec.waitForMovement(null, 200, 50)) {
+				xfer_problem_flag = false;
+				break;
+			}
+			TDW_BOT_Log.logWarning(D2JSP_UTIL_COLOR_YELLOW + "Attempt to purchase "+
+				tmp_name + " " +D2JSP_UTIL_COLOR_YELLOW + "is problematic: waited "+
+				(((200 * 50) / 1000) * (count_1 + 1)) + " seconds for the item to "+
+				"leave " + npc_name + "'s store, but it's still there" +
+				((!count_2) ? (" --- will wait another " + ((200 * 50) / 1000) +
+				" seconds.") : "."));
+		}
+		D2JSP_UTIL_GEN_FuzzyDelay(100 + ((xfer_problem_flag) ? 900 : 0));
+		D2JSP_UTIL_GEN_CheckCursor(50);
+		if (D2JSP_UTIL_GEN_ClearCursor(false, TDW_BOT_Log, error_msg_string))
+			TDW_SS_DoExitWithMsg(error_msg_string);
+		if (xfer_problem_flag)
+			TDW_BOT_Log.logWarning(D2JSP_UTIL_COLOR_YELLOW + "Looking for " +
+				sispec.fullNameColor + D2JSP_UTIL_COLOR_YELLOW +
+				" within inventory.");
+		else
+			TDW_BOT_Log.logDetail("Looking for " + sispec.fullNameColor +
+				" within inventory.");
+		for (count_2 = 0; count_2 < 100; count_2++) {
+			results_data = D2JSP_OBJ_IterateItem(sispec, TDW_SS_FilterMe,
+				D2JSP_OBJ_ActionStop, sispec.code,
+				D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE);
+			if (results_data[D2JSP_OBJ_ACTION_COUNT])
+				break;
+			D2JSP_UTIL_GEN_FuzzyDelay(100);
+		}
+		if (!results_data[D2JSP_OBJ_ACTION_COUNT]) {
+			if (xfer_problem_flag || (!sispec.waitForMovement(null, 1, 50)))
+				failure_list.push("Attempt to purchase " + tmp_name +
+					" failed: waited " + ((200 * 50) / 1000) +
+					" seconds for the item to leave " + npc_name + "'s store, but " +
+					"it's apparently still there.");
+			else
+				failure_list.push("Attempt to purchase " + tmp_name +
+					" failed: purchase seemed OK, but the item can't be found " +
+					"within the inventory.");
+			TDW_BOT_Log.logError(failure_list[failure_list.length - 1]);
+			continue;
+		}
+		else if (xfer_problem_flag)
+			TDW_BOT_Log.logInfo("Transfer problem resolved: " + tmp_name +
+				" found in inventory.");
+		this_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+		sispec   = new ISF_SISpec(this_obj, false, false, true, sispec.other);
+		TDW_BOT_Log.logDetail("Purchased " + sispec.fullNameColor + " from " +
+			npc_name + ". It is in inventory at coordinates [" +
+			this_obj.x + ", " + this_obj.y + "].");
+		TDW_BOT_Log.logInfo(D2JSP_UTIL_FORMAT_OneSpace("Purchased " +
+			sispec.fullNameColor + " from " + npc_name + " (" +
+			TDW_ISF_Cfg.getSpecString(sispec.other) + ")"));
+		TDW_SS_ItemLogBought("Purchased from " +
+			D2JSP_UTIL_FORMAT_LJust(npc_name, 10) + ": " +
+			D2JSP_UTIL_FORMAT_LJust(sispec.fullNameColor,
+			D2JSP_ITEM_COLORED_ITEM_NAME_MAX) + " ---> " +
+			TDW_ISF_Cfg.getSpecString(sispec.other));
+		if (!D2JSP_ITEM_CONT_AddToMapListItem(this_obj, container_map_list)) {
+			TDW_BOT_Log.logFatal("Attempt to add the newly-purchased " +
+				sispec.fullNameColor + " to the inventory container map at " +
+				"coordinates [" + this_obj.x + ", " + this_obj.y + "] failed.");
+			TDW_BOT_Log.logFatal("Maps of all containers follow:");
+//			TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_DETAIL);
+			D2JSP_ITEM_CONT_LogMapList(container_map_list);
+			TDW_SS_DoExitWithMsg("Container management error");
+		}
+		if (D2JSP_ITEM_HasHoradricCube())
+			item_dest = D2JSP_ITEM_CONT_FindSpace(sispec.xsize, sispec.ysize,
+				container_map_list, D2JSP_ITEM_CONT_SRC_CUBE);
+		else
+			item_dest = null;
+		if (!item_dest)
+			item_dest = D2JSP_ITEM_CONT_FindSpace(sispec.xsize, sispec.ysize,
+				container_map_list, D2JSP_ITEM_CONT_SRC_STASH);
+		if (!item_dest) {
+			TDW_BOT_Log.logDetail("No space in which to stash purchase of " +
+			sispec.fullNameColor + " found. Maps follow:");
+			D2JSP_ITEM_CONT_LogMap(D2JSP_ITEM_CONT_SRC_STASH,
+				container_map_list[D2JSP_ITEM_CONT_SRC_STASH]);
+			if (D2JSP_ITEM_HasHoradricCube())
+				D2JSP_ITEM_CONT_LogMap(D2JSP_ITEM_CONT_SRC_CUBE,
+					container_map_list[D2JSP_ITEM_CONT_SRC_CUBE]);
+			TDW_BOT_Log.logWarning("No space found in which to stash the " +
+				sispec.fullNameColor + ": Item left in inventory.");
+			continue;
+		}
+		TDW_BOT_Log.logDetail("Will attempt to store the " + sispec.fullNameColor +
+			" in the " + D2JSP_ITEM_CONT_ToName(item_dest[0]) +
+			" at coordinates [" + item_dest[1] + ", " + item_dest[2] + "]");
+		if (!D2JSP_ITEM_CONT_RemoveFromMapListItem(this_obj, container_map_list)){
+			TDW_BOT_Log.logFatal("Attempt to remove the newly-purchased " +
+				sispec.fullNameColor + " from the inventory container map at " +
+				"coordinates [" + this_obj.x + ", " + this_obj.y + "] before " +
+				"its movement to the " + D2JSP_ITEM_CONT_ToName(item_dest[0]) +
+				" container failed.");
+			TDW_BOT_Log.logFatal("Maps of all containers follow:");
+//			TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_DETAIL);
+			D2JSP_ITEM_CONT_LogMapList(container_map_list);
+			TDW_SS_DoExitWithMsg("Container management error");
+		}
+		D2JSP_ITEM_CONT_ItemMoveTo(this_obj, item_dest[0], item_dest[1],
+			item_dest[2]);
+		TDW_BOT_Log.logInfo("Stored the " + sispec.fullNameColor + " in the " +
+			D2JSP_ITEM_CONT_ToName(item_dest[0]) + " at coordinates [" +
+				item_dest[1] + ", " + item_dest[2] + "]");
+		D2JSP_UTIL_GEN_CheckCursor(50);
+		if (D2JSP_UTIL_GEN_ClearCursor(false, TDW_BOT_Log, error_msg_string))
+			TDW_SS_DoExitWithMsg(error_msg_string);
+		if (!sispec.waitForMovement())
+			TDW_SS_DoExitWithMsg("Purchased item seems to be still in the " +
+				"inventory");
+		sispec.itemloc   = D2JSP_ITEM_CONT_SourceData[item_dest[0]][1];
+		sispec.container = item_dest[0];
+		sispec.x         = item_dest[1];
+		sispec.y         = item_dest[2];
+		if (!(this_obj = sispec.findItem()))
+			TDW_SS_DoExitWithMsg("Purchased item cannot be located in the " +
+				D2JSP_ITEM_CONT_ToName(item_dest[0]));
+		if (!D2JSP_ITEM_CONT_AddToMapListItem(this_obj, container_map_list)) {
+			TDW_BOT_Log.logFatal("Attempt to add the newly-purchased " +
+				sispec.fullNameColor + " to its final resting place in the " +
+				D2JSP_ITEM_CONT_ToName(item_dest[0]) + " container map at " +
+				"coordinates [" + item_dest[1] + ", " + item_dest[2] + "] failed.");
+			TDW_BOT_Log.logFatal("Maps of all containers follow:");
+//			TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_DETAIL);
+			D2JSP_ITEM_CONT_LogMapList(container_map_list);
+			TDW_SS_DoExitWithMsg("Container management error");
+		}
+		purchase_count++;
+	}
+
+	if (npc_obj != null) {
+		D2JSP_UTIL_GEN_CancelNPC(npc_obj);
+		me.cancel();
+	}
+
+	TDW_BOT_Log.logInfo("======================================================");
+
+	if (failure_list.length) {
+		TDW_SS_CloseItemLogsAll();
+		for (count_1 = 0; count_1 < failure_list.length; count_1++)
+			TDW_BOT_Log.logError(failure_list[count_1]);
+		if (purchase_count && TDW_BOT_ContextList["operation.exit.after.purchase"]) {
+			TDW_BOT_Log.logWarning(D2JSP_UTIL_COLOR_RED + "A total of " +
+				failure_list.length + "failed purchase" +
+				((failure_list.length == 1) ? " is" : "s are") +
+				" being abandoned because the configuration specifies that this " +
+				"program should exit after any purchases are made to avoid the " +
+				"D2JSP core item list traversal bug.");
+			print(D2JSP_UTIL_COLOR_RED + "Wait 5 seconds...");
+			delay(5000);
+			TDW_SS_DoQuit()
+		}
+		D2JSP_UTIL_BNET_OverheadSafe(D2JSP_UTIL_COLOR_RED + "Purchase Failures");
+		while (true) {
+			TDW_MOVE_COMPAT_TownMove("waypoint");
+			for (count_1 = 0; count_1 < 20; count_1++) {
+				D2JSP_UTIL_BNET_OverheadSafe(D2JSP_UTIL_COLOR_RED +
+					["Idle Mode", "User Needed"][count_1 % 2]);
+				delay(500);
+			}
+			D2JSP_UTIL_BNET_OverheadSafe(D2JSP_UTIL_COLOR_RED + "Idle Mode");
+			TDW_MOVE_COMPAT_TownMove(TDW_BOT_ContextList["npc.name"]);
+			for (count_1 = 0; count_1 < 20; count_1++) {
+				D2JSP_UTIL_BNET_OverheadSafe(D2JSP_UTIL_COLOR_RED +
+					["Purchase Failures", "User Needed"][count_1 % 2]);
+				delay(500);
+			}
+			D2JSP_UTIL_BNET_OverheadSafe(D2JSP_UTIL_COLOR_RED + "Purchase Failures");
+		}
+	}
+
+	if (purchase_count && TDW_BOT_ContextList["operation.exit.after.purchase"]) {
+		TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_RED + "Program exiting because the " +
+			"configuration specifies that this program should exit after any " +
+			"purchases are made to avoid the D2JSP core item list traversal bug.");
+		print(D2JSP_UTIL_COLOR_RED + "Wait 5 seconds...");
+		delay(5000);
+		TDW_SS_DoQuit()
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_SearchItems(sispec_list)
+{
+	var item_count  = 0;
+	var this_item   = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+	var all_list    = new Array();
+	var detail_list = new Array();
+	var this_parent;
+
+	sispec_list.length = 0;
+
+	if (this_item) {
+		do {
+			this_parent = this_item.getParent();
+			if (this_parent && (this_parent.name.toLowerCase() ==
+				TDW_BOT_ContextList["npc.name"].toLowerCase())) {
+				item_count++;
+				all_list.push(D2JSP_ITEM_FixFName(this_item));
+				if ((results_data = TDW_ISF_Cfg.evalItemForKeep(this_item,
+					ISF_EVAL_FLAG_RETURN_SOURCE_INFO))[0] == true) {
+					sispec_list.push(new ISF_SISpec(this_item, false, false, true,
+						results_data[1]));
+					TDW_BOT_Log.logDetail("Found an item for purchase    : " +
+						sispec_list[sispec_list.length - 1].fullNameColor);
+				}
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	TDW_BOT_Log.logDetail("Total of " + all_list.length +
+		" items found in " + TDW_BOT_ContextList["npc.name"] +
+		"'s shop this pass.");
+
+	if (all_list.length)
+		TDW_SS_ItemLogAll(all_list);
+
+	return(item_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_CountItems()
+{
+	var item_count = 0;
+	var this_item  = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+	var this_parent;
+
+	if (this_item) {
+		do {
+			this_parent = this_item.getParent();
+			if (this_parent && (this_parent.name.toLowerCase() ==
+				TDW_BOT_ContextList["npc.name"].toLowerCase()))
+				item_count++;
+		} while (this_item && this_item.getNext());
+	}
+
+	return(item_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_FilterMe(this_obj, sispec)
+{
+	return((D2JSP_OBJ_FilterParent(this_obj, me.name) &&
+		(this_obj.mode == D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE) &&
+		(sispec.fixedFName == D2JSP_ITEM_FixFName(this_obj))) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_UseTransitObj(transit_name, transit_destination)
+{
+	var transit_obj;
+
+	if (!(transit_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, transit_name)))
+		TDW_SS_DoExitWithMsg("Unable to locate the " + transit_name);
+
+	if (transit_name.toLowerCase() == "waypoint") {
+//		D2JSP_SKILL_TelekinesisOn(transit_obj);
+		if (D2JSP_AREA_IsTown(me.area) &&
+			(myDist(transit_obj.x, transit_obj.y) > 8))
+			TDW_MOVE_COMPAT_TownMove(transit_name);
+		if (myDist(transit_obj.x, transit_obj.y) > 5)
+			TDW_MOVE_MoveToObject(transit_obj);
+		if (!TDW_MOVE_WaypointUse(transit_destination)) {
+			if (D2JSP_AREA_IsTown(me.area))
+				D2JSP_SKILL_SetSkill("Attack", 1);
+			return(0);
+		}
+		TDW_BOT_Log.logWarning("Failed to transit to " +
+			D2JSP_AREA_AreaToName(transit_destination) + " failed re-trying...");
+		for (count_1 = 0; count_1 < 10; count_1++) {
+			if (D2JSP_AREA_IsTown(me.area) &&
+				(myDist(transit_obj.x, transit_obj.y) > 5))
+				TDW_MOVE_COMPAT_TownMove(transit_name);
+			if (myDist(transit_obj.x, transit_obj.y) > 5)
+				TDW_MOVE_MoveToObject(transit_obj);
+			if (!TDW_MOVE_WaypointUse(transit_destination)) {
+				if (D2JSP_AREA_IsTown(me.area))
+					D2JSP_SKILL_SetSkill("Attack", 1);
+				return(0);
+			}
+			TDW_BOT_Log.logWarning("Re-try " + (count_1 + 1) +
+				" of 10 transit attempts to " +
+				D2JSP_AREA_AreaToName(transit_destination) + " failed");
+			if (count_1 && (!(count_1 % 3))) {
+				TDW_BOT_Log.logInfo("Randomizing location before " +
+					"attempt to re-acquire the " + transit_name + ".");
+				delay(1000);
+				TDW_MOVE_RandomizeLocation(me.x, me.y, 10, 10);
+				delay(1000);
+				if (!(transit_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT,
+					transit_name)))
+					TDW_SS_DoExitWithMsg("Unable to locate the " + transit_name);
+				TDW_MOVE_MoveToObject(transit_obj);
+				delay(1000);
+			}
+		}
+		if (D2JSP_AREA_IsTown(me.area))
+			D2JSP_SKILL_SetSkill("Attack", 1);
+		TDW_SS_DoExitWithMsg("Attempt to transit to " +
+			D2JSP_AREA_AreaToName(transit_destination) + " using the " +
+			transit_name + " failed");
+	}
+	else if (transit_name.toLowerCase() == "portal") {
+		if (D2JSP_AREA_IsTown(me.area) &&
+			(myDist(transit_obj.x, transit_obj.y) > 8))
+			TDW_MOVE_COMPAT_TownMove(transit_name);
+		if (myDist(transit_obj.x, transit_obj.y) > 5)
+			TDW_MOVE_MoveToObject(transit_obj);
+		TDW_MOVE_TakePortal(transit_obj, true);
+		if (me.area == transit_destination)
+			return(0);
+		TDW_BOT_Log.logWarning("Failed to transit to " +
+			D2JSP_AREA_AreaToName(transit_destination) + " ... re-trying...");
+		if (!(transit_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, transit_name)))
+			TDW_SS_DoExitWithMsg("Unable to locate the " + transit_name);
+		TDW_MOVE_MoveToObject(transit_obj);
+		D2JSP_UTIL_GEN_FuzzyDelay(100);
+		D2JSP_UTIL_MoveTo(transit_obj.x, transit_obj.y);
+		D2JSP_UTIL_GEN_FuzzyDelay(100);
+		TDW_MOVE_LookForAndTakePortal(transit_destination, "*", 10)
+		if (me.area == transit_destination)
+			return(0);
+		TDW_BOT_Log.logError("Failed to transit to " +
+			D2JSP_AREA_AreaToName(transit_destination));
+	}
+	else
+		TDW_SS_DoExitWithMsg("Invalid transit name specified ('" +
+			transit_name + "')");
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_DoExitWithMsg(msg_string)
+{
+	TDW_SS_CloseItemLogsAll();
+	TDW_BOT_Log.logFatal(D2JSP_UTIL_COLOR_RED + msg_string + " --- exiting...");
+	TDW_BOT_Log.closeLog();
+
+	print("... Waiting " + (TDW_SS_ExitSleepMS / 1000) + " seconds ...");
+	delay(TDW_SS_ExitSleepMS);
+
+	TDW_SS_DoQuit();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_DoQuit()
+{
+	TDW_SS_CloseItemLogsAll();
+	TDW_BOT_Log.closeLog();
+
+	if (!TDW_BOT_ContextList["operation.exit.normal.stop"])
+		quit();
+
+	print("Not doing a 'quit()', but stopping the Speed Shopper.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_OpenItemLogAll()
+{
+	if ((typeof(TDW_BOT_ContextList["items.file.all"]) != "undefined") &&
+		TDW_BOT_ContextList["items.file.all"])
+		TDW_SS_ItemsLogAll = TDW_SS_OpenItemLog("output/TDW_SpeedShop." +
+			me.realm + "." + me.account + "." + me.name +".Items.All.txt");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_OpenItemLogBought()
+{
+	if ((typeof(TDW_BOT_ContextList["items.file.bought"]) != "undefined") &&
+		TDW_BOT_ContextList["items.file.bought"])
+		TDW_SS_ItemsLogBought = TDW_SS_OpenItemLog("output/TDW_SpeedShop."+
+			me.realm + "." + me.account + "." + me.name +".Items.Bought.txt");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_OpenItemLog(file_name)
+{
+	var file_handle = null;
+	var tmp_text;
+
+	if ((file_handle = fileOpen(file_name, 2)) != null) {
+		tmp_text = D2JSP_UTIL_FORMAT_RJust("", 4 + 1 + 2 + 1 + 2, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 2 + 1 + 2 + 1 + 2 + 1 + 3, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 80, "*");
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(D2JSP_UTIL_DATE_ToSmallDate() + " " +
+			"Start of Shopping Session");
+		file_handle.writeLine(tmp_text);
+	}
+	else
+		TDW_SS_DoExitWithMsg("Unable to open items log file '" +
+			file_name + "' for appending");
+
+	return(file_handle);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_CloseItemLogsAll()
+{
+	var close_date = new Date();
+
+	TDW_SS_CloseItemLogsOne(close_date, TDW_SS_ItemsLogAll);
+	TDW_SS_CloseItemLogsOne(close_date, TDW_SS_ItemsLogBought);
+
+	TDW_SS_ItemsLogAll    = null;
+	TDW_SS_ItemsLogBought = null;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_CloseItemLogsOne(close_date, file_handle)
+{
+
+	var tmp_text;
+
+	if (file_handle != null) {
+		tmp_text = D2JSP_UTIL_FORMAT_RJust("", 4 + 1 + 2 + 1 + 2, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 2 + 1 + 2 + 1 + 2 + 1 + 3, "*") + " " +
+			D2JSP_UTIL_FORMAT_RJust("", 80, "*");
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(D2JSP_UTIL_DATE_ToSmallDate() + " " +
+			"End of Shopping Session");
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine(tmp_text);
+		file_handle.writeLine("");
+		file_handle.close();
+		file_handle = null;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_ItemLogAll(out_data)
+{
+	TDW_SS_WriteItemLog(out_data, TDW_SS_ItemsLogAll);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_ItemLogBought(out_data)
+{
+	TDW_SS_WriteItemLog(out_data, TDW_SS_ItemsLogBought);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_SS_WriteItemLog(out_data, file_handle, in_date)
+{
+	var this_date;
+	var count_1;
+	var tmp_message;
+
+	if (file_handle != null) {
+		this_date = (in_date instanceof Date) ? in_date : (new Date());
+		if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(out_data)) {
+			for (count_1 = 0; count_1 < out_data.length; count_1++)
+				TDW_SS_WriteItemLog(out_data[count_1], file_handle, this_date);
+		}
+		else {
+			tmp_message = out_data + "";
+			tmp_message = tmp_message.replace(/\xff+(c\d)/g, "");
+			file_handle.writeLine(D2JSP_UTIL_DATE_ToSmallDate(this_date) + " " +
+				tmp_message, this_date);
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

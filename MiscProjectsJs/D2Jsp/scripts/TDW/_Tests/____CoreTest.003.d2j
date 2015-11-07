@@ -1,0 +1,67 @@
+/*
+	___CoreTest.003.d2j
+
+	Symptoms    :
+		Catastrophic failure: UNHANDLED EXCEPTION: ACCESS_VIOLATION (c0000005)
+
+		Reliably occurs when attempting to determine the value of the property
+		'itemoncursor' for objects (from 'getUnit(OBJECT)').
+
+		Yes, I do know one can't put an object on one's cursor. Discovered this
+		bug as a result of a typo on my part...
+
+	Tested under :
+
+		D2X Product and D2 Loader for
+			24 Core --- Win 2000 / SP 3 / 1 2.0 Ghz Pentium 4 CPU / 512KB RAM
+			24 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			25 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			26 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	var file_name   = "output/____CoreTest.003.txt";
+
+	DoGet(file_name, "get(ITEM)",    D2JSP_UTIL_GETUNIT_ITEM);
+	DoGet(file_name, "get(NPC)",     D2JSP_UTIL_GETUNIT_NPC);
+	DoGet(file_name, "get(OBJECT)",  D2JSP_UTIL_GETUNIT_OBJECT);
+
+	print("Done");
+}
+
+function DoGet(file_name, get_name, unit_type)
+{
+	var this_item;
+	var this_prop;
+
+	print("Trying " + get_name + " ...");
+
+	WriteLine(file_name, "====================================================");
+	this_item = getUnit(unit_type);
+	if (this_item) {
+		WriteLine(file_name, "Got an item with " + get_name + "():");
+		for (this_prop in this_item) {
+			WriteLine(file_name, "   Property name  = " + this_prop);
+			WriteLine(file_name, "            value = ["+
+					this_item[this_prop] + "]");
+		}
+	}
+	else
+		WriteLine(file_name, "Nothing returned from " + get_name + "()!");
+}
+
+function WriteLine(file_name, out_string)
+{
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 2)) != null) {
+		file_handle.writeLine(out_string);
+		file_handle.close();
+	}
+	else {
+		print("ERROR: Unable to open '" + file_name + "' for appending.");
+		print("Stopping script execution.");
+		stop();
+	}
+}
+

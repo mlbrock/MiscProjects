@@ -1,0 +1,3796 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW OOG Utility Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_OOG_Utility.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Out-of-game utility library.
+//
+// Revison History : 2003-12-29 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+include("TDW/TDW_Basic.d2l");
+
+/*
+	Difficulty Radio buttons (disabled if can't create that difficulty):
+	--------------------------------------------------------------------
+                                                   6   430   381     16     16 false   false    undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                   6   555   381     16     16 false   false    undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                   6   698   381     16     16 false   false    undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+		 new TDW_OOG_Control( 6,	430,	381,	 16,	 16,	""                                               )
+		 new TDW_OOG_Control( 6,	555,	381,	 16,	 16,	""                                               ),
+		 new TDW_OOG_Control( 6,	698,	381,	 16,	 16,	""                                               ),
+================================================================================
+	Max Number of Players (example = 7):
+	------------------------------------
+7                                                  1   657   308     27     20 false   false    undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+		 new TDW_OOG_Control( 1,	657,	308,	 27,	 20,	"7"                                              ),
+
+	*** NOT PRESENT IN OPEN BATTLENET GAMES
+================================================================================
+	Character Level Difference (before enabling):
+	---------------------------------------------
+Character Difference:                              4   632   342    300     12 false   false    Character Difference:,Character Difference:,Character Difference:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+Levels                                             4   705   342    150     12 false   false    Levels,Levels,Levels                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+                                                   6   681   332     15     12 false   true     undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                   6   681   346     15     12 false   true     undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+	Character Level Difference (after enabling):
+	--------------------------------------------
+Character Difference:                              4   632   342    300     12 false   false    Character Difference:,Character Difference:,Character Difference:,Character Difference:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+Levels                                             4   705   342    150     12 false   false    Levels,Levels,Levels,Levels                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+                                                   6   681   332     15     12 false   false    undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                   6   681   346     15     12 false   false    undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+================================================================================
+	Character Level Difference Value (example = 5):
+	-----------------------------------------------
+5                                                  1   657   342     27     20 false   false    undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+		 new TDW_OOG_Control( 1,	657,	342,	 27,	 20,	"5"                                              ),
+
+	*** NOT PRESENT IN OPEN BATTLENET GAMES
+================================================================================
+*/
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Flags used in the character information object TDW_OOG_Character() member
+// 'char_flags'.
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_CHAR_FLAG_NONE				= 0x0000;
+var TDW_OOG_CHAR_FLAG_EXPANSION		= 0x0001;
+var TDW_OOG_CHAR_FLAG_LADDER			= 0x0002;
+var TDW_OOG_CHAR_FLAG_WILL_EXPIRE	= 0x0004;
+var TDW_OOG_CHAR_FLAG_HAS_EXPIRED	= 0x0008;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Flags used to control the dumping of OOG controls...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_DUMP_CONTROLS_FLAG_NONE		= 0x0000;
+var TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE	= 0x0001;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// The controls for the (first) eight characters on a character selection
+// screen...
+// ////////////////////////////////////////////////////////////////////////////
+/*
+// 1.09 Character positions
+var TDW_OOG_CharPositions = [
+	new TDW_OOG_Control( 4,	 37,	178,	200,	90),
+	new TDW_OOG_Control( 4,	309,	178,	200,	90),
+	new TDW_OOG_Control( 4,	 37,	271,	200,	90),
+	new TDW_OOG_Control( 4,	309,	271,	200,	90),
+	new TDW_OOG_Control( 4,	 37,	364,	200,	90),
+	new TDW_OOG_Control( 4,	309,	364,	200,	90),
+	new TDW_OOG_Control( 4,	 37,	457,	200,	90),
+	new TDW_OOG_Control( 4,	309,	457,	200,	90)
+];
+*/
+var TDW_OOG_CharPositions = [
+	new TDW_OOG_Control( 4,	 37,	178,	200,	92),
+	new TDW_OOG_Control( 4,	309,	178,	200,	92),
+	new TDW_OOG_Control( 4,	 37,	271,	200,	92),
+	new TDW_OOG_Control( 4,	309,	271,	200,	92),
+	new TDW_OOG_Control( 4,	 37,	364,	200,	92),
+	new TDW_OOG_Control( 4,	309,	364,	200,	92),
+	new TDW_OOG_Control( 4,	 37,	457,	200,	92),
+	new TDW_OOG_Control( 4,	309,	457,	200,	92)
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// The create game difficult radio buttons...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_GameDifficultyButtons = [
+	 new TDW_OOG_Control( 6,	430,	381,	 16,	 16,	null,	null, false),
+	 new TDW_OOG_Control( 6,	555,	381,	 16,	 16,	null,	null, false),
+	 new TDW_OOG_Control( 6,	698,	381,	 16,	 16,	null,	null, false)
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Text names for the various control types...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_ControlTypeNames = [
+	"UNKNOWN",
+	"EditBox",
+	"Image",
+	"UNKNOWN",
+	"TextBox",
+	"ScrollBar",
+	"Button",
+	"List",
+	"Timer",
+	"Smack",
+	"ProgressBar",
+	"PopUp",
+	"AccountList"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Global storage for the character selection screen information retrieved by
+// the function TDW_OOG_LoadCharacterInfo().
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_CharacterList = new Array();
+var TDW_OOG_CharacterHash = new Array();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some global information to record game creation...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_GlobalCreateGameCounter = 0;
+var TDW_OOG_GlobalCreateGameAppend  = 0;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_GetControlTypeName(type)
+{
+	return(((type >= 0) && (type < TDW_OOG_ControlTypeNames.length)) ?
+		TDW_OOG_ControlTypeNames[type] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_Control(type, x_pos, y_pos, x_size, y_size, text, visible,
+	disabled, ext_text)
+{
+	this.type     = type;
+	this.x_pos    = x_pos;
+	this.y_pos    = y_pos;
+	this.x_size   = x_size;
+	this.y_size   = y_size;
+	this.text     = text;
+	this.visible  = visible;
+	this.disabled = disabled;
+	this.ext_text = ext_text;
+
+	this.getControl     = function() {
+		var log_obj   = TDW_BASIC_LOG_GetALog();
+		var this_ctrl = getControl(this.type, this.x_pos, this.y_pos,
+			this.x_size, this.y_size);
+		if (this_ctrl) {
+			log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+				"***** this.text = " +
+				typeof(this.text) + " = [" + this.text + "], control text = " +
+				typeof(this_ctrl.text) + " = [" + this_ctrl.text + "]");
+			if ((this.text != null) && (this_ctrl.text != this.text)) {
+				log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+					"***** failed text test for control [" + this.toString() +
+					"] --- actual control text = '" + this_ctrl.text + "'");
+				return(null);
+			}
+			log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+				"***** passed text test for control [" + this.toString() + "]");
+//			if (this.visible && (!this_ctrl.visible)) {
+			if ((this.visible != null) && (this.visible != this_ctrl.visible)) {
+				log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+					"***** failed visible test for control [" + this.toString() +
+					"] --- actual control visible flag = " + this_ctrl.visible);
+				return(null);
+			}
+			log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+				"***** passed visible test for control [" + this.toString() + "]");
+/*
+if ((this.type == 4) && (this.x_pos == 85) && (this.y_pos == 78) &&
+	(this.x_size == 466) && (this.y_size == 42)) {
+	var logic2 = (this.disabled && (!this_ctrl.disabled)) ? true : false;
+	TDW_BASIC_LOG_GetALog().logMinutiae("***** DISABLED TEST DETAIL: " +
+		"this.disabled = " + this.disabled + ", this_ctrl.disabled = " +
+		this_ctrl.disabled + ", LOGIC RESULT A = " + this.disabled +
+		", LOGIC RESULT B = " + this_ctrl.disabled + ", RESULT = " + logic_2);
+}
+*/
+//			if (this.disabled && (!this_ctrl.disabled)) {
+			if ((this.disabled != null) && (this.disabled != this_ctrl.disabled)) {
+				log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+					"***** failed disabled test for control [" + this.toString() +
+					"] --- actual control disabled flag = " + this_ctrl.disabled);
+				return(null);
+			}
+			log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+				"***** passed disabled test for control [" + this.toString() + "]");
+			if ((this.ext_text != null) && (this.ext_text != this_ctrl.getText())){
+				log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+					"***** failed extended text test for control [" + this.toString() +
+					"] --- actual control extended text = '" + this_ctrl.getText() +
+					"'");
+				return(null);
+			}
+			log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+				"***** passed extended text test for control [" + this.toString() +
+				"]");
+			log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+				"***** returning control data = [" + this_ctrl + "]");
+			return(this_ctrl);
+		}
+		log_obj.logMinutiae("TDW_OOG_Control.getControl: " +
+			"***** Failed to location control [" + this.toString() + "]");
+		return(null);
+	}
+
+	this.clickControl   = function(wait_ms, no_wait_for_change_flag) {
+		wait_ms = (TDW_BASIC_GEN_TypeOfNumber(wait_ms) && (wait_ms > 0)) ?
+			Math.max(wait_ms, 1000) : 1000;
+		TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.clickControl(" +
+			wait_ms + "): For control [" + this.toString() + "]: ENTRY");
+		var this_ctrl  = this.getControl();
+		if (this_ctrl) {
+			var old_screen = null;
+			if (!no_wait_for_change_flag)
+				old_screen = TDW_OOG_FindCurrentScreen(100);
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.clickControl(" +
+				wait_ms + "): For control [" + this.toString() + "]: Control " +
+				"located.");
+			this_ctrl.click();
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.clickControl(" +
+				wait_ms + "): For control [" + this.toString() + "]: Control " +
+				"clicked.");
+			if (!no_wait_for_change_flag) {
+				var end_time = (new Date()).valueOf() + wait_ms;
+				do {
+					var new_screen = TDW_OOG_FindCurrentScreen(50);
+					if (((old_screen == null) && (new_screen != null)) ||
+						((old_screen != null) && (new_screen == null)) ||
+						((old_screen != null) && (new_screen != null) &&
+						(old_screen.screen_id != new_screen.screen_id)))
+						break;
+				} while (end_time > (new Date()));
+			}
+			else
+				delay(250);
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.clickControl(" +
+				wait_ms + "): For control [" + this.toString() +
+				"]: Waiting done.");
+			return(true);
+		}
+
+		TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.clickControl(" +
+			wait_ms + "): For control [" + this.toString() + "]: Unable to " +
+			"locate the control.");
+
+		return(false);
+	}
+
+	this.setControlText = function(in_text, wait_ms) {
+		wait_ms = (TDW_BASIC_GEN_TypeOfNumber(wait_ms) && (wait_ms > 0)) ?
+			Math.max(wait_ms, 500) : 1;
+		TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.SetControlText(" +
+			in_text + ", " + wait_ms + "): For control [" + this.toString() +
+			"]: ENTRY");
+		var this_ctrl = this.getControl();
+		if (this_ctrl) {
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.SetControlText(" +
+				in_text + ", " + wait_ms + "): For control [" + this.toString() +
+				"]: Control located.");
+			this_ctrl.setText(in_text);
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.SetControlText(" +
+				in_text + ", " + wait_ms + "): For control [" + this.toString() +
+				"]: Text set within control.");
+			delay(wait_ms);
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.SetControlText(" +
+				in_text + ", " + wait_ms + "): For control [" + this.toString() +
+				"]: Waiting done.");
+			return(true);
+		}
+
+		TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_Control.SetControlText(" +
+			in_text + ", " + wait_ms + "): For control [" + this.toString() +
+			"]: Unable to locate the control.");
+
+		return((this_ctrl) ? true : false);
+	}
+
+	this.toString       = function() {
+		return("type = " + this.type + " = " +
+			TDW_OOG_GetControlTypeName(this.type).toUpperCase() + ", " +
+			"x_pos = " + this.x_pos + ", " +
+			"y_pos = " + this.y_pos + ", " +
+			"x_size = " + this.x_size + ", " +
+			"y_size = " + this.y_size + ", " +
+			"text = " + this.text + ", " +
+			"visible = " + this.visible + ", " +
+			"disabled = " + this.disabled + ", " +
+			"ext_text = " + this.ext_text);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_SCREEN_TYPE_IS_IN_PROGRESS			=  0;
+var TDW_OOG_SCREEN_TYPE_IS_PRE_LOGIN			=  1;
+var TDW_OOG_SCREEN_TYPE_IS_LOGIN					=  2;
+var TDW_OOG_SCREEN_TYPE_IS_POST_LOGIN			=  3;
+var TDW_OOG_SCREEN_TYPE_IS_CHAR_SELECT			=  4;
+var TDW_OOG_SCREEN_TYPE_IS_POST_CHAR_SELECT	=  5;
+var TDW_OOG_SCREEN_TYPE_IS_GOTO_CREATE_GAME	=  6;
+var TDW_OOG_SCREEN_TYPE_IS_GOTO_JOIN_GAME		=  7;
+var TDW_OOG_SCREEN_TYPE_IS_CAN_CREATE_GAME	=  8;
+var TDW_OOG_SCREEN_TYPE_IS_CAN_JOIN_GAME		=  9;
+var TDW_OOG_SCREEN_TYPE_IS_CONN_ERROR			= 10;
+
+var TDW_OOG_SCREEN_TYPE_COUNT						= 11;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_ControlScreen(screen_id, screen_name, control_list, exit_spec)
+{
+	this.screen_id        = screen_id;
+	this.screen_name      = screen_name;
+	this.control_list     = control_list;
+	this.exit_spec        = exit_spec;
+
+	this.isActive         = function() {
+		if (this.screen_id == TDW_OOG_SCREEN_ID_BLANK_SCREEN) {
+			if (getControl())
+				return(false);
+		}
+		else {
+			for (var count_1 = 0; count_1 < this.control_list.length; count_1++) {
+				if (!this.control_list[count_1].getControl())
+					return(false);
+			}
+		}
+		return(true);
+	}
+
+	this.isInProgress     = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_BLANK_SCREEN								:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_1				:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_2				:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_3				:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_4				:
+			case TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN_IN_PROGRESS	:
+			case TDW_OOG_SCREEN_ID_CHAR_SELECT_PLEASE_WAIT				:
+			case TDW_OOG_SCREEN_ID_CHAR_SELECT_CONNECTING				:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isConnError      = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_LOST_CONN_TO_BNET						:
+			case TDW_OOG_SCREEN_ID_UNABLE_TO_CONN_TO_BNET				:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isPreLogin       = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_STARTUP_PANEL							:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_1				:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_2				:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_3				:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_4				:
+			case TDW_OOG_SCREEN_ID_INIT_CONN_TYPE							:
+			case TDW_OOG_SCREEN_ID_ACCT_SETTINGS_SELECT					:
+			case TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_PASSWORD		:
+			case TDW_OOG_SCREEN_ID_ACCT_SETTINGS_GET_PASSWORD			:
+			case TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_EMAIL			:
+			case TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_TOS					:
+			case TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_PRIMARY_INFO		:
+			case TDW_OOG_SCREEN_ID_CREDITS									:
+			case TDW_OOG_SCREEN_ID_CINEMATICS								:
+			case TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT				:
+			case TDW_OOG_SCREEN_ID_TCP_IP_JOIN								:
+			case TDW_OOG_SCREEN_ID_TCP_IP_JOIN_CANNOT_CONNECT			:
+			case TDW_OOG_SCREEN_ID_TCP_IP_HOST_OR_JOIN					:
+			case TDW_OOG_SCREEN_ID_CD_KEY_IN_USE							:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isLogin          = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN_IN_PROGRESS	:
+			case TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN					:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isPostLogin      = function() {
+		return((this.isPreLogin()) ? false : true);
+	}
+
+	this.isCharSelect     = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT						:
+			case TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT				:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isPostCharSelect = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_CLOSED_LOBBY								:
+			case TDW_OOG_SCREEN_ID_CLOSED_CHANNEL							:
+			case TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_CLOSED_JOIN_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_CLOSED_CHAN_SELECT_CHANNEL			:
+			case TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_CHANNEL		:
+			case TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY					:
+			case TDW_OOG_SCREEN_ID_CLOSED_JOIN_LOBBY						:
+			case TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_LOBBY			:
+			case TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_MINE			:
+			case TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_OTHER			:
+			case TDW_OOG_SCREEN_ID_OPEN_LOBBY								:
+			case TDW_OOG_SCREEN_ID_OPEN_CHANNEL								:
+			case TDW_OOG_SCREEN_ID_OPEN_CREATE_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_OPEN_JOIN_CHANNEL						:
+			case TDW_OOG_SCREEN_ID_OPEN_CHAN_SELECT_CHANNEL				:
+			case TDW_OOG_SCREEN_ID_OPEN_CREATE_LOBBY						:
+			case TDW_OOG_SCREEN_ID_OPEN_JOIN_LOBBY							:
+			case TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_MINE				:
+			case TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_OTHER			:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isGotoCreateGame = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_CLOSED_JOIN_LOBBY						:
+			case TDW_OOG_SCREEN_ID_CLOSED_JOIN_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_CLOSED_CHAN_SELECT_CHANNEL			:
+			case TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_LOBBY			:
+			case TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_CHANNEL		:
+			case TDW_OOG_SCREEN_ID_CLOSED_LOBBY								:
+			case TDW_OOG_SCREEN_ID_CLOSED_CHANNEL							:
+			case TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_MINE			:
+			case TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_OTHER			:
+			case TDW_OOG_SCREEN_ID_OPEN_JOIN_LOBBY							:
+			case TDW_OOG_SCREEN_ID_OPEN_JOIN_CHANNEL						:
+			case TDW_OOG_SCREEN_ID_OPEN_CHAN_SELECT_CHANNEL				:
+			case TDW_OOG_SCREEN_ID_OPEN_LOBBY								:
+			case TDW_OOG_SCREEN_ID_OPEN_CHANNEL								:
+			case TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_MINE				:
+			case TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_OTHER			:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isGotoJoinGame   = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY					:
+			case TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_CLOSED_CHAN_SELECT_CHANNEL			:
+			case TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_LOBBY			:
+			case TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_CHANNEL		:
+			case TDW_OOG_SCREEN_ID_CLOSED_LOBBY								:
+			case TDW_OOG_SCREEN_ID_CLOSED_CHANNEL							:
+			case TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_MINE			:
+			case TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_OTHER			:
+			case TDW_OOG_SCREEN_ID_OPEN_CREATE_LOBBY						:
+			case TDW_OOG_SCREEN_ID_OPEN_CREATE_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_OPEN_CHAN_SELECT_CHANNEL				:
+			case TDW_OOG_SCREEN_ID_OPEN_LOBBY								:
+			case TDW_OOG_SCREEN_ID_OPEN_CHANNEL								:
+			case TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_MINE				:
+			case TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_OTHER			:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isCanCreateGame  = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY					:
+			case TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_OPEN_CREATE_LOBBY						:
+			case TDW_OOG_SCREEN_ID_OPEN_CREATE_CHANNEL					:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isCanJoinGame    = function() {
+		switch (this.screen_id) {
+			case TDW_OOG_SCREEN_ID_CLOSED_JOIN_LOBBY						:
+			case TDW_OOG_SCREEN_ID_CLOSED_JOIN_CHANNEL					:
+			case TDW_OOG_SCREEN_ID_OPEN_JOIN_LOBBY							:
+			case TDW_OOG_SCREEN_ID_OPEN_JOIN_CHANNEL						:
+				return(true);
+				break;
+			default																	:
+				break;
+		}
+		return(false);
+	}
+
+	this.isScreenType     = function(screen_type) {
+		var return_flag = false;
+		switch (screen_type) {
+			case TDW_OOG_SCREEN_TYPE_IS_IN_PROGRESS		:
+				return_flag = this.isInProgress();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_PRE_LOGIN			:
+				return_flag = this.isPreLogin();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_LOGIN				:
+				return_flag = this.isLogin();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_POST_LOGIN			:
+				return_flag = this.isPostLogin();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_CHAR_SELECT		:
+				return_flag = this.isCharSelect();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_POST_CHAR_SELECT	:
+				return_flag = this.isPostCharSelect();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_GOTO_CREATE_GAME	:
+				return_flag = this.isGotoCreateGame();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_GOTO_JOIN_GAME	:
+				return_flag = this.isGotoJoinGame();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_CAN_CREATE_GAME	:
+				return_flag = this.isCanCreateGame();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_CAN_JOIN_GAME		:
+				return_flag = this.isCanJoinGame();
+				break;
+			case TDW_OOG_SCREEN_TYPE_IS_CONN_ERROR			:
+				return_flag = this.isConnError();
+				break;
+			default													:
+				break;
+		}
+		return(return_flag);
+	}
+
+	this.canExitScreen    = function() {
+		return((this.exit_spec instanceof TDW_OOG_Control) ? true : false);
+	}
+
+	this.exitScreen       = function(wait_for_change_ms) {
+		if (this.canExitScreen()) {
+			TDW_BASIC_LOG_GetALog().logInfo("Attempting to exit screen id " +
+				this.screen_id + " (" + this.screen_name + ").");
+			this.exit_spec.clickControl();
+			wait_for_change_ms = (TDW_BASIC_GEN_TypeOfNumber(wait_for_change_ms) &&
+				(wait_for_change_ms > 0)) ? wait_for_change_ms : 5000;
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_ControlScreen.exitScreen(" +
+				wait_for_change_ms + "): sent click on control [" +
+				this.exit_spec + "] from screen id " + this.screen_id + " (" +
+				this.screen_name + ").");
+/*
+			var end_time = (new Date()).valueOf() + wait_for_change_ms;
+			while (this.isActive() && (end_time > (new Date())))
+				delay(250);
+*/
+			if (this.isActive())
+				TDW_OOG_WaitForNotScreen(this.screen_id, wait_for_change_ms);
+			TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_ControlScreen.exitScreen(" +
+				wait_for_change_ms + "): Screen id " + this.screen_id +
+				" (" + this.screen_name + ") is " +
+				((this.isActive()) ? "still" : "no longer") + " active.");
+			if (this.isActive())
+				TDW_OOG_WaitForNotScreen(this.screen_id, 5000);
+			TDW_OOG_FindCurrentScreen(wait_for_change_ms);
+			return(true);
+		}
+		TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_ControlScreen.exitScreen(" +
+			wait_for_change_ms + "): failed because there is no " +
+			"exit control specified for screen id " + this.screen_id + " (" +
+			this.screen_name + ").");
+		TDW_BASIC_LOG_GetALog().logWarning("Unable to exit screen id " +
+			this.screen_id + " (" + this.screen_name + ") because there is no " +
+			"specified control for doing so.");
+		return(false);
+	}
+
+	this.toString         = function() {
+		var tmp_string = "screen_id = " + this.screen_id + ", " +
+			"screen_name = " + this.screen_name;
+		for (var count_1 = 0; count_1 < this.control_list.length; count_1++)
+			tmp_string += ", control index " + count_1 + " = [" +
+				this.control_list[count_1] + "]";
+		return(tmp_string);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_Character(index, name, level, char_class, title, char_flags,
+	expiry_days, control)
+{
+	this.index       = index;
+	this.name        = name;
+	this.level       = level;
+	this.char_class  = char_class;
+	this.title       = title;
+	this.char_flags  = char_flags;
+	this.expiry_days = expiry_days;
+	this.control     = control;
+
+	this.toString   = function() {
+		return("index = " + this.index + ", " +
+			"name = " + this.name + ", " +
+			"level = " + this.level + ", " +
+			"char_class = " + this.char_class + ", " +
+			"title = " + this.title + ", " +
+			"char_flags = " + this.char_flags + ", " +
+			"expiry_days = " + this.expiry_days + ", " +
+			"control = [" + this.control + "]");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_CONN_TYPE_NONE					= 0;
+var TDW_OOG_CONN_TYPE_SINGLE_PLAYER		= 1;
+var TDW_OOG_CONN_TYPE_TCP_IP				= 2;
+var TDW_OOG_CONN_TYPE_BATTLENET_CLOSED	= 3;
+var TDW_OOG_CONN_TYPE_BATTLENET_OPEN	= 4;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_LoginSpec(conn_type, realm, account_name, account_pass,
+	other_login_info)
+{
+	this.conn_type        = conn_type;
+	this.realm            = realm;
+	this.account_name     = account_name;
+	this.account_pass     = account_pass;
+	this.other_login_info = other_login_info;
+
+	this.performLogin = function() {
+		return(TDW_OOG_PerformLogin(this.conn_type, this.realm, this.account_name,
+			this.account_pass, this.other_login_info));
+	}
+
+/*
+	this.performLogin = function(added_wait_ms) {
+		added_wait_ms = (TDW_BASIC_GEN_TypeOfNumber(added_wait_ms) &&
+			(added_wait_ms > 0)) ? added_wait_ms : 1000;
+		var log_obj   = TDW_BASIC_LOG_GetALog();
+		var this_screen;
+		log_obj.logDetail("TDW_OOG_LoginSpec.performLogin(" +
+			added_wait_ms + ") for login spec [" + this.toString() + "]: ENTRY");
+		log_obj.logInfo("Will attempt a login for [" + this.toString() + "]");
+if (this.conn_type == TDW_OOG_CONN_TYPE_TCP_IP) {
+	log_obj.logError("TCP/IP games are not yet supported.");
+	return(false);
+}
+		if (!(this_screen = TDW_OOG_FindCurrentScreen()))
+			return(false);
+		while (this_screen.screen_id != TDW_OOG_SCREEN_ID_INIT_CONN_TYPE) {
+			if ((this.conn_type == TDW_OOG_CONN_TYPE_BATTLENET_CLOSED) &&
+				(this_screen.screen_id == TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN))
+				break;
+//			else if (this_screen.screen_id == TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT)
+//				return(true);
+			if (this_screen.screen_id == TDW_OOG_SCREEN_ID_STARTUP_PANEL)
+				this_screen = TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_INIT_CONN_TYPE,
+					5000);
+			else if (!this_screen.canExitScreen()) {
+				TDW_OOG_WaitForNotScreen(this_screen.screen_id, 5000);
+				this_screen = TDW_OOG_FindCurrentScreen(5000);
+			}
+			else
+				this_screen.exitScreen(10000);
+			if (!(this_screen = TDW_OOG_FindCurrentScreen()))
+				return(false);
+		}
+		log_obj.logInfo("Starting login attempt for [" + this.toString() + "]");
+		switch (this.conn_type) {
+			case TDW_OOG_CONN_TYPE_NONE					:
+				return(false);
+				break;
+			case TDW_OOG_CONN_TYPE_SINGLE_PLAYER		:
+				log_obj.logDetail("TDW_OOG_LoginSpec.performLogin(" +
+					added_wait_ms + ") for login spec [" + this.toString() + "]: " +
+					"Executing case " + TDW_OOG_CONN_TYPE_SINGLE_PLAYER + ".");
+				var this_spec = new TDW_OOG_Control(6,	264,	324,	272,	 35);
+				if (!this_spec.clickControl())
+					return(false);
+				if (TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT,
+					added_wait_ms))
+					return(true);
+				break;
+			case TDW_OOG_CONN_TYPE_BATTLENET_CLOSED	:
+				// NOTE: Realm selection not yet supported.
+				var this_spec;
+				var this_ctrl;
+				if (this_screen.screen_id == TDW_OOG_SCREEN_ID_INIT_CONN_TYPE) {
+					this_spec = new TDW_OOG_Control(6,	264,	366,	272,	 35);
+					if (!this_spec.clickControl())
+						return(false);
+					delay(500);
+				}
+				if (!TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN,
+					5000))
+					return(false);
+				this_spec = new TDW_OOG_Control(1,	322,	342,	162,	 19);
+				if (!(this_spec.setControlText(this.account_name)))
+					return(false);
+				this_spec = new TDW_OOG_Control(1,	322,	396,	162,	 19);
+				if (!(this_spec.setControlText(this.account_pass)))
+					return(false);
+				this_spec = new TDW_OOG_Control(6,	264,	484,	272,	 35);
+				if (!this_spec.clickControl())
+					return(false);
+				if (TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT,
+					5000))
+					return(true);
+				break;
+			case TDW_OOG_CONN_TYPE_BATTLENET_OPEN		:
+				break;
+			default												:
+				break;
+		}
+		return(false);
+	}
+*/
+
+	this.toString       = function() {
+		return("conn_type = " + this.conn_type + ", " +
+			"realm = " + this.realm + ", " +
+			"account_name = " + this.account_name + ", " +
+			"account_pass = " + this.account_pass + ", " +
+			"other_login_info = " + other_login_info);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_CharacterSpec(character_spec, dnd_message, away_message)
+{
+	this.character_spec  = character_spec;
+	this.dnd_message     = dnd_message;
+	this.away_message    = away_message;
+
+	this.selectCharacter = function(wait_ms) {
+		wait_ms = (TDW_BASIC_GEN_TypeOfNumber(wait_ms) && (wait_ms > 0)) ?
+			wait_ms : 1000;
+		var log_obj   = TDW_BASIC_LOG_GetALog();
+		var this_screen;
+		log_obj.logDetail("TDW_OOG_CharacterSpec.selectCharacter(" +
+			wait_ms + ") for character spec [" + this.toString() +
+			"]: ENTRY");
+		if (!(this_screen = TDW_OOG_FindCurrentScreen()))
+			return(false);
+		while (this_screen && this_screen.isPostCharSelect()) {
+			this_screen.exitScreen(10000);
+			this_screen = TDW_OOG_FindCurrentScreen(wait_ms);
+		}
+		if (!this_screen)
+			return(false);
+		else if (!this_screen.isCharSelect())
+			return(false);
+		var return_flag = false;
+		if (TDW_BASIC_GEN_TypeOfString(character_spec))
+			return_flag = TDW_OOG_SelectCharacterByName(character_spec);
+		else if (TDW_BASIC_GEN_TypeOfUInt(character_spec))
+			return_flag = TDW_OOG_SelectCharacterByIndex(character_spec);
+		if (return_flag) {
+			while (this_screen && this_screen.isCharSelect())
+				this_screen = TDW_OOG_FindCurrentScreen(1);
+/*
+			if ((this_screen = TDW_OOG_FindCurrentScreen()) != null) {
+				if (this_screen.isPostCharSelect()) {
+					if (TDW_BASIC_GEN_TypeOfString(this.dnd_message) ||
+						TDW_BASIC_GEN_TypeOfString(this.away_message)) {
+						var tmp_string =
+							(TDW_BASIC_GEN_TypeOfString(this.dnd_message)) ?
+							("/dnd " + this.dnd_message) :
+							("/away " + this.away_message);
+						
+					}
+				}
+			}
+*/
+		}
+		return(return_flag);
+	}
+
+	this.toString        = function() {
+		return("character_spec = " + this.character_spec + ", " +
+			"dnd_message = " + this.dnd_message + ", " +
+			"away_message = " + this.away_message);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_OOG_CREATE_GAME_FLAG_NONE		= 0x0000;
+var TDW_OOG_CREATE_GAME_FLAG_INCREMENT	= 0x0001;
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_CreateGameSpec(game_name, password, difficulty, description,
+	max_players, level_diff, flags, delay_next_game)
+{
+	this.game_name       = (TDW_BASIC_GEN_TypeOfStringNotEmpty(game_name)) ?
+		game_name.substr(0, 15) : null;
+	this.password        = (TDW_BASIC_GEN_TypeOfStringNotEmpty(password)) ? 
+		password.substr(0, 15) : null;
+	this.difficulty      = (!TDW_BASIC_GEN_TypeOfUInt(difficulty)) ? null :
+		((difficulty < 0) ? 0 : ((difficulty > 2) ? 2 : difficulty));
+	this.description     = (TDW_BASIC_GEN_TypeOfStringNotEmpty(description)) ?
+		description.substr(0, 31) : null;
+	this.max_players     = (!TDW_BASIC_GEN_TypeOfUInt(max_players)) ? null :
+		((max_players < 1) ? 1 : ((max_players > 8) ? 8 : max_players));
+	this.level_diff      = (!TDW_BASIC_GEN_TypeOfUInt(level_diff)) ? null :
+		((level_diff > 99) ? 99 : level_diff);
+	this.flags           = (TDW_BASIC_GEN_TypeOfUInt(flags)) ? flags :
+		TDW_OOG_CREATE_GAME_FLAG_NONE;
+	this.delay_next_game = ((!TDW_BASIC_GEN_TypeOfUInt(delay_next_game)) ||
+		(delay_next_game < 1)) ? 10000 : delay_next_game;
+
+	this.createGame  = function() {
+		return(TDW_OOG_CreateGame(this.game_name, this.password, this.difficulty,
+			this.description, this.max_players, this.level_diff, this.flags));
+	}
+
+	this.toString    = function() {
+		return("game_name = " + this.game_name + ", " +
+			"password = " + this.password + ", " +
+			"difficulty = " + this.difficulty + " = " +
+				TDW_BASIC_GetDifficultyName(this.difficulty) + ", " +
+			"description = " + this.description + ", " +
+			"max_players = " + this.max_players + ", " +
+			"level_diff = " + this.level_diff + ", " +
+			"flags = " + this.flags + ", " +
+			"delay_next_game = " + this.delay_next_game);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_SCREEN_ID_STARTUP_PANEL								=  0;
+var TDW_OOG_SCREEN_ID_INIT_CONN_TYPE							=  1;
+var TDW_OOG_SCREEN_ID_CREDITS										=  2;
+var TDW_OOG_SCREEN_ID_CINEMATICS									=  3;
+var TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT						=  4;
+var TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT					=  5;
+var TDW_OOG_SCREEN_ID_CLOSED_LOBBY								=  6;
+var TDW_OOG_SCREEN_ID_CLOSED_CHANNEL							=  7;
+var TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL					=  8;
+var TDW_OOG_SCREEN_ID_CLOSED_JOIN_CHANNEL						=  9;
+var TDW_OOG_SCREEN_ID_CLOSED_CHAN_SELECT_CHANNEL			= 10;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_CHANNEL			= 11;
+var TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY						= 12;
+var TDW_OOG_SCREEN_ID_CLOSED_JOIN_LOBBY						= 13;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_LOBBY			= 14;
+var TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_MINE			= 15;
+var TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_OTHER			= 16;
+var TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN					= 17;
+var TDW_OOG_SCREEN_ID_CLOSED_REALM_SELECT						= 18;
+
+var TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_1				= 19;
+var TDW_OOG_SCREEN_ID_FIRST_110_LOGIN_CHANGE_EMAIL			= 20;
+var TDW_OOG_SCREEN_ID_ACCT_SETTINGS_SELECT					= 21;
+var TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_PASSWORD		= 22;
+var TDW_OOG_SCREEN_ID_ACCT_SETTINGS_GET_PASSWORD			= 23;
+var TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_EMAIL			= 24;
+var TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_TOS						= 25;
+var TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_PRIMARY_INFO			= 26;
+var TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT_REALM_DOWN		= 27;
+var TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_2				= 28;
+var TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_3				= 29;
+var TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_4				= 30;
+var TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN_IN_PROGRESS	= 31;
+var TDW_OOG_SCREEN_ID_CHAR_SELECT_PLEASE_WAIT				= 32;
+var TDW_OOG_SCREEN_ID_CHAR_SELECT_CONNECTING					= 33;
+var TDW_OOG_SCREEN_ID_BLANK_SCREEN								= 34;
+var TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT				= 35;
+var TDW_OOG_SCREEN_ID_TCP_IP_JOIN								= 36;
+var TDW_OOG_SCREEN_ID_TCP_IP_HOST_OR_JOIN						= 37;
+
+var TDW_OOG_SCREEN_ID_OPEN_CREATE_LOBBY						= 38;
+var TDW_OOG_SCREEN_ID_OPEN_CREATE_CHANNEL						= 39;
+var TDW_OOG_SCREEN_ID_OPEN_JOIN_LOBBY							= 40;
+var TDW_OOG_SCREEN_ID_OPEN_JOIN_CHANNEL						= 41;
+var TDW_OOG_SCREEN_ID_OPEN_CHAN_SELECT_CHANNEL				= 42;
+var TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_MINE				= 43;
+var TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_OTHER				= 44;
+var TDW_OOG_SCREEN_ID_OPEN_LOBBY									= 45;
+var TDW_OOG_SCREEN_ID_OPEN_CHANNEL								= 46;
+
+var TDW_OOG_SCREEN_ID_TCP_IP_JOIN_CANNOT_CONNECT			= 47;
+
+var TDW_OOG_SCREEN_ID_LOST_CONN_TO_BNET						= 48;
+var TDW_OOG_SCREEN_ID_UNABLE_TO_CONN_TO_BNET					= 49;
+var TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_ACCOUNT_NOT_FOUND		= 50;
+var TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_PASSWORD_FAILURE		= 51;
+var TDW_OOG_SCREEN_ID_CD_KEY_IN_USE								= 52;
+
+/*
+	NOTE: Not used at present.
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_SC_CHANNEL	= 12;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_HC_CHANNEL	= 13;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_SC_CHANNEL	= 14;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_HC_CHANNEL	= 15;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_SC_LOBBY		= 19;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_HC_LOBBY		= 20;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_SC_LOBBY	= 21;
+var TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_HC_LOBBY	= 22;
+*/
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_ScreenIdConstants = new Array();
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_STARTUP_PANEL]                      = "TDW_OOG_SCREEN_ID_STARTUP_PANEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_INIT_CONN_TYPE]                     = "TDW_OOG_SCREEN_ID_INIT_CONN_TYPE";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CREDITS]                            = "TDW_OOG_SCREEN_ID_CREDITS";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CINEMATICS]                         = "TDW_OOG_SCREEN_ID_CINEMATICS";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT]                 = "TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT]             = "TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LOBBY]                       = "TDW_OOG_SCREEN_ID_CLOSED_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_CHANNEL]                     = "TDW_OOG_SCREEN_ID_CLOSED_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL]              = "TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_JOIN_CHANNEL]                = "TDW_OOG_SCREEN_ID_CLOSED_JOIN_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_CHAN_SELECT_CHANNEL]         = "TDW_OOG_SCREEN_ID_CLOSED_CHAN_SELECT_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_CHANNEL]       = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_CHANNEL";
+/*
+	NOTE: Not used at present.
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_SC_CHANNEL]  = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_SC_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_HC_CHANNEL]  = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_HC_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_SC_CHANNEL] = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_SC_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_HC_CHANNEL] = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_HC_CHANNEL";
+*/
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY]                = "TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_JOIN_LOBBY]                  = "TDW_OOG_SCREEN_ID_CLOSED_JOIN_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_LOBBY]         = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_LOBBY";
+/*
+	NOTE: Not used at present.
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_SC_LOBBY]    = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_SC_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_HC_LOBBY]    = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_STANDARD_HC_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_SC_LOBBY]   = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_SC_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_HC_LOBBY]   = "TDW_OOG_SCREEN_ID_CLOSED_LADDER_EXPANSION_HC_LOBBY";
+*/
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_MINE]         = "TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_MINE";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_OTHER]        = "TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_OTHER";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN_IN_PROGRESS]   = "TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN_IN_PROGRESS";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN]               = "TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_REALM_SELECT]                = "TDW_OOG_SCREEN_ID_CLOSED_REALM_SELECT";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_1]            = "TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_1";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_2]            = "TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_2";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_3]            = "TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_3";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_4]            = "TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_4";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_FIRST_110_LOGIN_CHANGE_EMAIL]       = "TDW_OOG_SCREEN_ID_FIRST_110_LOGIN_CHANGE_EMAIL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_ACCT_SETTINGS_SELECT]               = "TDW_OOG_SCREEN_ID_ACCT_SETTINGS_SELECT";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_PASSWORD]      = "TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_PASSWORD";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_ACCT_SETTINGS_GET_PASSWORD]         = "TDW_OOG_SCREEN_ID_ACCT_SETTINGS_GET_PASSWORD";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_EMAIL]         = "TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_EMAIL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_TOS]                = "TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_TOS";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_PRIMARY_INFO]       = "TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_PRIMARY_INFO";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT_REALM_DOWN]      = "TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT_REALM_DOWN";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CHAR_SELECT_PLEASE_WAIT]            = "TDW_OOG_SCREEN_ID_CHAR_SELECT_PLEASE_WAIT";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CHAR_SELECT_CONNECTING]             = "TDW_OOG_SCREEN_ID_CHAR_SELECT_CONNECTING";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_BLANK_SCREEN]                       = "TDW_OOG_SCREEN_ID_BLANK_SCREEN";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT]           = "TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_TCP_IP_JOIN]                        = "TDW_OOG_SCREEN_ID_TCP_IP_JOIN";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_TCP_IP_HOST_OR_JOIN]                = "TDW_OOG_SCREEN_ID_TCP_IP_HOST_OR_JOIN";
+
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_CREATE_LOBBY]                  = "TDW_OOG_SCREEN_ID_OPEN_CREATE_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_CREATE_CHANNEL]                = "TDW_OOG_SCREEN_ID_OPEN_CREATE_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_JOIN_LOBBY]                    = "TDW_OOG_SCREEN_ID_OPEN_JOIN_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_JOIN_CHANNEL]                  = "TDW_OOG_SCREEN_ID_OPEN_JOIN_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_CHAN_SELECT_CHANNEL]           = "TDW_OOG_SCREEN_ID_OPEN_CHAN_SELECT_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_MINE]           = "TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_MINE";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_OTHER]          = "TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_OTHER";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_LOBBY]                         = "TDW_OOG_SCREEN_ID_OPEN_LOBBY";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_OPEN_CHANNEL]                       = "TDW_OOG_SCREEN_ID_OPEN_CHANNEL";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_TCP_IP_JOIN_CANNOT_CONNECT]         = "TDW_OOG_SCREEN_ID_TCP_IP_JOIN_CANNOT_CONNECT";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_LOST_CONN_TO_BNET]                  = "TDW_OOG_SCREEN_ID_LOST_CONN_TO_BNET";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_UNABLE_TO_CONN_TO_BNET]             = "TDW_OOG_SCREEN_ID_UNABLE_TO_CONN_TO_BNET";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_ACCOUNT_NOT_FOUND]    = "TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_ACCOUNT_NOT_FOUND";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_PASSWORD_FAILURE]     = "TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_PASSWORD_FAILURE";
+TDW_OOG_ScreenIdConstants[TDW_OOG_SCREEN_ID_CD_KEY_IN_USE]                      = "TDW_OOG_SCREEN_ID_CD_KEY_IN_USE";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_ScreenList = [
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_BLANK_SCREEN,
+		"Blank Screen / Screen Change In-Progress",
+		[
+		],
+		 null
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_LOST_CONN_TO_BNET,
+		"Lost Connection to BattleNet Screen",
+		[
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32,	"OK"                ),
+		 new TDW_OOG_Control( 4,	268,	320,	264,	120,	"Lost Connection to")
+		],
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_UNABLE_TO_CONN_TO_BNET,
+		"Unable to Connect to BattleNet Screen",
+		[
+		 new TDW_OOG_Control( 6,	335,	450,	128,	 35,	"OK"                                               ),
+		 new TDW_OOG_Control( 4,	158,	220,	485,	 40,	"Unable to Connect"                                ),
+		 new TDW_OOG_Control( 4,	162,	320,	477,	100,	"Unable to connect to Battle.net."                 ),
+		 new TDW_OOG_Control( 4,	162,	420,	477,	100,	"If using a modem, you may need to connect to your")
+		],
+		 new TDW_OOG_Control( 6,	335,	450,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY,
+		"Closed BattleNet In-Lobby Create Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                             ),
+		 new TDW_OOG_Control( 4,	496,	111,	200,	 22,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 4,	427,	188,	300,	 12,	"Password (Optional)"                             ),
+		 new TDW_OOG_Control( 6,	 27,	480,	120,	 20,	"ENTER CHAT"                                      ),
+		 new TDW_OOG_Control( 4,	427,	134,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	427,	243,	300,	 12,	"Game Description (Optional)"                     ),
+		 new TDW_OOG_Control( 4,	632,	306,	300,	 12,	"Max. Number of Players:"                         ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          ),
+		 new TDW_OOG_Control( 4,	632,	342,	300,	 12,	"Character Difference:"                           ),
+		 new TDW_OOG_Control( 4,	705,	342,	150,	 12,	"Levels"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_CREATE_LOBBY,
+		"Open BattleNet In-Lobby Create Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                              ),
+		 new TDW_OOG_Control( 4,	496,	111,	200,	 22,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 4,	427,	188,	300,	 12,	"Password (Optional)"                             ),
+		 new TDW_OOG_Control( 6,	 27,	480,	120,	 20,	"ENTER CHAT"                                      ),
+		 new TDW_OOG_Control( 4,	427,	134,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	427,	243,	300,	 12,	"Game Description (Optional)"                     ),
+		 new TDW_OOG_Control( 4,	632,	306,	300,	 12,	"Max. Number of Players:"                         ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          ),
+		 new TDW_OOG_Control( 4,	632,	342,	300,	 12,	"Character Difference:"                           ),
+		 new TDW_OOG_Control( 4,	705,	342,	150,	 12,	"Levels"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL,
+		"Closed BattleNet In-Channel Create Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                             ),
+		 new TDW_OOG_Control( 4,	496,	111,	200,	 22,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 4,	427,	188,	300,	 12,	"Password (Optional)"                             ),
+		 new TDW_OOG_Control( 4,	427,	134,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	427,	243,	300,	 12,	"Game Description (Optional)"                     ),
+		 new TDW_OOG_Control( 4,	632,	306,	300,	 12,	"Max. Number of Players:"                         ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          ),
+		 new TDW_OOG_Control( 4,	632,	342,	300,	 12,	"Character Difference:"                           ),
+		 new TDW_OOG_Control( 4,	705,	342,	150,	 12,	"Levels"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_CREATE_CHANNEL,
+		"Open BattleNet In-Channel Create Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                              ),
+		 new TDW_OOG_Control( 4,	496,	111,	200,	 22,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 4,	427,	188,	300,	 12,	"Password (Optional)"                             ),
+		 new TDW_OOG_Control( 4,	427,	134,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	427,	243,	300,	 12,	"Game Description (Optional)"                     ),
+		 new TDW_OOG_Control( 4,	632,	306,	300,	 12,	"Max. Number of Players:"                         ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"CREATE GAME"                                     ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          ),
+		 new TDW_OOG_Control( 4,	632,	342,	300,	 12,	"Character Difference:"                           ),
+		 new TDW_OOG_Control( 4,	705,	342,	150,	 12,	"Levels"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_JOIN_LOBBY,
+		"Closed BattleNet In-Lobby Join Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                             ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"JOIN GAME"                                       ),
+		 new TDW_OOG_Control( 6,	 27,	480,	120,	 20,	"ENTER CHAT"                                      ),
+		 new TDW_OOG_Control( 4,	428,	121,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	602,	121,	150,	 12,	"Password"                                        ),
+		 new TDW_OOG_Control( 4,	431,	212,	200,	 12,	"Game Name Players"                               ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_JOIN_LOBBY,
+		"Open BattleNet In-Lobby Join Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                              ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"JOIN GAME"                                       ),
+		 new TDW_OOG_Control( 6,	 27,	480,	120,	 20,	"ENTER CHAT"                                      ),
+		 new TDW_OOG_Control( 4,	428,	121,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	602,	121,	150,	 12,	"Password"                                        ),
+		 new TDW_OOG_Control( 4,	431,	212,	200,	 12,	"Game Name Players"                               ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_JOIN_CHANNEL,
+		"Closed BattleNet In-Channel Join Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                             ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"JOIN GAME"                                       ),
+		 new TDW_OOG_Control( 4,	428,	121,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	602,	121,	150,	 12,	"Password"                                        ),
+		 new TDW_OOG_Control( 4,	431,	212,	200,	 12,	"Game Name Players"                               ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_JOIN_CHANNEL,
+		"Open BattleNet In-Channel Join Game Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                              ),
+		 new TDW_OOG_Control( 6,	594,	433,	172,	 32,	"JOIN GAME"                                       ),
+		 new TDW_OOG_Control( 4,	428,	121,	150,	 12,	"Game Name"                                       ),
+		 new TDW_OOG_Control( 4,	602,	121,	150,	 12,	"Password"                                        ),
+		 new TDW_OOG_Control( 4,	431,	212,	200,	 12,	"Game Name Players"                               ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT_REALM_DOWN,
+		"Closed BattleNet Character Selection Screen (Realm Down)",
+		[
+		 new TDW_OOG_Control( 4,	 37,	178,	547,	 35,	"REALM DOWN"   ),
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null           ),
+		 new TDW_OOG_Control( 6,	627,	572,	128,	 35,	"OK"           ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"         ),
+		 new TDW_OOG_Control( 6,	 33,	528,	168,	 60,	"CREATE NEW"   ),
+		 new TDW_OOG_Control( 6,	233,	528,	168,	 60,	"CONVERT TO"   ),
+		 new TDW_OOG_Control( 6,	433,	528,	168,	 60,	"DELETE"       ),
+		 new TDW_OOG_Control( 6,	609,	113,	182,	 30,	"CHANGE REALM" ),
+		 new TDW_OOG_Control( 4,	629,	 44,	145,	 21,	"Current Realm")
+		],
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CHAR_SELECT_PLEASE_WAIT,
+		"Character Selection Screen Please Wait",
+		[
+		 new TDW_OOG_Control( 4,	268,	300,	264,	100,	"Please Wait"),
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null         ),
+		 new TDW_OOG_Control( 6,	627,	572,	128,	 35,	"OK"         ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"       ),
+		 new TDW_OOG_Control( 6,	 33,	528,	168,	 60,	"CREATE NEW" ),
+		 new TDW_OOG_Control( 6,	233,	528,	168,	 60,	"CONVERT TO" ),
+		 new TDW_OOG_Control( 6,	433,	528,	168,	 60,	"DELETE"     ),
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32,	"CANCEL"     )
+		],
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CHAR_SELECT_CONNECTING,
+		"Character Selection Screen Connecting",
+		[
+		 new TDW_OOG_Control( 4,	 37,	178,	547,	 35,	"CONNECTING..."),
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null           ),
+		 new TDW_OOG_Control( 6,	627,	572,	128,	 35,	"OK"           ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"         ),
+		 new TDW_OOG_Control( 6,	 33,	528,	168,	 60,	"CREATE NEW"   ),
+		 new TDW_OOG_Control( 6,	233,	528,	168,	 60,	"CONVERT TO"   ),
+		 new TDW_OOG_Control( 6,	433,	528,	168,	 60,	"DELETE"       )
+		],
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT,
+		"Closed BattleNet Character Selection Screen",
+		[
+		 new TDW_OOG_Control(2,	  0,	599,	800,	600,	null           ),
+		 new TDW_OOG_Control(6,	627,	572,	128,	 35,	"OK"           ),
+		 new TDW_OOG_Control(6,	 33,	572,	128,	 35,	"EXIT"         ),
+		 new TDW_OOG_Control(6,	 33,	528,	168,	 60,	"CREATE NEW"   ),
+		 new TDW_OOG_Control(6,	233,	528,	168,	 60,	"CONVERT TO"   ),
+		 new TDW_OOG_Control(6,	433,	528,	168,	 60,	"DELETE"       ),
+		 new TDW_OOG_Control(6,	609,	113,	182,	 30,	"CHANGE REALM" ),
+		 new TDW_OOG_Control(4,	629,	 44,	145,	 21,	"Current Realm")
+		],
+		 new TDW_OOG_Control(6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT,
+		"Single-Player or Open BattleNet Character Selection Screen",
+		[
+		 new TDW_OOG_Control(2,	  0,	599,	800,	600,	null           ),
+		 new TDW_OOG_Control(6,	627,	572,	128,	 35,	"OK"           ),
+		 new TDW_OOG_Control(6,	 33,	572,	128,	 35,	"EXIT"         ),
+		 new TDW_OOG_Control(6,	 33,	528,	168,	 60,	"CREATE NEW"   ),
+		 new TDW_OOG_Control(6,	233,	528,	168,	 60,	"CONVERT TO"   ),
+		 new TDW_OOG_Control(6,	433,	528,	168,	 60,	"DELETE"       )
+		],
+		 new TDW_OOG_Control(6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN_IN_PROGRESS,
+		"BattleNet Account Login In-Progress",
+		[
+		 new TDW_OOG_Control( 4,	321,	340,	300,	 32,	"Account Name"                                    ),
+		 new TDW_OOG_Control( 4,	321,	394,	300,	 32,	"Password"                                        ),
+		 new TDW_OOG_Control( 4,	200,	350,	400,	100,	"To use an existing Battle.net account, enter the"),
+		 new TDW_OOG_Control( 6,	264,	572,	272,	 35,	"CREATE NEW ACCOUNT"                              ),
+		 new TDW_OOG_Control( 6,	264,	528,	272,	 35,	"ACCOUNT SETTINGS"                                ),
+		 new TDW_OOG_Control( 6,	264,	484,	272,	 35,	"LOG IN"                                          ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"                                            ),
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32,	"CANCEL"                                          ),
+		 new TDW_OOG_Control( 4,	268,	300,	264,	100,	"Please Wait"                                     )
+		],
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_ACCOUNT_NOT_FOUND,
+		"BattleNet Account Login Account Not Found Failure Screen",
+		[
+		 new TDW_OOG_Control( 4,	321,	340,	300,	 32,	"Account Name"                                    ),
+		 new TDW_OOG_Control( 4,	321,	394,	300,	 32,	"Password"                                        ),
+		 new TDW_OOG_Control( 4,	200,	350,	400,	100,	"To use an existing Battle.net account, enter the"),
+		 new TDW_OOG_Control( 6,	264,	572,	272,	 35,	"CREATE NEW ACCOUNT"                              ),
+		 new TDW_OOG_Control( 6,	264,	528,	272,	 35,	"ACCOUNT SETTINGS"                                ),
+		 new TDW_OOG_Control( 6,	264,	484,	272,	 35,	"LOG IN"                                          ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"                                            ),
+		 new TDW_OOG_Control( 6,	335,	412,	128,	 35,	"OK"                                              ),
+		 new TDW_OOG_Control( 4,	195,	237,	410,	 40,	"Login Error"                                     ),
+		 new TDW_OOG_Control( 4,	199,	377,	402,	140,	"That account does not exist. If"                 )
+		],
+		 new TDW_OOG_Control( 6,	335,	412,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_PASSWORD_FAILURE,
+		"BattleNet Account Login Password Failure Screen",
+		[
+		 new TDW_OOG_Control( 4,	321,	340,	300,	 32,	"Account Name"                                    ),
+		 new TDW_OOG_Control( 4,	321,	394,	300,	 32,	"Password"                                        ),
+		 new TDW_OOG_Control( 4,	200,	350,	400,	100,	"To use an existing Battle.net account, enter the"),
+		 new TDW_OOG_Control( 6,	264,	572,	272,	 35,	"CREATE NEW ACCOUNT"                              ),
+		 new TDW_OOG_Control( 6,	264,	528,	272,	 35,	"ACCOUNT SETTINGS"                                ),
+		 new TDW_OOG_Control( 6,	264,	484,	272,	 35,	"LOG IN"                                          ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"                                            ),
+		 new TDW_OOG_Control( 6,	335,	412,	128,	 35,	"OK"                                              ),
+		 new TDW_OOG_Control( 4,	195,	237,	410,	 40,	"Login Error"                                     ),
+		 new TDW_OOG_Control( 4,	199,	377,	402,	140,	"The password you have entered"                   )
+		],
+		 new TDW_OOG_Control( 6,	335,	412,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN,
+		"Closed BattleNet Account Login, Creation, and Settings Screen",
+		[
+		 new TDW_OOG_Control(4,	321,	340,	300,	 32,	"Account Name"                                    ),
+		 new TDW_OOG_Control(4,	321,	394,	300,	 32,	"Password"                                        ),
+		 new TDW_OOG_Control(4,	200,	350,	400,	100,	"To use an existing Battle.net account, enter the"),
+		 new TDW_OOG_Control(6,	264,	572,	272,	 35,	"CREATE NEW ACCOUNT"                              ),
+		 new TDW_OOG_Control(6,	264,	528,	272,	 35,	"ACCOUNT SETTINGS"                                ),
+		 new TDW_OOG_Control(6,	264,	484,	272,	 35,	"LOG IN"                                          ),
+		 new TDW_OOG_Control(6,	 33,	572,	128,	 35,	"EXIT"                                            )
+		],
+		 new TDW_OOG_Control(6,	 33,	572,	128,	 35)
+	),
+
+
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_REALM_SELECT,
+		"Closed BattleNet Realm Selection Screen",
+		[
+		 new TDW_OOG_Control(2,	  0,	599,	800,	600,	null                                            ),
+		 new TDW_OOG_Control(2,	400,	120,	181,	170,	null                                            ),
+		 new TDW_OOG_Control(2,	400,	120,	188,	177,	null                                            ),
+		 new TDW_OOG_Control(2,	237,	555,	340,	340,	null                                            ),
+		 new TDW_OOG_Control(4,	237,	270,	340,	 35,	"SELECT GATEWAY"                                ),
+		 new TDW_OOG_Control(4,	257,	345,	320,	 84,	"If the current gateway does not best represent"),
+		 new TDW_OOG_Control(5,	549,	491,	 10,	154,	null                                            ),
+		 new TDW_OOG_Control(4,	257,	500,	292,	160,	"U.S. West"                                     ),
+		 new TDW_OOG_Control(6,	281,	538,	 96,	 32,	"OK"                                            ),
+		 new TDW_OOG_Control(6,	436,	538,	 96,	 32,	"CANCEL"                                        )
+		],
+		 new TDW_OOG_Control(6,	436,	538,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_2,
+		"Initial Connection In-Progress Screen / 2 of 4 (Connecting to the fastest server)",
+		[
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	181,	170,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	188,	177,	null                    ),
+//		 new TDW_OOG_Control( 6,	264,	391,	272,	 25,	"GATEWAY: U.S. EAST"    ),
+		 new TDW_OOG_Control( 6,	264,	366,	272,	 35,	"BATTLE.NET"            ),
+		 new TDW_OOG_Control( 6,	264,	433,	272,	 35,	"OTHER MULTIPLAYER"     ),
+		 new TDW_OOG_Control( 6,	264,	324,	272,	 35,	"SINGLE PLAYER"         ),
+		 new TDW_OOG_Control( 6,	264,	528,	135,	 25,	"CREDITS"               ),
+		 new TDW_OOG_Control( 6,	402,	528,	135,	 25,	"CINEMATICS"            ),
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"EXIT DIABLO II"        ),
+		 new TDW_OOG_Control( 4,	  0,	599,	200,	 40,	"v 1.10"                ),
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                ),
+		 new TDW_OOG_Control( 4,	222,	280,	340,	 60,	"Connecting to"         ),
+		 new TDW_OOG_Control( 4,	222,	360,	340,	 70,	"Connecting to the fastest"),
+//		 new TDW_OOG_Control( 4,	222,	370,	340,	 20,	".."                    )
+		],
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                )
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_3,
+		"Initial Connection In-Progress Screen / 3 of 4 (Accessing your account)",
+		[
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	181,	170,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	188,	177,	null                    ),
+//		 new TDW_OOG_Control( 6,	264,	391,	272,	 25,	"GATEWAY: U.S. EAST"    ),
+		 new TDW_OOG_Control( 6,	264,	366,	272,	 35,	"BATTLE.NET"            ),
+		 new TDW_OOG_Control( 6,	264,	433,	272,	 35,	"OTHER MULTIPLAYER"     ),
+		 new TDW_OOG_Control( 6,	264,	324,	272,	 35,	"SINGLE PLAYER"         ),
+		 new TDW_OOG_Control( 6,	264,	528,	135,	 25,	"CREDITS"               ),
+		 new TDW_OOG_Control( 6,	402,	528,	135,	 25,	"CINEMATICS"            ),
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"EXIT DIABLO II"        ),
+		 new TDW_OOG_Control( 4,	  0,	599,	200,	 40,	"v 1.10"                ),
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                ),
+		 new TDW_OOG_Control( 4,	222,	280,	340,	 60,	"Connecting to"         ),
+		 new TDW_OOG_Control( 4,	222,	360,	340,	 70,	"Accessing your account"),
+//		 new TDW_OOG_Control( 4,	222,	370,	340,	 20,	".."                    )
+		],
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                )
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_4,
+		"Initial Connection In-Progress Screen 4 of 4 (Checking versions)",
+		[
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	181,	170,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	188,	177,	null                    ),
+//		 new TDW_OOG_Control( 6,	264,	391,	272,	 25,	"GATEWAY: U.S. EAST"    ),
+		 new TDW_OOG_Control( 6,	264,	366,	272,	 35,	"BATTLE.NET"            ),
+		 new TDW_OOG_Control( 6,	264,	433,	272,	 35,	"OTHER MULTIPLAYER"     ),
+		 new TDW_OOG_Control( 6,	264,	324,	272,	 35,	"SINGLE PLAYER"         ),
+		 new TDW_OOG_Control( 6,	264,	528,	135,	 25,	"CREDITS"               ),
+		 new TDW_OOG_Control( 6,	402,	528,	135,	 25,	"CINEMATICS"            ),
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"EXIT DIABLO II"        ),
+		 new TDW_OOG_Control( 4,	  0,	599,	200,	 40,	"v 1.10"                ),
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                ),
+		 new TDW_OOG_Control( 4,	222,	280,	340,	 60,	"Connecting to"         ),
+		 new TDW_OOG_Control( 4,	222,	360,	340,	 70,	"Checking versions" ),
+//		 new TDW_OOG_Control( 4,	222,	370,	340,	 20,	".."                    )
+		],
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                )
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_INIT_CONN_IN_PROGRESS_1,
+		"Initial Connection In-Progress Screen / 1 of 4  (Connecting to BattleNet)",
+		[
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	181,	170,	null                    ),
+		 new TDW_OOG_Control( 2,	400,	120,	188,	177,	null                    ),
+//		 new TDW_OOG_Control( 6,	264,	391,	272,	 25,	"GATEWAY: U.S. EAST"    ),
+		 new TDW_OOG_Control( 6,	264,	366,	272,	 35,	"BATTLE.NET"            ),
+		 new TDW_OOG_Control( 6,	264,	433,	272,	 35,	"OTHER MULTIPLAYER"     ),
+		 new TDW_OOG_Control( 6,	264,	324,	272,	 35,	"SINGLE PLAYER"         ),
+		 new TDW_OOG_Control( 6,	264,	528,	135,	 25,	"CREDITS"               ),
+		 new TDW_OOG_Control( 6,	402,	528,	135,	 25,	"CINEMATICS"            ),
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"EXIT DIABLO II"        ),
+		 new TDW_OOG_Control( 4,	  0,	599,	200,	 40,	"v 1.10"                ),
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                ),
+		 new TDW_OOG_Control( 4,	222,	280,	340,	 60,	"Connecting to"         ),
+//		 new TDW_OOG_Control( 4,	222,	370,	340,	 20,	".."                    )
+		],
+		 new TDW_OOG_Control( 6,	330,	416,	128,	 35,	"CANCEL"                )
+	),
+/*
+	For the CD-Key in-use screen, retrieve the text associated with the
+	following control in order to attempt to determine who's using it...
+		 new TDW_OOG_Control( 4,	158,	310,	485,	 40)
+*/
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CD_KEY_IN_USE,
+		"CD Key In-Use Screen",
+		[
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null                                                      ),
+		 new TDW_OOG_Control( 2,	400,	120,	181,	170,	null                                                      ),
+		 new TDW_OOG_Control( 2,	400,	120,	188,	177,	null                                                      ),
+//		 new TDW_OOG_Control( 6,	264,	391,	272,	 25,	"GATEWAY: U.S. EAST"                                      ),
+		 new TDW_OOG_Control( 6,	264,	366,	272,	 35,	"BATTLE.NET"                                              ),
+		 new TDW_OOG_Control( 6,	264,	433,	272,	 35,	"OTHER MULTIPLAYER"                                       ),
+		 new TDW_OOG_Control( 6,	264,	324,	272,	 35,	"SINGLE PLAYER"                                           ),
+		 new TDW_OOG_Control( 6,	264,	528,	135,	 25,	"CREDITS"                                                 ),
+		 new TDW_OOG_Control( 6,	402,	528,	135,	 25,	"CINEMATICS"                                              ),
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"EXIT DIABLO II"                                          ),
+		 new TDW_OOG_Control( 4,	  0,	599,	200,	 40,	"v 1.10"                                                  ),
+		 new TDW_OOG_Control( 6,	335,	450,	128,	 35,	"OK"                                                      ),
+		 new TDW_OOG_Control( 4,	158,	220,	485,	 40,	"Unable to Connect"                                       ),
+		 new TDW_OOG_Control( 4,	162,	270,	477,	 50,	"Your CD key is currently being used"                     ),
+		 new TDW_OOG_Control( 4,	162,	420,	477,	100,	"Only one registered instance of this application can use")
+		],
+		 new TDW_OOG_Control( 6,	335,	450,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_INIT_CONN_TYPE,
+		"Initial Connection Type Selection Screen",
+		[
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null                ),
+		 new TDW_OOG_Control( 2,	400,	120,	181,	170,	null                ),
+		 new TDW_OOG_Control( 2,	400,	120,	188,	177,	null                ),
+//		 new TDW_OOG_Control( 6,	264,	391,	272,	 25,	"GATEWAY: U.S. EAST"),
+		 new TDW_OOG_Control( 6,	264,	366,	272,	 35,	"BATTLE.NET"        ),
+		 new TDW_OOG_Control( 6,	264,	433,	272,	 35,	"OTHER MULTIPLAYER" ),
+		 new TDW_OOG_Control( 6,	264,	324,	272,	 35,	"SINGLE PLAYER"     ),
+		 new TDW_OOG_Control( 6,	264,	528,	135,	 25,	"CREDITS"           ),
+		 new TDW_OOG_Control( 6,	402,	528,	135,	 25,	"CINEMATICS"        ),
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"EXIT DIABLO II"    ),
+		 new TDW_OOG_Control( 4,	  0,	599,	200,	 40,	"v 1.10"            )
+		],
+		 new TDW_OOG_Control(6,	264,	568,	272,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_STARTUP_PANEL,
+		"Start-up Panel Screen",
+		[
+		 new TDW_OOG_Control(2,	  0,	599,	800,	600,	null                                     ),
+		 new TDW_OOG_Control(8,	  0,	  0,	  0,	  0,	null                                     ),
+		 new TDW_OOG_Control(2,	400,	120,	181,	170,	null                                     ),
+		 new TDW_OOG_Control(2,	400,	120,	188,	177,	null                                     ),
+		 new TDW_OOG_Control(4,	100,	580,	600,	 80,	"© Copyright 2001 Blizzard Entertainment")
+		],
+		null
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT,
+		"Other Multiplayer Game Type Selection Screen",
+		[
+		 new TDW_OOG_Control( 6,	264,	310,	272,	 35,	"OPEN BATTLE.NET"),
+		 new TDW_OOG_Control( 6,	264,	350,	272,	 35,	"TCP/IP GAME"    ),
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"CANCEL"         )
+		],
+		 new TDW_OOG_Control( 6,	264,	568,	272,	 35,	"CANCEL"         )
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_TCP_IP_JOIN,
+		"TCP/IP Join Game Screen",
+		[
+		 new TDW_OOG_Control( 4,	100,	 76,	600,	 40,	"TCP/IP Options"                      ),
+		 new TDW_OOG_Control( 4,	270,	156,	272,	 40,	"Your IP Address is: "                ),
+		 new TDW_OOG_Control( 6,	265,	206,	272,	 35,	"HOST GAME"                           ),
+		 new TDW_OOG_Control( 6,	265,	264,	272,	 35,	"JOIN GAME"                           ),
+//		 new TDW_OOG_Control( 4,	265,	520,	272,	210,	"Click 'Host Game' to make your"      ),
+//		 new TDW_OOG_Control( 4,	265,	520,	272,	210,	"Click 'Join Game', then enter the IP"),
+		 new TDW_OOG_Control( 6,	 39,	571,	128,	 35,	"CANCEL"                              ),
+		 new TDW_OOG_Control( 4,	300,	250,	200,	 50,	"Enter Host IP Address"               ),
+		 new TDW_OOG_Control( 6,	421,	337,	 96,	 32,	"OK"                                  ),
+		 new TDW_OOG_Control( 6,	281,	337,	 96,	 32,	"CANCEL"                              )
+		],
+		 new TDW_OOG_Control( 6,	281,	337,	 96,	 32,	"CANCEL"                              )
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_TCP_IP_JOIN_CANNOT_CONNECT,
+		"TCP/IP Host or Join Game Cannot Connect Screen",
+		[
+		 new TDW_OOG_Control( 4,	100,	 76,	600,	 40,	"TCP/IP Options"                      ),
+		 new TDW_OOG_Control( 4,	270,	156,	272,	 40,	"Your IP Address is: "                ),
+		 new TDW_OOG_Control( 6,	265,	206,	272,	 35,	"HOST GAME"                           ),
+		 new TDW_OOG_Control( 6,	265,	264,	272,	 35,	"JOIN GAME"                           ),
+//		 new TDW_OOG_Control( 4,	265,	520,	272,	210,	"Click 'Host Game' to make your"      ),
+//		 new TDW_OOG_Control( 4,	265,	520,	272,	210,	"Click 'Join Game', then enter the IP"),
+		 new TDW_OOG_Control( 6,	 39,	571,	128,	 35,	"CANCEL"                              ),
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32,	"OK"                                  ),
+		 new TDW_OOG_Control( 4,	268,	300,	264,	100,	"Cannot Connect to"                   )
+		],
+		 new TDW_OOG_Control( 6,	351,	337,	 96,	 32,	"OK"                                  )
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_TCP_IP_HOST_OR_JOIN,
+		"TCP/IP Host or Join Game Selection Screen",
+		[
+		 new TDW_OOG_Control( 4,	100,	 76,	600,	 40,	"TCP/IP Options"                      ),
+		 new TDW_OOG_Control( 4,	270,	156,	272,	 40,	"Your IP Address is: "                ),
+		 new TDW_OOG_Control( 6,	265,	206,	272,	 35,	"HOST GAME"                           ),
+		 new TDW_OOG_Control( 6,	265,	264,	272,	 35,	"JOIN GAME"                           ),
+//		 new TDW_OOG_Control( 4,	265,	520,	272,	210,	"Click 'Host Game' to make your"      ),
+//		 new TDW_OOG_Control( 4,	265,	520,	272,	210,	"Click 'Join Game', then enter the IP"),
+		 new TDW_OOG_Control( 6,	 39,	571,	128,	 35,	"CANCEL"                              )
+		],
+		 new TDW_OOG_Control( 6,	 39,	571,	128,	 35,	"CANCEL"                              )
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_CHAN_SELECT_CHANNEL,
+		"Closed BattleNet In-Channel Channel Selection Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                             ),
+		 new TDW_OOG_Control( 4,	496,	114,	200,	 22,	"Create/Join"                                     ),
+		 new TDW_OOG_Control( 4,	427,	135,	150,	 12,	"Channel Name"                                    ),
+		 new TDW_OOG_Control( 4,	427,	187,	150,	 12,	"Channels"                                        ),
+		 new TDW_OOG_Control( 6,	533,	469,	120,	 20,	"CREATE"                                          ),
+		 new TDW_OOG_Control( 6,	535,	490,	 80,	 20,	"CHANNEL"                                         ),
+		 new TDW_OOG_Control( 6,	652,	469,	120,	 20,	"JOIN"                                            ),
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20,	"QUIT"                                            ),
+		 new TDW_OOG_Control( 6,	 27,	470,	 80,	 20,	"SEND"                                            ),
+		 new TDW_OOG_Control( 6,	107,	470,	 80,	 20,	"WHISPER"                                         ),
+		 new TDW_OOG_Control( 6,	187,	470,	 80,	 20,	"HELP"                                            ),
+		 new TDW_OOG_Control( 6,	 27,	490,	 72,	 20,	"SQUELCH"                                         ),
+		 new TDW_OOG_Control( 6,	 99,	490,	 96,	 20,	"UNSQUELCH"                                       ),
+		 new TDW_OOG_Control( 6,	195,	490,	 72,	 20,	"EMOTE"                                           ),
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32,	"OK"                                              ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_CHAN_SELECT_CHANNEL,
+		"Open BattleNet In-Channel Channel Selection Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                              ),
+		 new TDW_OOG_Control( 4,	496,	114,	200,	 22,	"Create/Join"                                     ),
+		 new TDW_OOG_Control( 4,	427,	135,	150,	 12,	"Channel Name"                                    ),
+		 new TDW_OOG_Control( 4,	427,	187,	150,	 12,	"Channels"                                        ),
+		 new TDW_OOG_Control( 6,	533,	469,	120,	 20,	"CREATE"                                          ),
+		 new TDW_OOG_Control( 6,	535,	490,	 80,	 20,	"CHANNEL"                                         ),
+		 new TDW_OOG_Control( 6,	652,	469,	120,	 20,	"JOIN"                                            ),
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20,	"QUIT"                                            ),
+		 new TDW_OOG_Control( 6,	 27,	470,	 80,	 20,	"SEND"                                            ),
+		 new TDW_OOG_Control( 6,	107,	470,	 80,	 20,	"WHISPER"                                         ),
+		 new TDW_OOG_Control( 6,	187,	470,	 80,	 20,	"HELP"                                            ),
+		 new TDW_OOG_Control( 6,	 27,	490,	 72,	 20,	"SQUELCH"                                         ),
+		 new TDW_OOG_Control( 6,	 99,	490,	 96,	 20,	"UNSQUELCH"                                       ),
+		 new TDW_OOG_Control( 6,	195,	490,	 72,	 20,	"EMOTE"                                           ),
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32,	"OK"                                              ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_LOBBY,
+		"Closed BattleNet In-Lobby Ladder Selection Screen",
+		[
+		 new TDW_OOG_Control(6,	614,	490,	 80,	 20,	"LADDER"                                          ),
+		 new TDW_OOG_Control(4,	496,	112,	200,	 22,	"STANDARD"                                        ),
+		 new TDW_OOG_Control(6,	463,	238,	272,	 32,	"HARDCORE LADDER"                                 ),
+		 new TDW_OOG_Control(6,	463,	188,	272,	 32,	"STANDARD LADDER"                                 ),
+		 new TDW_OOG_Control(6,	463,	338,	272,	 32,	"EXPANSION HARDCORE LADDER"                       ),
+		 new TDW_OOG_Control(6,	463,	288,	272,	 32,	"EXPANSION LADDER"                                ),
+		 new TDW_OOG_Control(6,	 27,	480,	120,	 20,	"ENTER CHAT"                                      ),
+		 new TDW_OOG_Control(6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control(6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_LADDER_SELECT_CHANNEL,
+		"Closed BattleNet In-Channel Ladder Selection Screen",
+		[
+		 new TDW_OOG_Control(6,	614,	490,	 80,	 20,	"LADDER"                                          ),
+		 new TDW_OOG_Control(4,	496,	112,	200,	 22,	"STANDARD"                                        ),
+		 new TDW_OOG_Control(6,	463,	238,	272,	 32,	"HARDCORE LADDER"                                 ),
+		 new TDW_OOG_Control(6,	463,	188,	272,	 32,	"STANDARD LADDER"                                 ),
+		 new TDW_OOG_Control(6,	463,	338,	272,	 32,	"EXPANSION HARDCORE LADDER"                       ),
+		 new TDW_OOG_Control(6,	463,	288,	272,	 32,	"EXPANSION LADDER"                                ),
+		 new TDW_OOG_Control(6,	433,	433,	 96,	 32,	"CANCEL"                                          )
+		],
+		 new TDW_OOG_Control(6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_MINE,
+		"Closed BattleNet Player Profile (Mine)",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                            ),
+		 new TDW_OOG_Control( 4,	400,	112,	400,	 22,	"PLAYER PROFILE"                                 ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                         ),
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32,	"OK"                                             ),
+//		 new TDW_OOG_Control( 6,	552,	433,	 96,	 32,	"LADDER"                                         ),
+		 new TDW_OOG_Control( 4,	425,	129,	217,	 12,	"Name"                                           ),
+		 new TDW_OOG_Control( 4,	700,	129,	217,	 12,	"Gender"                                         ),
+		 new TDW_OOG_Control( 4,	425,	180,	217,	 12,	"Location"                                       ),
+		 new TDW_OOG_Control( 4,	425,	230,	217,	 12,	"Description"                                    )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_MINE,
+		"Open BattleNet Player Profile (Mine)",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                             ),
+		 new TDW_OOG_Control( 4,	400,	112,	400,	 22,	"PLAYER PROFILE"                                 ),
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32,	"CANCEL"                                         ),
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32,	"OK"                                             ),
+		 new TDW_OOG_Control( 4,	425,	129,	217,	 12,	"Name"                                           ),
+		 new TDW_OOG_Control( 4,	700,	129,	217,	 12,	"Gender"                                         ),
+		 new TDW_OOG_Control( 4,	425,	180,	217,	 12,	"Location"                                       ),
+		 new TDW_OOG_Control( 4,	425,	230,	217,	 12,	"Description"                                    )
+		],
+		 new TDW_OOG_Control( 6,	433,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_PLAYER_PROFILE_OTHER,
+		"Closed BattleNet Player Profile (Other)",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                            ),
+		 new TDW_OOG_Control( 4,	400,	112,	400,	 22,	"PLAYER PROFILE"                                 ),
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32,	"OK"                                             ),
+//		 new TDW_OOG_Control( 6,	552,	433,	 96,	 32,	"LADDER"                                         ),
+		 new TDW_OOG_Control( 4,	425,	129,	217,	 12,	"Name"                                           ),
+		 new TDW_OOG_Control( 4,	700,	129,	217,	 12,	"Gender"                                         ),
+		 new TDW_OOG_Control( 4,	425,	180,	217,	 12,	"Location"                                       ),
+		 new TDW_OOG_Control( 4,	425,	230,	217,	 12,	"Description"                                    )
+		],
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_PLAYER_PROFILE_OTHER,
+		"Open BattleNet Player Profile (Other)",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                             ),
+		 new TDW_OOG_Control( 4,	400,	112,	400,	 22,	"PLAYER PROFILE"                                 ),
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32,	"OK"                                             ),
+		 new TDW_OOG_Control( 4,	425,	129,	217,	 12,	"Name"                                           ),
+		 new TDW_OOG_Control( 4,	700,	129,	217,	 12,	"Gender"                                         ),
+		 new TDW_OOG_Control( 4,	425,	180,	217,	 12,	"Location"                                       ),
+		 new TDW_OOG_Control( 4,	425,	230,	217,	 12,	"Description"                                    )
+		],
+		 new TDW_OOG_Control( 6,	671,	433,	 96,	 32)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CREDITS,
+		"Credits Screen",
+		[
+		 new TDW_OOG_Control(2,	  0,	599,	800,	600,	null  ),
+		 new TDW_OOG_Control(6,	 33,	578,	128,	 35,	"EXIT"),
+		 new TDW_OOG_Control(4,	400,	615,	250,	610,	""    ),
+		 new TDW_OOG_Control(4,	410,	615,	250,	610,	""    ),
+		 new TDW_OOG_Control(4,	280,	615,	250,	610,	""    ),
+		 new TDW_OOG_Control(8,	  0,	  0,	  0,	  0,	null  )
+		],
+		 new TDW_OOG_Control(6,	 33,	578,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CINEMATICS,
+		"Cinematics Selection Screen",
+		[
+		 new TDW_OOG_Control(2,	  0,	599,	800,	600,	null                 ),
+		 new TDW_OOG_Control(2,	237,	505,	326,	427,	null                 ),
+		 new TDW_OOG_Control(4,	262,	153,	272,	 35,	"SELECT CINEMATICS"  ),
+		 new TDW_OOG_Control(6,	262,	181,	272,	 35,	"THE SISTER'S LAMENT"),
+		 new TDW_OOG_Control(6,	262,	224,	272,	 35,	"DESERT JOURNEY"     ),
+		 new TDW_OOG_Control(6,	262,	268,	272,	 35,	"MEPHISTO'S JUNGLE"  ),
+		 new TDW_OOG_Control(6,	262,	310,	272,	 35,	"ENTER HELL"         ),
+		 new TDW_OOG_Control(6,	262,	353,	272,	 35,	"TERROR'S END"       ),
+		 new TDW_OOG_Control(6,	262,	396,	272,	 35,	"SEARCH FOR BAAL"    ),
+		 new TDW_OOG_Control(6,	262,	439,	272,	 35,	"DESTRUCTION'S END"  ),
+		 new TDW_OOG_Control(6,	334,	488,	128,	 35,	"CANCEL"             )
+		],
+		 new TDW_OOG_Control(6,	334,	488,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_LOBBY,
+		"Closed BattleNet Lobby Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false         ),
+		 new TDW_OOG_Control( 6,	533,	469,	120,	 20,	"CREATE"                      ),
+		 new TDW_OOG_Control( 6,	535,	490,	 80,	 20,	"CHANNEL"                     ),
+		 new TDW_OOG_Control( 6,	652,	469,	120,	 20,	"JOIN"                        ),
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20,	"QUIT"                        ),
+		 new TDW_OOG_Control( 6,	 27,	480,	120,	 20,	"ENTER CHAT"                  ),
+		 new TDW_OOG_Control( 6,	146,	480,	120,	 20,	"HELP"                        )
+		],
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_LOBBY,
+		"Open BattleNet Lobby Screen",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true          ),
+		 new TDW_OOG_Control( 6,	533,	469,	120,	 20,	"CREATE"                      ),
+		 new TDW_OOG_Control( 6,	535,	490,	 80,	 20,	"CHANNEL"                     ),
+		 new TDW_OOG_Control( 6,	652,	469,	120,	 20,	"JOIN"                        ),
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20,	"QUIT"                        ),
+		 new TDW_OOG_Control( 6,	 27,	480,	120,	 20,	"ENTER CHAT"                  ),
+		 new TDW_OOG_Control( 6,	146,	480,	120,	 20,	"HELP"                        )
+		],
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CLOSED_CHANNEL,
+		"Closed BattleNet Channel",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, false                            ),
+		 new TDW_OOG_Control( 6,	533,	469,	120,	 20,	"CREATE"                                         ),
+		 new TDW_OOG_Control( 6,	535,	490,	 80,	 20,	"CHANNEL"                                        ),
+		 new TDW_OOG_Control( 6,	652,	469,	120,	 20,	"JOIN"                                           ),
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20,	"QUIT"                                           ),
+		 new TDW_OOG_Control( 6,	 27,	470,	 80,	 20,	"SEND"                                           ),
+		 new TDW_OOG_Control( 6,	107,	470,	 80,	 20,	"WHISPER"                                        ),
+		 new TDW_OOG_Control( 6,	187,	470,	 80,	 20,	"HELP"                                           ),
+		 new TDW_OOG_Control( 6,	 27,	490,	 72,	 20,	"SQUELCH"                                        ),
+		 new TDW_OOG_Control( 6,	 99,	490,	 96,	 20,	"UNSQUELCH"                                      ),
+		 new TDW_OOG_Control( 6,	195,	490,	 72,	 20,	"EMOTE"                                          )
+		],
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_OPEN_CHANNEL,
+		"Open BattleNet Channel",
+		[
+		 new TDW_OOG_Control( 6,	614,	490,	 80,	 20,	"LADDER", null, true                             ),
+		 new TDW_OOG_Control( 6,	533,	469,	120,	 20,	"CREATE"                                         ),
+		 new TDW_OOG_Control( 6,	535,	490,	 80,	 20,	"CHANNEL"                                        ),
+		 new TDW_OOG_Control( 6,	652,	469,	120,	 20,	"JOIN"                                           ),
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20,	"QUIT"                                           ),
+		 new TDW_OOG_Control( 6,	 27,	470,	 80,	 20,	"SEND"                                           ),
+		 new TDW_OOG_Control( 6,	107,	470,	 80,	 20,	"WHISPER"                                        ),
+		 new TDW_OOG_Control( 6,	187,	470,	 80,	 20,	"HELP"                                           ),
+		 new TDW_OOG_Control( 6,	 27,	490,	 72,	 20,	"SQUELCH"                                        ),
+		 new TDW_OOG_Control( 6,	 99,	490,	 96,	 20,	"UNSQUELCH"                                      ),
+		 new TDW_OOG_Control( 6,	195,	490,	 72,	 20,	"EMOTE"                                          )
+		],
+		 new TDW_OOG_Control( 6,	693,	490,	 80,	 20)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_FIRST_110_LOGIN_CHANGE_EMAIL,
+		"First 1.10 Login Change E-Mail Address Screen",
+		[
+		 new TDW_OOG_Control( 4,	200,	350,	400,	100,	"Enter a valid email address."                 ),
+		 new TDW_OOG_Control( 4,	200,	515,	400,	100,	"Entering your email address will enable extra"),
+		 new TDW_OOG_Control( 4,	252,	340,	300,	 32,	"Email Address:"                               ),
+		 new TDW_OOG_Control( 4,	252,	394,	300,	 32,	"Verify Email Address:"                        ),
+		 new TDW_OOG_Control( 6,	265,	527,	272,	 35,	"REGISTER"                                     ),
+		 new TDW_OOG_Control( 6,	265,	572,	272,	 35,	"DON'T REGISTER"                               ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"CANCEL"                                       )
+		],
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_ACCT_SETTINGS_SELECT,
+		"Account Settings Selection Screen",
+		[
+		 new TDW_OOG_Control( 4,	  0,	285,	800,	 35,	"Account Settings"                                                              ),
+		 new TDW_OOG_Control( 4,	  0,	300,	800,	 16,	"If you know your password and want to change it, click here."                  ),
+		 new TDW_OOG_Control( 4,	  0,	385,	800,	 16,	"If you have forgotten your password or your password doesn't work, click here."),
+		 new TDW_OOG_Control( 4,	  0,	470,	800,	 16,	"If you need to change your registered email address, click here."              ),
+		 new TDW_OOG_Control( 6,	264,	335,	272,	 35,	"CHANGE PASSWORD"                                                               ),
+		 new TDW_OOG_Control( 6,	264,	420,	272,	 35,	"GET NEW PASSWORD"                                                              ),
+		 new TDW_OOG_Control( 6,	264,	505,	272,	 35,	"CHANGE EMAIL"                                                                  ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"CANCEL"                                                                        )
+		],
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_PASSWORD,
+		"Account Settings Change Password Screen",
+		[
+		 new TDW_OOG_Control( 4,	321,	340,	300,	 32,	"Account Name"       ),
+		 new TDW_OOG_Control( 4,	321,	394,	300,	 32,	"Current Password"   ),
+		 new TDW_OOG_Control( 4,	321,	448,	300,	 32,	"New Password"       ),
+		 new TDW_OOG_Control( 4,	321,	502,	300,	 32,	"Verify New Password"),
+		 new TDW_OOG_Control( 4,	  0,	310,	800,	 50,	"Change Password"    ),
+		 new TDW_OOG_Control( 6,	627,	572,	128,	 35,	"OK"                 ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"               )
+		],
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_ACCT_SETTINGS_GET_PASSWORD,
+		"Account Settings Get New Password Screen",
+		[
+		 new TDW_OOG_Control( 4,	  0,	310,	800,	 50,	"Get New Password"                           ),
+		 new TDW_OOG_Control( 4,	158,	500,	480,	220,	"If you have forgotten your password and you"),
+		 new TDW_OOG_Control( 4,	250,	420,	300,	 32,	"Account Name"                               ),
+		 new TDW_OOG_Control( 4,	250,	470,	300,	 32,	"Email Address:"                             ),
+		 new TDW_OOG_Control( 6,	627,	572,	128,	 35,	"SEND"                                       ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"CANCEL"                                     )
+		],
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_ACCT_SETTINGS_CHANGE_EMAIL,
+		"Account Settings Change E-Mail Address Screen",
+		[
+		 new TDW_OOG_Control( 4,	  0,	310,	800,	 50,	"Change Email"                                            ),
+		 new TDW_OOG_Control( 4,	158,	500,	480,	220,	"If you registered an email address for this account then"),
+		 new TDW_OOG_Control( 4,	250,	395,	300,	 32,	"Account Name"                                            ),
+		 new TDW_OOG_Control( 4,	250,	445,	300,	 32,	"Old Email Address:"                                      ),
+		 new TDW_OOG_Control( 4,	250,	495,	300,	 32,	"New Email Address:"                                      ),
+		 new TDW_OOG_Control( 4,	250,	545,	300,	 32,	"Verify New Email Address:"                               ),
+		 new TDW_OOG_Control( 6,	627,	572,	128,	 35,	"SEND"                                                    ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"CANCEL"                                                  )
+		],
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_TOS,
+		"Create New Account BattleNet TOS Screen",
+		[
+		 new TDW_OOG_Control( 2,	400,	120,	181,	170,	null                         ),
+		 new TDW_OOG_Control( 2,	400,	120,	188,	177,	null                         ),
+		 new TDW_OOG_Control( 2,	  0,	599,	800,	600,	null                         ),
+		 new TDW_OOG_Control( 2,	103,	526,	593,	451,	null                         ),
+		 new TDW_OOG_Control( 5,	681,	467,	 10,	323,	null                         ),
+		 new TDW_OOG_Control( 4,	120,	467,	560,	318,	"BATTLE.NET(R) TERMS OF USE "),
+		 new TDW_OOG_Control( 6,	525,	513,	128,	 35,	"AGREE"                      ),
+		 new TDW_OOG_Control( 6,	133,	513,	128,	 35,	"DISAGREE"                   ),
+		 new TDW_OOG_Control( 4,	103,	173,	570,	 69,	"Terms of Use"               ),
+		 new TDW_OOG_Control( 6,	900,	900,	128,	 35,	""                           ),
+		 new TDW_OOG_Control( 6,	900,	900,	128,	 35,	""                           )
+		],
+		 new TDW_OOG_Control( 6,	133,	513,	128,	 35)
+	),
+	new TDW_OOG_ControlScreen(
+		TDW_OOG_SCREEN_ID_CREATE_NEW_ACCT_PRIMARY_INFO,
+		"Create New Account Primary Info Screen",
+		[
+		 new TDW_OOG_Control( 4,	321,	340,	300,	 32,	"Account Name"                            ),
+		 new TDW_OOG_Control( 4,	321,	394,	300,	 32,	"Password"                                ),
+		 new TDW_OOG_Control( 4,	321,	448,	300,	 32,	"Verify Password"                         ),
+		 new TDW_OOG_Control( 4,	200,	350,	400,	100,	"Enter the Name and Password for your new"),
+		 new TDW_OOG_Control( 6,	627,	572,	128,	 35,	"OK"                                      ),
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35,	"EXIT"                                    )
+		],
+		 new TDW_OOG_Control( 6,	 33,	572,	128,	 35)
+	)
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Creates an array of linkages between TDW_OOG_ControlScreen object screen ids
+//	and instances of those screens in the array TDW_OOG_ScreenList.
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_OOG_ScreenListLinks = new Array();
+do {
+	for (var count_1 = 0; count_1 < TDW_OOG_ScreenList.length; count_1++)
+		TDW_OOG_ScreenListLinks[TDW_OOG_ScreenList[count_1].screen_id] =
+			TDW_OOG_ScreenList[count_1];
+} while (false);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_FindCurrentScreen(wait_ms)
+{
+	wait_ms = (TDW_BASIC_GEN_TypeOfNumber(wait_ms) && (wait_ms > 0)) ?
+		wait_ms : 1000;
+
+	var end_time = (new Date()).valueOf() + wait_ms;
+
+	TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_FindCurrentScreen(): ENTRY");
+
+	var this_screen = TDW_OOG_FindCurrentScreenInternal(wait_ms);
+
+	if (this_screen) {
+//TDW_BASIC_LOG_GetALog().logMinutiae(
+//	TDW_OOG_GetControlsDump(TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE));
+		TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_FindCurrentScreen(): " +
+			"Determined the current screen as screen id " +
+			this_screen.screen_id + " (" + this_screen.screen_name + ").");
+		return(this_screen);
+	}
+
+	TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_FindCurrentScreen(): " +
+		"Failed to determine the current screen.");
+	TDW_BASIC_LOG_GetALog().logMinutiae(
+		TDW_OOG_GetControlsDump(TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE));
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_FindCurrentScreenInternal(wait_ms)
+{
+	wait_ms = (TDW_BASIC_GEN_TypeOfNumber(wait_ms) && (wait_ms > 0)) ?
+		wait_ms : 1000;
+
+	var end_time = (new Date()).valueOf() + wait_ms;
+
+	do {
+		for (var count_1 = 0; count_1 < TDW_OOG_ScreenList.length; count_1++) {
+			if (TDW_OOG_ScreenList[count_1].isActive())
+				return(TDW_OOG_ScreenList[count_1]);
+		}
+		if (end_time <= (new Date()))
+			break;
+		delay(250);
+	} while (end_time > (new Date()));
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_WaitForScreen(screen_id, added_wait_ms)
+{
+	return(TDW_OOG_WaitForScreenList([screen_id], added_wait_ms));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_WaitForScreenList(screen_id_list, added_wait_ms)
+{
+/*
+	var end_time = (new Date()).valueOf() + 500 + added_wait_ms +
+								(screen_id_list.length * 100);
+
+	TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_WaitForScreenList([" +
+		screen_id_list + "], " + added_wait_ms + "): ENTRY");
+
+	while (true) {
+		var this_screen = TDW_OOG_FindCurrentScreen();
+		if (this_screen) {
+			for (var count_1 = 0; count_1 < screen_id_list.length; count_1++) {
+				if (this_screen.screen_id == screen_id_list[count_1]) {
+					TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_WaitForScreenList([" +
+						screen_id_list + "], " + added_wait_ms + "): Located " +
+						"screen id " + this_screen.screen_id + " (" +
+						this_screen.screen_name + ").");
+					return(this_screen);
+				}
+			}
+		}
+		if ((new Date()) >= end_time)
+			break;
+		delay(50);
+	}
+
+	TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_WaitForScreenList([" +
+		screen_id_list + "], " + added_wait_ms + "): No specified screen was " +
+		"located.");
+
+	return(null);
+*/
+	var log_obj  = TDW_BASIC_LOG_GetALog();
+	var end_time = (new Date()).valueOf() + 500 + added_wait_ms +
+							(screen_id_list.length * 100);
+
+	log_obj.logDetail("TDW_OOG_WaitForScreenList([" + screen_id_list + "], " +
+		added_wait_ms + "): ENTRY");
+
+	while (true) {
+		for (var count_1 = 0; count_1 < screen_id_list.length; count_1++) {
+			var this_screen = TDW_OOG_ScreenListLinks[screen_id_list[count_1]];
+			if (this_screen && this_screen.isActive()) {
+				log_obj.logDetail("TDW_OOG_WaitForScreenList([" + screen_id_list +
+					"], " + added_wait_ms + "): EXIT  : Located " +
+					"specified screen id " + this_screen.screen_id + " (" +
+					this_screen.screen_name + ").");
+				return(this_screen);
+			}
+		}
+		if ((new Date()) >= end_time)
+			break;
+		delay(250);
+	}
+
+	if (TDW_BASIC_LOG_GetLastLog() &&
+		(log_obj.getLevelFile() <= TDW_BASIC_LOG_Level_DETAIL)) {
+		var this_screen = TDW_OOG_FindCurrentScreenInternal(1);
+		log_obj.logDetail("TDW_OOG_WaitForScreenList([" + screen_id_list +
+			"], " + added_wait_ms + "): EXIT  : No specified " +
+			"screen was located. Current screen is " +
+			((!this_screen) ? "unknown." : ("screen id " + this_screen.screen_id +
+			" (" + this_screen.screen_name + ").")) );
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_WaitForNotScreen(screen_id, added_wait_ms)
+{
+	return(TDW_OOG_WaitForNotScreenList([screen_id], added_wait_ms));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_WaitForNotScreenList(screen_id_list, added_wait_ms)
+{
+	var log_obj  = TDW_BASIC_LOG_GetALog();
+	var end_time = (new Date()).valueOf() + 500 + added_wait_ms +
+							(screen_id_list.length * 100);
+
+	log_obj.logDetail("TDW_OOG_WaitForNotScreenList([" + screen_id_list + "], " +
+		added_wait_ms + "): ENTRY");
+
+	while (true) {
+		var is_listed_screen = false;
+		for (var count_1 = 0; count_1 < screen_id_list.length; count_1++) {
+			var this_screen = TDW_OOG_ScreenListLinks[screen_id_list[count_1]];
+			if (this_screen && this_screen.isActive()) {
+				is_listed_screen = true;
+				break;
+			}
+		}
+		if (!is_listed_screen) {
+			if (this_screen)
+				log_obj.logDetail("TDW_OOG_WaitForNotScreenList([" +
+					screen_id_list + "], " + added_wait_ms + "): EXIT  : Located " +
+					"unspecified screen id " + this_screen.screen_id + " (" +
+					this_screen.screen_name + ").");
+			else {
+				log_obj.logDetail("TDW_OOG_WaitForNotScreenList([" +
+					screen_id_list + "], " + added_wait_ms + "): EXIT  : Located " +
+					"unspecified screen id (screen is unknown, dump follows):");
+				var ctrl_list =
+					TDW_OOG_GetControlsDump(TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE);
+				for (var count_2 = 0; count_2 < ctrl_list.length; count_2++)
+					log_obj.logDetail(ctrl_list[count_2]);
+			}
+			return(true);
+		}
+		if ((new Date()) >= end_time)
+			break;
+		delay(250);
+	}
+
+	if (TDW_BASIC_LOG_GetLastLog() &&
+		(log_obj.getLevelFile() <= TDW_BASIC_LOG_Level_DETAIL)) {
+		var this_screen = TDW_OOG_FindCurrentScreenInternal(1);
+		log_obj.logDetail("TDW_OOG_WaitForNotScreenList([" +
+			screen_id_list + "], " + added_wait_ms + "): EXIT  : No unspecified " +
+			"screen was located. Current screen is " +
+			((!this_screen) ? "unknown." : ("screen id " + this_screen.screen_id +
+			" (" + this_screen.screen_name + ").")) );
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_WaitForScreenType(screen_type, added_wait_ms)
+{
+	return(TDW_OOG_WaitForScreenTypeList([screen_type], added_wait_ms));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_WaitForScreenTypeList(screen_type_list, added_wait_ms)
+{
+	var end_time = (new Date()).valueOf() + 500 + added_wait_ms +
+							(screen_type_list.length * 100);
+
+	TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_WaitForScreenTypeList([" +
+		screen_type_list + "], " + added_wait_ms + "): ENTRY");
+
+	var this_screen = null;
+
+	while (true) {
+		this_screen = TDW_OOG_FindCurrentScreenInternal(1);
+		if (this_screen) {
+			for (var count_1 = 0; count_1 < screen_type_list.length; count_1++) {
+				if (this_screen &&
+					this_screen.isScreenType(screen_type_list[count_1])) {
+					TDW_BASIC_LOG_GetALog().
+						logDetail("TDW_OOG_WaitForScreenTypeList([" +
+						screen_type_list + "], " + added_wait_ms +
+						"): EXIT  : Located a screen of a specified type: screen id "+
+						this_screen.screen_id + " (" + this_screen.screen_name + ").");
+					return(this_screen);
+				}
+			}
+		}
+		if ((new Date()) >= end_time)
+			break;
+		delay(250);
+	}
+
+	TDW_BASIC_LOG_GetALog().logDetail("TDW_OOG_WaitForScreenTypeList([" +
+		screen_type_list + "], " + added_wait_ms + "): EXIT  : No screen of " +
+		"a specified type was located. Current screen is " +
+		((!this_screen) ? "unknown." : ("screen id " + this_screen.screen_id +
+		" (" + this_screen.screen_name + ").")) );
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_FindControlByText(ctrl_text)
+{
+	var this_control = getControl();
+
+	if (this_control) {
+		do {
+			if (this_control.text == ctrl_text)
+				return(this_control);
+		} while (this_control && this_control.getNext());
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_FindControlByTextI(ctrl_text)
+{
+	var this_control = getControl();
+
+	if (this_control) {
+		ctrl_text = ctrl_text.toLowerCase();
+		do {
+			if (this_control.text.toLowerCase() == ctrl_text)
+				return(this_control);
+		} while (this_control && this_control.getNext());
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_GetControlList()
+{
+	var out_list = new Array();
+	var ctrl     = getControl();
+
+	if (ctrl) {
+		do {
+			out_list.push(new TDW_OOG_Control(ctrl.type, ctrl.x, ctrl.y,
+				ctrl.xsize, ctrl.ysize, ctrl.text, ctrl.visible, ctrl.disabled,
+				ctrl.getText()));
+		} while(ctrl.getNext());
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_GetControlListAsArrays()
+{
+	var ctrl_list = TDW_OOG_GetControlList();
+	var out_list  = new Array(ctrl_list.length);
+
+	for (var count_1 = 0; count_1 < ctrl_list.length; count_1++)
+		out_list[count_1] = [ctrl_list[count_1].text, ctrl_list[count_1].type,
+			ctrl_list[count_1].x_pos, ctrl_list[count_1].y_pos,
+			ctrl_list[count_1].x_size, ctrl_list[count_1].y_size,
+			ctrl_list[count_1].visible, ctrl_list[count_1].disabled,
+			ctrl_list[count_1].ext_text];
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_LoadCharacterInfo()
+{
+	var log_obj = TDW_BASIC_LOG_GetALog();
+
+	log_obj.logDetail("TDW_OOG_LoadCharacterInfo(): ENTRY");
+
+	var this_screen = TDW_OOG_FindCurrentScreen(1);
+
+	if ((!this_screen) || (!this_screen.isCharSelect())) {
+		log_obj.logError("TDW_OOG_LoadCharacterInfo(): Not on a character " +
+			"selection screen.");
+		return(false);
+	}
+
+	log_obj.logDetail("TDW_OOG_LoadCharacterInfo(): Looking for character " +
+		"selection slots.");
+
+	TDW_OOG_WaitForScreenList([TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT,
+		TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT], 5000);
+	var this_spec = new TDW_OOG_Control( 4,	 85,	 78,	466,	 42);
+	var this_ctrl = null;
+	var end_time  = (new Date()).valueOf() + 5000;
+//var old_log_level = log_obj.setLevelFile(TDW_BASIC_LOG_Level_MINUTIAE);
+	while (end_time > (new Date())) {
+		if (((this_ctrl = this_spec.getControl()) != null) &&
+			(this_ctrl.text != null))
+			break;
+		delay(50);
+	}
+//log_obj.setLevelFile(old_log_level)
+
+	TDW_OOG_CharacterList = new Array();
+	TDW_OOG_CharacterHash = new Array();
+
+/*
+	for (var count_1 = 0; count_1 < 8; count_1++) {
+		var tmp_ctrl;
+		for (var count_2 = 0; count_2 < 6; count_2++) {
+			tmp_ctrl = TDW_OOG_CharPositions[count_1].getControl();
+			if (tmp_ctrl && tmp_ctrl.getText())
+				break;
+			log_obj.logDetail("TDW_OOG_LoadCharacterInfo(): Waiting for " +
+				"character position control index " + count_1 + " [" +
+				TDW_OOG_CharPositions[count_1] + "]");
+			delay(500);
+		}
+		if (((!tmp_ctrl) || (!tmp_ctrl.getText())) && count_1) {
+			delay((8 - count_1) * 250);
+			break;
+		}
+	}
+*/
+
+	log_obj.logDetail("TDW_OOG_LoadCharacterInfo(): Attempting to assemble " +
+		"character selection slot data.");
+
+	for (var count_1 = 0; count_1 < 8; count_1++) {
+		var tmp_ctrl = TDW_OOG_CharPositions[count_1].getControl();
+		if (tmp_ctrl) {
+			var tmp_text = tmp_ctrl.getText();
+			if (tmp_text && (tmp_text.length >= 4)) {
+				for (var count_2 = 0; count_2 < tmp_text.length; count_2++) {
+					if (TDW_BASIC_GEN_TypeOfArray(tmp_text[count_2]) &&
+						(tmp_text[count_2].length == 1))
+						tmp_text[count_2] = tmp_text[count_2][0];
+					tmp_text[count_2] = TDW_BASIC_FORMAT_Trim(tmp_text[count_2]);
+				}
+				var char_info = tmp_text[2].match(/^Level\s+(\d+)\s+(.+)$/);
+				if ((!char_info) || (char_info.length != 3))
+					log_obj.logWarning("Failed to parse character selection slot " +
+						"level and character class info from \'" + tmp_text[2] +
+						"\'.");
+				else {
+					var char_flags   = TDW_OOG_CHAR_FLAG_NONE;
+					var expiry_days  = 90;
+					for (var count_2 = 3; count_2 < tmp_text.length; count_2++) {
+						if (tmp_text[count_2] == "EXPANSION CHARACTER")
+							char_flags |= TDW_OOG_CHAR_FLAG_EXPANSION;
+						else if (tmp_text[count_2] == "LADDER CHARACTER")
+							char_flags |= TDW_OOG_CHAR_FLAG_LADDER;
+						else {
+							var expiry_info = tmp_text[count_2].
+								match(/^Expires\s+in\s+(\d+)\s+days$/);
+							if (expiry_info && (expiry_info.length == 2)) {
+								expiry_days = parseInt(expiry_info[1], 10);
+								char_flags |= TDW_OOG_CHAR_FLAG_WILL_EXPIRE;
+							}
+							else if (tmp_text[count_2] == "Character Expired")
+								char_flags |= TDW_OOG_CHAR_FLAG_HAS_EXPIRED;
+						}
+					}
+					TDW_OOG_CharacterList.push(
+						new TDW_OOG_Character(TDW_OOG_CharacterList.length,
+						tmp_text[1], parseInt(char_info[1], 10), char_info[2],
+						tmp_text[0], char_flags, expiry_days,
+						TDW_OOG_CharPositions[count_1]));
+					TDW_OOG_CharacterHash[tmp_text[1]] =
+						TDW_OOG_CharacterList[TDW_OOG_CharacterList.length - 1];
+					log_obj.logDetail("TDW_OOG_LoadCharacterInfo(): " +
+						"Found character number " + (count_1 + 1) +
+						" on the character selection screen [" +
+						TDW_OOG_CharacterList[TDW_OOG_CharacterList.length - 1] +
+						"].");
+				}
+			}
+		}
+	}
+
+	log_obj.logInfo("Found a total of " + TDW_OOG_CharacterList.length +
+		" characters on the character selection screen.");
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_SelectCharacterByName(char_name)
+{
+	var log_obj = TDW_BASIC_LOG_GetALog();
+
+	log_obj.logDetail("TDW_OOG_SelectCharacterByName(" + char_name + "): " +
+		"ENTRY");
+
+	if (!TDW_OOG_LoadCharacterInfo()) {
+		log_obj.logError("TDW_OOG_SelectCharacterByName(" + char_name + "): " +
+			"Unable to determine available characters for this account.");
+		return(false);
+	}
+
+	if (!(char_name in TDW_OOG_CharacterHash)) {
+		log_obj.logError("TDW_OOG_SelectCharacterByName(" + char_name + "): " +
+			"Failed to locate the character named '" + char_name +
+			"' on the character selection screen.");
+		return(false);
+	}
+
+	var char_index = TDW_OOG_CharacterHash[char_name].index;
+
+	log_obj.logDetail("TDW_OOG_SelectCharacterByName(" + char_name + "): " +
+		"Located character '" + char_name + "' on the character selection " +
+		"screen at character index " + char_index + ".");
+
+	return(TDW_OOG_SelectCharacterByIndexInternal(char_index));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_SelectCharacterByIndex(char_index)
+{
+	var log_obj = TDW_BASIC_LOG_GetALog();
+
+	log_obj.logDetail("TDW_OOG_SelectCharacterByIndex(" + char_index + "): " +
+		"ENTRY");
+
+	if (!TDW_OOG_LoadCharacterInfo()) {
+		log_obj.logError("TDW_OOG_SelectCharacterByIndex(" + char_index + "): " +
+			"Unable to determine available characters for this account.");
+		return(false);
+	}
+
+	return(TDW_OOG_SelectCharacterByIndexInternal(char_index));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_SelectCharacterByIndexInternal(char_index)
+{
+	var log_obj = TDW_BASIC_LOG_GetALog();
+
+	log_obj.logDetail("TDW_OOG_SelectCharacterByIndexInternal(" +
+		char_index + "): ENTRY");
+
+	if (!TDW_OOG_CharacterList.length) {
+		log_obj.logError("TDW_OOG_SelectCharacterByIndexInternal(" +
+			char_index + "): There are no characters on the character selection " +
+			"screen.");
+		return(false);
+	}
+
+	if ((char_index < 0) || (char_index >= TDW_OOG_CharacterList.length)) {
+		log_obj.logError("TDW_OOG_SelectCharacterByIndexInternal(" +
+			char_index + "): Invalid character index specified --- the valid " +
+			"range is 0 through " + (TDW_OOG_CharacterList.length - 1) +
+			", inclusive.");
+		return(false);
+	}
+
+	if (TDW_OOG_CharacterList[char_index].char_flags &
+		TDW_OOG_CHAR_FLAG_HAS_EXPIRED) {
+		log_obj.logError("The character selection slot " + char_index +
+			" for character '" + TDW_OOG_CharacterList[char_index].name +
+			"' can not be selected because the character has expired.");
+		return(false);
+	}
+
+/*
+	// //////////////////////////////////////////////////////////////////////
+	// Need to confirm that the character selection screen is fully updated on
+	//	the client. So we:
+	// 	1) Click the button associated with the first character.
+	//		2) Ensure that the header panel is updated for that character.
+	if (!TDW_OOG_CharacterList[0].control.clickControl(null, true)) {
+		log_obj.logMinutiae("TDW_OOG_SelectCharacterByIndexInternal(" +
+			char_index + "): Attempt to click the character selection slot for " +
+			"the first character '" + TDW_OOG_CharacterList[0].name + "' failed.");
+		return(false);
+	}
+	log_obj.logMinutiae("TDW_OOG_SelectCharacterByIndexInternal(" +
+		char_index + "): Clicked the character selection slot for the first " +
+		"character '" + TDW_OOG_CharacterList[0].name + "'.");
+	var this_spec = new TDW_OOG_Control( 4,	 85,	 78,	466,	 42,
+		TDW_OOG_CharacterList[0].name, false, false);
+	var this_ctrl = null;
+	var end_time  = (new Date()).valueOf() + 5000;
+	while (((this_ctrl = this_spec.getControl()) == null) &&
+		(end_time > (new Date())))
+		delay(50);
+	if (!this_ctrl) {
+		log_obj.logError("Failed to locate the first character slot selection " +
+			"confirmation control ([" + this_spec + "]).");
+//		var ctrl_list =
+//			TDW_OOG_GetControlsDump(TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE);
+//		while (ctrl_list.length)
+//			log_obj.logMinutiae(ctrl_list.shift());
+//		log_obj.logMinutiae("***** STOPPING");
+//		stop();
+		return(false);
+	}
+	// //////////////////////////////////////////////////////////////////////
+*/
+
+	TDW_OOG_WaitForScreenList([TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT,
+		TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT], 5000);
+	var this_spec = new TDW_OOG_Control( 4,	 85,	 78,	466,	 42);
+	var this_ctrl = null;
+	var end_time  = (new Date()).valueOf() + 5000;
+	while (end_time > (new Date())) {
+		if (((this_ctrl = this_spec.getControl()) != null) &&
+			(this_ctrl.text != null))
+			break;
+		delay(50);
+	}
+
+	// //////////////////////////////////////////////////////////////////////
+	// Click the button associated with the desired character...
+	if (!TDW_OOG_CharacterList[char_index].control.clickControl(null, true)) {
+		log_obj.logError("TDW_OOG_SelectCharacterByIndexInternal(" +
+			char_index + "): Attempt to click the character selection slot for " +
+			"character '" + TDW_OOG_CharacterList[char_index].name + "' failed.");
+		return(false);
+	}
+	log_obj.logDetail("TDW_OOG_SelectCharacterByIndexInternal(" +
+		char_index + "): Clicked the character selection slot for character '" +
+		TDW_OOG_CharacterList[char_index].name + "'.");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Need to confirm that the client is updated with the desired character
+	//	selection...
+/*
+AKAC_PA          4    85    78    466     42 false   false     AKAC_PA                                                                       
+AKAC_PABHc       4    85    78    466     42 false   false     AKAC_PABHc                                                                    
+AKAC_PALad       4    85    78    466     42 false   false     AKAC_PALad                                                                    
+AKAC_PALadA      4    85    78    466     42 false   false     AKAC_PALadA                                                                   
+*/
+	var this_spec = new TDW_OOG_Control( 4,	 85,	 78,	466,	 42,
+		TDW_OOG_CharacterList[char_index].name, false);
+//log_obj.logInfo("########## DESIRED CONTROL [" + this_spec + "] ##########");
+	var this_ctrl = null;
+	end_time  = (new Date()).valueOf() + 5000;
+//var old_log_level = log_obj.setLevelFile(TDW_BASIC_LOG_Level_MINUTIAE);
+	while (((this_ctrl = this_spec.getControl()) == null) &&
+		(end_time > (new Date())))
+		delay(50);
+	if (!this_ctrl) {
+		log_obj.logError("Failed to locate the character slot selection " +
+			"confirmation control ([" + this_spec + "]).");
+//log_obj.setLevelFile(old_log_level)
+var ctrl_list = TDW_OOG_GetControlsDump(TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE);
+var old_log_level = log_obj.setLevelFile(TDW_BASIC_LOG_Level_MINUTIAE);
+while (ctrl_list.length)
+	log_obj.logMinutiae(ctrl_list.shift());
+log_obj.setLevelFile(old_log_level)
+		return(false);
+	}
+//log_obj.setLevelFile(old_log_level)
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Click the character selection confirmation button...
+	this_spec = new TDW_OOG_Control( 6,	627,	572,	128,	 35);
+	if (!this_spec.clickControl(null, true)) {
+		log_obj.logError("TDW_OOG_SelectCharacterByIndexInternal(" +
+			char_index + "): Attempt to click the character selection " +
+			"confirmation button for character '" +
+			TDW_OOG_CharacterList[char_index].name + "' failed.");
+		return(false);
+	}
+	log_obj.logDetail("TDW_OOG_SelectCharacterByIndexInternal(" +
+		char_index + "): Clicked the character selection confirmation button " +
+		"for character '" + TDW_OOG_CharacterList[char_index].name + "'.");
+	log_obj.logInfo("Selected character number " + (char_index + 1) + " of " +
+		TDW_OOG_CharacterList.length + " ('" +
+		TDW_OOG_CharacterList[char_index].name + "').");
+	// //////////////////////////////////////////////////////////////////////
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_CreateGame(game_name, password, difficulty, description,
+	max_players, level_diff, flags)
+{
+	var log_obj = TDW_BASIC_LOG_GetALog();
+
+	if (TDW_BASIC_GEN_TypeOfStringNotEmpty(game_name)) {
+		if (flags & TDW_OOG_CREATE_GAME_FLAG_INCREMENT) {
+			game_name = game_name.substr(0, 15 - 5) +
+				TDW_OOG_GlobalCreateGameAppend;
+		}
+		else
+			game_name.substr(0, 15);
+	}
+	else
+		game_name = TDW_BASIC_GetRandomStringLower(rnd(7, 12));
+
+	password   = (TDW_BASIC_GEN_TypeOfStringEmpty(password)) ? "" :
+		((password == null) ? TDW_BASIC_GetRandomStringLower(rnd(7, 12)) :
+		password.substr(0, 15));
+	difficulty  = (!TDW_BASIC_GEN_TypeOfUInt(difficulty)) ? null :
+		((difficulty < 0) ? 0 : ((difficulty > 2) ? 2 : difficulty));
+	description = (TDW_BASIC_GEN_TypeOfStringNotEmpty(description)) ?
+		description.substr(0, 31) : null;
+	max_players = (!TDW_BASIC_GEN_TypeOfUInt(max_players)) ? null :
+		((max_players < 1) ? 1 : ((max_players > 8) ? 8 : max_players));
+	level_diff  = (!TDW_BASIC_GEN_TypeOfUInt(level_diff)) ? null :
+		((level_diff > 99) ? 99 : level_diff);
+
+	var header = "TDW_OOG_CreateGame(" + game_name + ", " + password + ", " +
+		difficulty + " = " + ((difficulty == null) ? "DEFAULT DIFFICULTY" :
+		TDW_BASIC_GetDifficultyName(difficulty)) + ", " + description + ", " +
+		max_players + ", " + level_diff + ", " + flags + "): ";
+
+	log_obj.logDetail(header + "ENTRY");
+
+	log_obj.logInfo("Will attempt to create a game named '" + game_name +
+		"', password '" + password + "', difficulty " + difficulty +
+		" = " + ((difficulty == null) ? "DEFAULT DIFFICULTY" :
+		TDW_BASIC_GetDifficultyName(difficulty)) + ", description '" +
+		description + "', maximum number of players " +
+		((max_players == null) ? "UNSPECIFIED" : max_players) +
+		", level difference " + ((level_diff == null) ? "UNSPECIFIED" :
+		level_diff) + ".");
+
+	var this_screen = TDW_OOG_FindCurrentScreen();
+
+	if (!this_screen) {
+		log_obj.logError(header + "Unable to determine the current screen.");
+		return(false);
+	}
+
+	if (!this_screen.isPostCharSelect()) {
+		log_obj.logError(header + "The current screen is not a post-character " +
+			"selection screen.");
+		return(false);
+	}
+
+	while (this_screen && this_screen.isPostCharSelect() &&
+		(!this_screen.isGotoCreateGame()) && (!this_screen.isCanCreateGame())) {
+		this_screen.exitScreen(10000);
+		this_screen = TDW_OOG_FindCurrentScreen();
+	}
+
+	if (!this_screen) {
+		log_obj.logError(header + "Unable to determine the current screen.");
+		return(false);
+	}
+
+	var this_spec;
+
+	// //////////////////////////////////////////////////////////////////////
+	// If we're on a screen with which we can create a game, click the 'Join'
+	// button to switch to the Join Screen. This avoids a problem with the
+	// client in which the button that activates the Create Game screen is
+	// 'stuck'...
+	if (this_screen.isCanCreateGame()) {
+		this_spec = new TDW_OOG_Control( 6,	652,	469,	120,	 20)
+		if (!this_spec.clickControl()) {
+			log_obj.logError(header + "Attempt to click the join game " +
+				"button for a temporary switch to the Join Screen failed.");
+			return(false);
+		}
+		log_obj.logDetail(header + "Clicked the join game button for a " +
+			"temporary switch to the Join Screen.");
+		if (!(this_screen =
+			TDW_OOG_WaitForScreenType(TDW_OOG_SCREEN_TYPE_IS_GOTO_CREATE_GAME,
+			5000))) {
+			log_obj.logError(header + "Unable to locate a screen from which " +
+				"the Create Game screen can be accessed.");
+			return(false);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// If on a screen from which we can access the Create Game screen, do so...
+	if (this_screen.isGotoCreateGame()) {
+		this_spec = new TDW_OOG_Control( 6,	533,	469,	120,	 20);
+		if (!this_spec.clickControl()) {
+			log_obj.logError(header + "Attempt to click the create game " +
+				"button failed.");
+			return(false);
+		}
+		log_obj.logDetail(header + "Clicked the create game button.");
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Wait a bit for the Create Game screen...
+	if (!(this_screen = TDW_OOG_WaitForScreenList(
+		[TDW_OOG_SCREEN_ID_CLOSED_CREATE_LOBBY,
+		 TDW_OOG_SCREEN_ID_CLOSED_CREATE_CHANNEL], 1000))) {
+		log_obj.logError(header + "Unable to locate a game creation screen.");
+		return(false);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// If we can't create a game from this screen, we've got a problem...
+	if (!this_screen.isCanCreateGame()) {
+		log_obj.logError(header + "Unable to locate a game creation screen.");
+		return(false);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Set the game name...
+	this_spec = new TDW_OOG_Control( 1,	432,	162,	158,	 20);
+	if (!this_spec.setControlText(game_name)) {
+		log_obj.logError("Attempt to set the game name text to '" +
+			game_name + "' failed.");
+		return(false);
+	}
+	log_obj.logDetail(header + "Set the game name text to '" + game_name + "'.");
+//	delay(100);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Set the game password, if specified...
+	if (password != "") {
+		 this_spec = new TDW_OOG_Control( 1,	432,	217,	158,	 20);
+		if (!this_spec.setControlText(password)) {
+			log_obj.logError("Attempt to set the game password text to '" +
+				password + "' failed.");
+			return(false);
+		}
+		log_obj.logDetail(header + "Set the game password text to '" +
+			password + "'.");
+//		delay(100);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Set the game description, if specified...
+	if (description != null) {
+		 this_spec = new TDW_OOG_Control( 1,	432,	268,	333,	 20);
+		if (!this_spec.setControlText(description)) {
+			log_obj.logError( "Attempt to set the game description text to '" +
+				description + "' failed.");
+			return(false);
+		}
+		log_obj.logDetail(header + "Set the game description text to '" +
+			description + "'.");
+//		delay(100);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Set the game difficulty level, if specified...
+	if (difficulty != null) {
+		// ////////////////////////////////////////////////////////////////
+		// If the difficulty is greater than Normal, find the highest...
+		if (difficulty > 0) {
+			var highest_difficulty = 0;
+			for (var count_1 = 1; count_1 < TDW_OOG_GameDifficultyButtons.length;
+				count_1++) {
+				if (!TDW_OOG_GameDifficultyButtons[count_1].getControl())
+					break;
+				highest_difficulty = count_1;
+			}
+			// //////////////////////////////////////////////////////////
+			// If we can't create a game at the specified difficuty level,
+			//	fall back to the highest difficulty game we can create...
+			if (difficulty > highest_difficulty) {
+				log_obj.logWarning("Unable to set game difficulty to " +
+					difficulty + " (" + TDW_BASIC_GetDifficultyName(difficulty) +
+					") because the highest game difficulty available to this " +
+					"character is " + highest_difficulty + " (" +
+					TDW_BASIC_GetDifficultyName(highest_difficulty) + ") --- " +
+					"game creation will occur at that difficulty instead.");
+				difficulty = highest_difficulty;
+			}
+			// //////////////////////////////////////////////////////////
+		}
+		// ////////////////////////////////////////////////////////////////
+		// Now we can click the specified game difficulty button.
+		this_spec = TDW_OOG_GameDifficultyButtons[difficulty];
+		if (!this_spec.clickControl(1, true)) {
+			log_obj.logError(header + "Attempt to click the " +
+				TDW_BASIC_GetDifficultyName(difficulty) + " difficulty radio " +
+				"button failed.");
+			return(false);
+		}
+		// ////////////////////////////////////////////////////////////////
+		log_obj.logDetail(header + "Clicked the " +
+			TDW_BASIC_GetDifficultyName(difficulty) + " difficulty radio button.");
+//		delay(100);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Set the maximum number of players, if specified...
+	if (max_players != null) {
+		this_spec = new TDW_OOG_Control( 1,	657,	308,	 27,	 20,	null,	false);
+		if (!this_spec.getControl())
+			log_obj.logWarning("Unable to set the maximum number of players " +
+				"the specified number (" + max_players + "). This is probably " +
+				"because you are connected to Open BattleNet.");
+		else {
+			if (!this_spec.setControlText(max_players)) {
+				log_obj.logError("Attempt to set the maximum number of players " +
+					" to " + max_players + " failed.");
+				return(false);
+			}
+			log_obj.logDetail(header + "Set the maximum number of players to " +
+				max_players + ".");
+//			delay(100);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Set the maximum player level difference, if specified...
+	// CODE NOTE: To be implemented.
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Flush the log prepartory to game start-up.
+	log_obj.flushLog();
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Ensure that subsequent game messages are written synchronously.
+	var old_log_mode = log_obj.syncModeOn();
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Create the game...
+	delay(500);	// Delay to prevent crashes (per Paul 2004-01-28)...
+	this_spec = new TDW_OOG_Control( 6,	594,	433,	172,	 32);
+	if (!this_spec.clickControl(1, true)) {
+		log_obj.logDetail(header + "Attempt to click the create game " +
+			"confirmation button failed.");
+		return(false);
+	}
+	log_obj.logDetail(header + "Clicked the create game confirmation button.");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Should be all done, so log it...
+	log_obj.logInfo("Created game named '" + game_name + "', password '" +
+		password + "', difficulty " + difficulty +
+		" = " + ((difficulty == null) ? "DEFAULT DIFFICULTY" :
+		TDW_BASIC_GetDifficultyName(difficulty)) + ", description '" +
+		description + "', maximum number of players " +
+		((max_players == null) ? "UNSPECIFIED" : max_players) +
+		", level difference " + ((level_diff == null) ? "UNSPECIFIED" :
+		level_diff) + ".");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Reset the log synchronous mode to its old value.
+	log_obj.setSyncMode(old_log_mode);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Update our global game creation counters...
+	TDW_OOG_GlobalCreateGameCounter++;
+	TDW_OOG_GlobalCreateGameAppend = ++TDW_OOG_GlobalCreateGameAppend % 99999;
+	// //////////////////////////////////////////////////////////////////////
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_ManageCycleCreateGame(login_spec, character_spec,
+	game_spec, max_start_time, max_game_time)
+{
+	// Set the maximum permissible game start time in milliseconds. If zero or
+	//	null, it defaults to 30 seconds.
+	max_start_time = (TDW_BASIC_GEN_TypeOfUInt(max_start_time) &&
+		(max_start_time > 0)) ? max_start_time : (30 * 1000);
+
+	// Set the maximum permissible game length in milliseconds. If zero or null,
+	// it defaults to a full day.
+	max_game_time  = (TDW_BASIC_GEN_TypeOfUInt(max_game_time) &&
+		(max_game_time > 0)) ? max_game_time : (24 * 60 * 60 * 1000);
+
+	game_spec   = (game_spec instanceof TDW_OOG_CreateGameSpec) ? game_spec :
+		(new TDW_OOG_CreateGameSpec());
+
+	var log_obj = TDW_BASIC_LOG_GetALog();
+	var header  = "TDW_OOG_ManageCycleCreateGame([" + login_spec + "], [" +
+		character_spec + "], [" + game_spec + "], " + max_start_time + ", " +
+		max_game_time + "): ";
+
+	log_obj.logDetail(header + "ENTRY");
+
+	if (!(login_spec instanceof TDW_OOG_LoginSpec)) {
+		log_obj.logError("Invalid login specification passed to function " +
+			header + " login information must be specified.");
+		return(-1);
+	}
+	else if (!(character_spec instanceof TDW_OOG_CharacterSpec)) {
+		log_obj.logError("Invalid character specification passed to function " +
+			header + " character selection information must be specified.");
+		return(-1);
+	}
+
+	log_obj.flushLog();
+
+	while (true) {
+		var this_screen;
+		if (login_spec.performLogin()) {
+//			this_screen = TDW_OOG_FindCurrentScreen();
+			this_screen = TDW_OOG_WaitForScreenType(
+				TDW_OOG_SCREEN_TYPE_IS_CHAR_SELECT, 5000);
+			while (this_screen && this_screen.isCharSelect()) {
+				if (character_spec.selectCharacter()) {
+//					this_screen = TDW_OOG_FindCurrentScreen();
+					this_screen = TDW_OOG_WaitForScreenType(
+						TDW_OOG_SCREEN_TYPE_IS_POST_CHAR_SELECT, 5000);
+					while (this_screen && this_screen.isPostCharSelect()) {
+						var game_create_failed = true;
+						var last_gamestarttime = me.gamestarttime;
+						var old_log_mode       = log_obj.syncModeOn();
+						if (game_spec.createGame()) {
+							var end_time = (new Date()).valueOf() + max_start_time;
+							log_obj.logInfo("Game creation request sent: " +
+								"maximum game start time is " + max_start_time +
+								" milliseconds (expires at " + (new Date(end_time)) +
+								").");
+							do {
+								if (last_gamestarttime != me.gamestarttime) {
+									log_obj.logDetail(header +
+										"Last game start time difference: old time = " +
+										last_gamestarttime + ", new time = " +
+										me.gamestarttime + ", difference = " +
+										(me.gamestarttime - last_gamestarttime));
+									game_create_failed = false;
+									last_gamestarttime = me.gamestarttime;
+									break;
+								}
+								delay(50);
+							} while (end_time > (new Date()));
+						}
+						runGC();
+						if (!game_create_failed) {
+							if (me.ingame) {
+								log_obj.logInfo("Game start detected. Waiting " +
+									"for end of game.");
+								while (me.ingame)
+									delay(250);
+							}
+							log_obj.logInfo("Game end detected. Waiting " +
+								(game_spec.delay_next_game / 1000).toFixed(3) +
+								" seconds before next game.");
+							delay(game_spec.delay_next_game);
+						}
+						else {
+							log_obj.logError("Attempt to create a game " + game_spec +
+								"] failed --- waiting 10 seconds before next attempt.");
+							delay(10000);
+						}
+						log_obj.setSyncMode(old_log_mode);
+						this_screen = TDW_OOG_FindCurrentScreen();
+					}
+				}
+				else {
+					log_obj.logError("Attempt to select character [" +
+						character_spec + "] failed.");
+					delay(3000);
+					this_screen = TDW_OOG_FindCurrentScreen();
+					break;
+				}
+				this_screen = TDW_OOG_WaitForScreenType(
+					TDW_OOG_SCREEN_TYPE_IS_CHAR_SELECT, 5000);
+			}
+		}
+		else {
+			log_obj.logError("Attempt to perform login [" + login_spec +
+				"] failed.");
+			delay(3000);
+		}
+		delay(1000);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_ManageCycleActivateGame(login_spec_list, max_start_time,
+	max_game_time, will_expire_only_flag)
+{
+	// Set the maximum permissible game start time in milliseconds. If zero or
+	//	null, it defaults to 30 seconds.
+	max_start_time = (TDW_BASIC_GEN_TypeOfUInt(max_start_time) &&
+		(max_start_time > 0)) ? max_start_time : (30 * 1000);
+
+	// Set the maximum permissible game length in milliseconds. If zero or null,
+	// it defaults to a full day.
+	max_game_time         = (TDW_BASIC_GEN_TypeOfUInt(max_game_time) &&
+		(max_game_time > 0)) ? max_game_time : (24 * 60 * 60 * 1000);
+
+	// Controls whether all non-expired characters will be refreshed or just
+	// those which have an expiration date set by Blizzard.
+	will_expire_only_flag = (TDW_BASIC_GEN_TypeOfBoolean(will_expire_only_flag)) ?
+		will_expire_only_flag : false;
+
+	var log_obj = TDW_BASIC_LOG_GetALog();
+	var header  = "TDW_OOG_ManageCycleActivateGame([" + login_spec_list +
+		"], " + max_start_time + ", " + max_game_time + ", " +
+		will_expire_only_flag + "): ";
+
+	log_obj.logDetail(header + "ENTRY");
+
+	if ((!TDW_BASIC_GEN_TypeOfArrayIndexed(login_spec_list)) ||
+		(login_spec_list.length &&
+		(!(login_spec_list[0] instanceof TDW_OOG_LoginSpec)))) {
+		log_obj.logError("Invalid login list specification passed to function " +
+			header + " login information must be specified.");
+		return(-1);
+	}
+
+	log_obj.flushLog();
+
+	// Need a private copy because we'll be modifying it.
+	login_spec_list = TDW_BASIC_GEN_CloneObject(login_spec_list);
+
+	var login_spec = (login_spec_list.length) ? login_spec_list.shift() : null;
+	var game_spec  = new TDW_OOG_CreateGameSpec();
+
+	while (login_spec) {
+		var this_screen;
+		if (login_spec.performLogin()) {
+//			this_screen = TDW_OOG_FindCurrentScreen();
+			this_screen = TDW_OOG_WaitForScreenType(
+				TDW_OOG_SCREEN_TYPE_IS_CHAR_SELECT, 5000);
+			while (this_screen && this_screen.isCharSelect()) {
+				// Some problem if we can't load the characters, so re-try.
+				if (!TDW_OOG_LoadCharacterInfo())
+					break;
+				var char_index_list   = new Array();
+				var has_expired_count = 0;
+				var will_expire_count = 0;
+				for (var count_1 = 0; count_1 < TDW_OOG_CharacterList.length;
+					count_1++) {
+					if (TDW_OOG_CharacterList[count_1].char_flags &
+						TDW_OOG_CHAR_FLAG_HAS_EXPIRED)
+						has_expired_count++;
+					else {
+						if (TDW_OOG_CharacterList[count_1].char_flags &
+							TDW_OOG_CHAR_FLAG_WILL_EXPIRE) {
+							will_expire_count++;
+							char_index_list.push(count_1);
+						}
+						else if (!will_expire_only_flag)
+							char_index_list.push(count_1);
+					}
+				}
+				log_obj.logInfo("Found " + TDW_OOG_CharacterList.length +
+					" characters in account " + login_spec.account_name + " (" +
+					"have expired = " + has_expired_count + ", will expire = " +
+					will_expire_count + ", number to activate = " +
+					char_index_list.length + ").");
+				var done_count = 0;
+				for (var count_1 = 0; count_1 < char_index_list.length; ) {
+					if (TDW_OOG_SelectCharacterByIndexInternal
+						(char_index_list[count_1])) {
+//						this_screen = TDW_OOG_FindCurrentScreen();
+						this_screen = TDW_OOG_WaitForScreenType(
+							TDW_OOG_SCREEN_TYPE_IS_POST_CHAR_SELECT, 5000);
+						var old_log_mode = log_obj.syncModeOn();
+						while (this_screen && this_screen.isPostCharSelect()) {
+							var game_create_failed = true;
+							var last_gamestarttime = me.gamestarttime;
+							if (game_spec.createGame()) {
+								var end_time = (new Date()).valueOf() + max_start_time;
+								log_obj.logInfo("Game creation request sent: " +
+									"maximum game time is " + max_start_time +
+									" milliseconds (expires at " + (new Date(end_time)) +
+									").");
+								do {
+									if (last_gamestarttime != me.gamestarttime) {
+										log_obj.logDetail(header +
+											"Last game start time difference: old time = " +
+											last_gamestarttime + ", new time = " +
+											me.gamestarttime + ", difference = " +
+											(me.gamestarttime - last_gamestarttime));
+										game_create_failed = false;
+										last_gamestarttime = me.gamestarttime;
+										break;
+									}
+									delay(50);
+								} while (end_time > (new Date()));
+							}
+							runGC();
+							if (!game_create_failed) {
+								if (me.ingame) {
+									log_obj.logInfo("Game start detected. Waiting " +
+										"for end of game.");
+									while (me.ingame)
+										delay(250);
+								}
+								log_obj.logInfo("Game end detected. Waiting " +
+									(game_spec.delay_next_game / 1000).toFixed(3) +
+									" seconds before next character.");
+								delay(game_spec.delay_next_game);
+								done_count++;
+								count_1++;
+								break;
+							}
+							else {
+								log_obj.logError("Attempt to create a game " +
+									game_spec + "] failed --- waiting 10 seconds " +
+									"before next attempt.");
+								delay(10000);
+							}
+							this_screen = TDW_OOG_FindCurrentScreen();
+						}
+						log_obj.setSyncMode(old_log_mode);
+					}
+					else {
+						log_obj.logError("Attempt to select character [" +
+							TDW_OOG_CharacterList[char_index_list[count_1]] +
+							"] failed.");
+
+						delay(3000);
+					}
+					this_screen = TDW_OOG_WaitForScreenTypeList(
+						[TDW_OOG_SCREEN_TYPE_IS_CHAR_SELECT,
+						TDW_OOG_SCREEN_TYPE_IS_POST_CHAR_SELECT], 5000);
+					while (this_screen && this_screen.isPostCharSelect()) {
+						this_screen.exitScreen(10000);
+						this_screen = TDW_OOG_WaitForScreenTypeList(
+							[TDW_OOG_SCREEN_TYPE_IS_CHAR_SELECT,
+							TDW_OOG_SCREEN_TYPE_IS_POST_CHAR_SELECT], 5000);
+					}
+					if ((!this_screen) || (!this_screen.isCharSelect())) {
+						log_obj.logError("Attempt to return to the character " +
+							"selection screen failed --- re-trying.");
+						break;
+					}
+				}
+				if (done_count == char_index_list.length) {
+					log_obj.logInfo("Activation of " + done_count + " characters " +
+						"in account " + login_spec.account_name + " completed.");
+					login_spec = (login_spec_list.length) ?
+						login_spec_list.shift() : null;
+					break;
+				}
+				this_screen = TDW_OOG_FindCurrentScreen();
+			}
+		}
+		else {
+			log_obj.logError("Attempt to perform login [" + login_spec +
+				"] failed.");
+			delay(3000);
+		}
+		delay(60000);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_GetControlsDump(dump_flags)
+{
+	var out_list    = new Array();
+	var this_screen = TDW_OOG_FindCurrentScreenInternal(1);
+	var screen_id;
+	var screen_id_name;
+	var screen_name;
+
+	if (this_screen != null) {
+		screen_id      = this_screen.screen_id;
+		screen_id_name = TDW_OOG_ScreenIdConstants[screen_id];
+		screen_name    = this_screen.screen_name;
+	}
+	else {
+		screen_id      = 99999;
+		screen_id_name = "99999";
+		screen_name    = "***** UNKNOWN SCREEN LOCATION *****";
+	}
+
+	var data_list = new Array();
+	var len_list  = new Array(9);
+
+	data_list[0] = ["Text", "Type", "X Pos", "Y Pos", "X Size", "Y Size",
+						"Visible", "Disabled", "Extended Text"];
+
+	for (var count_1 = 0; count_1 < len_list.length; count_1++)
+		len_list[count_1] = 0;
+
+	var tmp_list  = TDW_OOG_GetControlListAsArrays();
+	var dump_time = TDW_BASIC_DATE_ToSmallDate();
+	data_list = data_list.concat(tmp_list);
+
+	for (var count_1 = 0; count_1 < data_list.length; count_1++) {
+		for (var count_2 = 0; count_2 < data_list[count_1].length; count_2++) {
+			var tmp_value     = data_list[count_1][count_2] + "";
+			len_list[count_2] = Math.max(tmp_value.length, len_list[count_2]);
+		}
+	}
+
+	var sep_1 = "";
+	var sep_2 = "";
+	var sep_3 = "";
+
+	for (var count_1 = 0; count_1 < len_list.length; count_1++) {
+		sep_1 += ((count_1) ? " " : "") +
+			TDW_BASIC_FORMAT_LJust("", len_list[count_1], "=");
+		sep_2 += ((count_1) ? " " : "") +
+			TDW_BASIC_FORMAT_LJust(data_list[0][count_1], len_list[count_1]);
+		sep_3 += ((count_1) ? " " : "") +
+			TDW_BASIC_FORMAT_LJust("", len_list[count_1], "-");
+	}
+
+	data_list.shift();	// Get rid of the first (headers) line.
+
+	out_list.push(TDW_BASIC_FORMAT_LJust("", sep_1.length, "="));
+	out_list.push(TDW_BASIC_FORMAT_LJust("", sep_1.length, "="));
+	out_list.push(screen_name);
+	out_list.push("Realm Name            : " + me.realm);
+	out_list.push("Account Name          : " + me.account);
+	out_list.push("Control Dump Date/Time: " + dump_time);
+	out_list.push(TDW_BASIC_FORMAT_LJust("", sep_1.length, "-"));
+
+	out_list.push(sep_1);
+	out_list.push(sep_2);
+	out_list.push(sep_3);
+
+	var code_list = new Array();
+
+	for (var count_1 = 0; count_1 < data_list.length; count_1++) {
+		var tmp_string = "";
+		for (var count_2 = 0; count_2 < data_list[count_1].length; count_2++)
+			tmp_string += ((count_2) ? " " : "") +
+				(((count_2 >= 1) && (count_2 <= 5)) ?
+				TDW_BASIC_FORMAT_RJust(data_list[count_1][count_2],
+					len_list[count_2]) :
+				TDW_BASIC_FORMAT_LJust(data_list[count_1][count_2],
+					len_list[count_2]));
+		out_list.push(tmp_string);
+		tmp_string = "\t\t new TDW_OOG_Control(" +
+			TDW_BASIC_FORMAT_RJust(data_list[count_1][1], 2) + ",\t" +
+			TDW_BASIC_FORMAT_RJust(data_list[count_1][2], 3) + ",\t" +
+			TDW_BASIC_FORMAT_RJust(data_list[count_1][3], 3) + ",\t" +
+			TDW_BASIC_FORMAT_RJust(data_list[count_1][4], 3) + ",\t" +
+			TDW_BASIC_FORMAT_RJust(data_list[count_1][5], 3) + ",\t" +
+			((data_list[count_1][0] == null) ?
+			TDW_BASIC_FORMAT_LJust("null", len_list[0] + 2) :
+			TDW_BASIC_FORMAT_LJust("\"" + data_list[count_1][0] + "\"",
+			len_list[0] + 2)) +
+			((count_1 < (data_list.length - 1)) ? ")," : ")");
+		code_list.push(tmp_string);
+	}
+
+	out_list.push(sep_1);
+
+	if (dump_flags & TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE) {
+		out_list.push("");
+		out_list.push("\tnew TDW_OOG_ControlScreen(");
+		out_list.push("\t\t" + screen_id_name + ",");
+		out_list.push("\t\t\"" + screen_name + "\",");
+		out_list.push("\t\t[");
+		while (code_list.length)
+			out_list.push(code_list.shift());
+		out_list.push("\t\t],");
+		if (!this_screen || (!(this_screen.exit_spec instanceof TDW_OOG_Control)))
+			out_list.push("\t\t null");
+		else			
+			out_list.push("\t\t new TDW_OOG_Control(" +
+				TDW_BASIC_FORMAT_RJust(this_screen.exit_spec.type,  2) + ",\t" +
+				TDW_BASIC_FORMAT_RJust(this_screen.exit_spec.x_pos, 3) + ",\t" +
+				TDW_BASIC_FORMAT_RJust(this_screen.exit_spec.y_pos, 3) + ",\t" +
+				TDW_BASIC_FORMAT_RJust(this_screen.exit_spec.x_size, 3) + ",\t" +
+				TDW_BASIC_FORMAT_RJust(this_screen.exit_spec.y_size, 3) + ")");
+		out_list.push("\t),");
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_DumpControls(file_name, dump_flags)
+{
+	return(TDW_OOG_DumpControlsBasic(file_name, null, dump_flags));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_DumpControlsBasic(file_name, out_list, dump_flags)
+{
+	if (!TDW_BASIC_GEN_TypeOfStringNotEmpty(file_name)) {
+		file_name = "output/TDW_OOG_DumpControls." +
+			TDW_BASIC_DATE_ToSmallDateSimple() + ".txt";
+		delay(1); // Wait one millisecond so subsequent names don't collide...
+	}
+
+	var file_handle = fileOpen(file_name, 2);
+
+	if (!file_handle)
+		return(-1);
+
+	TDW_OOG_DumpControlsHandle(file_handle, out_list, dump_flags);
+
+	file_handle.close();
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_DumpControlsHandle(file_handle, out_list, dump_flags)
+{
+	if (!file_handle)
+		return(TDW_OOG_DumpControlsBasic(null, out_list, dump_flags));
+
+	var tmp_list = (TDW_BASIC_GEN_TypeOfArrayIndexed(out_list)) ? out_list :
+		TDW_OOG_GetControlsDump(dump_flags);
+
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++)
+		file_handle.writeLine(tmp_list[count_1]);
+
+	file_handle.writeLine("");
+
+	file_handle.flush();
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_DEBUG_EmitScreenIdInfo(file_handle)
+{
+	var max_length = 0;
+
+	for (var count_1 = 0; count_1 < TDW_OOG_ScreenIdConstants.length; count_1++)
+		max_length = Math.max(max_length,
+			TDW_OOG_ScreenIdConstants[count_1].length);
+
+	file_handle.writeLine("// " + TDW_BASIC_FORMAT_RepeatString("/", 76));
+	for (var count_1 = 0; count_1 < TDW_OOG_ScreenList.length; count_1++) {
+		var this_name =
+			TDW_OOG_ScreenIdConstants[TDW_OOG_ScreenList[count_1].screen_id];
+		file_handle.writeLine("var " +
+			TDW_BASIC_FORMAT_LJust(this_name, max_length) +
+			" = "  + TDW_BASIC_FORMAT_RJust(count_1, 2) + ";");
+	}
+	file_handle.writeLine("// " + TDW_BASIC_FORMAT_RepeatString("/", 76));
+	file_handle.writeLine("");
+
+	file_handle.writeLine("// " + TDW_BASIC_FORMAT_RepeatString("/", 76));
+	file_handle.writeLine("var TDW_OOG_ScreenIdConstants = [");
+	for (var count_1 = 0; count_1 < TDW_OOG_ScreenList.length; count_1++) {
+		var this_name =
+			TDW_OOG_ScreenIdConstants[TDW_OOG_ScreenList[count_1].screen_id];
+		file_handle.writeLine("\t\"" + this_name +
+			((count_1 < (TDW_OOG_ScreenList.length - 1)) ? "\"," : "\""));
+	}
+	file_handle.writeLine("];");
+	file_handle.writeLine("// " + TDW_BASIC_FORMAT_RepeatString("/", 76));
+	file_handle.writeLine("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function TDW_OOG_FakeControl(text, type, x, y, xsize, ysize, visible, disabled,
+	ext_text)
+{
+	this.text     = text;
+	this.type     = type;
+	this.x        = x;
+	this.y        = y;
+	this.xsize    = xsize;
+	this.ysize    = ysize;
+	this.visible  = visible;
+	this.disabled = disabled;
+	this.ext_text = ext_text;
+
+	this.getText  = function() { return(this.ext_text); }
+	this.getNext  = function() { return(null); }
+}
+
+function main()
+{
+	print(new TDW_OOG_LoginSpec(TDW_OOG_CONN_TYPE_BATTLENET_CLOSED,
+		"USEast", "MyAccount", "MyPassword"));
+	TDW_OOG_DumpControls(null, TDW_OOG_DUMP_CONTROLS_FLAG_JS_CODE);
+	print("DONE");
+}
+function getControl()
+{
+	return(new TDW_OOG_FakeControl("FAKE TEXT 1", 9, 8, 7, 6, 5, true, true,
+		"FAKE EXTENDED"));
+//	return(null);
+}
+
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_PerformLogin(conn_type, realm, account_name, account_pass,
+	other_login_info)
+{
+	var return_code;
+
+	var log_obj      = TDW_BASIC_LOG_GetALog();
+
+	var login_string = conn_type + ", " + realm + ", " + account_name + ", " +
+		account_pass + ", " + other_login_info;
+	var header       = "TDW_OOG_PerformLogin(" + login_string + "): ";
+
+	log_obj.logDetail(header + "ENTRY");
+
+	switch (conn_type) {
+		case TDW_OOG_CONN_TYPE_SINGLE_PLAYER		:
+			return_code = TDW_OOG_PerformLoginSinglePlayer();
+			break;
+		case TDW_OOG_CONN_TYPE_TCP_IP					:
+			return_code = TDW_OOG_PerformLoginTcpIP(other_login_info);
+			break;
+		case TDW_OOG_CONN_TYPE_BATTLENET_CLOSED	:
+			return_code = TDW_OOG_PerformLoginRealmClosed(realm, account_name,
+				account_pass, other_login_info);
+			break;
+		case TDW_OOG_CONN_TYPE_BATTLENET_OPEN		:
+			return_code = TDW_OOG_PerformLoginRealmOpen(realm, account_name,
+				account_pass, other_login_info);
+			break;
+		default												:
+			log_obj.logError("Invalid connection type '" + conn_type +
+				"specified to function TDW_OOG_PerformLogin().");
+			return_code = false;
+			break;
+	}
+
+	log_obj.logDetail(header + "EXIT");
+
+	log_obj.flushLog();
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_PerformLoginSinglePlayer()
+{
+	var log_obj      = TDW_BASIC_LOG_GetALog();
+	var login_string = "";
+	var header       = "TDW_OOG_PerformLoginSinglePlayer(" + login_string + "): ";
+
+	log_obj.logDetail(header + "ENTRY");
+
+	log_obj.logInfo("Will attempt a Single-Player login for [" +
+		login_string + "]");
+
+	var this_screen;
+
+	if (!(this_screen = TDW_OOG_FindCurrentScreen(1000))) {
+		log_obj.logError("Unable to determine the current screen.");
+		return(false);
+	}
+
+	while (this_screen.screen_id != TDW_OOG_SCREEN_ID_INIT_CONN_TYPE) {
+		if (this_screen.screen_id == TDW_OOG_SCREEN_ID_STARTUP_PANEL)
+			this_screen = TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_INIT_CONN_TYPE,
+				5000);
+		else if (!this_screen.canExitScreen()) {
+			TDW_OOG_WaitForNotScreen(this_screen.screen_id, 5000);
+			this_screen = TDW_OOG_FindCurrentScreen(5000);
+		}
+		else
+			this_screen.exitScreen(10000);
+		if (!(this_screen = TDW_OOG_FindCurrentScreen(1000))) {
+			log_obj.logError("Unable to determine the current screen.");
+			return(false);
+		}
+	}
+
+	log_obj.logInfo("Starting Single-Player login attempt for [" +
+		login_string + "]");
+
+	var this_spec;
+	var this_ctrl;
+
+	this_spec = new TDW_OOG_Control(6,	264,	324,	272,	 35);
+	if (!this_spec.clickControl()) {
+		log_obj.logError("Attempt to click the Single-Player selection " +
+			"button control [" + this_spec + "] failed.");
+		return(false);
+	}
+
+	if (!TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT, 2000)) {
+		log_obj.logError("Wait of two seconds for the Single-Player character " +
+			"selection screen failed.");
+		return(false);
+	}
+
+	log_obj.logInfo("Single-Player login for [" + login_string + "] complete.");
+
+	log_obj.logDetail(header + "EXIT");
+
+	log_obj.flushLog();
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_PerformLoginTcpIP(other_login_info)
+{
+	var log_obj      = TDW_BASIC_LOG_GetALog();
+	var login_string = other_login_info + ((other_login_info != null) ?
+		" (will join an existing game on this IP)" : " (will host a new game)");
+	var header       = "TDW_OOG_PerformLoginTcpIp(" + login_string + "): ";
+
+	log_obj.logDetail(header + "ENTRY");
+
+	log_obj.logInfo("Will attempt a TCP/IP login for [" + login_string + "]");
+
+	if ((other_login_info != null) &&
+		(!TDW_BASIC_IsValidIPAddress(other_login_info))) {
+		log_obj.logError("A non-null TCP/IP address was specified ('" +
+			other_login_info + "') but it is invalid.");
+		return(false);
+	}
+
+	if (!(this_screen = TDW_OOG_FindCurrentScreen(1000))) {
+		log_obj.logError("Unable to determine the current screen.");
+		return(false);
+	}
+
+	while ((this_screen.screen_id != TDW_OOG_SCREEN_ID_INIT_CONN_TYPE) &&
+		(this_screen.screen_id != TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT) &&
+		(this_screen.screen_id != TDW_OOG_SCREEN_ID_TCP_IP_HOST_OR_JOIN)) {
+		if (this_screen.screen_id == TDW_OOG_SCREEN_ID_STARTUP_PANEL)
+			this_screen = TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_INIT_CONN_TYPE,
+				5000);
+		else if (!this_screen.canExitScreen())
+			TDW_OOG_WaitForNotScreen(this_screen.screen_id, 5000);
+		else
+			this_screen.exitScreen(10000);
+		if (!(this_screen = TDW_OOG_FindCurrentScreen(1000))) {
+			log_obj.logError("Unable to determine the current screen.");
+			return(false);
+		}
+	}
+
+	log_obj.logInfo("Starting TCP/IP login attempt for [" +
+		login_string + "]");
+
+	var this_spec;
+	var this_ctrl;
+
+	// If we're at the initial connection type screen, select Other
+	// Multiplayer...
+	if (this_screen.screen_id == TDW_OOG_SCREEN_ID_INIT_CONN_TYPE) {
+		this_spec = new TDW_OOG_Control( 6,	264,	433,	272,	 35);
+		if (!this_spec.clickControl()) {
+		log_obj.logError("Attempt to click the Other Multiplayer selection " +
+			"button control [" + this_spec + "] failed.");
+			return(false);
+		}
+		delay(500);
+		// Wait for the Other Multiplayer Game Type selection screen...
+		if (!(this_screen =
+			TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT,
+			5000))) {
+			log_obj.logError("Wait of five seconds for the Other Multiplayer " +
+				"Game Type selection screen failed.");
+			return(false);
+		}
+	}
+
+	// If we're at the Other Multiplayer Game Type Selection screen, select
+	//	TCP/IP Game...
+	if (this_screen.screen_id == TDW_OOG_SCREEN_ID_OTHER_MULTIPLAYER_SELECT) {
+		this_spec = new TDW_OOG_Control( 6,	264,	350,	272,	 35);
+		if (!this_spec.clickControl()) {
+			log_obj.logError("Attempt to click the TCP/IP Game selection " +
+			"button control [" + this_spec + "] failed.");
+			return(false);
+		}
+		delay(500);
+		if (!(this_screen =
+			TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_TCP_IP_HOST_OR_JOIN, 5000))) {
+			log_obj.logError("Wait of five seconds for the TCP/IP Game Host or " +
+				"Join Selection Screen failed.");
+			return(false);
+		}
+	}
+
+	// If not specified, we're hosting the game. Otherwise, we're joining
+	// an existing game...
+	if (other_login_info == null) {
+		// Attempt to click the Host Game control...
+		this_spec = new TDW_OOG_Control( 6,	265,	206,	272,	 35);
+		if (!this_spec.clickControl()) {
+			log_obj.logError("Attempt to click the Host TCP/IP Game " +
+				"button control [" + this_spec + "] failed.");
+			return(false);
+		}
+		delay(500);
+	}
+	else {
+		// Attempt to click the Join Game control...
+		this_spec = new TDW_OOG_Control( 6,	265,	264,	272,	 35);
+		if (!this_spec.clickControl()) {
+			log_obj.logError("Attempt to click the Join TCP/IP Game " +
+				"button control [" + this_spec + "] failed.");
+			return(false);
+		}
+		delay(500);
+		// Wait for the Join Game screen...
+		if (!(this_screen =
+			TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_TCP_IP_JOIN, 5000))) {
+			log_obj.logError("Wait of five seconds for the Join TCP/IP Game " +
+				"Selection Screen failed.");
+			return(false);
+		}
+		// Attempt to enter the TCP/IP address...
+		this_spec = new TDW_OOG_Control( 1,	300,	268,	213,	 20);
+		if (!this_spec.setControlText(other_login_info)) {
+			log_obj.logError(header + "Attempt to set the join TCP/IP game IP " +
+				"address text to '" + other_login_info + "' failed.");
+			return(false);
+		}
+		log_obj.logDetail(header + "Set the join TCP/IP game IP address text " +
+			"to '" + other_login_info + "'.");
+		// Attempt to click the TCP/IP address confirmation button...
+		this_spec = new TDW_OOG_Control( 6,	421,	337,	 96,	 32);
+		if (!this_spec.clickControl()) {
+			log_obj.logError("Attempt to click the Join TCP/IP Game " +
+				"IP address confirmation button control [" + this_spec + "] failed.");
+			return(false);
+		}
+		delay(500);
+	}
+
+	// Wait for either the character selection screen or the TCP/IP join game
+	//	cannot connect screen...
+	if (!(this_screen =
+		TDW_OOG_WaitForScreenList([TDW_OOG_SCREEN_ID_SP_OR_OPEN_CHAR_SELECT,
+		TDW_OOG_SCREEN_ID_TCP_IP_JOIN_CANNOT_CONNECT], 5000))) {
+		log_obj.logError("Wait of five seconds for the TCP/IP character " +
+			"selection screen failed.");
+		return(false);
+	}
+
+	if (this_screen.screen_id == TDW_OOG_SCREEN_ID_TCP_IP_JOIN_CANNOT_CONNECT) {
+		log_obj.logError("Attempt to connect to the TCP/IP game host on IP " +
+			"address " + other_login_info + " failed.");
+		return(false);
+	}
+
+	log_obj.logInfo("TCP/IP login for [" + login_string + "] complete.");
+
+	log_obj.logDetail(header + "EXIT");
+
+	log_obj.flushLog();
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_PerformLoginRealmClosed(realm, account_name, account_pass,
+	other_login_info)
+{
+	var log_obj      = TDW_BASIC_LOG_GetALog();
+	var login_string = realm + ", " + account_name + ", " + account_pass + ", " +
+		other_login_info;
+	var header       = "TDW_OOG_PerformLoginRealmClosed(" + login_string + "): ";
+
+	var this_screen;
+
+	log_obj.logDetail(header + "ENTRY");
+
+	log_obj.logInfo("Will attempt a Closed BattleNet login for [" +
+		login_string + "]");
+
+	if (!(this_screen = TDW_OOG_FindCurrentScreen(1000))) {
+		log_obj.logError("Unable to determine the current screen.");
+		return(false);
+	}
+
+	while (this_screen.screen_id != TDW_OOG_SCREEN_ID_INIT_CONN_TYPE) {
+		if (this_screen.screen_id == TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN)
+			break;
+		if (this_screen.screen_id == TDW_OOG_SCREEN_ID_STARTUP_PANEL)
+			this_screen = TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_INIT_CONN_TYPE,
+				5000);
+		else if (!this_screen.canExitScreen()) {
+			TDW_OOG_WaitForNotScreen(this_screen.screen_id, 5000);
+			this_screen = TDW_OOG_FindCurrentScreen(5000);
+		}
+		else
+			this_screen.exitScreen(10000);
+		if (!(this_screen = TDW_OOG_FindCurrentScreen(1000))) {
+			log_obj.logError("Unable to determine the current screen.");
+			return(false);
+		}
+	}
+
+	log_obj.logInfo("Starting Closed BattleNet login attempt for [" +
+		login_string + "]");
+
+	// NOTE: Realm selection not yet supported.
+
+	var this_spec;
+	var this_ctrl;
+
+	// If we're at the initial conntection type screen, select Realm play...
+	if (this_screen.screen_id == TDW_OOG_SCREEN_ID_INIT_CONN_TYPE) {
+		this_spec = new TDW_OOG_Control(6,	264,	366,	272,	 35);
+		if (!this_spec.clickControl()) {
+		log_obj.logError("Attempt to click the Closed BattleNet selection " +
+			"button control [" + this_spec + "] failed.");
+			return(false);
+		}
+//		delay(500);
+		log_obj.logDetail(header + "Clicked the Closed BattleNet selection " +
+			"button control [" + this_spec + "].");
+	}
+
+	// Wait for the Realm account login screen...
+	if (!TDW_OOG_WaitForScreen(TDW_OOG_SCREEN_ID_CLOSED_ACCOUNT_LOGIN, 5000)) {
+		log_obj.logError("Wait of five seconds for the Realm account login " +
+			"screen failed.");
+		return(false);
+	}
+
+	// Attempt to enter the account name...
+	this_spec = new TDW_OOG_Control(1,	322,	342,	162,	 19);
+	if (!(this_spec.setControlText(account_name))) {
+		log_obj.logError("Attempt to enter the account name in the Realm login " +
+			"screen failed.");
+		return(false);
+	}
+	log_obj.logDetail(header + "Entered the account name '" + account_name +
+		"' in the Realm login screen.");
+
+	// Attempt to enter the account password...
+	this_spec = new TDW_OOG_Control(1,	322,	396,	162,	 19);
+	if (!(this_spec.setControlText(account_pass))) {
+		log_obj.logError("Attempt to enter the account password in the Realm " +
+			"login screen failed.");
+		return(false);
+	}
+	log_obj.logDetail(header + "Entered the account password '" + account_pass +
+		"' in the Realm login screen.");
+
+	// Attempt to click the login button...
+	this_spec = new TDW_OOG_Control(6,	264,	484,	272,	 35);
+	if (!this_spec.clickControl()) {
+		log_obj.logError("Attempt to click the login confirmation button " +
+			"control [" + this_spec + "] failed.");
+		return(false);
+	}
+	log_obj.logDetail(header + "Clicked the login confirmation button " +
+		"control [" + this_spec + "].");
+
+	if (!(this_screen =
+		TDW_OOG_WaitForScreenList([TDW_OOG_SCREEN_ID_CLOSED_CHAR_SELECT,
+		TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_ACCOUNT_NOT_FOUND,
+		TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_PASSWORD_FAILURE], 5000))) {
+		log_obj.logError("Wait of five seconds for the Realm character " +
+			"selection screen failed.");
+		return(false);
+	}
+
+	if (this_screen.screen_id ==
+		TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_ACCOUNT_NOT_FOUND) {
+		log_obj.logError("The specified account name used ('" + account_name +
+			"') was not found on BattleNet.");
+		return(false);
+	}
+	else if (this_screen.screen_id ==
+		TDW_OOG_SCREEN_ID_ACCOUNT_LOGIN_PASSWORD_FAILURE) {
+		log_obj.logError("The specified account password used ('" + account_pass +
+			"') is not the valid password for account name '" + account_name +
+			"' on BattleNet.");
+		return(false);
+	}
+
+	//
+	// CODE NOTE: To be added: Code to support the multiple Asia realms.
+	//
+
+	log_obj.logInfo("Closed BattleNet login for [" + login_string +
+		"] complete.");
+
+	log_obj.logDetail(header + "EXIT");
+
+	log_obj.flushLog();
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_OOG_PerformLoginRealmOpen(realm, account_name, account_pass,
+	other_login_info)
+{
+	var log_obj      = TDW_BASIC_LOG_GetALog();
+	var login_string = realm + ", " + account_name + ", " + account_pass + ", " +
+		other_login_info;
+	var header       = "TDW_OOG_PerformLoginRealmOpen(" + login_string + "): ";
+
+	var this_screen;
+
+	log_obj.logDetail(header + "ENTRY");
+
+	log_obj.logInfo("Will attempt a Open BattleNet login for [" +
+		login_string + "]");
+
+	log_obj.logError("Open BattleNet logins not yet supported.");
+
+	log_obj.logDetail(header + "EXIT");
+
+	log_obj.flushLog();
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

@@ -1,0 +1,24 @@
+/*
+	___CoreTest.007.d2j
+
+	Symptoms    :
+		Returns 'null' for the interval 0, 0.
+
+		The 26 core returns 0.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			26 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			27 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	print("rnd(0, 3) = " + rnd(0, 3));
+	print("rnd(0, 2) = " + rnd(0, 2));
+	print("rnd(0, 1) = " + rnd(0, 1));
+	print("rnd(0, 0) = " + rnd(0, 0));
+
+	print("All tests done.");
+}
+
+

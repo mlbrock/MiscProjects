@@ -1,0 +1,46 @@
+/*
+	___CoreTest.006.d2j
+
+	Symptoms    :
+
+		Catastrophic failure:
+			Assertion Failure
+			Location : D2Cient\UI\npcmenu.cpp, line #4363
+			Expression : sgUIState.hDialogWaiting == NULL
+
+	Tested under :
+		D2X Product and D2 Loader for
+			29.12 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+
+		I tested with Larzuk.
+*/
+
+function main()
+{
+	var file_name = "output/____CoreTest.018.log";
+	var file_handle;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready.");
+
+	if (!(file_handle = fileOpen(file_name, 1)))
+		print("Unable to open file '" + file_name + "' for writing.");
+	else {
+		for (count_1 = 1; count_1 < 0xFFFFFFFF; count_1++) {
+			if (file_handle) {
+				file_handle.writeLine("Line number " + count_1);
+				file_handle.close();
+				if (!(file_handle = fileOpen(file_name, 2))) {
+					print("Unable to re-open file '" + file_name + "' for writing.");
+					break;
+				}
+			}
+		}
+	}
+
+	print("Stopping script");
+	stop();
+}
+
+

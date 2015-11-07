@@ -1,0 +1,59 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+var MsgCount = 0;
+
+function main()
+{
+	var my_log =
+		new D2JSP_UTIL_Log("output/____FeatureTest.013.TestGameMessages." +
+		me.realm + "." + me.account + "." + me.name + ".log",
+		"TestGameMessages", null, null, null, true);
+
+	my_log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	me.overhead(" ");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	print("Ready for game messages on PID " + getMyPID() + " = " +
+		getMyPID().toString(16));
+
+	while (true) {
+		me.overhead("Messages=" + MsgCount);
+		delay(250);
+	}
+
+	print("Script done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			log_obj.logInfoQuiet("GAME JOIN: " + player_name);
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (arguments[0].
+		match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			log_obj.logInfoQuiet("GAME EXIT: " + player_name);
+	}
+	else {
+		log_obj.logInfoQuiet("GAME MSG : " + arguments[0]);
+		MsgCount++;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

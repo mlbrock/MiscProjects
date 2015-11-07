@@ -1,0 +1,4 @@
+function checkMercHeal(_merc, _perc) {
+	if(_merc && _merc.hp<=(_merc.hpmax<128 ? 64 : 128)*(_perc/100)) return true;
+	return false;
+}

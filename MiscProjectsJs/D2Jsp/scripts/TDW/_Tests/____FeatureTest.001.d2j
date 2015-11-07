@@ -1,0 +1,86 @@
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_RoomStats.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+
+var FlagOfInterest = 0x80;
+
+function main()
+{
+	var obj_count  = 0;
+	var room_count = 0;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+	print("Ready");
+
+
+	while (true) {
+		me.overhead("1:[" + me.x + ", " + me.y + "]");
+		var this_obj  = getUnit(2);
+		var obj_list  = new Array();
+		obj_count = 0;
+		if (this_obj) {
+			obj_count++;
+			do {
+				obj_list[this_obj.x + "X" + this_obj.y] =
+					[this_obj.name, this_obj.classid];
+			} while (this_obj && this_obj.getNext());
+		}
+		me.overhead(" ");
+		me.overhead("2:[" + me.x + ", " + me.y + "]=" + obj_count + "=0");
+		var this_room = getRoom();
+		var room_x;
+		var room_y;
+		var cell_x;
+		var cell_y;
+		var this_coll
+		var found_obj;
+/*
+		room_count = 0;
+		if (this_room) {
+			do {
+				room_count++;
+				var was_inited = false;
+				var xStart;
+				var yStart;
+				var xSize1;
+				var ySize1;
+				if (!this_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEY)) {
+					this_room.init();
+					was_inited = true;
+				}
+				xStart = this_room.getStat(D2JSP_ROOMSTAT_XSTART);
+				yStart = this_room.getStat(D2JSP_ROOMSTAT_YSTART);
+				xSize1 = this_room.getStat(D2JSP_ROOMSTAT_XSIZE1);
+				ySize1 = this_room.getStat(D2JSP_ROOMSTAT_YSIZE1);
+//	print("xStart = " + xStart + " = " + this_room.getStat(D2JSP_ROOMSTAT_XSTART));
+//	print("yStart = " + yStart + " = " + this_room.getStat(D2JSP_ROOMSTAT_YSTART));
+//	print("xSize1 = " + xSize1 + " = " + this_room.getStat(D2JSP_ROOMSTAT_XSIZE1));
+//	print("ySize1 = " + ySize1 + " = " + this_room.getStat(D2JSP_ROOMSTAT_YSIZE1));
+				for (count_1 = 0; count_1 < xSize1; count_1++) {
+					for (count_2 = 0; count_2 < ySize1; count_2++) {
+						cell_x = xStart + count_1;
+						cell_y = yStart + count_2;
+						if ((this_coll = this_room.getCollision(cell_x, cell_y)) &
+							FlagOfInterest) {
+							found_obj = obj_list[cell_x + "X" + cell_y];
+							if (typeof(found_obj) == "object") {
+								print("Collision flag 0x" + FlagOfInterest +
+									" found for object name '" + found_obj[0] + "', " +
+									"classid " + found_obj[1] + " at location " +
+									"[" + cell_x + ", " + cell_y + "]");
+							}
+						}
+						delay(5);	// Wee delay for concurrency...
+					}
+				}
+				if (was_inited)
+					this_room.release();
+			} while (this_room && this_room.getNext());
+		}
+*/
+		me.overhead("3:[" + me.x + ", " + me.y + "]=" + obj_count + "=" + room_count);
+		delay(500);
+	}
+}
+

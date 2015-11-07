@@ -1,0 +1,54 @@
+// ////////////////////////////////////////////////////////////////////////////
+me.overhead("ÿc9" + "Loading...");
+include("TDW/TDW_BotSupport.d2l");
+//include("TDW/TDW_Threat.d2l");
+me.overhead(D2JSP_UTIL_COLOR_YELLOW + "Initializing...");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/______AvoidTest.log",
+		"TDW_AvoidTest.001", null, null, null, true);
+
+	TDW_BOT_ContextList = D2JSP_UTIL_CTX_ContextCreateBasic(TDW_BOT_ConfigureList,
+		null, null, "TDW_AvoidTest.001", TDW_BOT_Log);
+
+	TDW_PATH_CreateArea(me.area);
+
+	var avoid_spec = new TDW_THREAT_MoveSpec(0, 18, 0, 5);
+
+	TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN + "Ready.");
+	me.overhead(D2JSP_UTIL_COLOR_GREEN + "Ready.");
+
+	while (true) {
+		while (D2JSP_AREA_IsTown(me.area)) {
+			me.overhead("Exit town, please.");
+			delay(500);
+		}
+		var last_weight = 0;
+		var start_time  = getTickCount();
+		var best_point  = TDW_THREAT_FindSafestSpot(null, avoid_spec,
+			TDW_THREAT_AVOID_FLAG_NO_PRIORITY_CENTER);
+		var end_time    = getTickCount();
+		if (best_point) {
+			var this_dist = myDist(best_point.x, best_point.y);
+			TDW_BOT_Log.logInfoQuiet("Me point = [" + me.x + "," + me.y +
+				"], Best point = [" + best_point + "], distance = " + this_dist +
+				", found in " +
+				((end_time - start_time) / 1000).toFixed(3) + " seconds.");
+			if (this_dist > 1)
+//				D2JSP_SKILL_TeleportTo(best_point.x, best_point.y);
+				TDW_BOT_MOVE_TeleportToDestination([best_point.x, best_point.y]);
+		}
+		else
+			TDW_BOT_Log.logWarningColor("********** NO POINT FOUND!!!");
+		delay(1000);
+	}
+
+	print("Done.");
+
+	TDW_BOT_Log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

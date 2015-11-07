@@ -1,0 +1,900 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Belt Manager Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BeltManager.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains the TDW belt manager object.
+//
+// Revison History : 2003-01-07 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_BeltManager_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_BeltManager_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_BodyLocations.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BELTMAN_FLAG_NONE           = 0x00000000;
+var TDW_BELTMAN_FLAG_HP_ONLY        = 0x00000001;
+var TDW_BELTMAN_FLAG_MP_ONLY        = 0x00000002;
+var TDW_BELTMAN_FLAG_RV_ONLY        = 0x00000004;
+var TDW_BELTMAN_FLAG_RVL_ONLY       = 0x00000008;
+var TDW_BELTMAN_FLAG_NO_FILL_EMPTY  = 0x00010000;
+var TDW_BELTMAN_FLAG_NO_UPGRADE     = 0x00020000;
+var TDW_BELTMAN_FLAG_HP_TO_EMPTY    = 0x00040000;
+var TDW_BELTMAN_FLAG_NO_CONTAINERS  = 0x40000000;
+var TDW_BELTMAN_FLAG_ALL_CONTAINERS = 0x80000000;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BELTMAN_ITEM_IN_CODE   = 0;
+var TDW_BELTMAN_ITEM_IN_OTHER  = 1;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BELTMAN_ITEM_OUT_IN_DATA   = 0;
+var TDW_BELTMAN_ITEM_OUT_BELT_ROW  = 1;
+var TDW_BELTMAN_ITEM_OUT_BELT_COL  = 2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_ActionItem(src_data, row, col)
+{
+	this.src_data = src_data;
+	this.row      = row;
+	this.col      = col;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_BeltInfo(belt_flags)
+{
+	var belt_item_list = new Array();
+	var iter_data;
+	var belt_dims;
+	var count_1;
+	var count_2;
+	var item_row;
+	var item_col;
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Get the belt object if we have one...
+	//
+	// Regardless of whether we're wearing a belt, we'll need to know our belt
+	// storage capacity and other attributes...
+	// ///////////////////////////////////////////////////////////////////////
+	iter_data = D2JSP_OBJ_IterateItem(null, D2JSP_OBJ_FilterIsMyBelt,
+		D2JSP_OBJ_ActionStop, null, D2JSP_MODE_ITEM_EQUIPPED_SELF_OR_MERC);
+	if (iter_data[D2JSP_OBJ_ACTION_COUNT] && ((belt_dims =
+		D2JSP_COMM_GetBeltDimensions(iter_data[D2JSP_OBJ_LAST_OBJECT]))[0])){
+		this.code    = iter_data[D2JSP_OBJ_LAST_OBJECT].code;
+		this.name    = iter_data[D2JSP_OBJ_LAST_OBJECT].name;
+		this.fname   = D2JSP_ITEM_GetItemFName(iter_data[D2JSP_OBJ_LAST_OBJECT]);
+		this.quality = iter_data[D2JSP_OBJ_LAST_OBJECT].quality;
+		this.cols    = belt_dims[0];
+		this.rows    = belt_dims[1];
+	}
+	else {
+		this.code    = null;
+		this.name    = "No Belt";
+		this.fname   = "No Belt";
+		this.quality = 0;
+		this.cols    = 4;
+		this.rows    = 1;
+	}
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Initialize other members...
+	// ///////////////////////////////////////////////////////////////////////
+	this.belt_array      = new Array(this.rows);
+	this.empty_cells     = false;
+	this.upgrades_needed = false;
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Our object representation of the belt...
+	// ///////////////////////////////////////////////////////////////////////
+	for (count_1 = 0; count_1 < this.rows; count_1++) {
+		this.belt_array[count_1] = new Array(this.cols);
+		for (count_2 = 0; count_2 < this.cols; count_2++)
+			this.belt_array[count_1][count_2] = "   ";
+	}
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Get a list of everthing in the belt at the present time...
+	// ///////////////////////////////////////////////////////////////////////
+	iter_data = D2JSP_OBJ_IterateItem(belt_item_list, D2JSP_OBJ_FilterIsInMyBelt,
+		"callback_data.push([new String(this_obj.code), this_obj.x, this_obj.y]); false;",
+		null, D2JSP_MODE_ITEM_IN_BELT);
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// And use that list to populate our object representation...
+	// ///////////////////////////////////////////////////////////////////////
+	for (count_1 = 0; count_1 < belt_item_list.length; count_1++) {
+		item_row = Math.floor(belt_item_list[count_1][1] / this.cols);
+		item_col = belt_item_list[count_1][1] % this.cols;
+		if ((item_row < this.rows) && (item_col < this.cols))
+			this.belt_array[item_row][item_col] = belt_item_list[count_1][0];
+	}
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Determine whether any improvment to belt cells is needed...
+	// ///////////////////////////////////////////////////////////////////////
+ 	for (count_1 = 0; count_1 < this.rows; count_1++) {
+		for (count_2 = 0; count_2 < this.cols; count_2++) {
+			var this_cell = this.belt_array[count_1][count_2];
+			if (this_cell == "   ") {
+				this.empty_cells = true;
+				if (this.upgrades_needed)
+					break;
+			}
+			else if (typeof(D2JSP_ITEM_BeltCellUpgrades[this_cell]) == "undefined")
+				continue;
+			else if (D2JSP_ITEM_BeltCellUpgrades[this_cell].length) {
+				this.upgrades_needed = true;
+				if (this.empty_cells)
+					break;
+			}
+		}
+		if (this.upgrades_needed && this.empty_cells)
+			break;
+  }
+	// ///////////////////////////////////////////////////////////////////////
+
+	this.toString = TDW_BELTMAN_toString;
+
+	function TDW_BELTMAN_toString() {
+		return("Belt " + this.fname + ", capacity " + this.cols + " X " +
+			this.rows + ", empty cells = " + this.empty_cells +
+			", upgrades needed = " + this.upgrades_needed);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_getNeededList(belt_flags)
+{
+	var needed_list = new Array();
+	var cell_needs;
+	var count_1;
+	var count_2;
+	var this_need;
+
+	if (((!this.upgrades_needed) && (!this.empty_cells)) ||
+		(belt_flags &
+		(TDW_BELTMAN_FLAG_NO_FILL_EMPTY | TDW_BELTMAN_FLAG_NO_UPGRADE)))
+		return(needed_list);
+
+	for (count_1 = 0; count_1 < this.rows; count_1++) {
+		for (count_2 = 0; count_2 < this.cols; count_2++) {
+			cell_needs = this.getCellNeeds(count_1, count_2, belt_flags);
+			for (this_need in cell_needs)
+				needed_list[this_need] = true;
+		}
+	}
+
+	runGC();
+
+	return(needed_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_createActionList(src_list, belt_flags, max_rows,
+	max_cols)
+{
+	var action_list = new Array();
+	var src_index   = new Array();
+	var src_count   = 0;
+	var belt_needs  = new Array();
+	var count_1;
+	var count_2;
+	var this_cell;
+
+	max_rows = (D2JSP_UTIL_GEN_TypeOfNumber(max_rows) && (max_rows > 0)) ?
+		Math.min(max_rows, this.rows) : this.rows;
+	max_cols = (D2JSP_UTIL_GEN_TypeOfNumber(max_cols) && (max_cols > 0)) ?
+		Math.min(max_cols, this.cols) : this.cols;
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Ensure it's worth proceeding...
+	// ///////////////////////////////////////////////////////////////////////
+	if ((!src_list.length) || ((!this.upgrades_needed) && (!this.empty_cells)) ||
+		((!this.upgrades_needed) && (belt_flags & TDW_BELTMAN_FLAG_NO_UPGRADE))||
+		((!this.empty_cells) && (belt_flags & TDW_BELTMAN_FLAG_NO_UPGRADE)) ||
+		((belt_flags & TDW_BELTMAN_FLAG_NO_FILL_EMPTY) &&
+		(belt_flags & TDW_BELTMAN_FLAG_NO_UPGRADE)))
+		return(action_list);
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Create a hash of all item codes in the source list where the value is
+	// an array of indices into the source list...
+	//
+	// We don't include those items in the source list which can't be placed
+	// into a belt cell.
+	//
+	// We'll use this to determine quickly whether a particular item code is
+	// available when iterating over the list of prioritized belt cell item
+	// codes.
+	// ///////////////////////////////////////////////////////////////////////
+	for (count_1 = 0; count_1 < src_list.length; count_1++) {
+		this_code = src_list[count_1][TDW_BELTMAN_ITEM_IN_CODE];
+		if (this_code in D2JSP_ITEM_BeltCellUpgrades) {
+			if (!(this_code in src_index))
+				src_index[this_code] = new Array();
+			src_index[this_code].push(count_1);
+			src_count++;
+		}
+	}
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Possible, if none of the items in the source list were valid belt cell
+	// items.
+	// ///////////////////////////////////////////////////////////////////////
+	if (!src_count)
+		return(action_list);
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Get a list of each cell which is unoccupied or could use an upgrade in
+	// contents.
+	//
+	// Note that we do the empty cells first, as they're a priority...
+	// ///////////////////////////////////////////////////////////////////////
+	if (!(belt_flags & TDW_BELTMAN_FLAG_NO_FILL_EMPTY)) {
+		for (count_1 = 0; count_1 < max_rows; count_1++) {
+			for (count_2 = 0; count_2 < max_cols; count_2++) {
+				if (this.belt_array[count_1][count_2] == "   ")
+					belt_needs.push([count_1, count_2,
+						this.getCellNeeds(count_1, count_2, belt_flags)]);
+			}
+		}
+	}
+	for (count_1 = 0; count_1 < max_rows; count_1++) {
+		for (count_2 = 0; count_2 < max_cols; count_2++) {
+			if ((this.belt_array[count_1][count_2] != "   ") &&
+				(this.belt_array[count_1][count_2] in D2JSP_ITEM_BeltCellUpgrades)&&
+				D2JSP_ITEM_BeltCellUpgrades[this.belt_array[count_1][count_2]].
+				length)
+				belt_needs.push([count_1, count_2,
+					this.getCellNeeds(count_1, count_2, belt_flags)]);
+		}
+	}
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// If we couldn't find any belt needs, return an empty action list.
+	// ///////////////////////////////////////////////////////////////////////
+	if (!belt_needs.length)
+		return(action_list);
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// We may have some of the needed belt items in the inventory, stash, or
+	//	cube. If we do, we remove them for the list of belt needs...
+	// ///////////////////////////////////////////////////////////////////////
+	if (!(belt_flags & TDW_BELTMAN_FLAG_NO_CONTAINERS)) {
+		var contain_hash = TDW_BELTMAN_getContainedBeltItems(belt_flags);
+		for (count_1 = 0; count_1 < D2JSP_ITEM_BeltCellPriorities.length;
+			count_1++) {
+			var this_code = D2JSP_ITEM_BeltCellPriorities[count_1];
+			if ((!(this_code in contain_hash)) || (!contain_hash[this_code]))
+				continue;
+			for (count_2 = 0; count_2 < belt_needs.length; ) {
+				if ((this_code in belt_needs[count_2][2]) &&
+					contain_hash[this_code]) {
+					belt_needs.splice(count_2, 1);
+					contain_hash[this_code]--;
+					if (!contain_hash[this_code])
+						delete contain_hash[this_code];
+					if (!belt_needs.length)
+						break;
+				}
+				else
+					count_2++;
+			}
+			if (!belt_needs.length)
+				break;
+		}
+	}
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// If we can fill all of the belt needs by using contained items, no
+	//	action is required, so return.
+	// ///////////////////////////////////////////////////////////////////////
+	if (!belt_needs.length)
+		return(action_list);
+	// ///////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////
+	// Iterate through the prioritized list of possible belt cell items,
+	// placing any which are in the source list and needed by a belt cell
+	// into the action list..
+	// ///////////////////////////////////////////////////////////////////////
+	for (count_1 = 0; count_1 < D2JSP_ITEM_BeltCellPriorities.length; count_1++){
+		var this_code = D2JSP_ITEM_BeltCellPriorities[count_1];
+		if ((!(this_code in src_index)) || (!src_index[this_code].length))
+			continue;
+		for (count_2 = 0; count_2 < belt_needs.length; ) {
+			if ((this_code in belt_needs[count_2][2]) &&
+				src_index[this_code].length) {
+				action_list.push([src_list[src_index[this_code][0]],
+					belt_needs[count_2][0], belt_needs[count_2][1]]);
+				belt_needs.splice(count_2, 1);
+				src_index[this_code].splice(0, 1);
+				src_count--;
+				if ((!src_count) || (!belt_needs.length))
+					break;
+			}
+			else
+				count_2++;
+		}
+		if ((!src_count) || (!belt_needs.length))
+			break;
+	}
+	// ///////////////////////////////////////////////////////////////////////
+
+	runGC();
+
+	return(action_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_getCellNeeds(cell_row, cell_col, belt_flags)
+{
+/*
+	var cell_needs = new Array();
+	var this_cell;
+	var count_1;
+
+	if ((cell_row >= 0) && (cell_col >= 0) &&
+		(cell_row < this.rows) && (cell_col < this.cols)) {
+		this_cell = this.belt_array[cell_row][cell_col];
+		if ((this_cell == "   ") &&
+			(!(belt_flags & TDW_BELTMAN_FLAG_NO_FILL_EMPTY))) {
+			this_cell = "hp1";
+			if (belt_flags & TDW_BELTMAN_FLAG_MP_ONLY)
+				this_cell = "mp1";
+			else if (belt_flags & TDW_BELTMAN_FLAG_RV_ONLY)
+				this_cell = "rvs";
+			else if (belt_flags & TDW_BELTMAN_FLAG_RVL_ONLY)
+				this_cell = "rvl";
+			if (cell_row && (!(belt_flags & TDW_BELTMAN_FLAG_HP_TO_EMPTY))) {
+				for (count_1 = (cell_row - 1); count_1 >= 0; count_1--) {
+					if (this.belt_array[count_1][cell_col] != "   ") {
+						this_cell = this.belt_array[count_1][cell_col];
+						break;
+					}
+				}
+			}
+			cell_needs[this_cell] = true;
+		}
+		if ((this_cell in D2JSP_ITEM_BeltCellUpgrades) &&
+			(!(belt_flags & TDW_BELTMAN_FLAG_NO_UPGRADE))) {
+			for (count_1 = 0;
+				count_1 < D2JSP_ITEM_BeltCellUpgrades[this_cell].length; count_1++)
+				cell_needs[D2JSP_ITEM_BeltCellUpgrades[this_cell][count_1]] = true;
+		}
+	}
+
+	return(cell_needs);
+*/
+	var cell_needs = new Array();
+	var this_cell;
+	var count_1;
+
+	if ((cell_row >= 0) && (cell_col >= 0) &&
+		(cell_row < this.rows) && (cell_col < this.cols)) {
+		this_cell = this.belt_array[cell_row][cell_col];
+		if (this_cell == "   ") {
+			this_cell = this.belt_array[0][cell_col];
+			if (this_cell == "   ")
+				this_cell = "hp1";
+			cell_needs[this_cell] = true;
+		}
+		if (this_cell in D2JSP_ITEM_BeltCellUpgrades) {
+			for (count_1 = 0;
+				count_1 < D2JSP_ITEM_BeltCellUpgrades[this_cell].length; count_1++)
+				cell_needs[D2JSP_ITEM_BeltCellUpgrades[this_cell][count_1]] = true;
+		}
+	}
+
+	return(cell_needs);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_getContainedBeltItems(belt_flags)
+{
+	var belt_list = new Array();
+	var cont_list = new Array();
+
+	if (belt_flags & TDW_BELTMAN_FLAG_NO_CONTAINERS)
+		return(belt_list);
+
+	cont_list[D2JSP_ITEM_CONT_SourceData
+		[D2JSP_ITEM_CONT_SRC_INVENTORY][1] + ""] = true;
+
+	if (belt_flags & TDW_BELTMAN_FLAG_ALL_CONTAINERS) {
+		cont_list[D2JSP_ITEM_CONT_SourceData
+			[D2JSP_ITEM_CONT_SRC_STASH][1] + ""] = true;
+		if (D2JSP_ITEM_HasHoradricCube())
+			cont_list[D2JSP_ITEM_CONT_SourceData
+				[D2JSP_ITEM_CONT_SRC_CUBE][1] + ""] = true;
+	}
+
+	var this_item = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+		D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE);
+
+	if (this_item) {
+		do {
+			if (this_item.code in D2JSP_ITEM_BeltCellUpgrades) {
+				var this_parent = this_item.getParent();
+				if (this_parent && (this_parent.name == me.name) &&
+					(this_item.mode == D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE) &&
+					((this_item.itemloc + "") in cont_list)) {
+					if (!(this_item.code in belt_list))
+						belt_list[this_item.code] = 0;
+					belt_list[this_item.code]++;
+				}
+			}
+		} while (this_item &&
+			this_item.getNext(null, D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE));
+	}
+
+	runGC();
+
+	return(belt_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_coordsAreValid(in_row, in_col)
+{
+	if (D2JSP_UTIL_GEN_TypeOfNumber(in_row) && (in_row >= 0) &&
+		(in_row < this.rows) &&
+		D2JSP_UTIL_GEN_TypeOfNumber(in_col) && (in_col >= 0) &&
+		(in_col < this.cols))
+		return(true);
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_toFormattedStringList()
+{
+	var out_list = [" | 0 | 1 | 2 | 3 |"];
+
+	for (var count_1 = 0; count_1 < this.rows; count_1++)
+		out_list.push(count_1 + "|" + this.belt_array[count_1].join("|") + "|");
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BELTMAN_BeltInfo.prototype.getNeededList = TDW_BELTMAN_getNeededList;
+TDW_BELTMAN_BeltInfo.prototype.getActionList = TDW_BELTMAN_createActionList;
+TDW_BELTMAN_BeltInfo.prototype.getCellNeeds  = TDW_BELTMAN_getCellNeeds;
+TDW_BELTMAN_BeltInfo.prototype.getContainedBeltItems = TDW_BELTMAN_getContainedBeltItems
+TDW_BELTMAN_BeltInfo.prototype.coordsAreValid        = TDW_BELTMAN_coordsAreValid;
+TDW_BELTMAN_BeltInfo.prototype.toFormattedStringList = TDW_BELTMAN_toFormattedStringList;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BELTMAN_OptimizeBelt_FirstTimeFlag   = true;
+var TDW_BELTMAN_OptimizeBelt_SourceEmptyFlag = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_OptimizeBelt(discard_remainder_flag)
+{
+	var belt_dims = D2JSP_COMM_GetCurrentBeltCapacity();
+	var actions_needed;
+
+	TDW_BELTMAN_OptimizeBelt_FirstTimeFlag   = true;
+	TDW_BELTMAN_OptimizeBelt_SourceEmptyFlag = false;
+
+	for (var count_1 = 0; count_1 <= belt_dims[0]; count_1++) {
+		for (var count_2 = 0; count_2 <= belt_dims[1]; count_2++) {
+			var actions_needed = TDW_BELTMAN_OptimizeBeltInternal(count_2 + 1,
+				count_1 + 1);
+			if ((!actions_needed) || TDW_BELTMAN_OptimizeBelt_SourceEmptyFlag)
+				break;
+		}
+		if ((!actions_needed) || TDW_BELTMAN_OptimizeBelt_SourceEmptyFlag)
+			break;
+	}
+
+	if (discard_remainder_flag && (!TDW_BELTMAN_OptimizeBelt_SourceEmptyFlag))
+		TDW_BELTMAN_ClearInventoryOfBeltItems()
+
+	return(actions_needed);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_OptimizeBeltInternal(max_rows, max_cols)
+{
+	var actions_needed = true;
+	var log_obj        = D2JSP_UTIL_LOG_GetALog();
+	var this_obj;
+
+	log_obj.logDebug("TDW_BELTMAN_OptimizeBeltInternal(" + max_rows +
+		", " + max_cols + ") ENTRY");
+
+	D2JSP_UTIL_GEN_ClearCursor();
+
+	while (true) {
+		var my_belt  = new TDW_BELTMAN_BeltInfo();
+		if (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE)
+			log_obj.logMinutiae(my_belt.toFormattedStringList());
+		if ((!my_belt.upgrades_needed) && (!my_belt.empty_cells)) {
+			log_obj.logDebug("TDW_BELTMAN_OptimizeBeltInternal(" + max_rows +
+				", " + max_cols + ") LOOP EXIT (upgrades_needed = " +
+				my_belt.upgrades_needed + ", empty_cells = " + my_belt.empty_cells +
+				")");
+			actions_needed = false;
+			break;
+		}
+		var src_list = TDW_BELTMAN_GetTrashInInventory(max_rows - 1);
+		if (!src_list.length) {
+			log_obj.logDebug("TDW_BELTMAN_OptimizeBeltInternal(" + max_rows +
+				", " + max_cols + ") LOOP EXIT (source list length = 0)");
+			TDW_BELTMAN_OptimizeBelt_SourceEmptyFlag = true;
+			break;
+		}
+		var action_list = my_belt.getActionList(src_list,
+			TDW_BELTMAN_FLAG_NO_CONTAINERS, max_rows, max_cols);
+		if (!action_list.length) {
+			log_obj.logDebug("TDW_BELTMAN_OptimizeBeltInternal(" + max_rows +
+				", " + max_cols + ") LOOP EXIT (action list length = 0)");
+			break;
+		}
+		if (TDW_BELTMAN_OptimizeBelt_FirstTimeFlag) {
+			log_obj.logInfo("Optimizing belt...");
+			TDW_BELTMAN_OptimizeBelt_FirstTimeFlag = false;
+		}
+		var i_spec = action_list[0][TDW_BELTMAN_ITEM_OUT_IN_DATA]
+			[TDW_BELTMAN_ITEM_IN_OTHER];
+		var src_x     = i_spec.x;
+		var src_y     = i_spec.y;
+		var dst_x     = action_list[0][TDW_BELTMAN_ITEM_OUT_BELT_COL];
+		var dst_y     = action_list[0][TDW_BELTMAN_ITEM_OUT_BELT_ROW];
+		var swap_flag = (my_belt.belt_array[dst_y][dst_x] != "   ") ?
+			true : false;
+		log_obj.logDetail("Moving a " + i_spec.fullNameColor + " from the " +
+			"inventory at location [" + src_x + ", " + src_y + "] to the belt "+
+			"at location [" + dst_x + ", " + dst_y + "].");
+		if (!(this_obj = i_spec.findItemExpected("just located")))
+			return(-1);
+		i_spec.fullNameColor += " (GID = " + this_obj.gid + ")";
+		if (D2JSP_COMM_ClickItemToCursor(this_obj)) {
+			log_obj.logDetail(">>> Error occurred in attempting to click the " +
+				i_spec.fullNameColor + " to the cursor. Re-trying...");
+			delay(500);
+			continue;
+		}
+		log_obj.logDetail(">>> " + i_spec.fullNameColor + " clicked from the " +
+			"inventory at location [" + src_x + ", " + src_y + "] to the cursor.");
+		if (D2JSP_COMM_ClickItemToXYLocation(D2JSP_ITEM_CLICK_BUTTON_LEFT, dst_x,
+			dst_y, D2JSP_ITEM_CLICK_CONTAINER_BELT)) {
+			log_obj.logDetail(">>> Error occurred in attempting to click the " +
+				i_spec.fullNameColor + " to the belt. Re-trying...");
+			delay(500);
+			continue;
+		}
+		log_obj.logDetail(">>> " + i_spec.fullNameColor + " clicked to the " +
+			"belt at location [" + dst_x + ", " + dst_y + "].");
+		if (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE) {
+			my_belt = new TDW_BELTMAN_BeltInfo();
+			log_obj.logMinutiae(my_belt.toFormattedStringList());
+		}
+		if (me.itemoncursor) {
+			delay(250);
+			if (D2JSP_COMM_ClickItemToXYLocation(D2JSP_ITEM_CLICK_BUTTON_LEFT,
+				src_x, src_y, D2JSP_ITEM_CLICK_CONTAINER_INVENTORY)) {
+				log_obj.logDetail(">>> Error occurred in attempting to click an " +
+					"item into the inventory. Re-trying...");
+				delay(500);
+				continue;
+			}
+			log_obj.logDetail(">>> Old belt item clicked from the belt at " +
+				"location [" + dst_x + ", " + dst_y + "] to the inventory at " +
+				"location [" + src_x + ", " + src_y + "].");
+			if (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE) {
+				my_belt = new TDW_BELTMAN_BeltInfo();
+				log_obj.logMinutiae(my_belt.toFormattedStringList());
+			}
+		}
+	}
+
+	runGC();
+
+	log_obj.logDebug("TDW_BELTMAN_OptimizeBeltInternal(" + max_rows +
+		", " + max_cols + ") EXIT = " + actions_needed);
+
+	return(actions_needed);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_ClearInventoryOfBeltItems()
+{
+	var log_obj           = D2JSP_UTIL_LOG_GetALog();
+	var src_list          = D2JSP_COMM_GetTrashInInventoryList();
+	var have_moved_scroll = false;
+	var this_obj;
+
+	D2JSP_UTIL_GEN_ClearCursor();
+
+	for (var count_1 = 0; count_1 < src_list.length; ) {
+		var i_spec = src_list[count_1][1];
+		if ((i_spec.code == "isc") || (i_spec.code == "tsc")) {
+			var tome_code = (i_spec.code == "isc") ? "ibk" : "tbk";
+			var tome_obj  = D2JSP_COMM_GetWorstTome(tome_code);
+			var done_flag = false;
+			if (tome_obj && (tome_obj.getStat(D2JSP_STAT_QUANTITY) < 20)) {
+				if ((this_obj = i_spec.findItemExpected("just located")) != null) {
+					if (!D2JSP_COMM_ClickItemToCursor(this_obj)) {
+						if (!D2JSP_COMM_ClickItemToXYLocation(
+							D2JSP_ITEM_CLICK_BUTTON_LEFT, tome_obj.x, tome_obj.y, 0)) {
+							if (!have_moved_scroll)
+								log_obj.logInfo("Filling tomes with left-over " +
+									"scrolls...");
+							src_list.splice(count_1, 1);
+							log_obj.logDetail("Moved a " + i_spec.fullNameColor +
+								" from inventory at location [" + i_spec.x + ", " +
+								i_spec.y + "] to a " + tome_obj.name + ".");
+							have_moved_scroll = true;
+							done_flag         = true;
+						}
+					}
+				}
+			}
+			if (!done_flag)
+				count_1++;
+		}
+		else
+			count_1++;
+	}
+
+	if (src_list.length)
+		log_obj.logInfo("Discarding " + src_list.length + " unneeded belt " +
+			"items...");
+
+	D2JSP_UTIL_GEN_ClearCursor();
+
+	for (var count_1 = 0; count_1 < src_list.length; count_1++) {
+		var i_spec   = src_list[count_1][1];
+		var msg_text = ((i_spec.code in D2JSP_ITEM_BeltCellPotList) ?
+			"Drinking" : "Discarding") + " " + i_spec.fullNameColor +
+			" from inventory at location [" + i_spec.x + ", " + i_spec.y + "].";
+		log_obj.logDetail(msg_text);
+		if (!(this_obj = i_spec.findItemExpected("just located")))
+			continue;
+/*
+		if (i_spec.code in D2JSP_ITEM_BeltCellPotList)
+			clickItem(D2JSP_ITEM_CLICK_BUTTON_RIGHT, this_obj);
+		else {
+;
+		}
+*/
+		D2JSP_COMM_DiscardItem(this_obj);
+		delay(250);
+	}
+
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_GetTrashInInventory(desired_belt_row)
+{
+	var trash_list    = D2JSP_COMM_GetTrashInInventoryList();
+	var callback_data = [desired_belt_row, new Array()];
+
+	if (desired_belt_row) {
+		D2JSP_OBJ_IterateItem(callback_data,
+			TDW_BELTMAN_GetTrashInInventory_Filter, null, null,
+			D2JSP_MODE_ITEM_IN_BELT);
+		if (callback_data[1].length)
+			trash_list = trash_list.concat(callback_data[1]);
+	}
+
+	return(trash_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BELTMAN_GetTrashInInventory_Filter(this_obj, callback_data)
+{
+/*
+	if (D2JSP_OBJ_FilterParentMe(this_obj, callback_data) &&
+		(this_obj.code in callback_data[0]) &&
+		(this_obj.mode == D2JSP_MODE_ITEM_IN_BELT) &&
+		(D2JSP_ITEM_CONT_ItemContainer(this_obj) ==
+		D2JSP_ITEM_CONT_SRC_INVENTORY)) {
+		callback_data[2].push([this_obj.code, new D2JSP_ITEM_Spec(this_obj)]);
+		return(true);
+	}
+	else
+		return(false);
+*/
+	if (D2JSP_OBJ_FilterIsInMyBelt(this_obj, callback_data) &&
+		(Math.floor(this_obj.y / 4) >= callback_data[0])) {
+		callback_data[1].push([this_obj.code, new D2JSP_ITEM_Spec(this_obj)]);
+		return(true);
+	}
+	else
+		return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(TDW_INCLUDE_GUARD_BeltManager_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+includeonce("TDW/ISF.d2l");
+function main()
+{
+	var my_log    = new D2JSP_UTIL_Log
+		("output/_RegressionTest.TDW_BeltManager.d2l.log", null, null, null,
+		null, true);
+	var file_name = "settings/ISF.cfg";
+	var my_belt;
+	var needed_list;
+	var pickup_list;
+	var this_pickup;
+	var this_prop;
+	var count_1;
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	my_log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+	my_log.setLevelScreen(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+/*
+var isf_cfg    = new Array();
+var error_list = new Array();
+if (!ISF_LoadConfigFromFile(file_name,
+	ISF_PARSE_FLAG_CONTINUE_ON_ERROR, error_list, isf_cfg))
+	print("Successfully loaded ISF configuration file '" + file_name + "'.");
+else {
+	print("Errors occurred:");
+	print("------ ---------");
+	while (error_list.length)
+		print(">>>" + error_list.shift());
+}
+ISF_DoStashing(isf_cfg);
+print("Stashing done"); delay(10000);
+*/
+
+	my_belt = new TDW_BELTMAN_BeltInfo();
+
+	my_log.logInfo("My Belt: " + my_belt);
+
+//print("Belt creation done"); delay(10000);
+	my_log.logInfo("================================================================");
+	my_log.logInfo("This is your belt (from bottom up):");
+	my_log.logInfo(my_belt.toFormattedStringList());
+	my_log.logInfo("================================================================");
+//my_log.logInfo("Stopping"); stop();
+
+	needed_list = my_belt.getNeededList();
+//print("Belt needed list creation done"); delay(10000);
+	if (!D2JSP_UTIL_GEN_CountHashElements(needed_list))
+		my_log.logInfo("There isn't any way I could improve current belt contents.");
+	else {
+		my_log.logInfo("You could improve belt contents by picking these up:");
+		for (this_prop in needed_list)
+			my_log.logInfo(this_prop + " = " + D2JSP_ITEM_CodeToName(this_prop));
+	}
+	my_log.logInfo("================================================================");
+
+/*
+	my_log.logInfo("If we had two full rejuves, I'd move them here:");
+	action_list = my_belt.getActionList([["rvl", 0], ["rvl",0]]);
+	for (count_1 = 0; count_1 < action_list.length; count_1++)
+		my_log.logInfo("Row " + (action_list[count_1][TDW_BELTMAN_ITEM_OUT_BELT_ROW] + 1) + ", " +
+			"Column " + (action_list[count_1][TDW_BELTMAN_ITEM_OUT_BELT_COL] + 1));
+	my_log.logInfo("----------------------------------------------------------------");
+	my_log.logInfo("And your belt would look like this (bottom up again):");
+	for (count_1 = 0; count_1 < action_list.length; count_1++)
+		my_belt.belt_array[action_list[count_1][TDW_BELTMAN_ITEM_OUT_BELT_ROW]]
+			[action_list[count_1][TDW_BELTMAN_ITEM_OUT_BELT_COL]] =
+			action_list[count_1][TDW_BELTMAN_ITEM_OUT_IN_DATA]
+			[TDW_BELTMAN_ITEM_IN_CODE];
+	my_log.logInfo(my_belt.toFormattedStringList());
+	// Get a new belt object because we just stuck some fake data in the old one.
+	my_belt = new TDW_BELTMAN_BeltInfo();
+*/
+
+/*
+	my_log.logInfo("================================================================");
+
+	my_log.logInfo("At present, I would pick up the following items:");
+//	pickup_list = ISF_CreatePickupList(null, ISF_PICKUP_FLAG_ALL, 20,
+	pickup_list = ISF_CreatePickupList(isf_cfg, ISF_PICKUP_FLAG_ALL, 20,
+		TDW_BELTMAN_FLAG_NONE, 1);
+	for (count_1 = 0; count_1 < pickup_list.length; count_1++) {
+		this_pickup = pickup_list[count_1];
+		my_log.logInfo(">>> " + this_pickup.code + " = " +
+			D2JSP_ITEM_CodeToName(this_pickup.code) + " located at [" +
+			this_pickup.x + ", " + this_pickup.y + "]");
+	}
+	my_log.logInfo("================================================================");
+
+//	ISF_DoPickupBasic(isf_cfg, pickup_list);
+	ISF_DoPickupBasic(null, pickup_list);
+*/
+
+	TDW_BELTMAN_OptimizeBelt(true);
+
+	my_log.closeLog();
+
+	print("Done");
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+
+

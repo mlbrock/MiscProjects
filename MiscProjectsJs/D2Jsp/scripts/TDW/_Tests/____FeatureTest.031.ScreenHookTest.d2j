@@ -1,0 +1,16 @@
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var scr   = getScreenHook();
+	scr.x     = 100;
+	scr.y     = 100;
+	scr.font  = 5;
+	scr.text  = "Font Number " + scr.font;
+//	scr.color = D2JSP_UTIL_COLOR_BASE_RED;
+
+	while (true)
+		delay(100);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

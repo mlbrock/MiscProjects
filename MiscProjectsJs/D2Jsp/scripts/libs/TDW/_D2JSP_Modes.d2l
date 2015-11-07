@@ -1,0 +1,460 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Mode Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Modes.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion mode constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Modes_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Modes_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant mode values...
+// ////////////////////////////////////////////////////////////////////////////
+	// Player modes
+var D2JSP_MODE_PLAYER_DEATH						=   0;
+var D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN	=   1;
+var D2JSP_MODE_PLAYER_WALKING						=   2;
+var D2JSP_MODE_PLAYER_RUNNING						=   3;
+var D2JSP_MODE_PLAYER_GETTING_HIT				=   4;
+var D2JSP_MODE_PLAYER_STANDING_IN_TOWN			=   5;
+var D2JSP_MODE_PLAYER_WALKING_IN_TOWN			=   6;
+var D2JSP_MODE_PLAYER_ATTACKING_1				=   7;
+var D2JSP_MODE_PLAYER_ATTACKING_2				=   8;
+var D2JSP_MODE_PLAYER_BLOCKING					=   9;
+var D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL		=  10;
+var D2JSP_MODE_PLAYER_THROWING_AN_ITEM			=  11;
+var D2JSP_MODE_PLAYER_KICKING						=  12;
+var D2JSP_MODE_PLAYER_USING_SKILL_1				=  13;
+var D2JSP_MODE_PLAYER_USING_SKILL_2				=  14;
+var D2JSP_MODE_PLAYER_USING_SKILL_3				=  15;
+var D2JSP_MODE_PLAYER_USING_SKILL_4				=  16;
+var D2JSP_MODE_PLAYER_DEAD							=  17;
+var D2JSP_MODE_PLAYER_SEQUENCE					=  18;
+var D2JSP_MODE_PLAYER_BEING_KNOCKED_BACK		=  19;
+	// NPC, monster and hireling modes
+var D2JSP_MODE_NPC_DEATH							=   0;
+var D2JSP_MODE_NPC_STANDING_STILL				=   1;
+var D2JSP_MODE_NPC_WALKING							=   2;
+var D2JSP_MODE_NPC_GETTING_HIT					=   3;
+var D2JSP_MODE_NPC_ATTACKING_1					=   4;
+var D2JSP_MODE_NPC_ATTACKING_2					=   5;
+var D2JSP_MODE_NPC_BLOCKING						=   6;
+var D2JSP_MODE_NPC_CASTING_SPELL_SKILL			=   7;
+var D2JSP_MODE_NPC_USING_SKILL_1					=   8;
+var D2JSP_MODE_NPC_USING_SKILL_2					=   9;
+var D2JSP_MODE_NPC_USING_SKILL_3					=  10;
+var D2JSP_MODE_NPC_USING_SKILL_4					=  11;
+var D2JSP_MODE_NPC_DEAD								=  12;
+var D2JSP_MODE_NPC_BEING_KNOCKED_BACK			=  13;
+var D2JSP_MODE_NPC_SEQUENCE						=  14;
+var D2JSP_MODE_NPC_RUNNING							=  15;
+	// Object modes
+var D2JSP_MODE_OBJECT_IDLE							=   0;
+var D2JSP_MODE_OBJECT_OPERATING					=   1;
+var D2JSP_MODE_OBJECT_OPENED						=   2;
+var D2JSP_MODE_OBJECT_SPECIAL_1					=   3;
+var D2JSP_MODE_OBJECT_SPECIAL_2					=   4;
+var D2JSP_MODE_OBJECT_SPECIAL_3					=   5;
+var D2JSP_MODE_OBJECT_SPECIAL_4					=   6;
+var D2JSP_MODE_OBJECT_SPECIAL_5					=   7;
+	// Item modes
+var D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE	=   0;
+var D2JSP_MODE_ITEM_EQUIPPED_SELF_OR_MERC		=   1;
+var D2JSP_MODE_ITEM_IN_BELT						=   2;
+var D2JSP_MODE_ITEM_ON_GROUND						=   3;
+var D2JSP_MODE_ITEM_ON_CURSOR						=   4;
+var D2JSP_MODE_ITEM_BEING_DROPPED				=   5;
+var D2JSP_MODE_ITEM_SOCKETED_IN_ITEM			=   6;
+var D2JSP_MODE_ITEM_IN_INVENTORY					= 100;
+var D2JSP_MODE_ITEM_IN_STORE						= 101;
+var D2JSP_MODE_ITEM_IN_CUBE						= 103;
+var D2JSP_MODE_ITEM_IN_STASH						= 104;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MODE_PLAYER_MINIMUM = D2JSP_MODE_PLAYER_DEATH;
+var D2JSP_MODE_PLAYER_MAXIMUM = D2JSP_MODE_PLAYER_BEING_KNOCKED_BACK;
+var D2JSP_MODE_PLAYER_COUNT   = 20;
+
+var D2JSP_MODE_NPC_MINIMUM    = D2JSP_MODE_NPC_DEATH;
+var D2JSP_MODE_NPC_MAXIMUM    = D2JSP_MODE_NPC_RUNNING;
+var D2JSP_MODE_NPC_COUNT      = 16;
+
+var D2JSP_MODE_OBJECT_MINIMUM = D2JSP_MODE_OBJECT_IDLE;
+var D2JSP_MODE_OBJECT_MAXIMUM = D2JSP_MODE_OBJECT_SPECIAL_5;
+var D2JSP_MODE_OBJECT_COUNT   = 8;
+
+var D2JSP_MODE_ITEM_MINIMUM   = D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE;
+var D2JSP_MODE_ITEM_MAXIMUM   = D2JSP_MODE_ITEM_IN_STASH;
+var D2JSP_MODE_ITEM_COUNT     = 11;
+
+var D2JSP_MODE_TYPE_PLAYER    = 0;
+var D2JSP_MODE_TYPE_NPC       = 1;
+var D2JSP_MODE_TYPE_OBJECT    = 2;
+var D2JSP_MODE_TYPE_ITEM      = 3;
+var D2JSP_MODE_TYPE_COUNT     = 4;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some mode type-related info...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MODE_TypeInfo = [
+	["Player",	D2JSP_MODE_PLAYER_MINIMUM,	D2JSP_MODE_PLAYER_MAXIMUM],
+	["NPC",		D2JSP_MODE_NPC_MINIMUM,		D2JSP_MODE_NPC_MAXIMUM],
+	["Object",	D2JSP_MODE_OBJECT_MINIMUM,	D2JSP_MODE_OBJECT_MAXIMUM],
+	["Item",		D2JSP_MODE_ITEM_MINIMUM,	D2JSP_MODE_ITEM_MAXIMUM]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps mode numbers to names.
+// ////////////////////////////////////////////////////////////////////////////
+	// Player modes
+var D2JSP_MODE_PLAYER_NameList = new Array(D2JSP_MODE_PLAYER_COUNT);
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_DEATH]                 = "Player death";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN] = "Player standing outside town";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_WALKING]               = "Player walking";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_RUNNING]               = "Player running";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_GETTING_HIT]           = "Player getting hit";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_STANDING_IN_TOWN]      = "Player standing in town";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_WALKING_IN_TOWN]       = "Player walking in town";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_ATTACKING_1]           = "Player attacking 1";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_ATTACKING_2]           = "Player attacking 2";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_BLOCKING]              = "Player blocking";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL]   = "Player casting spell skill";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_THROWING_AN_ITEM]      = "Player throwing an item";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_KICKING]               = "Player kicking";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_USING_SKILL_1]         = "Player using skill 1";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_USING_SKILL_2]         = "Player using skill 2";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_USING_SKILL_3]         = "Player using skill 3";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_USING_SKILL_4]         = "Player using skill 4";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_DEAD]                  = "Player dead";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_SEQUENCE]              = "Player sequence";
+D2JSP_MODE_PLAYER_NameList[D2JSP_MODE_PLAYER_BEING_KNOCKED_BACK]    = "Player being knocked back";
+	// NPC, monster and hireling modes
+var D2JSP_MODE_NPC_NameList = new Array(D2JSP_MODE_NPC_COUNT);
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_DEATH]                       = "NPC death";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_STANDING_STILL]              = "NPC standing still";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_WALKING]                     = "NPC walking";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_GETTING_HIT]                 = "NPC getting hit";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_ATTACKING_1]                 = "NPC attacking 1";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_ATTACKING_2]                 = "NPC attacking 2";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_BLOCKING]                    = "NPC blocking";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_CASTING_SPELL_SKILL]         = "NPC casting spell skill";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_USING_SKILL_1]               = "NPC using skill 1";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_USING_SKILL_2]               = "NPC using skill 2";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_USING_SKILL_3]               = "NPC using skill 3";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_USING_SKILL_4]               = "NPC using skill 4";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_DEAD]                        = "NPC dead";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_BEING_KNOCKED_BACK]          = "NPC being knocked back";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_SEQUENCE]                    = "NPC sequence";
+D2JSP_MODE_NPC_NameList[D2JSP_MODE_NPC_RUNNING]                     = "NPC running";
+	// Object modes
+var D2JSP_MODE_OBJECT_NameList = new Array(D2JSP_MODE_OBJECT_COUNT);
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_IDLE]                  = "Object idle";
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_OPERATING]             = "Object operating";
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_OPENED]                = "Object opened";
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_SPECIAL_1]             = "Object special 1";
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_SPECIAL_2]             = "Object special 2";
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_SPECIAL_3]             = "Object special 3";
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_SPECIAL_4]             = "Object special 4";
+D2JSP_MODE_OBJECT_NameList[D2JSP_MODE_OBJECT_SPECIAL_5]             = "Object special 5";
+	// Item modes
+var D2JSP_MODE_ITEM_NameList = new Array(D2JSP_MODE_ITEM_COUNT);
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE]    = "Item inven stash cube store";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_EQUIPPED_SELF_OR_MERC]     = "Item equipped self or merc";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_IN_BELT]                   = "Item in belt";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_ON_GROUND]                 = "Item on ground";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_ON_CURSOR]                 = "Item on cursor";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_BEING_DROPPED]             = "Item being dropped";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_SOCKETED_IN_ITEM]          = "Item socketed in item";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_IN_INVENTORY]              = "Item in inventory";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_IN_STORE]                  = "Item in store";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_IN_CUBE]                   = "Item in cube";
+D2JSP_MODE_ITEM_NameList[D2JSP_MODE_ITEM_IN_STASH]                  = "Item in stash";
+	// A consolidated list...
+var D2JSP_MODE_ModeNameList = [
+	D2JSP_MODE_PLAYER_NameList,
+	D2JSP_MODE_NPC_NameList,
+	D2JSP_MODE_OBJECT_NameList,
+	D2JSP_MODE_ITEM_NameList
+];	
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MODE_FLAG_INDICATOR  = 1 << 29;
+var D2JSP_MODE_FLAG_VALID_MASK = 0x2FFFFFFF;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MODE_NPC_FLAGS_ALL_BUT_DEAD =
+		(1 << D2JSP_MODE_NPC_STANDING_STILL)      |
+		(1 << D2JSP_MODE_NPC_WALKING)             |
+		(1 << D2JSP_MODE_NPC_GETTING_HIT)         |
+		(1 << D2JSP_MODE_NPC_ATTACKING_1)         |
+		(1 << D2JSP_MODE_NPC_ATTACKING_2)         |
+		(1 << D2JSP_MODE_NPC_BLOCKING)            |
+		(1 << D2JSP_MODE_NPC_CASTING_SPELL_SKILL) |
+		(1 << D2JSP_MODE_NPC_USING_SKILL_1)       |
+		(1 << D2JSP_MODE_NPC_USING_SKILL_2)       |
+		(1 << D2JSP_MODE_NPC_USING_SKILL_3)       |
+		(1 << D2JSP_MODE_NPC_USING_SKILL_4)       |
+		(1 << D2JSP_MODE_NPC_BEING_KNOCKED_BACK)  |
+		(1 << D2JSP_MODE_NPC_SEQUENCE)            |
+		(1 << D2JSP_MODE_NPC_RUNNING);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MODE_PLAYER_FLAGS_ALL_BUT_DEAD =
+		(1 << D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN)	|
+		(1 << D2JSP_MODE_PLAYER_WALKING)						|
+		(1 << D2JSP_MODE_PLAYER_RUNNING)						|
+		(1 << D2JSP_MODE_PLAYER_GETTING_HIT)				|
+		(1 << D2JSP_MODE_PLAYER_STANDING_IN_TOWN)			|
+		(1 << D2JSP_MODE_PLAYER_WALKING_IN_TOWN)			|
+		(1 << D2JSP_MODE_PLAYER_ATTACKING_1)				|
+		(1 << D2JSP_MODE_PLAYER_ATTACKING_2)				|
+		(1 << D2JSP_MODE_PLAYER_BLOCKING)					|
+		(1 << D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL)		|
+		(1 << D2JSP_MODE_PLAYER_THROWING_AN_ITEM)			|
+		(1 << D2JSP_MODE_PLAYER_KICKING)						|
+		(1 << D2JSP_MODE_PLAYER_USING_SKILL_1)				|
+		(1 << D2JSP_MODE_PLAYER_USING_SKILL_2)				|
+		(1 << D2JSP_MODE_PLAYER_USING_SKILL_3)				|
+		(1 << D2JSP_MODE_PLAYER_USING_SKILL_4)				|
+		(1 << D2JSP_MODE_PLAYER_SEQUENCE)					|
+		(1 << D2JSP_MODE_PLAYER_BEING_KNOCKED_BACK);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Mapping of OR'ed mode flags to mode values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MODE_ModeFlagList = new Array(D2JSP_MODE_ModeNameList.length);
+for (count_1 = 0; count_1 < D2JSP_MODE_ModeNameList.length; count_1++) {
+	D2JSP_MODE_ModeFlagList[count_1] = new Array();
+	for (count_2 = 0; count_2 < D2JSP_MODE_ModeNameList[count_1].length;
+		count_2++) {
+		if ((D2JSP_MODE_ModeNameList[count_1][count_2] != null) && (count_2 < 29))
+			D2JSP_MODE_ModeFlagList[count_1][(1 << count_2) + ""] = count_2;
+	}
+}
+delete count_1;
+delete count_2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_IsValid(mode_type, mode_number)
+{
+	return((D2JSP_MODE_TypeIsValid(mode_type) && (mode_number >= 0) &&
+		(typeof(D2JSP_MODE_ModeNameList[mode_type][mode_number]) != "undefined"))?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_TypeIsValid(mode_type)
+{
+	return(((mode_type >= 0) && (mode_type <= D2JSP_MODE_TYPE_COUNT)) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_ModeToName(mode_type, mode_number)
+{
+	return((D2JSP_MODE_IsValid(mode_type, mode_number)) ?
+		D2JSP_MODE_ModeNameList[mode_type][mode_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_UnitModeToName(unit_type, mode_number)
+{
+	var mode_type = D2JSP_MODE_UnitToType(unit_type);
+
+	return((D2JSP_MODE_IsValid(mode_type, mode_number)) ?
+		D2JSP_MODE_ModeNameList[mode_type][mode_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_UnitToType(unit_type)
+{
+	return((unit_type == D2JSP_UTIL_GETUNIT_PLAYER) ? D2JSP_MODE_TYPE_PLAYER :
+			 (unit_type == D2JSP_UTIL_GETUNIT_NPC)    ? D2JSP_MODE_TYPE_NPC    :
+			 (unit_type == D2JSP_UTIL_GETUNIT_OBJECT) ? D2JSP_MODE_TYPE_OBJECT :
+			 (unit_type == D2JSP_UTIL_GETUNIT_ITEM)   ? D2JSP_MODE_TYPE_ITEM   :
+			 -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_ModeFlagsToModeList(mode_type, mode_flags)
+{
+	var out_list = new Array();
+
+	mode_flags &= D2JSP_MODE_FLAG_VALID_MASK;
+
+	if (D2JSP_MODE_TypeIsValid(mode_type) && mode_flags) {
+		for (var this_prop in D2JSP_MODE_ModeFlagList[mode_type]) {
+			if (mode_flags & parseInt(this_prop, 10))
+				out_list.push(D2JSP_MODE_ModeFlagList[mode_type][this_prop]);
+		}
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_ModeFlagsToNameList(mode_type, mode_flags)
+{
+	var out_list  = new Array();
+	var mode_list = D2JSP_MODE_ModeFlagsToModeList(mode_type, mode_flags);
+
+	while (mode_list.length)
+		out_list.push(D2JSP_MODE_ModeToName(mode_type, mode_list.shift()));
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_ModeFlagsToNameString(mode_type, mode_flags)
+{
+	return(D2JSP_MODE_ModeFlagsToNameList(mode_type, mode_flags).join("|"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_UnitModeFlagsToModeList(unit_type, mode_flags)
+{
+	var mode_type = D2JSP_MODE_UnitToType(unit_type);
+
+	return((D2JSP_MODE_IsValid(mode_type, mode_number)) ?
+		D2JSP_MODE_ModeFlagsToModeList(mode_type, mode_flags) : (new Array()));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_UnitModeFlagsToNameList(unit_type, mode_flags)
+{
+	var mode_type = D2JSP_MODE_UnitToType(unit_type);
+
+	return(D2JSP_MODE_ModeFlagsToNameList(mode_type, mode_flags));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_UnitModeFlagsToNameString(unit_type, mode_flags)
+{
+	return(D2JSP_MODE_UnitModeFlagsToNameList(unit_type, mode_flags).join("|"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Modes_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+include("TDW/_D2JSP_Utility.d2l");
+function main() {
+	var count_1;
+	var count_2;
+	var file_name = "output\\RegressionTest._D2JSP_Modes.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_Modes.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	if (file_handle) {
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Complete Mode List");
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_MODE_ModeNameList.length; count_1++) {
+			file_handle.writeLine(D2JSP_MODE_TypeInfo[count_1][0] + " Modes:");
+			for (count_2 = 0; count_2 <
+				D2JSP_MODE_ModeNameList[count_1].length; count_2++) {
+				if (typeof(D2JSP_MODE_ModeNameList[count_1][count_2]) !=
+					"undefined")
+					file_handle.writeLine("\t" + count_2 + "\t" +
+						D2JSP_MODE_ModeNameList[count_1][count_2]);
+			}
+			file_handle.writeLine("");
+		}
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Mode Flag To Mode List");
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_MODE_ModeFlagList.length; count_1++) {
+			file_handle.writeLine(D2JSP_MODE_TypeInfo[count_1][0] + " Mode Flags:");
+			for (var this_prop in D2JSP_MODE_ModeFlagList[count_1]) {
+				var this_flag = parseInt(this_prop, 10);
+				var this_mode = D2JSP_MODE_ModeFlagList[count_1][this_prop];
+				file_handle.writeLine("0x" + D2JSP_UTIL_FORMAT_ZeroFill(
+					this_flag.toString(16), 8) + " = " +
+					D2JSP_UTIL_FORMAT_RJust(this_mode, 3) + " = " +
+					D2JSP_MODE_ModeFlagsToNameString(count_1, this_flag));
+			}
+			file_handle.writeLine("");
+		}
+		D2JSP_MODE_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_MODE_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+
+

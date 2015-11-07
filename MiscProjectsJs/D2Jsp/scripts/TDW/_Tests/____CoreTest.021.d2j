@@ -1,0 +1,59 @@
+/*
+	___CoreTest.020.d2j
+
+	Symptoms    :
+
+		copyUnit(<some-room-object>); dies immediately.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			31.Final Release Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+
+var D2JSP_ROOMSTAT_NSIZEGAMEY = 12;
+
+function main()
+{
+	var file_name = "output/____CoreTest.021.log";
+	var file_handle;
+
+	print("Waiting 1 second for game load completion...");
+	delay(1000);
+	print("Ready.");
+
+	if (!(file_handle = fileOpen(file_name, 2)))
+		print("Unable to open file '" + file_name + "' for appending.");
+	else {
+		file_handle.writeLine("Opened file '" + file_name +
+			"' for appending on " + (new Date()));
+		var this_room = getRoom();
+		if (this_room) {
+			var total_count = 0;
+			var bad_count   = 0;
+			do {
+var did_init = false;
+if (!this_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEY)) {
+	this_room.init();
+	did_init = true;
+}
+				total_count++;
+				if ((this_room.number < 1) || (this_room.number > 1089)) {
+					print("Room number = " + this_room.number +
+						((this_room.number > 1089) ? " (BAD!)" : ""));
+					file_handle.writeLine("Room number = " + this_room.number +
+						((this_room.number > 1089) ? " (BAD!)" : ""));
+					file_handle.flush();
+					bad_count++;
+				}
+if (did_init)
+	this_room.release();
+			} while (this_room && this_room.getNext());
+		}
+		print("Total rooms = " + total_count + ", bad rooms = " + bad_count);
+	}
+
+	print("Stopping script");
+	stop();
+}
+
+

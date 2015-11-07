@@ -1,0 +1,22 @@
+// this will overlay your current hp/mp onto your red/blue balls. PWNed.
+// by njaguar
+
+function main() {
+	s_hp = getScreenHook();
+	s_hp.text=String(me.hp);
+	s_hp.x=50;
+	s_hp.y=550;
+	s_hp.color=0;
+
+	s_mp = getScreenHook();
+	s_mp.text=String(me.mp);
+	s_mp.x=710;
+	s_mp.y=550;
+	s_mp.color=0;
+
+	while(1) {
+		s_hp.text=String(me.hp);
+		s_mp.text=String(me.mp);
+		delay(100);
+	}
+}

@@ -1,0 +1,3 @@
+//include("TDW_BOT_CFG/TDW_BOT_CFG.TDW_BotPindleskin.JUNIOR.d2l");
+include("TDW_BOT_CFG/TDW_BOT_CFG.TDW_BotPindleskin.SENIOR.d2l");
+

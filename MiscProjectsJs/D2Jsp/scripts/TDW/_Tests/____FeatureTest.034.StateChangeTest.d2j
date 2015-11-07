@@ -1,0 +1,53 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+var TestSkill = D2JSP_SKILL_FROZEN_ORB;
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var state_list = new Array(D2JSP_STATE_COUNT);
+	var my_log     = new D2JSP_UTIL_Log("output/____FeatureTest.034." +
+		"StateChangeTest.d2j.log", "FeatureTest.034", null, null, null, true);
+
+	TEST_GetStates(state_list);
+
+	while (true) {
+		state_list = TEST_CompareStates(state_list, my_log);
+		delay(0);
+	}
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_GetStates(state_list)
+{
+	for (var count_1 = 0; count_1 < D2JSP_STATE_COUNT; count_1++)
+		state_list[count_1] = me.getState(count_1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_CompareStates(state_list, log_obj)
+{
+	var tmp_state_list = new Array(D2JSP_STATE_COUNT);
+
+	TEST_GetStates(tmp_state_list);
+
+	for (var count_1 = 0; count_1 < D2JSP_STATE_COUNT; count_1++) {
+		if (state_list[count_1] != tmp_state_list[count_1])
+			log_obj.logInfo("STATE " + D2JSP_UTIL_FORMAT_RJust(count_1, 3) + ": " +
+				D2JSP_UTIL_FORMAT_RJust(state_list[count_1], 11) + " ---> " +
+				D2JSP_UTIL_FORMAT_RJust(tmp_state_list[count_1], 11) + " (" +
+				D2JSP_STATE_StateToName(count_1) + ")");
+	}
+
+	return(tmp_state_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+

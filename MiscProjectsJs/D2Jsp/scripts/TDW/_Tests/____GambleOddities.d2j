@@ -1,0 +1,81 @@
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+var MyLog = new D2JSP_UTIL_Log("output/GambleOddities.log");
+
+function main()
+{
+	var npc_name = "Anya";
+	var npc_obj;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+	print("Ready");
+
+	MyLog.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	while (true) {
+		print("Requesting gamble...");
+		if ((npc_obj = D2JSP_NPC_Gamble(npc_name)) == null) {
+			print("Unable to enter gamble screen with " + npc_name + ".");
+			break;
+		}
+		print("Now in gamble.");
+		var item_count = 0;
+		var this_item  = getUnit(D2JSP_OBJ_TYPE_ITEM, null,
+//			D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE);
+			D2JSP_MODE_ITEM_IN_INVENTORY);
+		var this_parent;
+		if (this_item) {
+			do {
+				this_parent = this_item.getParent();
+				if (this_parent && (this_parent.name == npc_name)) {
+					item_count++;
+					if (this_item.quality >= D2JSP_ITEM_QUALITY_MAGIC)
+						TEST_DoIdle(this_item, "Item quality >= " +
+							D2JSP_ITEM_QualityToName(D2JSP_ITEM_QUALITY_MAGIC) +
+							"(" + this_item.quality + " = " +
+							D2JSP_ITEM_QualityToName(this_item.quality) + ")");
+					else if (this_item.getFlag(D2JSP_ITEMFLAG_IDENTIFIED))
+						TEST_DoIdle(this_item, "Item identified.");
+				}
+			} while (this_item && this_item.getNext());
+		}
+		print("Item count = " + item_count);
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+		D2JSP_COMM_CancelUIMenu(npc_obj);
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+	}
+
+	print("Script stopping.");
+}
+
+// 1342981-1279981
+function TEST_DoIdle(this_item, item_text)
+{
+	MyLog.logInfo(item_text);
+	MyLog.logInfo(">>> " + this_item.code + ", " + this_item.name);
+
+	load("MLB/MLB_DataDump.d2j");
+	delay(10000);
+
+	MyLog.logInfo(item_text);
+	MyLog.logInfo(">>> " + this_item.code + ", " + this_item.name);
+
+	while (true) {
+		delay(1000);
+		print(item_text);
+		print(">>> " + this_item.code + ", " + this_item.name);
+	}
+}
+
+

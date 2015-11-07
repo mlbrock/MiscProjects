@@ -1,0 +1,10 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/MLB_RunShopBot._CORE_.d2l");
+
+function main()
+{
+	D2J_RSB_Start("Larzuk");
+}
+
+

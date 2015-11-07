@@ -1,0 +1,174 @@
+/*******************************************************************************
+*                              Sc_FindPath v0.1                                *
+*                                                                              *
+*                                by Scavenger                                  *
+*                                                                              *
+*      ->  modified version of Syadasti's super-duper path finder v0.1  <-     *
+*                                                                              *
+*******************************************************************************/
+
+/*******************************************************************************
+* CREDITS:                                                                     *
+* ---------------------------------------------------------------------------- *
+* This is a modified version of Syadasti's super-duper path finder v0.1.       *
+* All credits for this go to Syadasti. It's just a little modified to fit into *
+* rushbot. Thanx to Syadasti's pathfinding this pathfinding works!             *
+* So ALL CREDITS for the pathfinding using this lib are for Syadasti.          *
+*******************************************************************************/
+
+/*******************************************************************************
+* NOTE:                                                                        *
+* ---------------------------------------------------------------------------- *
+* I renamed the functions from Sy_ to Sc_, to avoid errors when both are used. *
+*******************************************************************************/
+var _Points = null;
+
+function Sc_FindPath(targetx, targety, maxsep) {
+//
+// PARAMETER: targetx = stairs down X
+// PARAMETER: targety = stairs down Y
+// PARAMETER: maxsep = max separation between vertices, divided by sqrt(2)
+// RETURNS: an array of Sy_Point objects containing the path
+//
+	var v = new Array;
+	for (var i = 0; i < _Points.length; i++)
+		v[i] = new Vertex();
+		
+	_Points[0].set(me);
+	_Points[1].set(targetx, targety);
+	
+	// Create the graph
+	
+	for (var i = 0; i < _Points.length; i++) {
+		for (var j = 0; j < _Points.length; j++) {
+			if (i != j) {
+				var d = _Points[i].dist2(_Points[j]);
+				if (d <= 2 * maxsep * maxsep) {
+					v[i].push(j, Math.sqrt(d)); 
+				} 
+			} 
+		}
+	}
+	
+	Sc_Dijkstra(v, _Points.length, 0);
+	
+	path = new Array();
+	if (!Sc_CreatePath(v, 0, 1, path))
+		return null;
+	
+	return path;
+}
+
+function Sc_BuildMap(lo, hi, offset) {
+//
+// PARAMETER: lo = room number of the first type of room to match
+// PARAMETER: hi = room number of the last type of room to match
+// PARAMETER: offset = number of game coordinates to offset the x/y
+//                     coordinates of room corners to arrive at teleport
+//                     hop target coordinates
+// RETURNS: a Sy_Point object containing the X/Y position of the target room
+//
+
+	if (_Points)
+		delete _Points;
+	
+	_Points = new Array();
+	_Points[0] = new coord();
+	_Points[1] = new coord();
+
+	var ret = new coord();
+	
+	var room = getRoom();
+	do {
+		if (room && room.number) {
+			if (room.number >= lo && room.number <= hi) {
+				ret.set(room.x * 5 + offset, room.y * 5 + offset);
+			}
+			var index = _Points.length;
+			_Points[index] = new coord((room.x * 5) + offset, (room.y * 5) + offset);
+			_Points[index].data = room.number;
+		}
+	} while (room && room.getNext());
+	
+	return ret; 
+}
+
+// constructor for Vertex objects
+function Vertex() {
+	this.NumAdjacencies = 0;
+	this.Adjacent = new Array;
+	this.AdjacencyWeight = new Array;
+	this.Previous = 0;
+	this.Cost = 0;
+	this.push = PushMethod;
+}
+
+// the Vertex object's sole method
+function PushMethod(neighbor, Cost) {
+	this.Adjacent[this.NumAdjacencies] = neighbor;
+	this.AdjacencyWeight[this.NumAdjacencies] = Cost;
+	this.NumAdjacencies++;
+}
+
+function Sc_Dijkstra(v, size, source) {
+	var _Sy_Path_Max = 256;
+	var _INFINITY = 32767;
+	var Cost = new Array;
+	var done = new Array;
+	var to_do = size;
+
+	for (i = 0; i < size; i++) {
+		v[i].Cost = Cost[i] = _INFINITY;
+		v[i].Previous = -1;
+		done[i] = 0;
+	}
+
+	Cost[source] = 0;
+	while (to_do) {
+
+		for (var i = 0; i < size; i++) {
+			if (!done[i]) {
+				iMin=i;
+				break;
+			}
+		}
+
+		for (var i = iMin + 1; i < size; i++) {
+			if (!done[i] && Cost[i] < Cost[iMin]) {
+				iMin = i;
+			}
+		}
+
+		done[iMin] = 1;
+		to_do--;
+		for (var i = 0; i < v[iMin].NumAdjacencies; i++) {
+			if (Cost[iMin] + v[iMin].AdjacencyWeight[i] < Cost[v[iMin].Adjacent[i]]) {
+				v[v[iMin].Adjacent[i]].Previous = iMin;
+				v[v[iMin].Adjacent[i]].Cost = Cost[v[iMin].Adjacent[i]] =
+					Cost[iMin] + v[iMin].AdjacencyWeight[i];
+			}
+		}
+	}
+}
+
+function Sc_CreatePath(v, source, dest, path) {	
+	if (source == dest) {
+		index = path.length;
+		path[index] = new coord(_Points[dest]);
+		path[index].data = _Points[dest].data;
+		return true;
+	}
+	else {
+		if (v[dest].Previous != -1) {
+			Sc_CreatePath(v, source, v[dest].Previous, path);
+			index = path.length;
+			path[index] = new coord(_Points[dest]);
+			path[index].data = _Points[dest].data;
+		}
+		else {
+//			print("ÿc1Sc_CreatePath: Unable to build path");
+			return false;
+		} 
+	}
+	return true;
+}

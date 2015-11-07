@@ -1,0 +1,1077 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Threat Assessment Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BotSupport.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Generalized TDW bot support library.
+//
+// Revison History : 2004-02-03 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_Threat_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_Threat_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_Path.d2l");
+include("TDW/_D2JSP_Common.d2l");
+include("TDW/_D2JSP_Enchants.d2l");
+include("TDW/_D2JSP_States.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// The collision mask used for determining whether it is possible to go to
+//	a particular cell.
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_THREAT_COLL_MASK =	D2JSP_UTIL_COLL_BLOCK_WALK |
+									D2JSP_UTIL_COLL_BLOCK_LOS  |
+									D2JSP_UTIL_COLL_BLOCK_JUMP |
+									D2JSP_UTIL_COLL_BLOCK_PLAYER_WALK;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Multiplier factors for enemy enchantments...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_THREAT_MultiplierEnchants = [
+	[D2JSP_ENCHANT_EXTRA_STRONG,        1.3],
+	[D2JSP_ENCHANT_EXTRA_FAST,          1.2],
+	[D2JSP_ENCHANT_CURSED,              1.1],
+//	[D2JSP_ENCHANT_MAGIC_RESISTANT,     1.0],
+	[D2JSP_ENCHANT_FIRE_ENCHANTED,      1.2],
+	[D2JSP_ENCHANT_CHAMPION,            1.1],
+	[D2JSP_ENCHANT_LIGHTNING_ENCHANTED, 1.4],
+	[D2JSP_ENCHANT_COLD_ENCHANTED,      1.4],
+	[D2JSP_ENCHANT_PRESET_BOSS,         1.3],
+//	[D2JSP_ENCHANT_THIEF,               1.1],
+	[D2JSP_ENCHANT_MANA_BURN,           1.3],
+//	[D2JSP_ENCHANT_TELEPORTATION,       1.0],
+	[D2JSP_ENCHANT_SPECTRAL_HIT,        1.2],
+	[D2JSP_ENCHANT_STONE_SKIN,          1.2],
+	[D2JSP_ENCHANT_MULTIPLE_SHOTS,      1.4],
+	[D2JSP_ENCHANT_AURA_ENCHANTED,      1.1],
+	[D2JSP_ENCHANT_GHOSTLY,             1.1],
+	[D2JSP_ENCHANT_FANATIC,             2.0],
+	[D2JSP_ENCHANT_POSSESSED,           1.1],
+	[D2JSP_ENCHANT_BERSERKER,           1.1]
+];
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Multiplier factors for enemy states...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_THREAT_MultiplierStates = [
+	[D2JSP_STATE_CONVICTION,            1.3],
+	[D2JSP_STATE_MIGHT,                 1.9],
+	[D2JSP_STATE_HOLYFIRE,              1.2],
+	[D2JSP_STATE_THORNS,                1.3],
+	[D2JSP_STATE_DEFIANCE,              1.1],
+	[D2JSP_STATE_BLESSEDAIM,            1.1],
+	[D2JSP_STATE_CONCENTRATION,         1.1],
+	[D2JSP_STATE_HOLYWIND,              1.2],
+	[D2JSP_STATE_HOLYWINDCOLD,          1.2],
+	[D2JSP_STATE_HOLYSHOCK,             1.3],
+	[D2JSP_STATE_FANATICISM,            1.5]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Scaling factors for enemy distance...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_THREAT_DistanceMultipliers = [
+	 4.60517019,
+	 4.23839389,
+	 4.01504205,
+	 3.85014760,
+	 3.71706962,
+	 3.60392994,
+	 3.50438174,
+	 3.41462653,
+	 3.33220451,
+	 3.25542670,
+	 3.18307900,
+	 3.11425550,
+	 3.04825866,
+	 2.98453643,
+	 2.92264102,
+	 2.86220088,
+	 2.80290103,
+	 2.74446886,
+	 2.68666359,
+	 2.62926825,
+	 2.57208334,
+	 2.51492178,
+	 2.45760458,
+	 2.39995713,
+	 2.34180581,
+	 2.28297474,
+	 2.22328258,
+	 2.16253914,
+	 2.10054172,
+	 2.03707093,
+	 1.97188585,
+	 1.90471821,
+	 1.83526516,
+	 1.76318026,
+	 1.68806187,
+	 1.60943791,
+	 1.52674555,
+	 1.43930346,
+	 1.34627301,
+	 1.24660273,
+	 1.13894624,
+	 1.02153695,
+	 0.89198866,
+	 0.74696251,
+	 0.58157540,
+	 0.38826439,
+	 0.15436774
+//	,-0.14384104,
+//	-0.55961579,
+//	-1.26286432
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_Enemy(enemy_obj)
+{
+	this.type        = enemy_obj.type;
+	this.classid     = enemy_obj.classid;
+	this.gid         = enemy_obj.gid;
+	this.area        = enemy_obj.area;
+	this.x           = enemy_obj.x;
+	this.y           = enemy_obj.y;
+	this.weight_init = (this.type == D2JSP_UTIL_GETUNIT_PLAYER) ? 500 : 100;
+	this.weight      = this.weight_init;
+	this.multiplier  = 0;
+
+	for (var count_1 = 0; count_1 < TDW_THREAT_MultiplierEnchants.length;
+		count_1++)
+		this.multiplier +=
+			(enemy_obj.getEnchant(TDW_THREAT_MultiplierEnchants[count_1][0])) ?
+			TDW_THREAT_MultiplierEnchants[count_1][1] : 0;
+
+	for (var count_1 = 0; count_1 < TDW_THREAT_MultiplierStates.length;
+		count_1++)
+		this.multiplier +=
+			(enemy_obj.getState(TDW_THREAT_MultiplierEnchants[count_1][0])) ?
+			TDW_THREAT_MultiplierEnchants[count_1][1] : 0;
+
+	this.weight += Math.floor(this.weight * this.multiplier);
+
+	this.toString = function() {
+		return(
+			"type = " + this.type + ", " +
+			"classid = " + this.classid + ", " +
+			"gid = " + this.gid + ", " +
+			"area = " + this.area + ", " +
+			"x = " + this.x + ", " +
+			"y = " + this.y + ", " +
+			"weight_init = " + this.weight_init.toFixed(8) + ", " +
+			"weight = " + this.weight.toFixed(8) + ", " +
+			"multiplier = " + this.multiplier.toFixed(8));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_GetEnemyList(player_eval_func, npc_eval_func)
+{
+	var enemy_list = new Array();
+
+	player_eval_func = (D2JSP_UTIL_GEN_TypeOfFunction(player_eval_func)) ?
+		player_eval_func : D2JSP_PLAYER_ShouldAvoidEnemyHere;
+	npc_eval_func    = (D2JSP_UTIL_GEN_TypeOfFunction(npc_eval_func)) ?
+		npc_eval_func : D2JSP_NPC_ShouldAvoidEnemyHere;
+
+	var enemy_obj = getUnit(D2JSP_UTIL_GETUNIT_PLAYER, null,
+		D2JSP_MODE_FLAG_INDICATOR | D2JSP_MODE_PLAYER_FLAGS_ALL_BUT_DEAD);
+	if (enemy_obj) {
+		do {
+			if (getPlayerFlag(me.gid, enemy_obj.gid, 8) &&
+				player_eval_func(enemy_obj))
+				enemy_list.push(new TDW_THREAT_Enemy(enemy_obj));
+		} while (enemy_obj && enemy_obj.getNext(null,
+			D2JSP_MODE_FLAG_INDICATOR | D2JSP_MODE_PLAYER_FLAGS_ALL_BUT_DEAD));
+	}
+
+	enemy_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, null,
+		D2JSP_MODE_FLAG_INDICATOR | D2JSP_MODE_NPC_FLAGS_ALL_BUT_DEAD);
+	if (enemy_obj) {
+		do {
+			if (npc_eval_func(enemy_obj))
+				enemy_list.push(new TDW_THREAT_Enemy(enemy_obj));
+		} while (enemy_obj && enemy_obj.getNext(null,
+			D2JSP_MODE_FLAG_INDICATOR | D2JSP_MODE_NPC_FLAGS_ALL_BUT_DEAD));
+	}
+
+	return(enemy_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_MoveSpec(coord_min, coord_max, tether_coord, tether_length,
+	bounding_box)
+{
+	if (arguments.length > 0) {
+		this.coord_min     = (D2JSP_UTIL_GEN_TypeOfUInt(coord_min)) ?
+			coord_min : 0;
+		this.coord_max     = (D2JSP_UTIL_GEN_TypeOfUInt(coord_max) && coord_max) ?
+			coord_max : 18;
+		this.tether_coord  = (D2JSP_UTIL_GEN_TypeOfCoord(tether_coord)) ?
+			tether_coord : null;
+		this.tether_length = (D2JSP_UTIL_GEN_TypeOfUInt(tether_length) &&
+			tether_length) ? tether_length : ((this.tether_coord) ? 25 : 0);
+		this.bounding_box  = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(bounding_box) &&
+			(bounding_box.length == 2) &&
+			D2JSP_UTIL_GEN_TypeOfCoord(bounding_box[0]) &&
+			D2JSP_UTIL_GEN_TypeOfCoord(bounding_box[1])) ? bounding_box : null;
+	}
+	else {
+		this.center_coord  = [me.x, me.y];
+		this.coord_min     = 0;
+		this.coord_max     = 18;
+		this.tether_coord  = null;
+		this.tether_length = 0;
+		this.bounding_box  = null;
+	}
+
+	// Re-order min and max if necessary...
+	if (this.coord_min > this.coord_max) {
+		var coord_tmp = this.coord_min;
+		this.coord_min = this.coord_max;
+		this.coord_max = coord_tmp;
+	}
+
+	// Difference between min and max must be at leat 5 units...
+	if ((this.coord_max - this.coord_min) < 5)
+		this.coord_max += 5 - (this.coord_max - this.coord_min);
+
+	// Pre-calculated negative minimum coordinate distance...
+	this.coord_min_neg = 0 - this.coord_min;
+
+	// Length of the side of the rectangle specified by the max coordinate...
+	this.side_length = (this.coord_min + this.coord_max) * 2;
+
+	// If a bounding box was specified, determine all X,Y coordinates of interest...
+	if (this.bounding_box)
+		this.bounding_box =
+			[
+				[
+					Math.min(this.bounding_box[0][0], this.bounding_box[1][0]),
+					Math.min(this.bounding_box[0][1], this.bounding_box[1][1])
+				],
+				[
+					Math.max(this.bounding_box[0][0], this.bounding_box[1][0]),
+					Math.max(this.bounding_box[0][1], this.bounding_box[1][1])
+				]
+			];
+
+	// Game distance equivalents...
+	this.dist_min   = Math.max(this.coord_min - 1, 0);
+	this.dist_max   = Math.floor(Math.sqrt((this.coord_max * this.coord_max) * 2)) + 1;
+	this.dist_min_2 = this.dist_min * this.dist_min;
+	this.dist_max_2 = this.dist_max * this.dist_max;
+
+	this.toString   = function() {
+		return("coord_min = " + this.coord_min + ", " +
+			"coord_max = " + this.coord_max + ", " +
+			"tether_coord = [" + this.tether_coord + "], " +
+			"tether_length = " + this.tether_length + ", " +
+			"bounding_box = [" + this.bounding_box + "], " +
+			"coord_min_neg = " + this.coord_min_neg + ", " +
+			"side_length = " + this.side_length);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_MapCell(x, y, distance)
+{
+	this.x           = x;
+	this.y           = y;
+	this.distance    = distance;
+	this.distance_me = myDist(this.x, this.y);
+	this.weight      = 0;
+
+	this.applyEnemies = function(enemy_list) {
+		for (var count_1 = 0; count_1 < enemy_list.length; count_1++) {
+			var this_enemy  = enemy_list[count_1];
+			var this_dist   = Dist(this.x, this.y, this_enemy.x, this_enemy.y);
+			this.weight    +=
+				(this_dist >= TDW_THREAT_DistanceMultipliers.length) ? 0 :
+				(TDW_THREAT_DistanceMultipliers[this_dist] *
+				enemy_list[count_1].weight);
+/*
+print("ENEMY = [" + this_enemy + "]");
+print("DISTANCE = " + this_dist);
+print("ENEMY WEIGHT = " + 
+	((this_dist >= TDW_THREAT_DistanceMultipliers.length) ? 0 :
+	(TDW_THREAT_DistanceMultipliers[this_dist] *
+	enemy_list[count_1].weight)));
+print("STOPPING");
+stop();
+*/
+		}
+		return(this.weight);
+	}
+
+	this.toString     = function() {
+		return("[" + D2JSP_UTIL_FORMAT_RJust(this.x, 5) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(this.y, 5) + "] " +
+			D2JSP_UTIL_FORMAT_RJust(this.distance, 5) + " " +
+			D2JSP_UTIL_FORMAT_RJust(this.weight.toFixed(0), 16));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_MapCell_Compare(item_1, item_2)
+{
+	return((item_1.weight < item_2.weight) ? -1 :
+		(item_1.weight > item_2.weight) ? 1 :
+		(item_1.distance < item_2.distance) ? -1 :
+		(item_1.distance > item_2.distance) ? 1 : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_THREAT_AVOID_FLAG_NONE							= 0x0000;
+	// If set, the first zero-weight cell found is returned.
+var TDW_THREAT_AVOID_FLAG_SELECT_FIRST_ZERO			= 0x0001;
+	// If set, priority is not given to the specified center coordinate.
+var TDW_THREAT_AVOID_FLAG_NO_PRIORITY_CENTER			= 0x0002;
+	// If set, the first cell with a weight less than the specified center
+	//	coordinate is returned.
+var TDW_THREAT_AVOID_FLAG_SELECT_FIRST_LT_CENTER	= 0x0004;
+	// If set, the cell selected will be on from which the specified center
+	//	coordinate can be attacked.
+var TDW_THREAT_AVOID_FLAG_CENTER_IS_ATTACKABLE		= 0x0008;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot(center_coord, avoid_spec, flags, step_size,
+	acceptable_risk)
+{
+/*
+	// //////////////////////////////////////////////////////////////////////
+	// Coerce these so we can depend upon our pre-conditions...
+	center_coord    = (D2JSP_UTIL_GEN_TypeOfCoord(center_coord)) ?
+		center_coord : [me.x, me.y];
+	avoid_spec      = (avoid_spec instanceof TDW_THREAT_MoveSpec) ?
+		avoid_spec : (new TDW_THREAT_MoveSpec());
+	step_size       = (D2JSP_UTIL_GEN_TypeOfUInt(step_size) && step_size &&
+		(step_size <= 5)) ? step_size : 5;
+	acceptable_risk = (D2JSP_UTIL_GEN_TypeOfUInt(acceptable_risk) &&
+		acceptable_risk) ? acceptable_risk : -1;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Create working info and get the list of our enemies...
+	var this_area  = me.area;
+	var map_cells  = new Array();
+	var enemy_list = TDW_THREAT_GetEnemyList();
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Area must be created... One hopes it has been, so that we use the cache...
+	TDW_PATH_CreateArea(this_area);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Get the weight for the specified center coordinate...
+	var center_cell = TDW_THREAT_DetermineSpotSafety_Internal(center_coord,
+		avoid_spec, flags, this_area, enemy_list);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	//	Check the center coordinate to see if it meets the specified safety
+	//	parameters. If so, we're done...
+	if (!(flags & TDW_THREAT_AVOID_FLAG_NO_PRIORITY_CENTER)) {
+		if (center_cell && ((!center_cell.weight) ||
+			(center_cell.weight <= acceptable_risk)))
+	D2JSP_UTIL_LOG_GetALog().logInfo("Provisional cell = [" + center_cell + "]");
+			return(center_cell);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Examine each X,Y coordinate with the specified maximum coordinate value...
+	for (var count_1 = (0 - avoid_spec.coord_max);
+		count_1 <= avoid_spec.coord_max; count_1 += step_size) {
+		// Avoid X coordinates within the banned minimum coordinate value.
+		if (avoid_spec.coord_min && (count_1 >= avoid_spec.coord_min_neg) &&
+			(count_1 <= avoid_spec.coord_min))
+			continue;
+//		var this_x = center_coord[0] + count_1;
+		var this_x = (center_coord[0] + count_1) + Math.floor(step_size / 2);
+		for (var count_2 = (0 - avoid_spec.coord_max);
+			count_2 <= avoid_spec.coord_max; count_2 += step_size) {
+			// Avoid Y coordinates within the banned minimum coordinate value.
+			if (avoid_spec.coord_min && (count_1 >= avoid_spec.coord_min_neg) &&
+				(count_1 <= avoid_spec.coord_min))
+				continue;
+//			var this_y   = center_coord[1] + count_2;
+			var this_y   = (center_coord[1] + count_2) + Math.floor(step_size / 2);
+			// Ensure the X,Y coordinates meet our constraints...
+			if (!TDW_THREAT_FindSafestSpot_CheckCoord(center_coord, avoid_spec,
+				flags, this_area, this_x, this_y))
+				continue;
+			// Create a cell for X,Y coordinates...
+			var new_cell = new TDW_THREAT_MapCell(this_x, this_y,
+				Dist(center_coord[0], center_coord[1], this_x, this_y));
+			// Evaluate its safety...
+			new_cell.applyEnemies(enemy_list);
+			// Potential early return if the cell weight is zero...
+			if (((flags & TDW_THREAT_AVOID_FLAG_SELECT_FIRST_ZERO) &&
+				(!new_cell.weight)) || (new_cell.weight <= acceptable_risk))
+{
+	D2JSP_UTIL_LOG_GetALog().logInfo("Early loop exit ZERO = [" + new_cell + "]");
+				return(new_cell);
+}
+			// Potential early return if the cell weight is less than that of
+			// of the specified center coordinate...
+			else if (center_cell &&
+				(flags & TDW_THREAT_AVOID_FLAG_SELECT_FIRST_LT_CENTER) &&
+				(new_cell.weight < center_cell.weight))
+{
+	D2JSP_UTIL_LOG_GetALog().logInfo("Early loop exit LT CENTER = [" + new_cell + "]");
+				return(new_cell);
+}
+			// Otherwise push the cell for local minima optimization...
+			map_cells.push(new_cell);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+//TDW_THREAT_FindSafestSpot_DebugToCSV(center_coord, this_area, avoid_spec,
+//	step_size, map_cells);
+//D2JSP_UTIL_LOG_GetALog().logInfo("STOPPING");
+//stop();
+
+	// //////////////////////////////////////////////////////////////////////
+	// If some valid X,Y coordinates were found, order them from low-to-high
+	// by the calculated threat weighting and (secondarily) by the distance
+	//	from the center coordinate...
+	if (map_cells.length) {
+		map_cells.sort(TDW_THREAT_MapCell_Compare);
+		// Done a lot of stuff here; tell SpiderMonkey to clean up our garbage...
+		runGC();
+		// After sorting, the first element is the local minima. We be done!
+		return(map_cells[0]);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// Found nuttin'. Tell the user.
+	return(null);
+*/
+	return(TDW_THREAT_FindSafestSpot_Internal(false, center_coord, avoid_spec,
+		flags, step_size, acceptable_risk));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpotList(center_coord, avoid_spec, flags,
+	step_size, acceptable_risk)
+{
+	return(TDW_THREAT_FindSafestSpot_Internal(true, center_coord, avoid_spec,
+		flags, step_size, acceptable_risk));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot_Internal(list_flag, center_coord, avoid_spec,
+	flags, step_size, acceptable_risk)
+{
+	// //////////////////////////////////////////////////////////////////////
+	// Coerce these so we can depend upon our pre-conditions...
+	center_coord    = (D2JSP_UTIL_GEN_TypeOfCoord(center_coord)) ?
+		center_coord : [me.x, me.y];
+	avoid_spec      = (avoid_spec instanceof TDW_THREAT_MoveSpec) ?
+		avoid_spec : (new TDW_THREAT_MoveSpec());
+	step_size       = (D2JSP_UTIL_GEN_TypeOfUInt(step_size) && step_size &&
+		(step_size <= 5)) ? step_size : 5;
+	acceptable_risk = (D2JSP_UTIL_GEN_TypeOfUInt(acceptable_risk) &&
+		acceptable_risk) ? acceptable_risk : -1;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Create working info and get the list of our enemies...
+	var this_area  = me.area;
+	var map_cells  = new Array();
+	var enemy_list = TDW_THREAT_GetEnemyList();
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Area must be created... One hopes it has been, so that we use the cache...
+	TDW_PATH_CreateArea(this_area);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Get the weight for the specified center coordinate...
+	var center_cell = (list_flag) ? null :
+		TDW_THREAT_DetermineSpotSafety_Internal(center_coord, avoid_spec, flags,
+		this_area, enemy_list);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	//	Check the center coordinate to see if it meets the specified safety
+	//	parameters. If so, we're done...
+	if ((!list_flag) && (!(flags & TDW_THREAT_AVOID_FLAG_NO_PRIORITY_CENTER)) &&
+		center_cell && ((!center_cell.weight) ||
+		(center_cell.weight <= acceptable_risk)))
+		return(center_cell);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Examine each X,Y coordinate with the specified maximum coordinate value...
+	for (var count_1 = (0 - avoid_spec.coord_max);
+		count_1 <= avoid_spec.coord_max; count_1 += step_size) {
+		// Avoid X coordinates within the banned minimum coordinate value.
+		if (avoid_spec.coord_min && (count_1 >= avoid_spec.coord_min_neg) &&
+			(count_1 <= avoid_spec.coord_min))
+			continue;
+		var this_x = (center_coord[0] + count_1) + Math.floor(step_size / 2);
+		for (var count_2 = (0 - avoid_spec.coord_max);
+			count_2 <= avoid_spec.coord_max; count_2 += step_size) {
+			// Avoid Y coordinates within the banned minimum coordinate value.
+			if (avoid_spec.coord_min && (count_1 >= avoid_spec.coord_min_neg) &&
+				(count_1 <= avoid_spec.coord_min))
+				continue;
+			var this_y   = (center_coord[1] + count_2) + Math.floor(step_size / 2);
+			// Ensure the X,Y coordinates meet our constraints...
+			if (!TDW_THREAT_FindSafestSpot_CheckCoord(center_coord, avoid_spec,
+				flags, this_area, this_x, this_y))
+				continue;
+			// Create a cell for X,Y coordinates...
+			var new_cell = new TDW_THREAT_MapCell(this_x, this_y,
+				Dist(center_coord[0], center_coord[1], this_x, this_y));
+			// Evaluate its safety...
+			new_cell.applyEnemies(enemy_list);
+			// Potential early return if the cell weight is zero...
+			if ((!list_flag) &&
+				((flags & TDW_THREAT_AVOID_FLAG_SELECT_FIRST_ZERO) &&
+				(!new_cell.weight)) || (new_cell.weight <= acceptable_risk))
+				return(new_cell);
+			// Potential early return if the cell weight is less than that of
+			// of the specified center coordinate...
+			else if ((!list_flag) && center_cell &&
+				(flags & TDW_THREAT_AVOID_FLAG_SELECT_FIRST_LT_CENTER) &&
+				(new_cell.weight < center_cell.weight))
+				return(new_cell);
+			// Otherwise push the cell for local minima optimization...
+			map_cells.push(new_cell);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+/*
+TDW_THREAT_FindSafestSpot_DebugToCSV(center_coord, this_area, avoid_spec,
+	step_size, map_cells, "output/______AvoidTest.csv");
+D2JSP_UTIL_LOG_GetALog().logInfo("STOPPING");
+stop();
+*/
+
+	// //////////////////////////////////////////////////////////////////////
+	// If some valid X,Y coordinates were found, order them from low-to-high
+	// by the calculated threat weighting and (secondarily) by the distance
+	//	from the center coordinate...
+	if (map_cells.length) {
+		map_cells.sort(TDW_THREAT_MapCell_Compare);
+		// Done a lot of stuff here; tell SpiderMonkey to clean up our garbage...
+		runGC();
+		// After sorting, the first element is the local minima. We be done!
+		return((!list_flag) ? map_cells[0] : map_cells);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// Otherwise we found nuttin'. Tell the user.
+	return((!list_flag) ? null : map_cells);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_DetermineSpotSafety(center_coord, avoid_spec, flags)
+{
+	center_coord = (D2JSP_UTIL_GEN_TypeOfCoord(center_coord)) ?
+		center_coord : [me.x, me.y];
+	avoid_spec   = (avoid_spec instanceof TDW_THREAT_MoveSpec) ?
+		avoid_spec : (new TDW_THREAT_MoveSpec());
+	step_size    = (D2JSP_UTIL_GEN_TypeOfUInt(step_size) && step_size &&
+		(step_size <= 5)) ? step_size : 5;
+
+	var this_area  = me.area;
+	var enemy_list = TDW_THREAT_GetEnemyList();
+
+	TDW_PATH_CreateArea(this_area);
+
+	return(TDW_THREAT_DetermineSpotSafety_Internal(center_coord, avoid_spec,
+		flags, this_area, enemy_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_DetermineSpotSafety_Internal(center_coord, avoid_spec,
+	flags, this_area, enemy_list)
+{
+	if (!TDW_THREAT_FindSafestSpot_CheckCoord(center_coord, avoid_spec, flags,
+		this_area, center_coord[0], center_coord[1]))
+		return(null);
+
+	var new_cell = new TDW_THREAT_MapCell(center_coord[0],
+		center_coord[1], 0);
+
+	new_cell.applyEnemies(enemy_list);
+
+	return(new_cell);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot_CheckCoord(center_coord, avoid_spec, flags,
+	this_area, this_x, this_y)
+{
+	// //////////////////////////////////////////////////////////////////////
+	// The X,Y coordinate must be within the specified area's rectangular
+	//	domain...
+	if (!TDW_PATH_IsInAreaXY(this_area, this_x, this_y))
+		return(false);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// The X,Y coordinate must be within some room in the area...
+	if (!TDW_PATH_MapGlobal.area_list[this_area].findRoomByXY(this_x, this_y))
+		return(false);
+	// //////////////////////////////////////////////////////////////////////
+
+/*
+	if (checkCollision(this_area, this_x, this_y, 2,
+		this_x, this_y, 2, TDW_THREAT_COLL_MASK))
+		return(false);
+*/
+
+/*
+	if (checkCollision(this_area, this_x, this_y, TDW_THREAT_COLL_MASK))
+		return(false);
+*/
+
+	// //////////////////////////////////////////////////////////////////////
+	// It should be permissible for us to get to the X,Y coordinate...
+	if (checkCollision(this_area, me.x, me.y, 2, this_x, this_y, 2,
+		D2JSP_UTIL_COLL_BLOCK_LOS | D2JSP_UTIL_COLL_BLOCK_JUMP))
+		return(false);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	if ((flags & TDW_THREAT_AVOID_FLAG_CENTER_IS_ATTACKABLE) &&
+		checkCollision(this_area, this_x, this_y, 2,
+		center_coord[0], center_coord[1], 2, TDW_BOT_COLL_BLOCK_ATTACK))
+		return(false);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// If a tether was specified, make sure we're within its range...
+	if (avoid_spec.tether_coord) {
+		var tether_distance = Dist(avoid_spec.tether_coord[0],
+			avoid_spec.tether_coord[1], this_x, this_y);
+		if (tether_distance > avoid_spec.tether_length)
+			return(false);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// If a bounding box was specified, make sure we're within it...
+	if (avoid_spec.bounding_box &&
+		((this_x < avoid_spec.bounding_box[0][0]) ||
+		 (this_y < avoid_spec.bounding_box[0][1]) ||
+		 (this_x > avoid_spec.bounding_box[1][0]) ||
+		 (this_y > avoid_spec.bounding_box[1][1])))
+{
+/*
+	TDW_BOT_Log.logInfoQuiet("Excluded [" + this_x + "," + this_y +
+		"] because of bounding box [[" + avoid_spec.bounding_box[0] + "],[" +
+		avoid_spec.bounding_box[1] + "]]");
+//return(true);
+*/
+		return(false);
+}
+	// //////////////////////////////////////////////////////////////////////
+
+/*
+if (flags & TDW_THREAT_AVOID_FLAG_CENTER_IS_ATTACKABLE) {
+	TDW_BOT_Log.logInfo("Center [" + center_coord + "] is attackable from [" +
+		this_x + "," + this_y + "]");
+	TDW_BOT_Log.logInfo("STOPPING");
+	stop();
+}
+*/
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot_DebugToLog(center_coord, this_area,
+	avoid_spec, step_size, map_cells, log_obj)
+{
+	log_obj = D2JSP_UTIL_LOG_SelectALog(log_obj);
+
+	var cell_data = TDW_THREAT_FindSafestSpot_DebugGetData(center_coord,
+		this_area, avoid_spec, step_size, map_cells);
+
+	log_obj.emitSep("=");
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("Area " + this_area + " (" +
+		D2JSP_AREA_AreaToName(this_area) + ")");
+	log_obj.logInfoQuiet("Center    : [" + center_coord + "]");
+	log_obj.logInfoQuiet("Me        : [" + me.x + ","+ me.y + "]");
+	log_obj.logInfoQuiet("Distance  : " +
+		myDist(center_coord[0], center_coord[1]));
+	log_obj.logInfoQuiet("Avoid Spec: [" + avoid_spec + "]");
+	log_obj.logInfoQuiet("Step Size : " + step_size);
+	log_obj.logInfoQuiet("Cell Count: " + map_cells.length);
+	log_obj.logInfoQuiet("Extent    : " + cell_data.length);
+	log_obj.emitSep("=");
+
+	var tmp_string = D2JSP_UTIL_FORMAT_RJust("", 6) + "|";
+	for (var count_1 = 0; count_1 < cell_data.length; count_1++)
+		tmp_string += D2JSP_UTIL_FORMAT_RJust(cell_data[count_1][0][1], 6) + "|";
+	log_obj.logInfoQuiet(tmp_string);
+
+	for (var count_1 = 0; count_1 < cell_data.length; count_1++) {
+		tmp_string = D2JSP_UTIL_FORMAT_RJust(cell_data[0][count_1][2], 6) + "|";
+		for (var count_2 = 0; count_2 < cell_data[0].length; count_2++)
+			tmp_string +=
+				D2JSP_UTIL_FORMAT_RJust(cell_data[count_1][count_2][0].toFixed(0),
+				6) + "|";
+		log_obj.logInfoQuiet(tmp_string);
+	}
+	log_obj.emitSep("=");
+
+/*
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("\"Actual Area\"");
+	log_obj.emitSep("=");
+	area_ref = TDW_PATH_MapGlobal.area_list[this_area];
+	map_list = area_ref.getStringListBounded(
+		[
+			[
+				cell_data[0][0][1],
+				cell_data[0][0][2]
+			],
+			[
+				cell_data[cell_data.length - 1][cell_data[0].length - 1][1],
+				cell_data[cell_data.length - 1][cell_data[0].length - 1][2]
+			],
+		]);
+	for (var count_1 = 0; count_1 < map_list.length; count_1++)
+		log_obj.logInfoQuiet(map_list[count_1]);
+	log_obj.emitSep("=");
+*/
+
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("Map Cells in Area of Interest");
+	log_obj.emitSep("=");
+	for (var count_1 = 0; count_1 < cell_data.length; count_1++) {
+		tmp_string = "";
+		for (var count_2 = 0; count_2 < cell_data[0].length; count_2++)
+			tmp_string += (cell_data[count_1][count_2][0] == -1) ? "*" : " ";
+		log_obj.logInfoQuiet(tmp_string);
+	}
+	log_obj.emitSep("=");
+
+	var map_list = TDW_THREAT_FindSafestSpot_DebugGetAreaInterest(this_area,
+		cell_data);
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("Actual Area of Interest");
+	log_obj.emitSep("=");
+	for (var count_1 = 0; count_1 < map_list.length; count_1++)
+		log_obj.logInfoQuiet(map_list[count_1]);
+	log_obj.emitSep("=");
+
+	if (avoid_spec.bounding_box) {
+		map_list = TDW_THREAT_FindSafestSpot_DebugGetAreaBounded(this_area,
+			avoid_spec);
+		log_obj.emitSep("=");
+		log_obj.logInfoQuiet("Actual Area Bounding Box");
+		log_obj.emitSep("=");
+		for (var count_1 = 0; count_1 < map_list.length; count_1++)
+			log_obj.logInfoQuiet(map_list[count_1]);
+		log_obj.emitSep("=");
+	}
+
+	runGC();
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot_DebugToCSV(center_coord, this_area,
+	avoid_spec, step_size, map_cells, file_spec)
+{
+	var we_opened_flag = false;
+	var file_handle;
+
+	if (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(file_spec)) {
+		file_handle    = fileOpen(file_spec, 2);
+		we_opened_flag = true;
+		if (!file_handle)
+			return(false);
+	}
+	else if (D2JSP_UTIL_GEN_TypeOfObject(file_spec))
+		file_handle = file_spec;
+	else
+		return(false);
+
+	var cell_data = TDW_THREAT_FindSafestSpot_DebugGetData(center_coord,
+		this_area, avoid_spec, step_size, map_cells);
+
+	file_handle.writeLine("\"Area " + this_area + " (" +
+		D2JSP_AREA_AreaToName(this_area) + ")\"");
+	file_handle.writeLine("\"Center    : [" + center_coord + "]\"");
+	file_handle.writeLine("\"Me        : [" + me.x + "," + me.y + "]\"");
+	file_handle.writeLine("\"Distance  : " +
+		myDist(center_coord[0], center_coord[1]) + "\"");
+	file_handle.writeLine("\"Avoid Spec: [" + avoid_spec + "]\"");
+	file_handle.writeLine("\"Step Size : " + step_size + "\"");
+//	file_handle.writeLine("\"Domain    : [" +
+//		min_x + ", " + min_y + ", " + max_x + ", " + max_y + "]\"");
+	file_handle.writeLine("\"Cell Count: " + map_cells.length + "\"");
+	file_handle.writeLine("\"Extent    : " + cell_data.length + "\"");
+
+	var tmp_string = "\"\"";
+	for (var count_1 = 0; count_1 < cell_data.length; count_1++)
+		tmp_string += ",\"" + cell_data[count_1][0][1] + "\"";
+	file_handle.writeLine(tmp_string);
+
+	for (var count_1 = 0; count_1 < cell_data.length; count_1++) {
+		tmp_string = "\"" + cell_data[0][count_1][2] + "\"";
+		for (var count_2 = 0; count_2 < cell_data[0].length; count_2++)
+			tmp_string += "," +
+				D2JSP_UTIL_FORMAT_RJust(cell_data[count_1][count_2][0].toFixed(0),
+				6);
+		file_handle.writeLine(tmp_string);
+	}
+
+/*
+	file_handle.writeLine("\"==========================================\"");
+	file_handle.writeLine("\"Actual Area\"");
+	file_handle.writeLine("\"==========================================\"");
+	area_ref = TDW_PATH_MapGlobal.area_list[this_area];
+	map_list = area_ref.getStringListBounded(
+		[
+			[
+				cell_data[0][0][1],
+				cell_data[0][0][2]
+			],
+			[
+				cell_data[cell_data.length - 1][cell_data[0].length - 1][1],
+				cell_data[cell_data.length - 1][cell_data[0].length - 1][2]
+			],
+		]);
+	for (var count_1 = 0; count_1 < map_list.length; count_1++)
+		file_handle.writeLine("\"" + map_list[count_1] + "\"");
+	file_handle.writeLine("\"==========================================\"");
+*/
+
+	file_handle.writeLine("\"==========================================\"");
+	file_handle.writeLine("\"Map Cells in Area of Interest\"");
+	file_handle.writeLine("\"==========================================\"");
+	for (var count_1 = 0; count_1 < cell_data.length; count_1++) {
+		tmp_string = "";
+		for (var count_2 = 0; count_2 < cell_data[0].length; count_2++)
+			tmp_string += (cell_data[count_1][count_2][0] == -1) ? "*" : " ";
+		file_handle.writeLine("\"" + tmp_string + "\"");
+	}
+	file_handle.writeLine("\"==========================================\"");
+
+	var map_list = TDW_THREAT_FindSafestSpot_DebugGetAreaInterest(this_area,
+		cell_data);
+	file_handle.writeLine("\"==========================================\"");
+	file_handle.writeLine("\"Actual Area of Interest\"");
+	file_handle.writeLine("\"==========================================\"");
+	for (var count_1 = 0; count_1 < map_list.length; count_1++)
+		file_handle.writeLine("\"" + map_list[count_1] + "\"");
+	file_handle.writeLine("\"==========================================\"");
+
+	if (avoid_spec.bounding_box) {
+		map_list = TDW_THREAT_FindSafestSpot_DebugGetAreaBounded(this_area,
+			avoid_spec);
+		file_handle.writeLine("\"==========================================\"");
+		file_handle.writeLine("\"Actual Area Bounding Box\"");
+		file_handle.writeLine("\"==========================================\"");
+		for (var count_1 = 0; count_1 < map_list.length; count_1++)
+			file_handle.writeLine("\"" + map_list[count_1] + "\"");
+		file_handle.writeLine("\"==========================================\"");
+	}
+
+	if (we_opened_flag)
+		file_handle.close();
+
+	runGC();
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot_DebugGetData(center_coord, this_area,
+	avoid_spec, step_size, map_cells)
+{
+	var min_x = center_coord[0] - avoid_spec.coord_max;
+	var min_y = center_coord[1] - avoid_spec.coord_max;
+	var max_x = 0;
+	var max_y = 0;
+
+	for (var count_1 = 0; count_1 < map_cells.length; count_1++) {
+		max_x = Math.max(max_x, map_cells[count_1].x);
+		max_y = Math.max(max_y, map_cells[count_1].y);
+	}
+
+	max_x -= center_coord[0];
+	max_y -= center_coord[1];
+
+	var cell_data    = new Array();
+//	var added_extent = ((avoid_spec.coord_max * 2) + 1) % step_size;
+//	var added_extent = ((avoid_spec.coord_max * 2) + 1) % (step_size * 2);
+	var added_extent = (step_size > 1) ? step_size : 0;
+	for (var count_1 = (0 - avoid_spec.coord_max);
+		count_1 <= (avoid_spec.coord_max + added_extent); count_1++) {
+		cell_data[count_1 + avoid_spec.coord_max] = new Array();
+		for (var count_2 = (0 - avoid_spec.coord_max);
+			count_2 <= (avoid_spec.coord_max + added_extent); count_2++)
+			cell_data[count_1 + avoid_spec.coord_max][count_2 + avoid_spec.coord_max] =
+				[-1, center_coord[0] + count_1, center_coord[1] + count_2];
+	}
+
+	if (map_cells) {
+		for (var count_1 = 0; count_1 < map_cells.length; count_1++) {
+			if (step_size == 1)
+				cell_data[map_cells[count_1].x - min_x]
+					[map_cells[count_1].y - min_y] =
+						[map_cells[count_1].weight,
+						map_cells[count_1].x, map_cells[count_1].y];
+			else {
+				for (var count_2 = 0; count_2 < step_size; count_2++) {
+					for (var count_3 = 0; count_3 < step_size; count_3++)
+						cell_data[(map_cells[count_1].x - min_x) + count_2]
+							[(map_cells[count_1].y - min_y) + count_3] =
+								[map_cells[count_1].weight,
+								map_cells[count_1].x, map_cells[count_1].y];
+				}
+			}
+		}
+	}
+
+	return(cell_data);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot_DebugGetAreaInterest(this_area, cell_data)
+{
+	return(TDW_PATH_MapGlobal.area_list[this_area].getStringListBounded(
+		[
+			[
+				cell_data[0][0][1],
+				cell_data[0][0][2]
+			],
+			[
+				cell_data[cell_data.length - 1][cell_data[0].length - 1][1],
+				cell_data[cell_data.length - 1][cell_data[0].length - 1][2]
+			],
+		]));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_THREAT_FindSafestSpot_DebugGetAreaBounded(this_area, avoid_spec)
+{
+	return(TDW_PATH_MapGlobal.area_list[this_area].getStringListBounded(
+		avoid_spec.bounding_box));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_Threat_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main()
+{
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/RegressionTest.TDW_Threat.log",
+		"TDW_Threat", null, null, null, true);
+
+	TDW_PATH_CreateArea(me.area);
+
+	var avoid_spec = new TDW_THREAT_MoveSpec(0, 18, 0, 5);
+
+	TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN + "Ready.");
+	me.overhead(D2JSP_UTIL_COLOR_GREEN + "Ready.");
+
+	while (true) {
+		while (D2JSP_AREA_IsTown(me.area)) {
+			me.overhead("Exit town, please.");
+			delay(500);
+		}
+		var last_weight = 0;
+		var start_time  = getTickCount();
+		var best_point  = TDW_THREAT_FindSafestSpot(null, avoid_spec, 0);
+		var end_time    = getTickCount();
+		if (best_point) {
+			var this_dist = myDist(best_point.x, best_point.y);
+			TDW_BOT_Log.logInfoQuiet("Me point = [" + me.x + "," + me.y +
+				"], Best point = [" + best_point + "], distance = " + this_dist +
+				", found in " +
+				((end_time - start_time) / 1000).toFixed(3) + " seconds.");
+			if (this_dist > 1)
+				D2JSP_SKILL_TeleportTo(best_point.x, best_point.y);
+		}
+		else
+			TDW_BOT_Log.logWarningColor("********** NO POINT FOUND!!!");
+		delay(1000);
+	}
+
+	print("Done.");
+
+	TDW_BOT_Log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

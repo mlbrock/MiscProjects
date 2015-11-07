@@ -1,0 +1,12 @@
+function main()
+{
+	var quest_list = new Array(5);
+
+	print("Running...");
+
+	while (true) {
+		me.overhead("[4,10] = " + me.getQuest(100, 100));
+		delay(500);
+	}
+}
+

@@ -1,0 +1,271 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Quests.d2l");
+includeonce("TDW/_D2JSP_Rooms.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_MQ_QuestRows = 48;
+const TDW_MQ_QuestCols = 16;
+
+var TDW_MQ_QuestData = null;
+
+var TDW_MQ_Log       = null;
+
+var TDW_MQ_MyMsgTag  = "\xff" + "c4" + me.name + "\xff" + "c0: ";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var count_down = 0;
+	var show_text;
+	var change_count;
+
+/*
+var file_handle = fileOpen("output/__________TEST_DUMP.txt", 1);
+D2JSP_QUEST_DumpKeyToFile(file_handle);
+file_handle.close();
+print("Stopping");
+stop();
+*/
+
+	TDW_MQ_Log = new D2JSP_UTIL_Log("output/TDW_MonitorQuests." +
+		D2JSP_UTIL_FORMAT_GetUserDottedStringFixed() + ".log", "MonitorQuests");
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	CheckQuestData();
+	LogQuestDetail();
+
+	while (true) {
+		if ((change_count = CheckQuestData()) > 0) {
+			show_text  = D2JSP_UTIL_COLOR_GREEN + "Quest changes=" + change_count;
+			count_down = 10;
+		}
+		if (count_down) {
+			count_down--;
+			D2JSP_UTIL_BNET_OverheadSafe(show_text);
+		}
+		delay(500);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function CheckQuestData()
+{
+	var quest_data  = new Array(TDW_MQ_QuestRows);
+	var change_data = new Array();
+	var diff_count  = 0;
+	var count_1;
+	var count_2;
+
+	for (count_1 = 0; count_1 < TDW_MQ_QuestRows; count_1++) {
+		quest_data[count_1] = new Array(TDW_MQ_QuestCols);
+		for (count_2 = 0; count_2 < TDW_MQ_QuestCols; count_2++)
+			quest_data[count_1][count_2] = me.getQuest(count_1, count_2);
+	}
+
+	if (TDW_MQ_QuestData != null) {
+		for (count_1 = 0; count_1 < TDW_MQ_QuestRows; count_1++) {
+			for (count_2 = 0; count_2 < TDW_MQ_QuestCols; count_2++) {
+				if (TDW_MQ_QuestData[count_1][count_2] !=
+					quest_data[count_1][count_2]) {
+					var rev_map  = D2JSP_QUEST_MapReverse[count_1];
+					var bit_text = "";
+					if (rev_map != null) {
+						bit_text = D2JSP_QUEST_GetQuestBitText(rev_map[0] + 1,
+							rev_map[1] - 1, count_2) + " = ";
+						if (D2JSP_QUEST_IsValidQuest(rev_map[0] + 1, rev_map[1] - 1))
+							bit_text += " (Act " + (rev_map[0] + 1) + ", Quest " +
+								(rev_map[1] - 1) + ")";
+					}
+					else
+						bit_text = D2JSP_QUEST_Name[count_1] + " - " +
+							D2JSP_QUEST_BasicText[count_2] + " (NOT AN IN-ACT QUEST)";
+					change_data.push("Quest Change: @ " +
+						D2JSP_UTIL_FORMAT_RJust(count_1, 2) + ", " +
+						D2JSP_UTIL_FORMAT_RJust(count_2, 2) + ": was " +
+						TDW_MQ_QuestData[count_1][count_2] + ", now " +
+						quest_data[count_1][count_2] + " " + bit_text);
+					diff_count++;
+				}
+			}
+		}
+		if (diff_count) {
+   		TDW_MQ_QuestData = quest_data;
+			LogQuestDetail();
+			TDW_MQ_Log.screenOff();
+			TDW_MQ_Log.emitSep("=");
+			TDW_MQ_Log.emitSep("=");
+			TDW_MQ_Log.logInfo("Quest Data Detail Changes: " + diff_count);
+			TDW_MQ_Log.emitSep("-");
+			TDW_MQ_Log.screenOn();
+			TDW_MQ_Log.logInfo(change_data);
+			TDW_MQ_Log.emitSep("=");
+			TDW_MQ_Log.flushLog();
+		}
+	}
+	else
+		TDW_MQ_QuestData = quest_data;
+
+	return(diff_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function LogMeInfo()
+{
+	TDW_MQ_Log.screenOff();
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.logInfo("Player Data:");
+	TDW_MQ_Log.emitSep("-");
+	TDW_MQ_Log.logInfo("Difficulty           : " + me.diff);
+	TDW_MQ_Log.logInfo("Difficulty Completed?: " +
+		D2JSP_QUEST_IsCompletedDifficulty());
+	TDW_MQ_Log.logInfo("Highest Act Started  : " +
+		D2JSP_QUEST_HighestStartedAct());
+	TDW_MQ_Log.logInfo("Highest Act Completed: " +
+		D2JSP_QUEST_HighestCompletedAct());
+	TDW_MQ_Log.logInfo("Act                  : " + me.act);
+	TDW_MQ_Log.logInfo("Area                 : " + me.area + " (" +
+		D2JSP_AREA_AreaToName(me.area) + ")"); 
+	TDW_MQ_Log.logInfo("Room                 : " +
+		D2JSP_ROOM_GetCurrentRoomNumber(me));
+	TDW_MQ_Log.logInfo("Location             : [" + me.x + ", " + me.y + "]");
+	TDW_MQ_Log.logInfo("Mode                 : "  + me.mode + " (" +
+		D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_PLAYER, me.mode) + ")");
+	TDW_MQ_Log.logInfo("Stat Points          : " +
+		me.getStat(D2JSP_STAT_STATPTS));
+	TDW_MQ_Log.logInfo("Skill Points         : " +
+		me.getStat(D2JSP_STAT_NEWSKILLS));
+	TDW_MQ_Log.emitSep("-");
+
+	var npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC);
+	if (npc_obj) {
+		do {
+			if ((npc_obj.name.toLowerCase() in D2JSP_NPC_MainHash) ||
+				 (npc_obj.name.toLowerCase() in D2JSP_NPC_ActBossHash) ||
+				 (npc_obj.name.toLowerCase() in D2JSP_NPC_SuperUniqueHash))
+				TDW_MQ_Log.logInfo("Nearby NPC  : " +
+					D2JSP_UTIL_FORMAT_LJust(npc_obj.name, 31) +
+					" [" + D2JSP_UTIL_FORMAT_RJust(npc_obj.x, 5) + ", " +
+					D2JSP_UTIL_FORMAT_RJust(npc_obj.y, 5) + "], mode = " +
+					D2JSP_UTIL_FORMAT_RJust(npc_obj.mode, 3) + " (" +
+					D2JSP_MODE_ModeToName(D2JSP_MODE_TYPE_NPC, npc_obj.mode) + ")");
+		} while (npc_obj && npc_obj.getNext());
+	}
+
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.flushLog();
+	TDW_MQ_Log.screenOn();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function LogQuestStatus()
+{
+	var count_1;
+	var count_2;
+	var count_3;
+
+	TDW_MQ_Log.screenOff();
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.logInfo("Quest Status Dump:");
+	TDW_MQ_Log.emitSep("-");
+
+	for (count_1 = 1; count_1 <= 5; count_1++) {
+		for (count_2 = 1;
+			count_2 <= (D2JSP_QUEST_Map[count_1 - 1].length - D2JSP_QUEST_QUEST_1);
+			count_2++) {
+			is_set = false;
+			for (count_3 = 0; count_3 < D2JSP_QUEST_BIT_COUNT; count_3++) {
+				if (TDW_MQ_QuestData
+					[D2JSP_QUEST_Map[count_1 - 1][count_2 + 1]][count_3]) {
+					is_set = true;
+					break;
+				}
+			}
+			if (is_set) {
+				TDW_MQ_Log.logInfo("Act " + count_1 + ", Quest " + count_2 + ": " +
+					D2JSP_QUEST_GetQuestText(count_1, count_2));
+				for (count_3 = 0; count_3 < D2JSP_QUEST_BIT_COUNT; count_3++) {
+					if (TDW_MQ_QuestData
+						[D2JSP_QUEST_Map[count_1 - 1][count_2 + 1]][count_3])
+						TDW_MQ_Log.logInfo("              : " +
+							D2JSP_UTIL_FORMAT_RJust(count_3, 2) + " = " +
+							D2JSP_QUEST_GetQuestBitText(count_1, count_2, count_3));
+				}
+			}
+		}
+	}
+
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.flushLog();
+	TDW_MQ_Log.screenOn();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function LogQuestDetail()
+{
+	var count_1;
+	var count_2;
+
+	LogMeInfo();
+	LogQuestStatus();
+
+	TDW_MQ_Log.screenOff();
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.logInfo("Quest Detail Dump:");
+	TDW_MQ_Log.emitSep("-");
+
+	for (count_1 = 0; count_1 < TDW_MQ_QuestRows; count_1++) {
+		var out_string = "";
+		for (count_2 = 0; count_2 < TDW_MQ_QuestCols; count_2++)
+			out_string += TDW_MQ_QuestData[count_1][count_2].toString();
+		TDW_MQ_Log.logInfo("Quest Level " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 2) + ": " + out_string + " : " +
+			D2JSP_QUEST_Name[count_1]);
+	}
+
+	TDW_MQ_Log.emitSep("=");
+	TDW_MQ_Log.flushLog();
+	TDW_MQ_Log.screenOn();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	if (arguments[0].substr(0, TDW_MQ_MyMsgTag.length) == TDW_MQ_MyMsgTag) {
+		var msg_data = D2JSP_UTIL_GEN_ParseNetString(arguments[0]);
+		if (msg_data) {
+			if (msg_data[0] == me.name) {
+				if (msg_data[1].substr(0, 3) == "MQ:") {
+					TDW_MQ_Log.logInfo("ANNOTATION: " + msg_data[1].substr(3));
+					TDW_MQ_Log.flushLog();
+				}
+				else if (msg_data[1] == "MQQUIT") {
+					D2JSP_UTIL_BNET_OverheadSafe("");
+					print("Quit request received.");
+					LogQuestDetail();
+					TDW_MQ_Log.closeLog();
+					TDW_MQ_Log.flushLog();
+					print("Stopping");
+					stop();
+				}
+			}
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+

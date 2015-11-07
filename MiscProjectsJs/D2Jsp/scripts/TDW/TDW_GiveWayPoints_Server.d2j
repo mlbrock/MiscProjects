@@ -1,0 +1,341 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+includeonce("TDW/TDW_BotSupport.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_GWPS_S_DelayReady         = false;
+var TDW_GWPS_S_DelayCancelPending = false;
+var TDW_GWPS_S_DelayLastKey       = null;
+
+const TDW_GWPS_S_DelayKeyCancel   = 187;		// This is the equals key ('=').
+const TDW_GWPS_S_DelayKeyConfirm  = 187;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_GWPS_C_Log                = null;
+
+// The number of waypoints, exclusive of towns.
+const TDW_GWPS_S_TPScrollCountNeeded = (8 + 8 + 8 + 2 + 8);
+
+// If you want all your chars to have Anya's portal (as I do), you'll set
+// the below variable to 'true'. Important because you can get the Nihlathak
+// quest while standing in another area if partied with someone.
+var TDW_GWPS_S_SkipHallsOfPain    = true;
+
+// How long we'll wait (in seconds) to transport from one waypoint to the next.
+var TDW_GWPS_S_WaitForTransport   =  3;
+
+// We'll give our clients this long (in seconds) to use the portal to the
+// waypoint. If they aren't using the automated client, increase it.
+var TDW_GWPS_S_PerWayPointTimeOut = 15;
+
+// This value (also in seconds) is used instead of the variable
+// 'TDW_GWPS_S_PerWayPointTimeOut' when first changing acts. If your clients
+// aren't using the automated client, increase it.
+var TDW_GWPS_S_PerActTimeOut      = 35;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+TDW_GWPS_S_PerWayPointTimeOut = 60;
+TDW_GWPS_S_PerActTimeOut      = 180;
+	var time_start;
+
+	me.randommove   = true;
+	me.autoparty    = true;
+	me.autoquitonpk = true;
+
+	TDW_GWPS_C_Log = new D2JSP_UTIL_Log("output/TDW_GiveWayPoints_Server." +
+		D2JSP_UTIL_FORMAT_GetUserDottedStringFixed() + ".log",
+		"TDW_GiveWayPoints_Server");
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+
+	time_start = new Date();
+	TDW_GWPS_C_Log.logInfo("-----> Beginning Give Way Points Server run",
+		time_start);
+
+//	Sc_TownMoveSetting("show_errors", true);
+
+	if ((me.act != 1) || (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT)) {
+		if (!Sc_InTown(me))
+			Sc_GotoTown();
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+		if ((me.act != 1) || (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT))
+			TDW_GWPS_S_ErrorExit("Unable to get to the Rouge Encampment Way Point!");
+	}
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_FILL_ALL, null))
+		TDW_GWPS_S_ErrorExit("Unable to complete town logic.");
+
+	TDW_GWPS_S_WaitForParty();
+
+	TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+
+	TDW_GWPS_S_DoWayPoints();
+
+	if (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT) {
+		D2JSP_UTIL_BNET_SaySafe("All done. Attempting to return to the Rogue " +
+			"Encampment...");
+		TDW_MOVE_WaypointUse(D2JSP_AREA_ROGUE_ENCAMPMENT,
+			TDW_GWPS_S_WaitForTransport);
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+	}
+	else
+		D2JSP_UTIL_BNET_SaySafe("All done.");
+
+	time_end = new Date();
+	TDW_GWPS_C_Log.logInfo("-----> Ending Give Way Points Server run (" +
+		((time_end.getTime() - time_start.getTime()) / 1000.0) + " seconds)",
+		time_end);
+
+	TDW_GWPS_C_Log.closeLog();
+
+	print("Script completed normally.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GWPS_S_WaitForParty()
+{
+if (me.version > 0.32) {
+	var this_player;
+
+	while (true) {
+		D2JSP_UTIL_BNET_OverheadSafe("Waiting for a client player...");
+//		this_party = getParty(me.gid);
+		this_party = getParty();
+		if (this_party) {
+			do {
+				if (this_party.name != me.name) {
+					print("Another player (" + this_party.name + ") found!");
+					print("Waiting 10 seconds to begin waypoint serving...");
+					delay(10000);
+					return(0);
+				}
+			} while (this_party && this_party.getNext());
+		}
+		delay(1000);
+	}
+}
+else
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GWPS_S_DoWayPoints()
+{
+	var last_act = me.act;
+	var return_code;
+	var time_out;
+	var count_1;
+	var count_2;
+	var count_3;
+	var target_area;
+
+TDW_GWPS_S_PerWayPointTimeOut = 5;
+TDW_GWPS_S_PerActTimeOut      = 20;
+	for (count_1 = 0; count_1 < D2JSP_WayPoints.length; count_1++) {
+		for (count_2 = 1; count_2 < D2JSP_WayPoints[count_1].length; count_2++) {
+//count_2 = D2JSP_WayPoints[count_1].length - 1;
+			target_area = D2JSP_WayPoints[count_1][count_2];
+			if (D2JSP_AREA_IsTown(target_area))
+				continue;
+			if ((target_area == D2JSP_AREA_HALLS_OF_DEATHS_CALLING) &&
+				TDW_GWPS_S_SkipHallsOfPain) {
+				TDW_GWPS_C_Log.logInfo("Skipping the Halls of Pain waypoint.");
+				delay(200);
+				continue;
+			}
+			if (!(return_code = TDW_MOVE_WaypointUse(target_area,
+				TDW_GWPS_S_WaitForTransport))) {
+				TDW_GWPS_C_Log.logInfo("Arrived at " + D2JSP_AREA_AreaToName());
+				time_out = (me.act == last_act) ? TDW_GWPS_S_PerWayPointTimeOut :
+					TDW_GWPS_S_PerActTimeOut;
+				last_act = me.act;
+				if (TDW_MOVE_UseTBK())
+					TDW_GWPS_S_InLoopFailure("Failed to open a town portal.");
+/*
+				D2JSP_UTIL_BNET_SaySafe("You have " + time_out +
+					" seconds to take this waypoint.");
+				delay(1000);
+				for (count_3 = (time_out - 1); count_3; count_3--) {
+					if (count_3 <= 5)
+						D2JSP_UTIL_BNET_SaySafe(count_3);
+					else if (!(count_3 % 5))
+						D2JSP_UTIL_BNET_SaySafe(count_3 +
+							" seconds to take this waypoint.");
+					delay(1000);
+				}
+*/
+				if (TDW_GWPS_S_DelayLoop(time_out) < 0) {
+					TDW_GWPS_C_Log.logInfo("Waypoint server operation aborted by " +
+						"user");
+					return;
+				}
+				D2JSP_UTIL_BNET_SaySafe("0");
+			}
+			else if (return_code == 1) {
+				D2JSP_UTIL_BNET_SaySafe("I guess I don't have this waypoint!");
+				delay(200);
+				D2JSP_UTIL_BNET_SaySafe("Sorry about that...");
+			}
+			else
+				TDW_GWPS_S_InLoopFailure("Failed to find and use a waypoint.");
+			if (D2JSP_COMM_CountTomesLessThan("tbk", 10)) {
+				if (!TDW_MOVE_WaypointUse(D2JSP_AREA_AreaToTown())) {
+					TDW_GWPS_C_Log.logInfo("Now in " + D2JSP_AREA_AreaToName());
+					if (D2JSP_NPC_FillTomesAll())
+						TDW_GWPS_S_InLoopFailure("Was unable to refill all tomes.");
+					TDW_MOVE_COMPAT_TownMove("waypoint");
+				}
+				else {
+					TDW_GWPS_C_Log.logFatal("Unable to waypoint to " +
+						D2JSP_AREA_AreaToName(D2JSP_AREA_AreaToTown()));
+					return(-1);
+				}
+			}
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	if (TDW_GWPS_S_DelayReady)
+		TDW_GWPS_S_DelayLastKey = arguments[0];
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GWPS_S_DelayLoop(delay_seconds)
+{
+	var message = D2JSP_UTIL_COLOR_GREEN + "Press = to cancel";
+	var count_1;
+	var count_2;
+	var count_3;
+
+	TDW_GWPS_S_DelayReady         = true;
+	TDW_GWPS_S_DelayCancelPending = false;
+	TDW_GWPS_S_DelayLastKey       = null;
+
+	D2JSP_UTIL_BNET_SaySafe("You have " + delay_seconds +
+		" seconds to take this waypoint.");
+
+//	delay(1000);
+
+	for (count_1 = delay_seconds; count_1; count_1--) {
+		if (!(count_1 % 10))
+			D2JSP_UTIL_BNET_SaySafe("Waiting " + count_1 + " seconds for " +
+				D2JSP_AREA_AreaToName() + " waypoint to be taken.");
+		else if (count_1 <= 5)
+			D2JSP_UTIL_BNET_SaySafe(count_1 + " seconds");
+		for (count_2 = 0; count_2 < 2; count_2++) {
+			for (count_3 = 0; count_3 < 5; count_3++) {
+				if (TDW_GWPS_S_DelayLastKey == null)
+					;
+				else if (TDW_GWPS_S_DelayCancelPending == true) {
+					if (TDW_GWPS_S_DelayLastKey == TDW_GWPS_S_DelayKeyConfirm) {
+						print(D2JSP_UTIL_COLOR_RED + "Operation cancelled. " +
+							"Press = again to stop or any other key to continue.");
+						message = D2JSP_UTIL_COLOR_RED + "Press = again to stop";
+						TDW_GWPS_S_DelayLastKey = null;
+						while (TDW_GWPS_S_DelayLastKey == null) {
+							D2JSP_UTIL_BNET_OverheadSafe(message);
+							delay(250);
+						}
+						var final_key                 = TDW_GWPS_S_DelayLastKey;
+						TDW_GWPS_S_DelayReady         = false;
+						TDW_GWPS_S_DelayCancelPending = false;
+						TDW_GWPS_S_DelayLastKey       = null;
+						D2JSP_UTIL_BNET_OverheadSafe("");
+						return((final_key == TDW_GWPS_S_DelayKeyConfirm) ? -1 : 1);
+					}
+					TDW_GWPS_S_DelayCancelPending = false;
+					TDW_GWPS_S_DelayLastKey       = null;
+					message                        = D2JSP_UTIL_COLOR_GREEN +
+						"Press = to cancel";
+				}
+				else if (TDW_GWPS_S_DelayLastKey == TDW_GWPS_S_DelayKeyCancel) {
+					TDW_GWPS_S_DelayCancelPending = true;
+					TDW_GWPS_S_DelayLastKey       = null;
+					message                       = D2JSP_UTIL_COLOR_RED +
+						"Press = again to confirm";
+				}
+				delay(50);
+			}
+			D2JSP_UTIL_BNET_OverheadSafe(message);
+		}
+	}
+
+	TDW_GWPS_S_DelayReady         = false;
+	TDW_GWPS_S_DelayCancelPending = false;
+	TDW_GWPS_S_DelayLastKey       = null;
+
+	D2JSP_UTIL_BNET_OverheadSafe("");
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GWPS_S_InLoopFailure(error_text)
+{
+	D2JSP_UTIL_BNET_SaySafe("Unable to continue: " + error_text);
+
+	if (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT) {
+		D2JSP_UTIL_BNET_SaySafe(">>> Attempting to return to the Rogue " +
+			"Encampment...");
+		TDW_MOVE_WaypointUse(D2JSP_AREA_ROGUE_ENCAMPMENT,
+			TDW_GWPS_S_WaitForTransport);
+	}
+
+	TDW_GWPS_S_ErrorExit(">>> Execution now ceasing: " + error_text);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_GWPS_S_ErrorExit(error_text)
+{
+	D2JSP_UTIL_BNET_SaySafe(error_text);
+	TDW_GWPS_C_Log.logFatal(error_text);
+	delay(500);
+	D2JSP_UTIL_BNET_SaySafe("Aborting...");
+	delay(1000);
+	TDW_GWPS_C_Log.closeLog();
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

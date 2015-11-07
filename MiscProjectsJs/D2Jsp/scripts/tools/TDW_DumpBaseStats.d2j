@@ -1,0 +1,500 @@
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEM_MPQ_INDEX_ITEM_MIN_WEAPON =   0;
+var D2JSP_ITEM_MPQ_INDEX_ITEM_MAX_WEAPON = 305;
+var D2JSP_ITEM_MPQ_COUNT_ITEM_WEAPON     =
+	(D2JSP_ITEM_MPQ_INDEX_ITEM_MAX_WEAPON - D2JSP_ITEM_MPQ_INDEX_ITEM_MIN_WEAPON) + 1;
+
+var D2JSP_ITEM_MPQ_INDEX_ITEM_MIN_ARMOR  = 306;
+var D2JSP_ITEM_MPQ_INDEX_ITEM_MAX_ARMOR  = 507;
+var D2JSP_ITEM_MPQ_COUNT_ITEM_ARMOR      =
+	(D2JSP_ITEM_MPQ_INDEX_ITEM_MAX_ARMOR - D2JSP_ITEM_MPQ_INDEX_ITEM_MIN_ARMOR) + 1;
+
+var D2JSP_ITEM_MPQ_INDEX_ITEM_MIN_MISC   = 508;
+var D2JSP_ITEM_MPQ_INDEX_ITEM_MAX_MISC   = 646;
+var D2JSP_ITEM_MPQ_COUNT_ITEM_MISC       =
+	(D2JSP_ITEM_MPQ_INDEX_ITEM_MAX_MISC - D2JSP_ITEM_MPQ_INDEX_ITEM_MIN_MISC) + 1;
+
+var D2JSP_ITEM_MINIMUM = D2JSP_ITEM_MPQ_INDEX_ITEM_MIN_WEAPON;
+var D2JSP_ITEM_MAXIMUM = D2JSP_ITEM_MPQ_INDEX_ITEM_MAX_MISC;
+var D2JSP_ITEM_COUNT   = (D2JSP_ITEM_MAXIMUM - D2JSP_ITEM_MINIMUM) + 1;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MONSTERS_MINIMUM =   0;
+var D2JSP_MONSTERS_MAXIMUM = 574;
+var D2JSP_MONSTERS_COUNT   = 575;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_MONSTERS2_MINIMUM =   0;
+var D2JSP_MONSTERS2_MAXIMUM = 603;
+var D2JSP_MONSTERS2_COUNT   = 604;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (parseFloat(me.version) < 0.3515) {
+var TDW_DBS_StatTypeList = [
+	["base_items.d2l",		-1,	D2JSP_BASE_ITEMS_NAMES,		D2JSP_BASESTAT_ITEM,			D2JSP_ITEM_MINIMUM,		D2JSP_ITEM_MAXIMUM],
+	["base_monstats.d2l",	-1,	D2JSP_BASE_MONSTATS_NAMES,	D2JSP_BASESTAT_MONSTER,		D2JSP_MONSTERS_MINIMUM,	D2JSP_MONSTERS_MAXIMUM],
+	["base_skills.d2l",		-1,	D2JSP_BASE_SKILLS_NAMES,	D2JSP_BASESTAT_SKILL,		D2JSP_SKILL_MINIMUM,		D2JSP_SKILL_MAXIMUM],
+	["base_objects.d2l",		-1,	D2JSP_BASE_OBJECTS_NAMES,	D2JSP_BASESTAT_OBJECT],
+//	["base_missiles.d2l",	-1,	D2JSP_BASE_MISSILES_NAMES,	D2JSP_BASESTAT_MISSILE,		D2JSP_MISSILE_MINIMUM,	D2JSP_MISSILE_MAXIMUM],
+];
+}
+else if (parseFloat(me.version) < 0.3518) {
+var TDW_DBS_StatTypeList = [
+	["base_items.d2l",		-1,	D2JSP_BASE_ITEMS_NAMES,		D2JSP_BASESTAT_ITEM,			D2JSP_ITEM_MINIMUM,		D2JSP_ITEM_MAXIMUM],
+	["base_monstats.d2l",	-1,	D2JSP_BASE_MONSTATS_NAMES,	D2JSP_BASESTAT_MONSTER,		D2JSP_MONSTERS_MINIMUM,	D2JSP_MONSTERS_MAXIMUM],
+	["base_skills.d2l",		-1,	D2JSP_BASE_SKILLS_NAMES,	D2JSP_BASESTAT_SKILL,		D2JSP_SKILL_MINIMUM,		D2JSP_SKILL_MAXIMUM],
+	["base_objects.d2l",		-1,	D2JSP_BASE_OBJECTS_NAMES,	D2JSP_BASESTAT_OBJECT],
+	["base_missiles.d2l",	-1,	D2JSP_BASE_MISSILES_NAMES,	D2JSP_BASESTAT_MISSILE,		D2JSP_MISSILE_MINIMUM,	D2JSP_MISSILE_MAXIMUM],
+];
+}
+else if (parseFloat(me.version) < 0.3907) {
+var TDW_DBS_StatTypeList = [
+	["base_items.d2l",			D2JSP_BASE_ITEMS_NAMESTR,			D2JSP_BASE_ITEMS_NAMES,				D2JSP_BASESTAT_ITEM,					D2JSP_ITEM_MINIMUM,			D2JSP_ITEM_MAXIMUM],
+	["base_monstats.d2l",		D2JSP_BASE_MONSTATS_NAMESTR,		D2JSP_BASE_MONSTATS_NAMES,			D2JSP_BASESTAT_MONSTER,				D2JSP_MONSTERS_MINIMUM,		D2JSP_MONSTERS_MAXIMUM],
+	["base_skills.d2l",			-1,										D2JSP_BASE_SKILLS_NAMES,			D2JSP_BASESTAT_SKILL,				D2JSP_SKILL_MINIMUM,			D2JSP_SKILL_MAXIMUM],
+	["base_skill_desc.d2l",		D2JSP_BASE_SKILLDESC_STR_NAME,	D2JSP_BASE_SKILLDESC_NAMES,		D2JSP_BASESTAT_SKILL_DESC,			D2JSP_SKILL_MINIMUM,			D2JSP_SKILL_MAXIMUM],
+	["base_objects.d2l",			-1,										D2JSP_BASE_OBJECTS_NAMES,			D2JSP_BASESTAT_OBJECT,				1,									2],
+	["base_missiles.d2l",		-1,										D2JSP_BASE_MISSILES_NAMES,			D2JSP_BASESTAT_MISSILE,				D2JSP_MISSILE_MINIMUM,		D2JSP_MISSILE_MAXIMUM],
+	["base_monstats2.d2l",		-1,										D2JSP_BASE_MONSTATS2_NAMES,		D2JSP_BASESTAT_MONSTER_2,			D2JSP_MONSTERS2_MINIMUM,	D2JSP_MONSTERS2_MAXIMUM],
+	["base_itemstatcost.d2l",	-1,										D2JSP_BASE_ITEMSTATCOST_NAMES,	D2JSP_BASESTAT_ITEM_STAT_COST,	0,									1],
+	["base_levels.d2l",			-1,										D2JSP_BASE_LEVELS_NAMES,			D2JSP_BASESTAT_LEVELS,				D2JSP_AREA_MINIMUM_VALID,	D2JSP_AREA_MAXIMUM_VALID],
+	["base_leveldefs.d2l",		-1,										D2JSP_BASE_LEVELDEFS_NAMES,		D2JSP_BASESTAT_LEVELDEFS,			D2JSP_AREA_MINIMUM_VALID,	D2JSP_AREA_MAXIMUM_VALID],
+	["base_lvlmaze.d2l",			-1,										D2JSP_BASE_LVLMAZE_NAMES,			D2JSP_BASESTAT_LVLMAZE,				D2JSP_AREA_MINIMUM_VALID,	D2JSP_AREA_MAXIMUM_VALID],
+	["base_lvlprest.d2l",		-1,										D2JSP_BASE_LVLPREST_NAMES,			D2JSP_BASESTAT_LVLPREST,			1,									1089],
+	["base_lvlsub.d2l",			-1,										D2JSP_BASE_LVLSUB_NAMES,			D2JSP_BASESTAT_LVLSUB,				0,									  34],
+	["base_lvltypes.d2l",		-1,										D2JSP_BASE_LVLTYPES_NAMES,			D2JSP_BASESTAT_LVLTYPES,			1,									  37],
+	["base_lvlwarp.d2l",			-1,										D2JSP_BASE_LVLWARP_NAMES,			D2JSP_BASESTAT_LVLWARP,				0,									  82]
+];
+}
+else {
+var TDW_DBS_StatTypeList = [
+	["base_items.d2l",			D2JSP_BASE_ITEMS_NAMESTR,			D2JSP_BASE_ITEMS_NAMES,				D2JSP_BASESTAT_ITEM,					D2JSP_ITEM_MINIMUM,			D2JSP_ITEM_MAXIMUM],
+	["base_monstats.d2l",		D2JSP_BASE_MONSTATS_NAMESTR,		D2JSP_BASE_MONSTATS_NAMES,			D2JSP_BASESTAT_MONSTER,				D2JSP_MONSTERS_MINIMUM,		D2JSP_MONSTERS_MAXIMUM],
+	["base_skill_desc.d2l",		D2JSP_BASE_SKILLDESC_STR_NAME,	D2JSP_BASE_SKILLDESC_NAMES,		D2JSP_BASESTAT_SKILL_DESC,			0,									 220],
+	["base_skills.d2l",			-1,										D2JSP_BASE_SKILLS_NAMES,			D2JSP_BASESTAT_SKILL,				D2JSP_SKILL_MINIMUM,			D2JSP_SKILL_MAXIMUM],
+	["base_objects.d2l",			-1,										D2JSP_BASE_OBJECTS_NAMES,			D2JSP_BASESTAT_OBJECT,				0,									 572],
+	["base_missiles.d2l",		-1,										D2JSP_BASE_MISSILES_NAMES,			D2JSP_BASESTAT_MISSILE,				D2JSP_MISSILE_MINIMUM,		D2JSP_MISSILE_MAXIMUM],
+	["base_monstats2.d2l",		-1,										D2JSP_BASE_MONSTATS2_NAMES,		D2JSP_BASESTAT_MONSTER_2,			D2JSP_MONSTERS2_MINIMUM,	D2JSP_MONSTERS2_MAXIMUM],
+	["base_itemstatcost.d2l",	-1,										D2JSP_BASE_ITEMSTATCOST_NAMES,	D2JSP_BASESTAT_ITEM_STAT_COST,	0,									   1],
+	["base_levels.d2l",			-1,										D2JSP_BASE_LEVELS_NAMES,			D2JSP_BASESTAT_LEVELS,				0,									D2JSP_AREA_MAXIMUM_VALID],
+	["base_leveldefs.d2l",		-1,										D2JSP_BASE_LEVELDEFS_NAMES,		D2JSP_BASESTAT_LEVELDEFS,			D2JSP_AREA_MINIMUM_VALID,	D2JSP_AREA_MAXIMUM_VALID],
+	["base_lvlmaze.d2l",			-1,										D2JSP_BASE_LVLMAZE_NAMES,			D2JSP_BASESTAT_LVLMAZE,				0,									  78],
+	["base_lvlsub.d2l",			-1,										D2JSP_BASE_LVLSUB_NAMES,			D2JSP_BASESTAT_LVLSUB,				0,									  33],
+	["base_lvlwarp.d2l",			-1,										D2JSP_BASE_LVLWARP_NAMES,			D2JSP_BASESTAT_LVLWARP,				0,									  82],
+	["base_lvlprest.d2l",		-1,										D2JSP_BASE_LVLPREST_NAMES,			D2JSP_BASESTAT_LVLPREST,			1,									1089],
+	["base_lvltypes.d2l",		-1,										D2JSP_BASE_LVLTYPES_NAMES,			D2JSP_BASESTAT_LVLTYPES,			1,									  35],
+
+	["base_charstats.d2l",		-1,										D2JSP_BASE_CHARSTATS_NAMES,		D2JSP_BASESTAT_CHARSTATS,			0,									   6],
+	["base_setitems.d2l",		-1,										D2JSP_BASE_SETITEMS_NAMES,			D2JSP_BASESTAT_SET_ITEMS,			0,									 126],
+	["base_uniqueitems.d2l",	-1,										D2JSP_BASE_UNIQUEITEMS_NAMES,		D2JSP_BASESTAT_UNIQUE_ITEMS,		0,									 399],
+	["base_sets.d2l",				-1,										D2JSP_BASE_SETS_NAMES,				D2JSP_BASESTAT_SETS,					0,									  31]
+];
+}
+
+var TDW_DBS_StatClassHash = new Array();
+TDW_DBS_StatClassHash["base_items.d2l"]			= "Items";
+TDW_DBS_StatClassHash["base_monstats.d2l"]		= "MonStats";
+TDW_DBS_StatClassHash["base_skill_desc.d2l"]		= "SkillDesc";
+TDW_DBS_StatClassHash["base_skills.d2l"]			= "Skills";
+TDW_DBS_StatClassHash["base_objects.d2l"]			= "Objects";
+TDW_DBS_StatClassHash["base_missiles.d2l"]		= "Missiles";
+TDW_DBS_StatClassHash["base_monstats2.d2l"]		= "MonStats2";
+TDW_DBS_StatClassHash["base_itemstatcost.d2l"]	= "ItemStatCost";
+TDW_DBS_StatClassHash["base_levels.d2l"]			= "Levels";
+TDW_DBS_StatClassHash["base_leveldefs.d2l"]		= "LevelDefs";
+TDW_DBS_StatClassHash["base_lvlmaze.d2l"]			= "LvlMaze";
+TDW_DBS_StatClassHash["base_lvlsub.d2l"]			= "LvlSub";
+TDW_DBS_StatClassHash["base_lvlwarp.d2l"]			= "LvlWarp";
+TDW_DBS_StatClassHash["base_lvlprest.d2l"]		= "LvlPrest";
+TDW_DBS_StatClassHash["base_lvltypes.d2l"]		= "LvlTypes";
+TDW_DBS_StatClassHash["base_charstats.d2l"]		= "CharStats";
+TDW_DBS_StatClassHash["base_setitems.d2l"]		= "SetItems";
+TDW_DBS_StatClassHash["base_uniqueitems.d2l"]	= "UniqueItems";
+TDW_DBS_StatClassHash["base_sets.d2l"]				= "Sets";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_DBS_Log = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	TDW_DBS_Log = new D2JSP_UTIL_Log("output/TDW_DumpBaseStats.log");
+
+TDW_DBS_Log.syncModeOn();
+	for (var count_1 = 0; count_1 < TDW_DBS_StatTypeList.length; count_1++) {
+//for (var count_1 = 15; count_1 < TDW_DBS_StatTypeList.length; count_1++) {
+//for (var count_1 = 5; count_1 < 6; count_1++) {
+//for (var count_1 = 16; count_1 < 17; count_1++) {
+//for (var count_1 = 1; count_1 < 2; count_1++) {
+//for (var count_1 = 11; count_1 < 12; count_1++) {
+//for (var count_1 = 10; count_1 < 11; count_1++) {
+//for (var count_1 = 8; count_1 < 9; count_1++) {
+		if (TDW_DBS_StatTypeList[count_1].length == 6)
+			TDW_DBS_DumpBaseStats(TDW_DBS_StatTypeList[count_1][0],
+				TDW_DBS_StatTypeList[count_1][1],
+				TDW_DBS_StatTypeList[count_1][2],
+				TDW_DBS_StatTypeList[count_1][3],
+				TDW_DBS_StatTypeList[count_1][4],
+				TDW_DBS_StatTypeList[count_1][5]);
+	}
+
+	TDW_DBS_Log.closeLog();
+
+	print("Done");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_DBS_DumpBaseStats(file_name, namestr_index, file_data, get_index,
+	min_index, max_index)
+{
+	var max_list       = new Array(file_data.length);
+	var data_count     = (max_index - min_index) + 1;
+	var data_list      = new Array(data_count);
+	var name_list      = new Array(data_count);
+	var max_name       = 0;
+	var file_base      = "output/TDW_DumpBaseStats." + file_name;
+	var file_name_log  = file_base + ".txt";
+	var file_name_csv  = file_base + ".csv";
+	var log_obj        = new D2JSP_UTIL_Log(file_name_log, null, null, null,
+									true, true);
+	var csv_handle     = null;
+
+	if ((csv_handle = fileOpen(file_name_csv, 1)) == null) {
+		print("Unable to open file '" + file_name_csv + "' for writing.");
+		return(-1);
+	}
+
+	TDW_DBS_Log.logInfo("Creating base stats data for '" + file_name+ "'...");
+
+	for (var count_1 = 0; count_1 < file_data.length; count_1++)
+		max_list[count_1] = file_data[count_1].length;
+
+	for (var count_1 = min_index; count_1 <= max_index; count_1++) {
+		data_list[count_1] = new Array(file_data.length + 1);
+		name_list[count_1] = (namestr_index > -1) ?
+			getLocaleString(getBaseStat(get_index, count_1, namestr_index)) : "";
+		name_list[count_1] = (name_list[count_1]) ? name_list[count_1] : "";
+		name_list[count_1] = name_list[count_1].replace(/^.+(\x0a)/g, "");
+		max_name           = Math.max(max_name, name_list[count_1].length);
+		for (var count_2 = 0; count_2 < file_data.length; count_2++) {
+			var this_stat = getBaseStat(get_index, count_1, count_2);
+			if (this_stat != null) {
+				var this_length = (D2JSP_UTIL_GEN_TypeOfString(this_stat)) ?
+					this_stat.length : this_stat.toString(10).length;
+				data_list[count_1][count_2] = this_stat;
+				max_list[count_2] = Math.max(max_list[count_2], this_length);
+			}
+		}
+//if (count_1 > 100)
+//	break;
+	}
+
+	if (file_name == "base_uniqueitems.d2l") {
+		if (data_list[278][1] == "Class Specific") {
+			data_list.splice(278, 1);
+			max_index--;
+		}
+		if (data_list[267][1] == "Rings") {
+			data_list.splice(267, 1);
+			max_index--;
+		}
+		if (data_list[247][1] == "Elite Uniques") {
+			data_list.splice(247, 1);
+			max_index--;
+		}
+		if (data_list[200][1] == "Armor") {
+			data_list.splice(200, 1);
+			max_index--;
+		}
+	}
+
+	var first_col  = Math.max(5, data_count.toString(10).length);
+	var second_col = Math.max(6, max_name);
+	var head_1     = D2JSP_UTIL_FORMAT_LJust("", first_col, "=") + " " +
+		D2JSP_UTIL_FORMAT_LJust("", second_col, "=");
+	var head_2     = D2JSP_UTIL_FORMAT_LJust("INDEX", first_col) + " " +
+		D2JSP_UTIL_FORMAT_LJust("STRING", second_col);
+	var head_3     = D2JSP_UTIL_FORMAT_LJust("", first_col) + " " +
+		D2JSP_UTIL_FORMAT_LJust("", second_col);
+	var head_4     = D2JSP_UTIL_FORMAT_LJust("", first_col, "-") + " " +
+		D2JSP_UTIL_FORMAT_LJust("", second_col, "-");
+
+	var csv_str_1 = TDW_DBS_FormatCSV("INDEX") + "," + TDW_DBS_FormatCSV("STRING");
+	var csv_str_2 = TDW_DBS_FormatCSV("") + "," + TDW_DBS_FormatCSV("");
+
+	for (var count_1 = 0; count_1 < file_data.length; count_1++) {
+		head_1    += " " + D2JSP_UTIL_FORMAT_LJust("", max_list[count_1], "=");
+		head_2    += " " + D2JSP_UTIL_FORMAT_LJust(file_data[count_1], max_list[count_1]);
+		head_3    += " " + D2JSP_UTIL_FORMAT_RJust(count_1, max_list[count_1]);
+		head_4    += " " + D2JSP_UTIL_FORMAT_LJust("", max_list[count_1], "-");
+		csv_str_1 += "," + TDW_DBS_FormatCSV(file_data[count_1]);
+		csv_str_2 += "," + TDW_DBS_FormatCSV(count_1);
+	}
+
+	log_obj.writeLine(head_1);
+	log_obj.writeLine(head_2);
+	log_obj.writeLine(head_3);
+	log_obj.writeLine(head_4);
+
+	csv_handle.writeLine(csv_str_1);
+	csv_handle.writeLine(csv_str_2);
+
+	TDW_DBS_Log.logInfo("Writing base stats files for '" + file_name+ "'...");
+	TDW_DBS_Log.logInfo(">>> " + file_name_log);
+	TDW_DBS_Log.logInfo(">>> " + file_name_csv);
+
+	for (var count_1 = min_index; count_1 <= max_index; count_1++) {
+		var string_txt = TDW_DBS_FormatLog(count_1, first_col) + " " +
+			TDW_DBS_FormatLog(name_list[count_1], second_col);
+		var string_csv = TDW_DBS_FormatCSV(count_1) + "," +
+			TDW_DBS_FormatCSV(name_list[count_1]);
+//print("STR = [" + string_txt + "]");
+//print("CSV = [" + string_csv + "]");
+		for (var count_2 = 0; count_2 < file_data.length; count_2++) {
+			string_txt += " " + TDW_DBS_FormatLog(data_list[count_1][count_2],
+				max_list[count_2]);
+			string_csv += "," + TDW_DBS_FormatCSV(data_list[count_1][count_2]);
+		}
+		log_obj.writeLine(string_txt);
+		csv_handle.writeLine(string_csv);
+	}
+
+	log_obj.writeLine(head_1);
+
+	log_obj.emitSep();
+	log_obj.emitSep("=");
+	log_obj.writeLine("Key To Base Stat Columns:");
+	log_obj.emitSep("=");
+	log_obj.writeLine("===== ================================");
+	log_obj.writeLine("Index Name");
+	log_obj.writeLine("----- --------------------------------");
+	for (var count_1 = 0; count_1 < file_data.length; count_1++)
+		log_obj.writeLine(D2JSP_UTIL_FORMAT_RJust(count_1, 5) + " " +
+			file_data[count_1]);
+	log_obj.writeLine("===== ================================");
+	log_obj.emitSep("=");
+
+	log_obj.closeLog();
+
+	csv_handle.close();
+
+	TDW_DBS_Log.logInfo("Base stats files for '" + file_name+ "' written.");
+
+	return(TDW_DBS_WriteCS(file_name, namestr_index, file_data, get_index,
+		min_index, max_index, data_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_DBS_WriteCS(file_name, namestr_index, file_data, get_index,
+	min_index, max_index, data_list)
+{
+	var type_list    = new Array((max_index - min_index) + 1);
+	var cs_handle    = null;
+	var class_name   = "BaseStat_" + TDW_DBS_StatClassHash[file_name];
+
+	if (class_name == null) {
+		print("Unable to locate a class name for file '" + file_name + "'.");
+		return(-1);
+	}
+
+	var file_name_cs = "output/" + class_name + ".cs";
+
+	if ((cs_handle = fileOpen(file_name_cs, 1)) == null) {
+		print("Unable to open file '" + file_name_cs + "' for writing.");
+		return(-1);
+	}
+
+	TDW_DBS_Log.logInfo(">>> " + file_name_cs);
+
+	// Fixd-up column names...
+	for (var count_1 = 0; count_1 < file_data.length; count_1++) {
+		type_list[count_1] = 0;
+		file_data[count_1] = D2JSP_UTIL_FORMAT_Trim(
+			D2JSP_UTIL_FORMAT_OneSpace(file_data[count_1]));
+		file_data[count_1] =  file_data[count_1].replace(/ /g, "_");
+		if (class_name == "BaseStat_SetItems") {
+			if (file_data[count_1] == "set")
+				file_data[count_1] = "set_flags";
+		}
+		else if (class_name == "BaseStat_CharStats") {
+			if (file_data[count_1] == "class")
+				file_data[count_1] = "CharClass";
+			else if (file_data[count_1] == "int")
+				file_data[count_1] = "int_value";
+		}
+		else if (file_data[count_1] == "add")
+			file_data[count_1] = "add_value";
+		else {
+			file_data[count_1] = file_data[count_1].replace(/\.|\-|\(|\)/g, "_");
+			if ("0123456789".indexOf(file_data[count_1].charAt(0)) > -1)
+				file_data[count_1] = "XXX_" + file_data[count_1];
+		}
+	}
+
+	// Fix-up for col index 11 & 12 (flippyfile & invfile) of BaseStat_SetItems
+	if (class_name == "BaseStat_SetItems") {
+		type_list[D2JSP_BASE_SETITEMS_FLIPPYFILE] = 4;
+		type_list[D2JSP_BASE_SETITEMS_INVFILE]    = 4;
+	}
+
+	// Determine the column types...
+	for (var count_1 = min_index; count_1 <= max_index; count_1++) {
+		for (var count_2 = 0; count_2 < file_data.length; count_2++) {
+			if (D2JSP_UTIL_GEN_TypeOfString(data_list[count_1][count_2])) {
+/*
+				data_list[count_1][count_2] = D2JSP_UTIL_FORMAT_Trim(
+					D2JSP_UTIL_FORMAT_OneSpace(data_list[count_1][count_2]));
+				type_list[count_2] = Math.max(type_list[count_2],
+					data_list[count_1][count_2].length);
+*/
+				var tmp_string = D2JSP_UTIL_FORMAT_Trim(
+					D2JSP_UTIL_FORMAT_OneSpace(data_list[count_1][count_2]));
+				tmp_string                  = tmp_string.replace(/\\/g, "\\\\");
+				tmp_string                  = tmp_string.replace(/\"/g, "\\\"");
+				data_list[count_1][count_2] = tmp_string;
+				type_list[count_2] = Math.max(type_list[count_2],
+					data_list[count_1][count_2].length);
+			}
+		}
+	}
+	// Fix up string lengths (minimum is four to accomodate 'null'.
+	for (var count_1 = 0; count_1 < file_data.length; count_1++) {
+		if ((type_list[count_1] > 0) && (type_list[count_1] < 4))
+			type_list[count_1] = 4;
+	}
+
+	cs_handle.writeLine("//\t" + D2JSP_UTIL_FORMAT_RepeatString("/", 76));
+	cs_handle.writeLine("");
+	cs_handle.writeLine("namespace TDW {");
+	cs_handle.writeLine("");
+
+	// Emit the enumerations...
+	var max_enum_length  = 0;
+	var max_value_length = (file_data.length - 1).toString().length;
+	for (var count_1 = 0; count_1 < file_data.length; count_1++)
+		max_enum_length = Math.max(max_enum_length, file_data[count_1].length);
+	cs_handle.writeLine("public enum " + class_name + "_Type {");
+	for (var count_1 = 0; count_1 < file_data.length; count_1++)
+		cs_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(file_data[count_1], max_enum_length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, max_value_length) +
+			(((count_1 + 1) < file_data.length) ? "," : ""));
+	cs_handle.writeLine("}");
+	cs_handle.writeLine("");
+
+	cs_handle.writeLine("public class " + class_name + " {");
+	// Emit the class constructor...
+	cs_handle.writeLine("\t// START: Constructor:");
+	var tmp_string = "\tpublic " + class_name + "(\n";
+	for (var count_1 = 0; count_1 < file_data.length; count_1++)
+		tmp_string += "\t\t" +
+			((type_list[count_1] > 0) ? "string " : "int    ") +
+			file_data[count_1] +
+			(((count_1 + 1) < file_data.length) ? ",\n" : ") {");
+	cs_handle.writeLine(tmp_string);
+	for (var count_1 = 0; count_1 < file_data.length; count_1++)
+		cs_handle.writeLine("\t\tthis." +
+			D2JSP_UTIL_FORMAT_LJust(file_data[count_1], max_enum_length) + " = " +
+			file_data[count_1] + ";");
+	cs_handle.writeLine("\t}");
+	cs_handle.writeLine("\t// END  : Constructor");
+	cs_handle.writeLine("");
+
+	// Emit class instance members...
+	cs_handle.writeLine("\t// START: Instance members:");
+	for (var count_1 = 0; count_1 < file_data.length; count_1++)
+		cs_handle.writeLine("\tpublic " +
+			((type_list[count_1] > 0) ? "string " : "int    ") +
+			file_data[count_1] + ";");
+	cs_handle.writeLine("\t// END  : Instance members");
+	cs_handle.writeLine("");
+
+	// A method (woo-hoo!)
+	cs_handle.writeLine("\t// START: Static methods:");
+	cs_handle.writeLine("\tpublic static int Count {");
+	cs_handle.writeLine("\t\tget { return(base_list.Length); }");
+	cs_handle.writeLine("\t}");
+	cs_handle.writeLine("\tpublic static " + class_name + " Get(int this_index) {");
+	cs_handle.writeLine("\t\treturn(base_list[this_index]);");
+	cs_handle.writeLine("\t}");
+	cs_handle.writeLine("\t// END  : Static methods:");
+	cs_handle.writeLine("\t");
+
+	// Emit class static data array...
+	cs_handle.writeLine("\t// START: Static data array:");
+	cs_handle.writeLine("\tpublic static " + class_name + "[] base_list = " +
+		"new " + class_name + "[] {");
+	for (var count_1 = min_index; count_1 <= max_index; count_1++) {
+		var tmp_string = "\t\tnew " + class_name + "(";
+		var tmp_length = 0;
+		for (var count_2 = 0; count_2 < file_data.length; count_2++) {
+			var comma        = ((count_2 < (file_data.length - 1)) ? ", " : "");
+			var start_length = tmp_string.length;
+			if (tmp_length >= 1000) {
+				tmp_string += "\n\t\t\t";
+				tmp_length  = 0;
+			}
+			if (count_2)
+				tmp_string += " ";
+			if (type_list[count_2] > 0) {
+				if (data_list[count_1][count_2] == null)
+					tmp_string += D2JSP_UTIL_FORMAT_LJust("null" + comma,
+						type_list[count_2] + 2 + 1);
+				else
+					tmp_string += D2JSP_UTIL_FORMAT_LJust("\"" +
+						data_list[count_1][count_2] + "\"" + comma,
+						type_list[count_2] + 2 + 1);
+			}
+			else
+				tmp_string += D2JSP_UTIL_FORMAT_RJust(
+					data_list[count_1][count_2] + comma, 11);
+			tmp_length += (tmp_string.length - start_length);
+		}
+		cs_handle.writeLine(tmp_string + ")" +
+			((count_1 < max_index) ? "," : ""));
+	}
+	cs_handle.writeLine("\t};");
+	cs_handle.writeLine("\t// END  : Static data array");
+	cs_handle.writeLine("}");
+	cs_handle.writeLine("");
+
+	cs_handle.writeLine("//\t" + D2JSP_UTIL_FORMAT_RepeatString("/", 76));
+	cs_handle.writeLine("");
+	cs_handle.writeLine("} // namespace TDW");
+	cs_handle.writeLine("");
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_DBS_FormatLog(in_data, width)
+{
+	return((D2JSP_UTIL_GEN_TypeOfNumber(in_data)) ?
+		D2JSP_UTIL_FORMAT_RJust(in_data, width) :
+		D2JSP_UTIL_FORMAT_LJust(in_data, width));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_DBS_FormatCSV(in_data)
+{
+	return((D2JSP_UTIL_GEN_TypeOfNumber(in_data)) ? (in_data + "") :
+		((D2JSP_UTIL_GEN_TypeOfString(in_data)) ? "\"" + in_data + "\"" : ""));
+}
+// ////////////////////////////////////////////////////////////////////////////
+

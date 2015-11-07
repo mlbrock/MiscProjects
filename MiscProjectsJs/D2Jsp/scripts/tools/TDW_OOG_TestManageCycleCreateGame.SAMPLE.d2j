@@ -1,0 +1,36 @@
+include("TDW/TDW_OOG_Utility.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log       =
+		new TDW_BASIC_Log("output/TDW_OOG_TestManageCycleCreateGame.log");
+/*
+	var login_spec_1 = new TDW_OOG_LoginSpec(TDW_OOG_CONN_TYPE_SINGLE_PLAYER);
+	var char_spec_1  = new TDW_OOG_CharacterSpec("SAMPLE_CHARACTER_NAME");
+	var game_spec_1  = new TDW_OOG_CreateGameSpec();
+*/
+
+	var login_spec_2 = new TDW_OOG_LoginSpec(TDW_OOG_CONN_TYPE_BATTLENET_CLOSED,
+		"SAMPLE_REALM", "SAMPLE_ACCOUNT", "SAMPLE_PASSWORD");
+	var char_spec_2  = new TDW_OOG_CharacterSpec("SAMPLE_CHARACTER_NAME");
+	var game_spec_2  = new TDW_OOG_CreateGameSpec();
+
+	my_log.setLevelFile(TDW_BASIC_LOG_Level_MINUTIAE);
+
+/*
+	my_log.logDetail("ManageCycleCreateGameTest: START: Single-Player");
+	login_spec_1.performLogin();
+	my_log.logDetail("ManageCycleCreateGameTest: END  : Single-Player");
+
+	delay(5000);
+*/
+
+	my_log.logDetail("ManageCycleCreateGameTest: START: Realm");
+	TDW_OOG_ManageCycleCreateGame(login_spec_2, char_spec_2, game_spec_2);
+	my_log.logDetail("ManageCycleCreateGameTest: END  : Realm");
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

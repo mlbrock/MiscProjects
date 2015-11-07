@@ -1,0 +1,99 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+var TestSkill = D2JSP_SKILL_FROZEN_ORB;
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var state_list = new Array(D2JSP_STATE_COUNT);
+	var my_log     = new D2JSP_UTIL_Log("output/____FeatureTest.035." +
+		"CheckSkills.d2j.log", "FeatureTest.035", null, null, null, true);
+
+	var this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+
+	var char_skills = [
+		D2JSP_STAT_ITEM_ADDAMASKILLPOINTS,
+		D2JSP_STAT_ITEM_ADDPALSKILLPOINTS,
+		D2JSP_STAT_ITEM_ADDNECSKILLPOINTS,
+		D2JSP_STAT_ITEM_ADDSORSKILLPOINTS,
+		D2JSP_STAT_ITEM_ADDBARSKILLPOINTS,
+		D2JSP_STAT_ITEM_ADDDRUSKILLPOINTS,
+		D2JSP_STAT_ITEM_ADDASSSKILLPOINTS
+	];
+
+	if (this_obj) {
+		do {
+			if ((this_obj.code == "amu") || (this_obj.code == "sst")) {
+				my_log.emitSep("-");
+				my_log.logInfo("Full Name     : " + this_obj.fname);
+				my_log.logInfo("GID           : " + this_obj.gid);
+				my_log.logInfo("Location      : [" + this_obj.x + ", " +
+					this_obj.y + "]");
+				my_log.logInfo("Mode          : " + this_obj.mode);
+				my_log.logInfo("Skills All    : " +
+					D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_ALLSKILLS, 3) + " = " +
+					D2JSP_UTIL_FORMAT_LJust(D2JSP_STAT_StatToName(
+					D2JSP_STAT_ITEM_ALLSKILLS), 33) + " = " +
+					this_obj.getStat(D2JSP_STAT_ITEM_ALLSKILLS));
+				for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++)
+					my_log.logInfo("Skills Element: " +
+						D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_FIRESKILL, 3) + " = " +
+						D2JSP_UTIL_FORMAT_RJust(count_1, 3) + " = " +
+						D2JSP_UTIL_FORMAT_LJust(D2JSP_UTIL_DAMAGE_BaseElementList
+						[count_1], 27) + " = " +
+						this_obj.getStat(D2JSP_STAT_ITEM_FIRESKILL, count_1));
+				for (var count_1 = 0; count_1 < char_skills.length; count_1++)
+					my_log.logInfo("Skills Char 1 : " +
+						D2JSP_UTIL_FORMAT_RJust(char_skills[count_1], 3) + " = " +
+						D2JSP_UTIL_FORMAT_LJust(D2JSP_STAT_StatToName(
+						char_skills[count_1]), 33) + " = " +
+						this_obj.getStat(char_skills[count_1]));
+				for (var count_1 = 0; count_1 < 7; count_1++)
+					my_log.logInfo("Skills Char 2 : " +
+						D2JSP_UTIL_FORMAT_RJust(count_1, 3) + " = " +
+						D2JSP_UTIL_FORMAT_LJust(D2JSP_CLASS_ID_NameList[count_1],
+						33) + " = " +
+						this_obj.getStat(D2JSP_STAT_ITEM_ADDAMASKILLPOINTS, count_1));
+				for (var count_1 = 0; count_1 < 99; count_1++) {
+					if (this_obj.getStat(D2JSP_STAT_ITEM_ADDSKILL_TAB1, count_1))
+						my_log.logInfo("Skills Tree   : " +
+							D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_ADDSKILL_TAB1, 3) +
+							" = " +
+							D2JSP_UTIL_FORMAT_LJust(D2JSP_STAT_StatToName(
+							D2JSP_STAT_ITEM_ADDSKILL_TAB1), 33) + " (index = " +
+							D2JSP_UTIL_FORMAT_RJust(count_1, 3) + ") = " +
+							this_obj.getStat(D2JSP_STAT_ITEM_ADDSKILL_TAB1, count_1));
+				}
+				for (var count_1 = D2JSP_SKILL_MINIMUM;
+					count_1 < D2JSP_SKILL_MAXIMUM; count_1++) {
+					if (this_obj.getStat(D2JSP_STAT_ITEM_SINGLESKILL1, count_1))
+						my_log.logInfo("Skills Single : " +
+							D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_ITEM_SINGLESKILL1, 3) +
+							" = " +
+							D2JSP_UTIL_FORMAT_LJust(D2JSP_STAT_StatToName(
+							D2JSP_STAT_ITEM_SINGLESKILL1), 33) + " = " +
+							D2JSP_UTIL_FORMAT_RJust(count_1, 3) + " = " +
+							D2JSP_UTIL_FORMAT_LJust(D2JSP_SKILL_ToSkillName(count_1),
+							24) + " = " +
+							this_obj.getStat(D2JSP_STAT_ITEM_SINGLESKILL1, count_1));
+				}
+/*
+				my_log.logInfo("
+				my_log.logInfo("
+				my_log.logInfo("
+				my_log.logInfo("
+				my_log.logInfo("
+				my_log.logInfo("
+*/
+			}
+		} while (this_obj && this_obj.getNext());
+	}
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

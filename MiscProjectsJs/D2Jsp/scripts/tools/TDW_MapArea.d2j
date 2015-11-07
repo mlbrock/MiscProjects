@@ -1,0 +1,468 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Rooms.d2l");
+
+var MyLog = new D2JSP_UTIL_Log("output/TDW_MapRooms.log");
+
+function main()
+{
+	var count_1;
+	var obj_list;
+	var last_area;
+	var room_list;
+	var start_time;
+	var total_time;
+
+	MyLog.logInfo("Area is: " + D2JSP_AREA_AreaToName());
+
+	MyLog.logInfo("Constructing area map...");
+	start_time = new Date();
+	room_list = new D2JSP_RoomList();
+	total_time = (new Date()) - start_time;
+	MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+		", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+
+	print("Creating collision info...");
+	start_time = new Date();
+	for (count_1 = 0; count_1 < room_list.room_list.length; count_1++)
+		room_list.room_list[count_1].createCollisionInfo();
+	total_time = (new Date()) - start_time;
+	MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+		", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+
+	var area_name = D2JSP_AREA_AreaToName();
+	var file_name;
+	area_name = area_name.replace(/\s/g, "_");
+	area_name = area_name.replace(/\'/g, "_");
+	file_name = "output/_MAP_" + area_name + ".txt";
+	if ((file_handle = fileOpen(file_name, 1)) != null) {
+		MyLog.logInfo("Now writing area information to '" + file_name + "'.");
+		// Write area descriptive information...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Area                  : " + room_list.level + " (" +
+			D2JSP_AREA_AreaToName(room_list.level) + ")");
+		file_handle.writeLine("Room Count            : " + room_list.room_list.length);
+		file_handle.writeLine("Calculated Area Coords: " +
+			"[" + room_list.x_1 + ", " + room_list.y_1 + "] ---> [" +
+			room_list.x_2 + ", " + room_list.y_2 + "]");
+		file_handle.writeLine("Room-Based Area Coords: " +
+			room_list.room_list[0].levelx + ", " + room_list.room_list[0].levely +
+			" (multiplied by 5 = " + (room_list.room_list[0].levelx * 5) + ", " +
+			(room_list.room_list[0].levely * 5) + ")");
+		file_handle.writeLine("-------------------------------------------------");
+/*
+		file_handle.writeLine("My Location           : [" + me.x + ", " + me.y + "]");
+		file_handle.writeLine("My Room Number        : " + getRoom(0).number);
+*/
+		var my_coords = [me.x, me.y];
+		var my_room   = room_list.findRoomByXYPair(my_coords);
+		file_handle.writeLine("My Location           : [" + my_coords + "]");
+		file_handle.writeLine("My Room Number        : " + my_room.number);
+		file_handle.writeLine("My Meta-Map Location  : [" +
+			my_room.room_row + ", " + my_room.room_col + "]");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write meta-map by room number...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Meta-Map by Room Number");
+		file_handle.writeLine("-------------------------------------------------");
+/*
+		for (count_1 = 0; count_1 < room_list.meta_map.length; count_1++) {
+			var meta_string = "";
+			for (var count_2 = 0; count_2 < room_list.meta_map[count_1].length;
+				count_2++)
+				meta_string += "|" + D2JSP_UTIL_FORMAT_RJust(
+					(room_list.meta_map[count_1][count_2] != null) ?
+					room_list.meta_map[count_1][count_2].number : "", 10);
+			file_handle.writeLine(meta_string + "|");
+		}
+*/
+		var map_list = room_list.getStringMetaMapList();
+		while (map_list.length)
+			file_handle.writeLine(map_list.shift());
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write meta-map by room area coordinates
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Meta-Map by Room Area Coordinates");
+		file_handle.writeLine("-------------------------------------------------");
+		for (count_1 = 0; count_1 < room_list.meta_map.length; count_1++) {
+			var meta_string = "";
+			for (var count_2 = 0; count_2 < room_list.meta_map[count_1].length;
+				count_2++) {
+				if (room_list.meta_map[count_1][count_2] != null)
+					meta_string += "|[" +
+						D2JSP_UTIL_FORMAT_RJust(
+							room_list.meta_map[count_1][count_2].x_1, 5) + "," +
+						D2JSP_UTIL_FORMAT_RJust(
+							room_list.meta_map[count_1][count_2].y_1, 5) + "][" +
+						D2JSP_UTIL_FORMAT_RJust(
+							room_list.meta_map[count_1][count_2].x_2, 5) + "," +
+						D2JSP_UTIL_FORMAT_RJust(
+							room_list.meta_map[count_1][count_2].y_2, 5) + "]";
+				else
+					meta_string += "|" + D2JSP_UTIL_FORMAT_RJust("",
+						1 + 5 + 1 + 5 + 2 + 5 + 1 + 5 + 1);
+			}
+			file_handle.writeLine(meta_string + "|");
+		}
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the room number hash table...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Room Number Hash Table");
+		file_handle.writeLine("-------------------------------------------------");
+		var room_index = new Array();
+		for (var this_prop in room_list.room_hash)
+			room_index.push(this_prop);
+		room_index.sort(D2JSP_UTIL_GEN_CompareNumeric);
+//		for (var this_prop in room_list.room_hash)
+		for (count_1 = 0; count_1 < room_index.length; count_1++) {
+			var this_prop = room_index[count_1];
+			file_handle.writeLine(D2JSP_UTIL_FORMAT_RJust(this_prop, 5) +
+				": count = " +
+				D2JSP_UTIL_FORMAT_RJust(room_list.room_hash[this_prop].length, 3) +
+				": [" + room_list.room_hash[this_prop] + "]");
+		}
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the adjacent rooms list...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Adjacent Rooms List");
+		file_handle.writeLine("-------------------------------------------------");
+		var my_room = room_list.findRoomByObject();
+		file_handle.writeLine("My current room is:");
+		file_handle.writeLine(
+			D2JSP_UTIL_FORMAT_RJust(my_room.number, 5) + " | " +
+			D2JSP_UTIL_FORMAT_RJust(my_room.room_row, 3) + " | " +
+			D2JSP_UTIL_FORMAT_RJust(my_room.room_col, 3));
+		file_handle.writeLine("-------------------------------------------------");
+		file_handle.writeLine("Adjacent to that room are:");
+		var adj_list = room_list.getAdjacentRooms(null, 1);
+		for (count_1 = 0; count_1 < adj_list.length; count_1++)
+			file_handle.writeLine(
+				D2JSP_UTIL_FORMAT_RJust(adj_list[count_1].number, 5) + " | " +
+				D2JSP_UTIL_FORMAT_RJust(adj_list[count_1].room_row, 3) + " | " +
+				D2JSP_UTIL_FORMAT_RJust(adj_list[count_1].room_col, 3));
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the simple accessible edge list...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Edge List (Simple)");
+		file_handle.writeLine("-------------------------------------------------");
+		MyLog.logInfo("Getting simple accessible edge list...");
+		start_time = new Date();
+		var edge_list = room_list.getAccessibleEdgeListSimple();
+		total_time = (new Date()) - start_time;
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		for (count_1 = 0; count_1 < edge_list.length; count_1++) {
+			if (!edge_list[count_1].length)
+				file_handle.writeLine("Edge list index " + count_1 + " is empty.");
+			else {
+				for (var count_2 = 0; count_2 < edge_list[count_1].length; count_2++)
+					file_handle.writeLine(count_1 + ":" + count_2 + ":[" +
+						edge_list[count_1][count_2] + "]");
+			}
+		}
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the accessible center list...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Accessible Center List");
+		file_handle.writeLine("-------------------------------------------------");
+		MyLog.logInfo("Getting accessible center list...");
+		var center_list = room_list.getCenterAccessibleList();
+		total_time = (new Date()) - start_time;
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		for (count_1 = 0; count_1 < center_list.length; count_1++) {
+			file_handle.writeLine(count_1 + ":[" +
+				center_list[count_1] + "]");
+		}
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the preset units list...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Preset Units List");
+		file_handle.writeLine("-------------------------------------------------");
+		MyLog.logInfo("Getting preset units list...");
+		start_time = new Date();
+		for (count_1 = 0; count_1 < room_list.meta_map.length; count_1++) {
+			var meta_string = "";
+			for (var count_2 = 0; count_2 < room_list.meta_map[count_1].length;
+				count_2++) {
+				if (room_list.meta_map[count_1][count_2] != null) {
+					file_handle.writeLine("Room number " +
+						D2JSP_UTIL_FORMAT_RJust(
+						room_list.meta_map[count_1][count_2].number, 4) +
+						", meta-map location = " +
+						D2JSP_UTIL_FORMAT_RJust(count_1, 3) + ", " +
+						D2JSP_UTIL_FORMAT_RJust(count_2, 3) + ":");
+					var presets = room_list.meta_map[count_1][count_2].getPresetList();
+					for (var count_3 = 0; count_3 < presets.length; count_3++)
+						file_handle.writeLine(">>> " +
+							D2JSP_UTIL_FORMAT_RJust(count_3, 3) + ": " +
+							D2JSP_UTIL_FORMAT_RJust(presets[count_3].type, 2) + " " +
+							D2JSP_UTIL_FORMAT_LJust(
+								D2JSP_UTIL_UnitNameList[presets[count_3].type], 6) + " " +
+							D2JSP_UTIL_FORMAT_RJust(presets[count_3].id, 6) + " " +
+							"[" + D2JSP_UTIL_FORMAT_RJust(presets[count_3].x, 3) + ", " +
+							D2JSP_UTIL_FORMAT_RJust(presets[count_3].y, 3) + "] " +
+							"[" + D2JSP_UTIL_FORMAT_RJust(presets[count_3].area_x, 6) + ", " +
+							D2JSP_UTIL_FORMAT_RJust(presets[count_3].area_y, 6) + "]");
+				}
+			}
+		}
+		total_time = (new Date()) - start_time;
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the area map...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Area Map / Default Mask");
+		file_handle.writeLine("-------------------------------------------------");
+		MyLog.logInfo("Getting the area map (default mask)...");
+		total_time = (new Date()) - start_time;
+		var map_list = room_list.getStringList();
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		for (count_1 = 0; count_1 < map_list.length; count_1++)
+			file_handle.writeLine(map_list[count_1]);
+		print("...done");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+
+		//
+		// Write the area map...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Area Map / Complete Mask");
+		file_handle.writeLine("-------------------------------------------------");
+		MyLog.logInfo("Getting the area map (complete mask)...");
+		total_time = (new Date()) - start_time;
+		var map_list = room_list.getStringList(0xFF);
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		for (count_1 = 0; count_1 < map_list.length; count_1++)
+			file_handle.writeLine(map_list[count_1]);
+		print("...done");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+
+		// Write the area map with preset unit locations...
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Area Map With Preset Unit Locations");
+		file_handle.writeLine("-------------------------------------------------");
+		MyLog.logInfo("Getting the area map...");
+		total_time = (new Date()) - start_time;
+		var map_list    = room_list.getStringList();
+		var preset_list = room_list.getPresetList();
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		for (count_1 = 0; count_1 < preset_list.length; count_1++) {
+			if (room_list.isValidXY(preset_list[count_1].area_x,
+				preset_list[count_1].area_y) && (preset_list[count_1].type >= 0) &&
+				(preset_list[count_1].type <= 5)) {
+				var row = preset_list[count_1].area_y - room_list.y_1;
+				var col = preset_list[count_1].area_x - room_list.x_1;
+				map_list[row] = map_list[row].substr(0, col) +
+					"PNOMIT".charAt(preset_list[count_1].type) +
+					map_list[row].substr(col + 1);
+			}
+		}
+		for (count_1 = 0; count_1 < map_list.length; count_1++)
+			file_handle.writeLine(map_list[count_1]);
+		print("...done");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the area map with accessible centers...
+		MyLog.logInfo("Writing the area map with accessible centers...");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Area Map With Accessible Centers");
+		file_handle.writeLine("-------------------------------------------------");
+		var map_list = room_list.getStringList();
+		for (count_1 = 0; count_1 < center_list.length; count_1++)
+			map_list[center_list[count_1][1] - room_list.y_1] =
+				map_list[center_list[count_1][1] - room_list.y_1].substr(
+				0, center_list[count_1][0] - room_list.x_1) + "@" +
+				map_list[center_list[count_1][1] - room_list.y_1].substr(
+				(center_list[count_1][0] - room_list.x_1) + 1);
+		for (count_1 = 0; count_1 < map_list.length; count_1++) {
+			file_handle.writeLine(map_list[count_1]);
+		}
+		print("...done");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write area map with room separation...
+		MyLog.logInfo("Writing the area map with room separation...");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Area Map With Room Separation");
+		file_handle.writeLine("-------------------------------------------------");
+		var map_list = room_list.getStringSepList();
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		for (count_1 = 0; count_1 < map_list.length; count_1++)
+			file_handle.writeLine(map_list[count_1]);
+/*
+		var string_coll_list = new Array(room_list.cell_rows + (room_list.meta_map.length - 1) + 1);
+		var tmp_array        = new Array(room_list.cell_cols + (room_list.meta_map[0].length - 1) + 1);
+print("ROWS="+room_list.cell_rows);
+		for (var count_1 = 0; count_1 < (room_list.cell_rows + (room_list.meta_map.length - 1) + 1); count_1++)
+			string_coll_list[count_1] = tmp_array.join("#");
+var collision_mask = null;
+var coll_true = null;
+var coll_false = null;
+		for (count_1 = 0; count_1 < room_list.meta_map.length; count_1++) {
+			for (var count_2 = 0; count_2 < room_list.meta_map[count_1].length;
+				count_2++) {
+				var this_room      = room_list.meta_map[count_1][count_2];
+				var room_row       = this_room.y_1 - room_list.y_1;
+				var room_col       = this_room.x_1 - room_list.x_1;
+				var room_coll_list = this_room.getStringList(collision_mask, coll_true, coll_false);
+				for (var count_3 = 0; count_3 < room_coll_list.length; count_3++) {
+					string_coll_list[room_row + count_3 + count_1] =
+						string_coll_list[room_row + count_3 + count_1].substr(0, room_col + count_2) +
+						room_coll_list[count_3] +
+						string_coll_list[room_row + count_3 + count_1].
+							substr(room_col + room_coll_list[count_3].length + count_2);
+					if (count_2)
+						string_coll_list[room_row + count_3 + count_1] =
+							string_coll_list[room_row + count_3 + count_1].substr(0, room_col + (count_2 - 1)) +
+							"|" +
+							string_coll_list[room_row + count_3 + count_1].
+								substr(room_col + 1 + (count_2 - 1));
+				}
+				room_row = (this_room.y_1 - room_list.y_1) + room_coll_list.length;
+				var tmp_str  = ((count_2) ? "+" : "-") +
+					D2JSP_UTIL_FORMAT_LJust("", room_coll_list[0].length, "-");
+				string_coll_list[room_row + count_1] =
+					string_coll_list[room_row + count_1].substr(0, room_col + (count_2 - 1)) +
+						tmp_str +
+					string_coll_list[room_row + count_1].
+						substr(room_col + tmp_str.length + 1 + (count_2 - 1));
+			}
+		}
+		string_coll_list.unshift(tmp_array.join("-"));
+		for (var count_1 = 0; count_1 < string_coll_list.length; count_1++)
+			string_coll_list[count_1] = "|" + string_coll_list[count_1] + "|";
+		for (var count_1 = 0; count_1 < string_coll_list.length; count_1++)
+			file_handle.writeLine(string_coll_list[count_1]);
+		print("...done");
+*/
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+
+
+		//
+		// Write room collision-based maps...
+		MyLog.logInfo("Writing per-room maps...");
+		file_handle.writeLine("===================================================");
+		file_handle.writeLine("====================================================");
+		file_handle.writeLine("Room Collision-Based Maps");
+		file_handle.writeLine("----------------------------------------------------");
+		for (count_1 = 0; count_1 < room_list.meta_map.length; count_1++) {
+			for (var count_2 = 0; count_2 < room_list.meta_map[count_1].length;
+				count_2++) {
+				if (room_list.meta_map[count_1][count_2] != null) {
+					var this_room = room_list.meta_map[count_1][count_2];
+					file_handle.writeLine(
+						"----------------------------------------------------");
+					file_handle.writeLine("Room " + D2JSP_UTIL_FORMAT_RJust(
+						this_room.number, 5) + " / " +
+						"meta-map location = [" +
+						D2JSP_UTIL_FORMAT_RJust(count_1, 3) + ", " +
+						D2JSP_UTIL_FORMAT_RJust(count_2, 3) + "]");
+					file_handle.writeLine("Sub-number      : " +
+						D2JSP_UTIL_FORMAT_RJust(this_room.subnumber, 5));
+					file_handle.writeLine("Raw Coordinates : [" +
+						D2JSP_UTIL_FORMAT_RJust(this_room.x, 5) + ", " +
+						D2JSP_UTIL_FORMAT_RJust(this_room.y, 5) + "]");
+					file_handle.writeLine("Area Coordinates: [" +
+						D2JSP_UTIL_FORMAT_RJust(this_room.x_1, 5) + ", " +
+						D2JSP_UTIL_FORMAT_RJust(this_room.y_1, 5) + "] ---> [" +
+						D2JSP_UTIL_FORMAT_RJust(this_room.x_2, 5) + ", " +
+						D2JSP_UTIL_FORMAT_RJust(this_room.y_2, 5) + "]");
+					file_handle.writeLine(
+						"----------------------------------------------------");
+					var this_room  = room_list.meta_map[count_1][count_2];
+					var tmp_list_1 = this_room.getStringList();
+					var tmp_list_2 = this_room.getStringList(0xFF);
+					var tmp_list_3 = this_room.getStringValueList(16, " ");
+					while (tmp_list_1.length)
+						file_handle.writeLine(tmp_list_1.shift() + "| |" +
+							tmp_list_2.shift() + "| |" + tmp_list_3.shift() + "|");
+				}
+			}
+		}
+		print("...done");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+		//
+		// Write the area map collision values...
+		MyLog.logInfo("Getting the area map collision values...");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("Area Map Collision Values");
+		file_handle.writeLine("-------------------------------------------------");
+		MyLog.logInfo("Writing the area map collision values...");
+		total_time = (new Date()) - start_time;
+		var map_list = room_list.getStringValueList();
+		MyLog.logInfo("********** Done in total=" + (total_time / 1000).toFixed(3) +
+			", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+		for (count_1 = 0; count_1 < map_list.length; count_1++)
+			file_handle.writeLine(map_list[count_1]);
+		print("...done");
+		file_handle.writeLine("=================================================");
+		file_handle.writeLine("");
+
+/*
+	// Pindleskin's lair interior:	[[10051, 13210], [10065, 13245]]
+		// Try a bounding box...
+		var map_list =
+			room_list.getStringListBounded([[10051, 13210], [10065, 13245]]);
+			for (count_1 = 0; count_1 < map_list.length; count_1++)
+				file_handle.writeLine(map_list[count_1]);
+			print("...done");
+*/
+	}
+	else
+		MyLog.logError("Unable to open output file '" + file_name +
+			"' for writing.");
+
+/*
+************************************************* *******    * *************************************************
+*/
+	MyLog.logInfo("Script completed.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+

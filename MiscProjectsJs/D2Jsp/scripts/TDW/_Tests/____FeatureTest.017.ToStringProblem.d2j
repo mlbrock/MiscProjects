@@ -1,0 +1,19 @@
+function main()
+{
+	var some_obj = new SomeObject();
+
+	print("to-String" + ": 1");
+	print("toString" + ": 2");
+	print("to_String" + ": 3");
+	print("TOSTRING= " + some_obj);
+}
+
+function SomeObject()
+{
+	this.toString = SomeObject_toString;
+
+	function SomeObject_toString() {
+		return("SomeObject.toString()");
+	}
+}
+

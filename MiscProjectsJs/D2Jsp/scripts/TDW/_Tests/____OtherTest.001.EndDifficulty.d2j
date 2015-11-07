@@ -1,0 +1,30 @@
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log     = new D2JSP_UTIL_Log("output/____OtherTest.001." +
+		"EndDifficulty.d2j.log", "OtherTest.001", null, null, null, true);
+
+	my_log.syncModeOn();
+
+	if (!D2JSP_UTIL_GEN_CheckCursor())
+		my_log.logError("No item found on cursor... Aborting...");
+	else {
+		var this_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+			D2JSP_MODE_ITEM_ON_CURSOR);
+		if (!this_obj)
+			my_log.logError("Unable to identify the item found on cursor... " +
+				"Aborting...");
+		else {
+			my_log.logInfo("Item found on cursor... Waiting 10 seconds...");
+			delay(10000);
+			D2JSP_UTIL_GEN_ClearCursor(true, my_log);
+		}
+	}
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

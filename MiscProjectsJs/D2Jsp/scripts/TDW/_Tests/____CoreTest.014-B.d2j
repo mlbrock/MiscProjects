@@ -1,0 +1,424 @@
+/*
+	___CoreTest.014.d2j
+
+	Symptoms    :
+
+		Crashes D2, leaving a zombie process in the Task Manager.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			31.Final Release Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+
+/*
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("SyLib.d2l");
+*/
+
+	// From _D2JSP_Areas.d2l
+var D2JSP_AREA_ROGUE_ENCAMPMENT                                     = 1;
+var D2JSP_AREA_LUT_GHOLEIN                                          = 40;
+var D2JSP_AREA_KURAST_DOCKTOWN                                      = 75;
+var D2JSP_AREA_THE_PANDEMONIUM_FORTRESS                             = 103;
+var D2JSP_AREA_HARROGATH                                            = 109;
+
+	// From _D2JSP_Modes.d2l
+	// Player modes
+var D2JSP_MODE_PLAYER_DEATH						=   0;
+var D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN	=   1;
+var D2JSP_MODE_PLAYER_WALKING						=   2;
+var D2JSP_MODE_PLAYER_RUNNING						=   3;
+var D2JSP_MODE_PLAYER_GETTING_HIT				=   4;
+var D2JSP_MODE_PLAYER_STANDING_IN_TOWN			=   5;
+var D2JSP_MODE_PLAYER_WALKING_IN_TOWN			=   6;
+var D2JSP_MODE_PLAYER_ATTACKING_1				=   7;
+var D2JSP_MODE_PLAYER_ATTACKING_2				=   8;
+var D2JSP_MODE_PLAYER_BLOCKING					=   9;
+var D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL		=  10;
+var D2JSP_MODE_PLAYER_THROWING_AN_ITEM			=  11;
+var D2JSP_MODE_PLAYER_KICKING						=  12;
+var D2JSP_MODE_PLAYER_USING_SKILL_1				=  13;
+var D2JSP_MODE_PLAYER_USING_SKILL_2				=  14;
+var D2JSP_MODE_PLAYER_USING_SKILL_3				=  15;
+var D2JSP_MODE_PLAYER_USING_SKILL_4				=  16;
+var D2JSP_MODE_PLAYER_DEAD							=  17;
+var D2JSP_MODE_PLAYER_SEQUENCE					=  18;
+var D2JSP_MODE_PLAYER_BEING_KNOCKED_BACK		=  19;
+
+	// From _D2JSP_Stats.d2l
+var D2JSP_STAT_ITEM_MAXMANA_PERCENT                                 = 77;
+
+/*
+var MyPrecastList = [
+	["Energy Shield", "Energy Shield", 30],
+	["Shiver Armor",  "Shiver Armor",  88],
+	["Thunder Storm", "Thunderstorm",  38]
+];
+*/
+
+function main()
+{
+	var start_mp;
+	var start_x;
+	var start_y;
+	var count_1;
+	var count_2;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready");
+
+	start_mp = parseInt(me.mpmax +
+		(me.mpmax * (me.getStat(D2JSP_STAT_ITEM_MAXMANA_PERCENT) / 100)));
+	print("Max mana is " + start_mp);
+
+	while (true) {
+print("1");
+		while (D2JSP_AREA_IsTown()) {
+			me.overhead("Move out-of-town, please");
+			delay(500);
+		}
+print("2");
+		me.overhead("OK");
+		start_x = me.x;
+		start_y = me.y;
+		while (!D2JSP_AREA_IsTown()) {
+			for (count_1 = -1; count_1 <= 1; count_1++) {
+				for (count_2 = -1; count_2 <= 1; count_2++) {
+//					DoTeleport(start_x + count_1, start_y + count_2);
+					DoTargetedSkill("Teleport", start_x + count_1, start_y + count_2);
+					DoUntargetedSkill("Nova");
+//					DoTargetedSkill("Frozen Orb", start_x + count_1, start_y + count_2);
+					DoTargetedSkill("Charged Bolt", start_x + count_1, start_y + count_2);
+					if (me.mp < 100)
+						break;
+				}
+				if (me.mp < 100)
+					break;
+			}
+//			delay(1000);
+			DoTeleport(start_x, start_y);
+			if (me.mp < 100) {
+				while (me.mp < (start_mp - 5)) {
+					me.overhead("Mana regen " + me.mp + " < " + start_mp);
+					delay(500);
+				}
+				me.overhead("Mana regen done");
+			}
+//			else
+//				delay(1000);
+		}
+print("3");
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+function DoTeleport(skill_x, skill_y)
+{
+	if (me.getSkill(0).toLowerCase() != "teleport") {
+		me.setSkill("Teleport", 0);
+		while (me.getSkill(0).toLowerCase() != "teleport")
+			delay(10);
+	}
+
+	if (D2JSP_SKILL_WaitForIdle() < 0)
+		print("WARNING: D2JSP_SKILL_WaitForIdle() failed.");
+	me.useSkillAt(skill_x, skill_y, 0);
+	if (D2JSP_SKILL_WaitForSpellCastCycle() < 0)
+		print("WARNING: D2JSP_SKILL_WaitForSpellCastCycle() failed.");
+	if (D2JSP_SKILL_WaitForIdle() < 0)
+		print("WARNING: D2JSP_SKILL_WaitForIdle() failed.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DoTargetedSkill(skill_name, skill_x, skill_y)
+{
+	if (me.getSkill(0).toLowerCase() != skill_name.toLowerCase()) {
+		me.setSkill(skill_name, 0);
+		while (me.getSkill(0).toLowerCase() != skill_name.toLowerCase())
+			delay(10);
+	}
+
+	if (D2JSP_SKILL_WaitForIdle() < 0)
+		print("WARNING: D2JSP_SKILL_WaitForIdle() failed.");
+	me.useSkillAt(skill_x, skill_y, 0);
+//	if (D2JSP_SKILL_WaitForSpellCastCycle() < 0)
+//		print("WARNING: D2JSP_SKILL_WaitForSpellCastCycle() failed.");
+//	if (D2JSP_SKILL_WaitForIdle() < 0)
+//		print("WARNING: D2JSP_SKILL_WaitForIdle() failed.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DoUntargetedSkill(skill_name)
+{
+	if (me.getSkill(0).toLowerCase() != skill_name.toLowerCase()) {
+		me.setSkill(skill_name, 0);
+		while (me.getSkill(0).toLowerCase() != skill_name.toLowerCase())
+			delay(10);
+	}
+
+	if (D2JSP_SKILL_WaitForIdle() < 0)
+		print("WARNING: D2JSP_SKILL_WaitForIdle() failed.");
+	me.useSkill(0);
+	if (D2JSP_SKILL_WaitForSpellCastCycle() < 0)
+		print("WARNING: D2JSP_SKILL_WaitForSpellCastCycle() failed.");
+	if (D2JSP_SKILL_WaitForIdle() < 0)
+		print("WARNING: D2JSP_SKILL_WaitForIdle() failed.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+/*
+// ////////////////////////////////////////////////////////////////////////////
+function RefreshPreCast(precast_name, state_name, state_number)
+{	
+	var count_1;
+
+	for (count_1 = 0; count_1 < 3; count_1++) {
+		print("About to refresh " + precast_name);
+		D2JSP_SKILL_SetAndUseSkill(precast_name, 0);
+		if (precast_name.toLowerCase() == "energy shield")
+			D2JSP_SKILL_SetAndUseSkill(precast_name, 0);
+		if ((precast_name.toLowerCase() == "energy shield") ||
+			me.getState(state_number)) {
+			print("Refreshed " + precast_name);
+			return_code = true;
+			break;
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+*/
+
+	// From _D2JSP_Areas.d2l
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_IsTown(area_number)
+{
+	area_number = (typeof(area_number) == "number") ? area_number : me.area;
+
+	return(((area_number == D2JSP_AREA_ROGUE_ENCAMPMENT) ||
+		(area_number == D2JSP_AREA_LUT_GHOLEIN) ||
+		(area_number == D2JSP_AREA_KURAST_DOCKTOWN) ||
+		(area_number == D2JSP_AREA_THE_PANDEMONIUM_FORTRESS) ||
+		(area_number == D2JSP_AREA_HARROGATH)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+	// From _D2JSP_Skills.d2l
+/*
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_SetAndUseSkill(skill_name, skill_hand, skill_x, skill_y)
+{
+	var return_code;
+
+	if (!(return_code = D2JSP_SKILL_SetSkill(skill_name, skill_hand))) {
+		if (arguments.length == 2)
+			return_code = D2JSP_SKILL_UseSkill(skill_hand);
+		else if (arguments.length == 3)
+			return_code = D2JSP_SKILL_UseSkill(skill_hand, skill_x);
+		else
+			return_code = D2JSP_SKILL_UseSkill(skill_hand, skill_x, skill_y);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_SetSkill(skill_name, skill_hand)
+{
+	var return_code = 0;
+	var count_1;
+
+	if (skill_name.toLowerCase() == me.getSkill(skill_hand).toLowerCase())
+		return_code = 0;
+	else if ((!me.getSkill(skill_name)) || (skill_hand < 0) || (skill_hand > 1))
+		return(-1);
+	else if (D2JSP_SKILL_WaitForIdle() > -1) {
+		me.setSkill(skill_name, skill_hand);
+		for (count_1 = 0; count_1 < 250; count_1++) {
+			if (skill_name.toLowerCase() == me.getSkill(skill_hand).toLowerCase())
+				break;
+			delay(5);
+		}
+		if (D2JSP_SKILL_WaitForIdle() < 0)
+			return_code = -1;
+	}
+	else
+		return_code = -1;
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_UseSkill(skill_hand, skill_x, skill_y)
+{
+	var return_code = 0;
+
+	if ((!arguments.length) || (arguments.length > 3))
+		return_code = -1;
+	else if (D2JSP_SKILL_WaitForIdle() > -1) {
+		if (arguments.length == 1)
+			me.useSkill(skill_hand);
+		else if (arguments.length == 2)
+			skill_x.useSkill(skill_hand);
+		else
+			me.useSkillAt(skill_x, skill_y, skill_hand);
+		if (D2JSP_SKILL_WaitForSpellCastCycle() < 0)
+			return_code = -1;
+		if (D2JSP_SKILL_WaitForIdle() < 0)
+			return_code = -1;
+	}
+	else
+		return_code = -1;
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TeleportToPair(destination)
+{
+	D2JSP_SKILL_TeleportTo(destination[0], destination[1]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TeleportTo(skill_x, skill_y)
+{
+	if (myDist(skill_x, skill_y))
+		D2JSP_SKILL_SetAndUseSkill("Teleport", 0, skill_x, skill_y);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TelekinesisOn(target_obj, skill_hand)
+{
+	var return_code;
+
+	if (arguments.length < 2)
+		skill_hand = 0;
+
+	if (!(return_code = D2JSP_SKILL_SetSkill("Telekinesis", skill_hand)))
+		return_code = D2JSP_SKILL_UseSkill(skill_hand, target_obj);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+*/
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForIdle(iteration_count, iteration_time)
+{
+	var wait_mode = -1;
+	var increment;
+	var this_mode;
+	var count_1;
+
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = 100;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = 10;
+
+	increment = (iteration_count > 0) ? 1 : 0;
+
+	for (count_1 = 0; count_1 < iteration_count; count_1 += increment) {
+		this_mode = me.mode;
+		if ((this_mode == D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN) ||
+			(this_mode == D2JSP_MODE_PLAYER_STANDING_IN_TOWN)) {
+			wait_mode = this_mode;
+			break;
+		}
+		delay(iteration_time);
+	}
+
+	return(wait_mode);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForSpellCastCycle(iteration_count, iteration_time)
+{
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = 100;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = 10;
+
+	D2JSP_SKILL_WaitForSpellCastStart(iteration_count, iteration_time);
+
+	return(D2JSP_SKILL_WaitForSpellCastFinish(iteration_count, iteration_time));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForSpellCastStart(iteration_count, iteration_time)
+{
+	var wait_mode = -1;
+	var increment;
+	var this_mode;
+	var count_1;
+
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = D2JSP_SKILL_DefaultSpellCastStartCount;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = 10;
+
+	increment = (iteration_count > 0) ? 1 : 0;
+
+	for (count_1 = 0; count_1 < iteration_count; count_1 += increment) {
+		this_mode = me.mode;
+/*
+		if ((this_mode == D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) ||
+			me.getState(D2JSP_STATE_SKILLDELAY)) {
+*/
+		if (this_mode == D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) {
+			wait_mode = this_mode;
+			break;
+		}
+		delay(iteration_time);
+	}
+
+	return(wait_mode);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForSpellCastFinish(iteration_count, iteration_time)
+{
+	var wait_mode = -1;
+	var increment;
+	var this_mode;
+	var count_1;
+
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = D2JSP_SKILL_DefaultSpellCastFinishCount;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = 10;
+
+	increment = (iteration_count > 0) ? 1 : 0;
+
+	for (count_1 = 0; count_1 < iteration_count; count_1 += increment) {
+		this_mode = me.mode;
+/*
+		if ((this_mode != D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) &&
+			(!me.getState(D2JSP_STATE_SKILLDELAY))) {
+*/
+		if (this_mode != D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) {
+			wait_mode = this_mode;
+			break;
+		}
+		delay(iteration_time);
+	}
+
+	return(wait_mode);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

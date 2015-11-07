@@ -1,0 +1,147 @@
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/TDW_Move.d2l");
+includeonce("TDW/TDW_PathLink.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/____FeatureTest.027.Act_3_AreaMaps."+
+		"log", "FeatureTest.027", null, null, null, true);
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	TDW_MOVE_ReturnToTown();
+
+	if (me.act != 3)
+		TDW_MOVE_COMPAT_TownMove(3, "waypoint");
+
+	var area_list = [D2JSP_AREA_SPIDER_FOREST, D2JSP_AREA_GREAT_MARSH,
+		D2JSP_AREA_FLAYER_JUNGLE];
+
+	TEST_FileHandle = my_log.file_handle;
+
+	my_log.emitSep("=");
+	my_log.logInfo("Linkages before fix-up:");
+	my_log.emitSep("-");
+	for (var count_1 = 0; count_1 < area_list.length; count_1++)
+		ShowLinkage(TDW_PATH_AreaLink[area_list[count_1]], my_log);
+	my_log.emitSep("=");
+	my_log.logInfo("");
+
+	TDW_PATH_FixUpAct();
+
+	my_log.emitSep("=");
+	my_log.logInfo("Linkages after fix-up:");
+	my_log.emitSep("-");
+	for (var count_1 = 0; count_1 < area_list.length; count_1++)
+		ShowLinkage(TDW_PATH_AreaLink[area_list[count_1]], my_log);
+	my_log.emitSep("=");
+	my_log.logInfo("");
+
+	my_log.emitSep("=");
+	my_log.logInfo("Area common edges:");
+	my_log.emitSep("-");
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		for (var count_2 = 0; count_2 < area_list.length; count_2++) {
+			if (count_1 != count_2)
+				my_log.logInfo("Common edge for areas " + area_list[count_1] +
+					" (" + D2JSP_AREA_AreaToName(area_list[count_1]) + ") and " +
+					area_list[count_2] + " (" +
+					D2JSP_AREA_AreaToName(area_list[count_2]) + "): " +
+					TDW_PATH_DetermineCommonEdge(area_list[count_1],
+						area_list[count_2]));
+		}
+	}
+	my_log.emitSep("=");
+	my_log.logInfo("");
+
+	my_log.emitSep("=");
+	my_log.logInfo("Area exits:");
+	my_log.emitSep("-");
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		for (var count_2 = 0; count_2 < area_list.length; count_2++) {
+			if (count_1 != count_2)
+				my_log.logInfo("Exits for areas " + area_list[count_1] +
+					" (" + D2JSP_AREA_AreaToName(area_list[count_1]) + ") and " +
+					area_list[count_2] + " (" +
+					D2JSP_AREA_AreaToName(area_list[count_2]) + "): " +
+					TDW_PATH_GetAreaExit(area_list[count_1],
+						area_list[count_2]));
+		}
+	}
+	my_log.emitSep("=");
+	my_log.logInfo("");
+
+//print("STOPPING");
+//stop();
+
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		my_log.emitSep("=");
+		my_log.logInfo("Map for area " + area_list[count_1] + " (" +
+			D2JSP_AREA_AreaToName(area_list[count_1]) + "):");
+		my_log.emitSep("-");
+		my_log.logInfoQuiet(TDW_PATH_MapGlobal.area_list[area_list[count_1]].
+			getStringList(null, ((count_1 + 1) + "")));
+		my_log.emitSep("=");
+		my_log.logInfo("");
+	}
+	my_log.emitSep("=");
+	my_log.logInfo("");
+
+	my_log.emitSep("=");
+	my_log.logInfo("Multi-map for areas:");
+	for (var count_1 = 0; count_1 < area_list.length; count_1++)
+		my_log.logInfo(area_list[count_1] + " (" +
+			D2JSP_AREA_AreaToName(area_list[count_1]) + ")");
+	my_log.emitSep("-");
+	my_log.logInfoQuiet(TDW_PATH_GetMultiStringList(area_list));
+	my_log.emitSep("=");
+	my_log.logInfo("");
+
+	my_log.closeLog();
+
+	print("Script done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ShowLinkage(in_link, log_obj)
+{
+//	TDW_PATH_FixUpAct();
+
+	log_obj.logInfo("==========================================================");
+	log_obj.logInfo("==========================================================");
+	log_obj.logInfo("Area " + in_link.area + " (" +
+		D2JSP_AREA_AreaToName(in_link.area) + ")");
+	log_obj.logInfo("Link Specification Count: " + in_link.link_spec.length);
+	log_obj.logInfo("==========================================================");
+
+	for (var count_1 = 0; count_1 < in_link.link_spec.length; count_1++) {
+		if (count_1)
+			log_obj.logInfo("----------------------------------------------------------");
+//		log_obj.logInfo("Link number " + (count_1 + 1) + ":");
+log_obj.logInfo("Link number " + (count_1 + 1) + " (" +
+	in_link.link_spec[count_1] + "):");
+		log_obj.logInfo("---- ------ " + D2JSP_UTIL_FORMAT_LJust("",
+			((count_1 + 1) + "").length + 1, "-"));
+/*
+		if (D2JSP_UTIL_GEN_TypeOfNumber(in_link.link_spec[count_1]))
+			log_obj.logInfo("Simple exit linkage to area " + in_link.link_spec[count_1] +
+				" (" + D2JSP_AREA_AreaToName(in_link.link_spec[count_1]) + ")");
+		else {
+			var string_list = in_link.link_spec[count_1].toStringList();
+			while (string_list.length)
+				log_obj.logInfo(string_list.shift());
+		}
+*/
+		var string_list = in_link.link_spec[count_1].toStringList();
+		while (string_list.length)
+			log_obj.logInfo(string_list.shift());
+	}
+
+	log_obj.logInfo("==========================================================");
+	log_obj.logInfo("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

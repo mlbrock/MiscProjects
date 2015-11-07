@@ -1,0 +1,569 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+/*
+-------------------------------------------------------------------------------
+NPC Name      : Catapult
+NPC Parent    : *NONE*
+NPC Owner     : -1
+NPC Owner Type: 0
+NPC ID        : 33793
+NPC GID       : 264
+NPC Class ID  : 517
+NPC Act       : 1
+NPC Area      : 110 (Bloody Foothills)
+NPC Room      : 876
+NPC Location  : [4097, 5053]
+NPC Distance  : 48
+NPC Type      : 1
+NPC Mode      : 1 (NPC standing still)
+NPC ClassId   : 517
+NPC HP        : 128
+NPC HP Max    : 128
+NPC MP        : 0
+NPC MP Max    : 0
+NPC Catapult Skills:
+   SKILL    :     0 : Attack                               =                  4
+NPC Catapult Enchants:
+   ENCHANT  :     0 : *INVALID*                            =               true
+NPC Catapult Stats:
+   STAT     :     6 : Hit points                           =              32768
+   STAT     :     7 : Max hit points                       =              32768
+   STAT     :    67 : Velocity percent                     =                 75
+   STAT     :    68 : Attack rate                          =                100
+   STAT     :    69 : Other anim rate                      =                100
+   STAT     :   172 : Alignment                            =                  2
+NPC Catapult States:
+   STATE    :   105 : Alignment                            =                512
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+NPC Name      : Catapult
+NPC Parent    : *NONE*
+NPC Owner     : -1
+NPC Owner Type: 3
+NPC ID        : 34689
+NPC GID       : 271
+NPC Class ID  : 498
+NPC Act       : 1
+NPC Area      : 110 (Bloody Foothills)
+NPC Room      : 876
+NPC Location  : [4064, 5062]
+NPC Distance  : 28
+NPC Type      : 1
+NPC Mode      : 1 (NPC standing still)
+NPC ClassId   : 498
+NPC HP        : 127
+NPC HP Max    : 128
+NPC MP        : 0
+NPC MP Max    : 0
+NPC Catapult Enchants:
+   ENCHANT  :     0 : *INVALID*                            =               true
+NPC Catapult Stats:
+   STAT     :     6 : Hit points                           =              32512
+   STAT     :     7 : Max hit points                       =              32768
+   STAT     :    12 : Level                                =                 67
+   STAT     :    67 : Velocity percent                     =                 75
+   STAT     :    68 : Attack rate                          =                100
+   STAT     :    69 : Other anim rate                      =                100
+   STAT     :   172 : Alignment                            =                  2
+NPC Catapult States:
+   STATE    :    98 : Source Unit                          =                  4
+   STATE    :   105 : Alignment                            =                512
+-------------------------------------------------------------------------------
+
+2003-10-25 11:42:06.859 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  0: [3913,5144]
+2003-10-25 11:42:06.859 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  1: [3941,5163]
+2003-10-25 11:42:06.859 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  2: [3913,5082]
+2003-10-25 11:42:06.859 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  3: [3939,5069]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  4: [3984,5102]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  5: [3984,5122]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  6: [4064,5157]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  7: [4233,5087]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  8: [4399,5106]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1:  9: [4704,5063]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1: 10: [4704,5158]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1: 11: [4795,5107]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner CATAPULT COORDS A-1: 12: [4864,5159]
+2003-10-25 11:42:06.875 INFO     TDW_BloodyRunner ----------------------------------------------
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  0: [3913,5144]
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  1: [3941,5163]
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  2: [3913,5082]
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  3: [3939,5069]
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  4: [3984,5102]
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  5: [3984,5122]
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  6: [4064,5157]
+2003-10-25 11:42:06.968 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  7: [4064,5062]**
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  8: [4233,5087]
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner CATAPULT COORDS A-2:  9: [4399,5106]
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner CATAPULT COORDS A-2: 10: [4704,5063]
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner CATAPULT COORDS A-2: 11: [4704,5158]
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner CATAPULT COORDS A-2: 12: [4795,5107]
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner CATAPULT COORDS A-2: 13: [4864,5063]**
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner CATAPULT COORDS A-2: 14: [4864,5159]
+2003-10-25 11:42:06.984 INFO     TDW_BloodyRunner ----------------------------------------------
+2003-10-25 11:42:07.437 INFO     TDW_BloodyRunner Refreshed Thunder Storm
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  0: [3913,5144]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  1: [3941,5163]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  2: [3913,5082]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  3: [3939,5069]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  4: [3984,5102]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  5: [3984,5122]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  6: [4064,5157]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  7: [4233,5087]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  8: [4399,5106]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  :  9: [4704,5063]
+2003-10-25 11:42:10.437 INFO     TDW_BloodyRunner CATAPULT COORDS B  : 10: [4704,5158]
+2003-10-25 11:42:10.453 INFO     TDW_BloodyRunner CATAPULT COORDS B  : 11: [4795,5107]
+2003-10-25 11:42:10.453 INFO     TDW_BloodyRunner CATAPULT COORDS B  : 12: [4864,5159]
+2003-10-25 11:42:10.453 INFO     TDW_BloodyRunner CATAPULT COORDS B  : 13: [4923,5144]??????????
+2003-10-25 11:42:10.453 INFO     TDW_BloodyRunner ----------------------------------------------
+2003-10-25 11:42:10.578 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  0: [3913,5144]
+2003-10-25 11:42:10.578 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  1: [3941,5163]
+2003-10-25 11:42:10.593 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  2: [3913,5082]
+2003-10-25 11:42:10.593 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  3: [3939,5069]
+2003-10-25 11:42:10.593 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  4: [3984,5102]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  5: [3984,5122]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  6: [4064,5157]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  7: [4233,5087]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  8: [4399,5106]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1:  9: [4704,5063]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1: 10: [4704,5158]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1: 11: [4795,5107]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner CATAPULT COORDS C-1: 12: [4864,5159]
+2003-10-25 11:42:10.609 INFO     TDW_BloodyRunner ----------------------------------------------
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  0: [3913,5144]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  1: [3941,5163]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  2: [3913,5082]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  3: [3939,5069]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  4: [3984,5102]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  5: [3984,5122]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  6: [4064,5157]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  7: [4064,5062]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  8: [4233,5087]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2:  9: [4399,5106]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2: 10: [4704,5063]
+2003-10-25 11:42:10.687 INFO     TDW_BloodyRunner CATAPULT COORDS C-2: 11: [4704,5158]
+2003-10-25 11:42:10.703 INFO     TDW_BloodyRunner CATAPULT COORDS C-2: 12: [4795,5107]
+2003-10-25 11:42:10.703 INFO     TDW_BloodyRunner CATAPULT COORDS C-2: 13: [4864,5063]
+2003-10-25 11:42:10.703 INFO     TDW_BloodyRunner CATAPULT COORDS C-2: 14: [4864,5159]
+2003-10-25 11:42:10.703 INFO     TDW_BloodyRunner ----------------------------------------------
+*/
+
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_BR_ExitSleepMS = 3000;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_BR_BloodyFirst = [3899, 5115];
+const TDW_BR_BloodyLast  = [4923, 5144];
+const TDW_BR_BloodyAdded = [
+	[ 3888,  5184],	// Delta = [    0,     0]
+	[ 3911,  5048],	// Delta = [   23,  -136]
+	[ 3975,  5186],	// Delta = [   64,   138]
+	[ 3969,  5040],	// Delta = [   -6,  -146]
+	[ 3999,  5185],	// Delta = [   30,   145]
+	[ 4105,  5170],	// Delta = [  106,   -15]
+	[ 4124,  5135],	// Delta = [   19,   -35]
+	[ 4549,  5105],
+	[ 4649,  5163],	// Delta = [  525,    28]
+	[ 4724,  5165],	// Delta = [   75,     2]
+	[ 4786,  5149],	// Delta = [   62,   -16]
+	[ 4764,  5057],	// Delta = [  -22,   -92]
+	[ 4916,  5067]		// Delta = [  152,    10]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["teleport.step.size"]          = 20;
+TDW_BOT_ConfigureList["teleport.step.size.max"]      = 120;
+// ////////////////////////////////////////////////////////////////////////////
+
+TDW_BOT_ConfigureList["operation.hostility.fight.softcore"] = true;
+TDW_BOT_ConfigureList["operation.quit.on.hostile"]          = false;
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	TDW_BOT_ConfigureList["operation.quit.on.error"]            = true;
+
+	TDW_BR_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BR_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_BloodyRunner", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_BOT_SUPP_DoMessageDND("got my nose to the merc levelling grindstone");
+
+	if (TDW_BR_DoBloody() && TDW_BOT_ContextList["operation.party"]) {
+		D2JSP_UTIL_BNET_SaySafe("laaaaggggg");
+		delay(500);
+	}
+
+	if (TDW_BOT_ContextList["operation.party"]) {
+		for (var count_1 = 0; count_1 < 3; count_1++) {
+			D2JSP_UTIL_BNET_SaySafe("next game");
+			delay(500);
+		}
+	}
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BR_DoBloody()
+{
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	if (!D2JSP_AREA_IsTown(me.area)) {
+		TDW_MOVE_ReturnToTown(null, null, 20, 50);
+		if (!D2JSP_AREA_IsTown(me.area))
+			return(-1);
+	}
+
+	if (me.area != D2JSP_AREA_HARROGATH) {
+		TDW_MOVE_COMPAT_TownMove(5, "waypoint");
+		if (me.area != D2JSP_AREA_HARROGATH)
+			return(-1);
+	}
+
+	TDW_PATH_CreateArea(D2JSP_AREA_BLOODY_FOOTHILLS);
+	TDW_PATH_CreateArea(D2JSP_AREA_RIGID_HIGHLANDS);
+	TDW_PATH_GetAreaExit(D2JSP_AREA_BLOODY_FOOTHILLS, D2JSP_AREA_RIGID_HIGHLANDS);
+//	TDW_PATH_BuildMap(D2JSP_AREA_BLOODY_FOOTHILLS);
+
+	if (!TDW_PATH_HasWaypointAccess(D2JSP_AREA_RIGID_HIGHLANDS,
+		access_strategy)) {
+		if (TDW_BOT_WP_AcquireWaypointOne(D2JSP_AREA_RIGID_HIGHLANDS,
+			access_strategy))
+			return(-1);
+	}
+
+	var coord_list = TDW_PATH_MapGlobal.area_list[D2JSP_AREA_BLOODY_FOOTHILLS].
+		getPresetCoordsList(null, D2JSP_UTIL_GETUNIT_NPC, [497, 498]);
+
+	coord_list.push(TDW_BR_BloodyLast);
+	coord_list = coord_list.concat(TDW_BR_BloodyAdded);
+	coord_list = D2JSP_UTIL_PATH_ProgressivePathSort(coord_list,
+		TDW_BR_BloodyFirst);
+
+	TDW_MOVE_WaypointUse(D2JSP_AREA_RIGID_HIGHLANDS);
+	if (me.area != D2JSP_AREA_RIGID_HIGHLANDS)
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to get to " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_RIGID_HIGHLANDS));
+
+	TDW_BOT_CHECK_PrecastChecks();
+
+	if (TDW_BOT_ContextList["operation.party"]) {
+		if (TDW_MOVE_UseTBK())
+			TDW_BOT_SUPP_DoExitWithMsg("Unable to use Tome of Town Portal...");
+	}
+
+	TDW_BOT_MOVE_TeleportToDestination(TDW_BR_BloodyFirst,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC(
+		"Shenk the Overseer", TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 5,
+		8, 18));
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC(
+		"Dac Farren", TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 5,
+		8, 18));
+
+	var action_flags = TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+		TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF;
+	var move_control = new TDW_BOT_ATTACK_MoveControl(action_flags);
+
+	while (coord_list.length) {
+		var next_coord = TDW_PATH_PopNearestCoordPresetUnit(coord_list);
+		TDW_BOT_MOVE_TeleportToDestination(next_coord, action_flags, move_control);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+/*
+	CODE NOTE: Obsolete; to be removed.
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_BR_BloodyList_1 = [
+// Area = 111 (Rigid Highlands)
+	[3778, 5108],
+	[3798, 5104],
+// Area = 110 (Bloody Foothills)
+	[3800, 5104],
+	[3820, 5107],
+	[3839, 5115],
+	[3859, 5119],
+	[3879, 5118],
+	[3899, 5115],
+];
+
+const TDW_BR_BloodyList_2 = [
+	[3906, 5116],
+	[3915, 5082],
+	[3906, 5116],
+	[3910, 5144],
+	[3925, 5171],
+	[3965, 5156],
+	[3981, 5123],
+	[3982, 5100],
+	[3938, 5074],
+	[3908, 5035],
+	[3967, 5031],
+	[3976, 5060],
+	[4000, 5103],
+	[4006, 5155],
+	[4021, 5196],
+	[4060, 5163],
+	[4055, 5111],
+	[4064, 5070],
+	[4055, 5043],
+	[4094, 5053],
+	[4101, 5093],
+	[4099, 5118],
+	[4135, 5136],
+	[4109, 5182],
+	[4133, 5109],
+	[4137, 5072],
+	[4132, 5043],
+	[4168, 5057],
+	[4178, 5109],
+	[4172, 5151],
+	[4205, 5129],
+	[4231, 5122],
+	[4226, 5092],
+	[4222, 5063],
+	[4224, 5069],
+	[4264, 5084],
+	[4290, 5085],
+	[4393, 5105],
+	[4402, 5123],
+	[4455, 5102],
+	[4497, 5102],
+	[4559, 5095],
+	[4573, 5111],
+	[4644, 5133],
+	[4661, 5122],
+	[4662, 5074],
+	[4695, 5060],
+	[4711, 5102],
+	[4702, 5157],
+	[4743, 5170],
+	[4736, 5069],
+	[4773, 5056],
+	[4778, 5130],
+	[4784, 5177],
+	[4813, 5134],
+	[4797, 5114],
+	[4813, 5074],
+	[4854, 5068],
+	[4852, 5042],
+	[4874, 5111],
+	[4867, 5158],
+	[4868, 5180],
+	[4894, 5177],
+	[4899, 5062],
+	[4944, 5045],
+	[4940, 5091],
+	[4923, 5144]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function OLD_TDW_BR_DoBloody()
+{
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	if (!D2JSP_AREA_IsTown(me.area)) {
+		TDW_MOVE_ReturnToTown(null, null, 20, 50);
+		if (!D2JSP_AREA_IsTown(me.area))
+			return(-1);
+	}
+
+	if (me.area != D2JSP_AREA_HARROGATH) {
+		TDW_MOVE_COMPAT_TownMove(5, "waypoint");
+		if (me.area != D2JSP_AREA_HARROGATH)
+			return(-1);
+	}
+
+	TDW_PATH_CreateArea(D2JSP_AREA_BLOODY_FOOTHILLS);
+	TDW_PATH_CreateArea(D2JSP_AREA_RIGID_HIGHLANDS);
+	TDW_PATH_GetAreaExit(D2JSP_AREA_BLOODY_FOOTHILLS, D2JSP_AREA_RIGID_HIGHLANDS);
+	TDW_PATH_BuildMap(D2JSP_AREA_BLOODY_FOOTHILLS);
+
+	if (!TDW_PATH_HasWaypointAccess(D2JSP_AREA_RIGID_HIGHLANDS,
+		access_strategy)) {
+		if (TDW_BOT_WP_AcquireWaypointOne(D2JSP_AREA_RIGID_HIGHLANDS,
+			access_strategy))
+			return(-1);
+	}
+
+	TDW_MOVE_WaypointUse(D2JSP_AREA_RIGID_HIGHLANDS);
+	if (me.area != D2JSP_AREA_RIGID_HIGHLANDS)
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to get to " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_RIGID_HIGHLANDS));
+
+	TDW_BOT_CHECK_PrecastChecks();
+
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC(
+		"Shenk the Overseer", TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 5,
+		8, 18));
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC(
+		"Dac Farren", TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 5,
+		8, 18));
+
+	if (TDW_BOT_ContextList["operation.party"]) {
+		if (TDW_MOVE_UseTBK())
+			TDW_BOT_SUPP_DoExitWithMsg("Unable to use Tome of Town Portal...");
+	}
+
+	TDW_BR_DoBloodyList(TDW_BR_BloodyList_1, TDW_BOT_SUPP_TP2DEST_FLAG_NONE);
+
+	TDW_BR_DoBloodyList(TDW_BR_BloodyList_2,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+		TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BR_DoBloodyList(move_list, action_flag)
+{
+	TDW_BOT_MOVE_TeleportToDestinationList(move_list,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+		TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+}
+// ////////////////////////////////////////////////////////////////////////////
+*/
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ has expressed hostility towards you.$/i)) {
+		if (TDW_BOT_ContextList["operation.hostility.fight"]) {
+			var player_name = arguments[0].split(/[\s]/)[0];
+			TDW_BOT_AttackNPCSpec.addPlayer(player_name);
+			log_obj.logHostile(D2JSP_UTIL_COLOR_RED + "Player " + player_name +
+				" has gone hostile; you are prepared to duel.");
+		}
+		else if (TDW_BOT_ContextList["operation.quit.on.hostile"]) {
+			log_obj.logHostile(D2JSP_UTIL_COLOR_RED +
+				"********** HOSTILITY EXIT: " + arguments[0]);
+			log_obj.closeLog();
+			quit();								// We're in trouble. REALLY quit()!
+		}
+		else
+			log_obj.logHostile(D2JSP_UTIL_COLOR_RED + "Player " + player_name +
+				" has gone hostile.");
+	}
+	else if (arguments[0].match(/^\S+ is no longer hostile towards you.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (TDW_BOT_AttackNPCSpec.findNPC(player_name)) {
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+			log_obj.logInfo(D2JSP_UTIL_COLOR_YELLOW + "Player " + player_name +
+				" is no longer hostile; you are no longer prepared to duel.");
+		}
+		else
+			log_obj.logInfo(D2JSP_UTIL_COLOR_YELLOW + "Player " + player_name +
+				" is no longer hostile.");
+	}
+	else
+		log_obj.logInfo(arguments[0]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			;
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (arguments[0].
+		match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+	else if (arguments[0].match(/^\S+ dropped due to timeout\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

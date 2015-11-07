@@ -1,0 +1,58 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Common.d2l");
+
+const D2J_MBI_GameLoadMS = 2000;
+
+const D2J_MBI_StepSize   = 3;
+const D2J_MBI_TestCount  = 20;
+const D2J_MBI_TestTime   = 50;
+
+function main()
+{
+	var move_array = new Array();
+	var this_move  = new Array();
+	var start_date = new Date();
+	var file_handle;
+	var count_1;
+	var count_2;
+	var new_x;
+	var new_y;
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	me.randommove = true;
+
+	file_name = "MuleBurnIn." + me.realm + "." + me.account + "." +
+		me.name + ".txt";
+	file_handle = fileOpen(file_name, 2);
+	if (file_handle) {
+		file_handle.writeLine("Mule Burn-In Started: " + start_date.toString());
+		file_handle.close();
+	}
+	else {
+		print("Unable to open MuleBurnIn.d2j output file '" + file_name +
+			"' for writing.");
+		return(-1);
+	}
+
+	var last_npc = null;
+
+	while (true) {
+		var this_npc;
+		do {
+			var npc_index = D2JSP_UTIL_GEN_RandomRange(0,
+				D2JSP_NPC_VENDOR_VendorList[me.act - 1].length - 1);
+			this_npc = D2JSP_NPC_VENDOR_VendorList[me.act - 1][npc_index];
+		} while (this_npc == last_npc);
+		me.overhead("Moving to NPC " + this_npc);
+		D2JSP_NPC_MoveToNPC(this_npc);
+		var my_wait = D2JSP_UTIL_GEN_RandomRange(1, 1);
+		while (my_wait) {
+			D2JSP_UTIL_BNET_OverheadSafe("Waiting " + my_wait-- + " seconds...");
+			delay(1000);
+		}
+		D2JSP_UTIL_BNET_OverheadSafe("");
+	}
+}
+

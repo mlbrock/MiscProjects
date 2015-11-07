@@ -1,0 +1,113 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+var TDW_MO_Log = null;
+
+function main()
+{
+	var obj_list;
+	var last_area;
+
+	TDW_MO_Log = new D2JSP_UTIL_Log("output/TDW_MonitorObjects." +
+		D2JSP_UTIL_FORMAT_GetUserDottedStringFixed() + ".log", "MonitorObjects");
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	last_area = me.area;
+	obj_list  = TDW_MO_InitializeObjects();
+	print("Ready");
+
+	while (true) {
+		if (me.area != last_area) {
+			last_area = me.area;
+			obj_list  = TDW_MO_InitializeObjects();
+		}
+		else
+			obj_list = TDW_MO_CheckObjects(obj_list);
+		D2JSP_UTIL_BNET_OverheadSafe("Monitoring objects...");
+		delay(500);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MO_InitializeObjects()
+{
+	var out_list     = TDW_MO_GetObjects();
+	var action_count = 0;
+	var log_obj      = D2JSP_UTIL_LOG_GetALog();
+
+	for (var this_prop in out_list) {
+		log_obj.logInfo("***** Object " + this_prop + " [" +
+			out_list[this_prop] + "] has been recorded.");
+		action_count++;
+	}
+
+	if (action_count)
+		log_obj.logInfo("---------------------------------------------------");
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MO_GetObjects()
+{
+	var out_list = new Array();
+	var this_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT);
+
+	if (this_obj) {
+		do {
+			out_list[this_obj.classid + ""] =
+				[this_obj.mode, this_obj.name, this_obj.x, this_obj.y];
+		} while (this_obj && this_obj.getNext());
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MO_CheckObjects(in_list)
+{
+	var out_list     = TDW_MO_GetObjects();
+	var action_count = 0;
+	var log_obj      = D2JSP_UTIL_LOG_GetALog();
+
+	for (var this_prop in in_list) {
+		if (this_prop in out_list) {
+			if (in_list[this_prop][0] != out_list[this_prop][0]) {
+				log_obj.logInfo("***** Object " + this_prop + " [" +
+					in_list[this_prop] + "] mode changed to " +
+					out_list[this_prop][0]);
+				action_count++;
+			}
+			if (in_list[this_prop][1] != out_list[this_prop][1]) {
+				log_obj.logInfo("***** Object " + this_prop + " [" +
+					in_list[this_prop] + "] name changed to " +
+					out_list[this_prop][0]);
+				action_count++;
+			}
+		}
+		else {
+			log_obj.logInfo("***** Object " + this_prop + " [" +
+				in_list[this_prop] + "] not found in current list!!!");
+			action_count++;
+		}
+	}
+
+	for (var this_prop in out_list) {
+		if (!(this_prop in in_list)) {
+			log_obj.logInfo("***** Object " + this_prop + " [" +
+				out_list[this_prop] + "] is new.");
+			action_count++;
+		}
+	}
+
+	if (action_count)
+		log_obj.logInfo("---------------------------------------------------");
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

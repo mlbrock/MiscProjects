@@ -1,0 +1,1911 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp MLB Movement Support Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Move.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Support for specialized character movement.
+//
+// Revison History : 2002-11-23 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_Move_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_Move_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_Path.d2l");
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+if (parseFloat(me.version) != 0.3518)
+	includeonce("TownMove2.d2l");
+else
+	includeonce("TownMove.d2l");
+
+includeonce("SyLib.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Stores waypoint accessibility info.
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_WaypointAccessData         = D2JSP_AREA_GetEmptyWaypointAccess();
+var TDW_MOVE_WaypointAccessDataDoneFlag = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Defaults for the functions in this library...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_DefaultWaitIterations = 10;
+var TDW_MOVE_DefaultWaitTime       = 50;
+var TDW_MOVE_DefaultFudgeFactor    = 5;
+var TDW_MOVE_DefaultRandomMove     = 5;
+
+// How long we'll wait (in seconds) to transport from one waypoint to the next.
+var TDW_MOVE_DefaultWPSecs   =  5;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_VENDOR_HEAL     = 0;
+var TDW_MOVE_VENDOR_SCROLL   = 1;
+var TDW_MOVE_VENDOR_POT      = 2;
+var TDW_MOVE_VENDOR_KEY      = 3;
+var TDW_MOVE_VENDOR_REVIVE   = 4;
+var TDW_MOVE_VENDOR_GAMBLE_1 = 5;
+var TDW_MOVE_VENDOR_GAMBLE_2 = 6;
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_VENDOR_VendorTypeList = new Array();
+TDW_MOVE_VENDOR_VendorTypeList["heal"]     = TDW_MOVE_VENDOR_HEAL;
+TDW_MOVE_VENDOR_VendorTypeList["healing"]  = TDW_MOVE_VENDOR_HEAL;
+TDW_MOVE_VENDOR_VendorTypeList["scroll"]   = TDW_MOVE_VENDOR_SCROLL;
+TDW_MOVE_VENDOR_VendorTypeList["scrolls"]  = TDW_MOVE_VENDOR_SCROLL;
+TDW_MOVE_VENDOR_VendorTypeList["pot"]      = TDW_MOVE_VENDOR_POT;
+TDW_MOVE_VENDOR_VendorTypeList["pots"]     = TDW_MOVE_VENDOR_POT;
+TDW_MOVE_VENDOR_VendorTypeList["potion"]   = TDW_MOVE_VENDOR_POT;
+TDW_MOVE_VENDOR_VendorTypeList["potions"]  = TDW_MOVE_VENDOR_POT;
+TDW_MOVE_VENDOR_VendorTypeList["key"]      = TDW_MOVE_VENDOR_KEY;
+TDW_MOVE_VENDOR_VendorTypeList["keys"]     = TDW_MOVE_VENDOR_KEY;
+TDW_MOVE_VENDOR_VendorTypeList["revive"]   = TDW_MOVE_VENDOR_REVIVE;
+TDW_MOVE_VENDOR_VendorTypeList["gamble"]   = TDW_MOVE_VENDOR_GAMBLE_1;
+TDW_MOVE_VENDOR_VendorTypeList["gambling"] = TDW_MOVE_VENDOR_GAMBLE_1;
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_VENDOR_VendorList = [
+	["Akara",	"Akara",   "Akara",	  "Akara",	  "Kashya",    "Gheed",   "Gheed"    ],
+	["Fara",    "Drognan", "Lysander", "Lysander", "Greiz",     "Elzix",   "Elzix"    ],
+	["Ormus",   "Ormus",   "Ormus",    "Hratli",   "Asheara",   "Alkor",   "Alkor"    ],
+	["Jamella", "Jamella", "Jamella",  "Jamella",  "Tyrael",    "Jamella", "Jamella"  ],
+	["Malah",   "Malah",   "Malah",    "Malah",    "Qual-Kehk", "Anya",    "Nihlathak"]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_ActHealerList = [
+	"Akara",
+	"Fara",
+	"Ormus",
+	"Jamella",
+	"Malah"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_ActMercReviverList = [
+	"Kashya",
+	"Greiz",
+	"Asheara",
+	"Tyrael",
+	"Qual-Kehk"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_MOVE_PathFaraToDrognan = [
+	[5123, 5083],
+	[5124, 5078],
+	[5124, 5073],
+	[5124, 5068],
+	[5121, 5064],
+	[5117, 5061],
+	[5112, 5059],
+	[5107, 5059],
+	[5102, 5056],
+	[5099, 5052],
+	[5098, 5047],
+	[5096, 5042],
+	[5095, 5037],
+	[5093, 5032]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MOVE_Act1_CairnStones = [
+	"StoneAlpha",
+	"StoneDelta",
+	"StoneLambda",
+//	"StoneTheta",								// Stand-alone stone not used.
+	"StoneGamma",
+	"StoneBeta"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (typeof(TOWNMOVE_VERSION) != "undefined") {
+	var TDW_GlobalTownMove2 = new TownMove();
+	TDW_GlobalTownMove2.Objects[0].push(new Obj("corpsespot",   0, 1,
+		new coord(-7, -12)));
+	TDW_GlobalTownMove2.Objects[1].push(new Obj("corpsespot",   0, 2,
+		new coord(5153, 5203)));
+//	TDW_GlobalTownMove2.NPCs[1].push(new NPC("jerhyn",          0, 2,
+//		new coord(5055,5142)));
+	TDW_GlobalTownMove2.Objects[1].push(new Obj("palace",       0, 2,
+		new coord(5055,5142)));
+	TDW_GlobalTownMove2.Objects[1].push(new Obj("sewers",       0, 2,
+		new coord(5221,5181)));
+
+	TDW_GlobalTownMove2.Objects[2].push(new Obj("corpsespot",   0, 3,
+		new coord(5122, 5168)));
+	TDW_GlobalTownMove2.Objects[3].push(new Obj("corpsespot",   0, 4,
+		new coord(5047, 5039)));
+	TDW_GlobalTownMove2.Objects[3].push(new Obj("portalspot",   0, 4,
+		new coord(5048, 5043)));
+	TDW_GlobalTownMove2.Objects[4].push(new Obj("corpsespot",   0, 5,
+		new coord(5099, 5024)));
+	TDW_GlobalTownMove2.Objects[4].push(new Obj("gate",       449, 5,
+		new coord(5023, 5094)));
+	for (count_1 = 0; count_1 < TDW_GlobalTownMove2.NPCs[1].length; count_1++) {
+		if (TDW_GlobalTownMove2.NPCs[1][count_1].Name == "warriv") {
+			TDW_GlobalTownMove2.NPCs[1][count_1].Location = new coord(5153, 5203);
+			break;
+		}
+	}
+	delete count_1;
+	TDW_GlobalTownMove2.Init();
+	for (count_1 = 0; count_1 < TDW_GlobalTownMove2.NPCs[1].length; count_1++) {
+		if (TDW_GlobalTownMove2.NPCs[1][count_1].Name == "warriv") {
+			TDW_GlobalTownMove2.NPCs[1][count_1].Location = new coord(5153, 5203);
+			break;
+		}
+	}
+}
+else {
+	// Fix missing locations in TownMove
+	_townpoints[0]["corpsespot"] = new coord(5093, 5032);
+	_townpoints[0]["warriv"]     = _townpoints[0]["stash"];
+	_townpoints[1]["corpsespot"] = new coord(5153, 5203);
+	_townpoints[1]["warriv"]     = new coord(5153, 5203);
+	_townpoints[1]["drognan"]    = new coord(5093, 5032);
+	_townpoints[1]["jerhyn"]     = _townpoints[1]["palace"];
+	_townpoints[2]["corpsespot"] = new coord(5122, 5168);
+	_townpoints[2]["meshif"]     = new coord(5118, 5168);
+	_townpoints[3]["corpsespot"] = new coord(5048, 5043);
+	_townpoints[4]["portalspot"] = new coord(5098, 5023);	// Broken in TownMove
+	_townpoints[4]["corpsespot"] = new coord(5098, 5023);
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_COMPAT_TownMove(in_arg)
+{
+	if (typeof(TDW_GlobalTownMove2) == "object") {
+		if (arguments.length == 1) {
+			if ((arguments[0].toLowerCase() == "waypoint") ||
+				 (arguments[0].toLowerCase() == "portalspot") ||
+				 (arguments[0].toLowerCase() == "corpsespot"))
+				return(TDW_GlobalTownMove2.MoveTo(arguments[0], me.act));
+			else
+				return(TDW_GlobalTownMove2.MoveTo(arguments[0]));
+		}
+		else if (arguments.length == 2)
+			return(TDW_GlobalTownMove2.MoveTo(arguments[1], arguments[0]));
+	}
+	else {
+		if (arguments.length == 1)
+			return(Sc_TownMove(arguments[0]));
+		else if (arguments.length == 2)
+			return(Sc_TownMove(arguments[0], arguments[1]));
+	}
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_COMPAT_TownMoveXY(in_act, in_x, in_y)
+{
+	if (typeof(TDW_GlobalTownMove2) == "object")
+		return(TDW_GlobalTownMove2.MoveTo(in_x, in_y, in_act));
+	else
+		return(Sc_TownMoveXY(in_act, in_x, in_y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_COMPAT_TownMoveExit()
+{
+	if (typeof(TDW_GlobalTownMove2) == "object") {
+		var area_exit = TDW_PATH_GetAreaExit(D2JSP_AREA_AreaToTown(),
+			D2JSP_AREA_AreaToTown() + 1);
+		return(TDW_GlobalTownMove2.MoveTo(area_exit.exit_coord[0],
+			area_exit.exit_coord[1], D2JSP_AREA_GetAct()));
+	}
+	else
+		return(Sc_TownMove("exit"));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_COMPAT_TownMoveHasNPC(in_act, in_name)
+{
+	if (typeof(TDW_GlobalTownMove2) == "object") {
+		for (var i = 0; i < TDW_GlobalTownMove2.NPCs[in_act-1].length; i++) {
+			if (TDW_GlobalTownMove2.NPCs[in_act-1][i].Name == in_name.toLowerCase())
+				return(true);
+		}
+		return(false);
+	}
+	else
+		return((in_name.toLowerCase() in _townpoints[in_act - 1]) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_COMPAT_TownMoveHasObject(in_act, in_name)
+{
+	if (typeof(TDW_GlobalTownMove2) == "object") {
+		for (var i = 0; i < TDW_GlobalTownMove2.Objects[in_act-1].length; i++) {
+			if (TDW_GlobalTownMove2.Objects[in_act-1][i].Name == in_name.toLowerCase())
+				return(true);
+		}
+		return(false);
+	}
+	else
+		return((in_name.toLowerCase() in _townpoints[in_act - 1]) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_COMPAT_TownMoveHasUnit(in_act, in_name)
+{
+	if (typeof(TDW_GlobalTownMove2) == "object") {
+		if (TDW_MOVE_COMPAT_TownMoveHasNPC(in_act, in_name))
+			return(true);
+		else
+			return(TDW_MOVE_COMPAT_TownMoveHasObject(in_act, in_name));
+	}
+	else
+		return((in_name.toLowerCase() in _townpoints[in_act - 1]) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_TownMove(arg_1, arg_2)
+{
+	var new_name;
+
+	if (TDW_MOVE_VENDOR_IsSymbolicVendor((arguments.length == 1) ? arg_1 :
+		arg_2)) {
+		if ((new_name = TDW_MOVE_VENDOR_SymbolicVendorToName(arg_1, arg_2)) !=
+			null)
+			return((arguments.length == 1) ? TDW_MOVE_COMPAT_TownMove(new_name) :
+				TDW_MOVE_COMPAT_TownMove(arg_1, new_name));
+	}
+
+	return((arguments.length == 1) ? TDW_MOVE_COMPAT_TownMove(arg_1) :
+		TDW_MOVE_COMPAT_TownMove(arg_1, arg_2));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_VENDOR_IsSymbolicVendor(arg_string)
+{
+	return((arg_string.toLowerCase() in TDW_MOVE_VENDOR_VendorTypeList) ? true :
+		false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_VENDOR_SymbolicVendorToName(arg_1, arg_2)
+{
+	var the_act;
+	var the_name;
+
+	if ((arguments.length == 1) || (arg2 == null)) {
+		the_act  = me.act;
+		the_name = arg_1;
+	}
+	else {
+		the_act  = arg_1;
+		the_name = arg_2;
+	}
+
+	if ((the_act >= 1) && (the_act <= 5) &&
+		TDW_MOVE_VENDOR_IsSymbolicVendor(the_name))
+		return(TDW_MOVE_VENDOR_VendorList[the_act][the_name]);
+	else
+		return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForAndTakePortal(target_area, portal_parent, try_count,
+	try_time, not_mine_flag, max_distance)
+{
+	var tmp_portal_parent = "*";
+	var this_portal;
+
+	if (arguments.length < 1)
+		target_area = -1;
+
+	if (arguments.length < 2)
+		portal_parent = "*";
+
+	if ((arguments.length < 3) || (try_count < 0))
+		try_count = 0;
+
+	if ((arguments.length < 4) || (try_time < 1))
+		try_time = 50;
+
+	if (arguments.length < 5)
+		not_mine_flag = false;
+
+	if (arguments.length < 6)
+		max_distance = 100;
+
+	max_distance = (D2JSP_UTIL_GEN_TypeOfNumber(max_distance) &&
+		(max_distance > 0)) ? max_distance : 100;
+
+	if (portal_parent != "*")				// Sanity check here...
+		not_mine_flag = false;
+
+	this_portal = TDW_MOVE_LookForPortal(target_area, portal_parent, try_count,
+		try_time, not_mine_flag, max_distance);
+
+	if (this_portal) {
+		tmp_portal_parent = this_portal.getParent();
+		if (TDW_MOVE_TakePortal(this_portal))
+			tmp_portal_parent = "*";
+	}
+
+	return(tmp_portal_parent);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// If 'target_area' = -1, this function will look for a portal to anywhere.
+// If 'target_area' = D2JSP_AREA_HARROGATH and 'portal_parent' = "*" and the
+// current area is D2JSP_AREA_THE_PANDEMONIUM_FORTRESS and you are near enough
+// to Tyrael to detect him with 'getNPC()', this function will look for
+// Tyrael's portal to Act 5.
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForPortal(target_area, portal_parent, try_count, try_time,
+	not_mine_flag, max_distance)
+{
+	var current_count = 0;
+	var tyrael_portal = false;
+	var this_portal;
+	var this_parent;
+
+	if (arguments.length < 1)
+		target_area = -1;
+
+	if (arguments.length < 2)
+		portal_parent = "*";
+
+	if ((arguments.length < 3) || (try_count < 0))
+		try_count = 0;
+
+	if ((arguments.length < 4) || (try_time < 1))
+		try_time = 50;
+
+	if (arguments.length < 5)
+		not_mine_flag = false;
+
+	if (arguments.length < 6)
+		max_distance = 100;
+
+	max_distance = (D2JSP_UTIL_GEN_TypeOfNumber(max_distance) &&
+		(max_distance > 0)) ? max_distance : 100;
+
+	if (portal_parent != "*")				// Sanity check here...
+		not_mine_flag = false;
+
+	if ((me.area == D2JSP_AREA_THE_PANDEMONIUM_FORTRESS) &&
+		(target_area == D2JSP_AREA_HARROGATH) && (portal_parent == "*") &&
+		getUnit(D2JSP_UTIL_GETUNIT_NPC, "Tyrael"))
+		tyrael_portal = true;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_LookForPortal(" + target_area +
+		", " + portal_parent + ", " + try_count + ", " + try_time + ", " +
+		not_mine_flag + ", " + max_distance + ")");
+
+	do {
+		this_portal = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, null,
+			D2JSP_MODE_OBJECT_OPENED);
+		do {
+			if ((this_portal && (this_portal.name.toLowerCase() == "portal") &&
+				(this_portal.mode == D2JSP_MODE_OBJECT_OPENED) &&
+				((target_area == -1) ||
+				(target_area == D2JSP_UTIL_GetObjectTargetArea(this_portal)))) ||
+				(tyrael_portal && (this_portal.name.toLowerCase() == "harrogath"))){
+				this_parent = this_portal.getParent();
+				if (not_mine_flag && (this_parent == me.name))
+					continue;
+				if (myDist(this_portal.x, this_portal.y) > max_distance)
+					continue;
+				if ((portal_parent == "*") || (this_parent == portal_parent)) {
+					if (portal_parent == "*")
+						portal_parent = this_portal.getParent();
+					D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_LookForPortal(" +
+						target_area + ", " + portal_parent + ", " + try_count + ", " +
+						try_time + ", " + not_mine_flag + ", " + max_distance +
+						") return = " + this_portal);
+					return(this_portal);
+				}
+			}
+//.exec t=getUnit(4,"tbk"); if (!t) stop(); clickItem(1,t); while (true) { p = getUnit(2, "XYZ"); if (p) { do { ; } while (p && p.getNext()); } if (p) print(p.getParent()); delay(10); }
+
+		} while (this_portal &&
+			this_portal.getNext(null, D2JSP_MODE_OBJECT_OPENED));
+		if (this_portal && (this_portal.getParent() == portal_parent))
+			break;
+		if (try_count && (try_count <= ++current_count))
+			break;
+		delay(try_time);
+	} while (1);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_LookForPortal(" +
+		target_area + ", " + portal_parent + ", " + try_count + ", " +
+		try_time + ", " + not_mine_flag + ", " + max_distance + ") return = null");
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForPortalByClassid(obj_classid, try_count, try_time)
+{
+	var current_count = 0;
+	var this_portal;
+
+	if (arguments.length < 1)
+		return(null);
+
+	if ((arguments.length < 2) || (try_count < 0))
+		try_count = 0;
+
+	if ((arguments.length < 3) || (try_time < 1))
+		try_time = 50;
+
+	do {
+		this_portal = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, obj_classid,
+			D2JSP_MODE_OBJECT_OPENED);
+		// Funky loop for cores before 0.29 because of 127 ptUnit limit.
+		do {
+			if (this_portal && (this_portal.classid == obj_classid))
+				return(this_portal);
+		} while (this_portal &&
+			this_portal.getNext(obj_classid, D2JSP_MODE_OBJECT_OPENED));
+		if (this_portal)
+			break;
+		if (try_count && (try_count <= ++current_count))
+			break;
+		delay(try_time);
+	} while (1);
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_ReturnToTown(call_back_func, call_back_data, try_count,
+	try_time)
+{
+	if (D2JSP_AREA_IsTown())
+		return(0);
+
+	var try_wp = false;
+	var wp_indices;
+
+	if (D2JSP_AREA_HasWayPoint(me.area)) {
+		wp_indices = D2JSP_AREA_AreaToWayPointIndices(me.area);
+		if ((me.area != D2JSP_AREA_HALLS_OF_DEATHS_CALLING) ||
+			(TDW_MOVE_WaypointAccessData[wp_indices[0]][wp_indices[1]]))
+			try_wp = true;
+	}
+
+	if (try_wp) {
+		var way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+		if (way_point_obj && (myDist(way_point_obj.x, way_point_obj.y) <= 5)) {
+			TDW_MOVE_WaypointUse(D2JSP_AREA_AreaToTown());
+			if (D2JSP_AREA_IsTown()) {
+				TDW_MOVE_WaypointAccessData[wp_indices[0]][wp_indices[1]] = true;
+				return(0);
+			}
+		}
+	}
+
+	return(TDW_MOVE_PortalToTown(call_back_func, call_back_data, try_count,
+		try_time));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_PortalToTown(call_back_func, call_back_data, try_count,
+	try_time, max_distance)
+{
+	var my_portal;
+
+	if (D2JSP_AREA_IsTown())
+		return(0);
+
+	if ((arguments.length < 1) || (!D2JSP_UTIL_GEN_TypeOfFunction(call_back_func)))
+		call_back_func = null;
+
+	if ((arguments.length < 3) || (try_count < 1) || (try_count == null))
+		try_count = 500;
+
+	if ((arguments.length < 4) || (try_time < 1) || (try_time == null))
+		try_time = 50;
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_PortalToTown(): parameters = (" +
+		D2JSP_UTIL_FORMAT_FunctionToName(call_back_func) + ", " +
+		call_back_data + ", " + try_count + ", " + try_time + ")");
+
+	TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_AreaToTown(), me.name, 1, 50,
+		null, 10);
+	if (D2JSP_AREA_IsTown()) {
+		D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_PortalToTown(): " +
+			"Returned to " + D2JSP_AREA_AreaToName() + ".");
+		TDW_MOVE_TownReturnFinalize();
+		return(0);
+	}
+
+	my_portal = TDW_MOVE_LookForPortal(D2JSP_AREA_AreaToTown(), me.name, 1, 50,
+		null, 10);
+
+	if ((!my_portal) || (myDist(my_portal.x, my_portal.y) > 5)) {
+		if (TDW_MOVE_OpenTownPortal())
+			return(-1);
+	}
+
+	for (var count_1 = 0; count_1 < try_count; count_1++) {
+		my_portal = TDW_MOVE_LookForPortal(D2JSP_AREA_AreaToTown(), me.name, 1,
+			50, null, 10);
+		if (my_portal)
+			TDW_MOVE_TakePortal(my_portal, true, 1, 10);
+		if (D2JSP_AREA_IsTown()) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_PortalToTown(): " +
+				"Returned to " + D2JSP_AREA_AreaToName() + ".");
+			TDW_MOVE_TownReturnFinalize();
+			return(0);
+		}
+		if (call_back_func != null)
+			call_back_func(call_back_data);
+		if (D2JSP_AREA_IsTown()) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_PortalToTown(): " +
+				"Returned to " + D2JSP_AREA_AreaToName() + ".");
+			TDW_MOVE_TownReturnFinalize();
+			return(0);
+		}
+		if (count_1 && (!(count_1 % 10))) {
+			my_portal = TDW_MOVE_LookForPortal(D2JSP_AREA_AreaToTown(), me.name, 1,
+				10, null, 50);
+			if (my_portal && (myDist(my_portal.x, my_portal.y) > 5)) {
+				if (TDW_MOVE_OpenTownPortal())
+					return(-1);
+			}
+			if (call_back_func != null)
+				call_back_func(call_back_data);
+		}
+		if (D2JSP_AREA_IsTown()) {
+			D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_PortalToTown(): " +
+				"Returned to " + D2JSP_AREA_AreaToName() + ".");
+			TDW_MOVE_TownReturnFinalize();
+			return(0);
+		}
+		delay(try_time);
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_PortalToTown(): failed.");
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_OpenTownPortal()
+{
+	var my_tp;
+
+	if (D2JSP_AREA_IsTown())
+		return(0);
+
+	if (!(my_tp = D2JSP_COMM_GetALocalTomeNotEmpty("tbk"))) {
+		if (!(my_tp = D2JSP_COMM_GetALocalScroll("tsc"))) {
+			D2JSP_UTIL_LOG_GetALog().logWarning("No tome or scroll of " +
+				"Town Portal found in inventory.");
+			return(-1);
+		}
+	}
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_OpenTownPortal(): " +
+		"About to right-click a " + my_tp.name + " (" + my_tp.code + ").");
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		delay(10);
+
+	clickItem(D2JSP_ITEM_CLICK_BUTTON_RIGHT, my_tp);
+
+	D2JSP_UTIL_LOG_GetALog().logDebug("TDW_MOVE_OpenTownPortal(): " +
+		"Right-click of a " + my_tp.name + " (" + my_tp.code + ") completed.");
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_TakePortal(this_portal, no_move_flag, try_count, try_time)
+{
+	var current_count = 0;
+	var last_area     = me.area;
+	var this_distance;
+	var count_1;
+	var old_skill;
+
+	if ((arguments.length < 2) || (no_move_flag == null))
+		no_move_flag = false;
+
+	if ((arguments.length < 3) || (try_count < 0))
+		try_count = 20;
+
+	if ((arguments.length < 4) || (try_time < 1))
+		try_time = 50;
+
+	if (!no_move_flag) {
+		if ((this_distance = myDist(this_portal.x, this_portal.y)) > 5) {
+			if ((this_distance > 10) && D2JSP_AREA_IsTown())
+				TDW_MOVE_COMPAT_TownMoveXY(me.act, this_portal.x, this_portal.y);
+			if ((this_distance = myDist(this_portal.x, this_portal.y)) > 5)
+				TDW_MOVE_MoveToObject(this_portal);
+		}
+		else
+			TDW_MOVE_MoveToObject(this_portal);
+	}
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	while ((me.area == last_area) && ((!try_count) ||
+		(try_count > current_count))) {
+		D2JSP_UTIL_InteractObject(this_portal);
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+		for (count_1 = 0; count_1 < 50; count_1++) {
+			if (me.area != last_area)
+				break;
+			D2JSP_UTIL_GEN_FuzzyDelay(10);
+		}
+		if (me.area != last_area)
+			break;
+		D2JSP_UTIL_GEN_FuzzyDelay(try_time);
+		current_count++;
+	}
+
+	return((me.area != last_area) ? 0 : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_TownReturnFinalize()
+{
+	if ((me.area == D2JSP_AREA_ROGUE_ENCAMPMENT) &&
+		((typeof(TOWNMOVE_VERSION) == "undefined") || (TOWNMOVE_VERSION < 2))) {
+		while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+			(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+			D2JSP_UTIL_GEN_FuzzyDelay(10);
+		var target_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, 39);
+		if (!target_obj) {						// If not null, Scav can find it.
+			if (TDW_PATH_Act1FireCoords == null)
+				TDW_PATH_UTIL_GetAct1Area1_Fire();
+			if (TDW_PATH_Act1FireCoords != null)
+				TDW_MOVE_MoveToXYPair(TDW_PATH_Act1FireCoords, 10);
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForAndTakeObjectToAreaByClassid(obj_classid, try_count,
+	try_time)
+{
+	var return_code;
+	var this_obj;
+
+	if ((arguments.length < 1) || (obj_classid == null))
+		return(null);
+
+	if ((arguments.length < 2) || (try_count < 0))
+		try_count = 0;
+
+	if ((arguments.length < 3) || (try_time < 1))
+		try_time = 50;
+
+	this_obj = TDW_MOVE_LookForObjectByClassid(obj_classid, try_count,
+		try_time);
+
+	// Treat it as a portal
+	if (this_obj != null)
+		return_code = TDW_MOVE_TakePortal(this_obj);
+	else
+		return_code = -1;
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForObjectByClassid(obj_classid, try_count, try_time)
+{
+	return(TDW_MOVE_LookForUnitByClassid(D2JSP_UTIL_GETUNIT_OBJECT, obj_classid,
+		try_count, try_time));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForUnitByClassid(unit_type, unit_classid, try_count,
+	try_time)
+{
+	var current_count    = 0;
+	var unit_hash        = new Array();
+	var nearest_distance = Number.MAX_VALUE;
+	var nearest_coords   = null;
+	var this_distance;
+	var this_obj;
+
+	if ((arguments.length >= 2) && (unit_type != null) && (unit_classid != null)) {
+		var unit_area = (unit_type == D2JSP_UTIL_GETUNIT_TILE) ? me.area : null;
+		if ((arguments.length < 3) || (try_count < 0))
+			try_count = 0;
+		if ((arguments.length < 4) || (try_time < 1))
+			try_time = 50;
+		unit_classid = D2JSP_UTIL_GEN_ExpandArgs(unit_classid);
+		for (var count_1 = 0; count_1 < unit_classid.length; count_1++)
+			unit_hash[unit_classid[count_1] + ""] = unit_classid[count_1];
+		do {
+			this_obj = getUnit(unit_type);
+			if (this_obj) {
+				do {
+					if (((this_obj.classid + "") in unit_hash) &&
+						((unit_area == null) || (this_obj.area == unit_area))) {
+						this_distance = myDist(this_obj.x, this_obj.y);
+						if (this_distance < nearest_distance) {
+							nearest_distance = this_distance;
+							nearest_coords   = [this_obj.x, this_obj.y];
+						}
+					}
+				} while (this_obj && this_obj.getNext());
+				if (nearest_coords) {
+					this_obj = getUnit(unit_type);
+					if (this_obj) {
+						do {
+							if (((this_obj.classid + "") in unit_hash) &&
+								((unit_area == null) || (this_obj.area == unit_area)) &&
+								(this_obj.x == nearest_coords[0]) &&
+								(this_obj.y == nearest_coords[1]))
+								return(this_obj);
+						} while (this_obj && this_obj.getNext());
+					}
+				}
+			}
+			if (try_count && (try_count <= ++current_count))
+				break;
+			delay(try_time);
+		} while (1);
+	}
+
+//	D2JSP_UTIL_LOG_GetALog().logWarning("Attempt to locate a unit of type " +
+//		unit_type + " for classid specification [" + unit_classid + "] failed.");
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_TakeUnitToArea(this_unit, no_move_flag, try_count, try_time)
+{
+	var current_count = 0;
+	var last_area     = me.area;
+	var count_1;
+	var old_skill;
+
+	if ((arguments.length < 2) || (no_move_flag == null))
+		no_move_flag = false;
+
+	if ((arguments.length < 3) || (try_count < 0))
+		try_count = 25;
+
+	if ((arguments.length < 4) || (try_time < 1))
+		try_time = 100;
+
+	if (!no_move_flag) {
+		if (myDist(this_unit.x, this_unit.y) > 5) {
+			TDW_MOVE_MoveToObject(this_unit);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+		while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+			(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+			D2JSP_UTIL_GEN_FuzzyDelay(10);
+//		TDW_MOVE_MoveToObject(this_unit);
+//		D2JSP_UTIL_GEN_FuzzyDelay(50);
+	}
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	while ((me.area == last_area) && ((!try_count) ||
+		(try_count > current_count))) {
+		D2JSP_UTIL_InteractObject(this_unit);
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+		for (count_1 = 0; count_1 < 5; count_1++) {
+			if (me.area != last_area)
+				break;
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+		if (me.area != last_area)
+			break;
+		D2JSP_UTIL_GEN_FuzzyDelay(try_time);
+		current_count++;
+	}
+
+	return((me.area != last_area) ? 0 : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_InteractWithUnitToMode(this_unit, desired_mode, no_move_flag,
+	try_count, try_time)
+{
+	var current_count = 0;
+	var count_1;
+	var old_skill;
+
+	if ((arguments.length < 3) || (no_move_flag == null))
+		no_move_flag = false;
+
+	if ((arguments.length < 4) || (try_count < 0))
+		try_count = 25;
+
+	if ((arguments.length < 5) || (try_time < 1))
+		try_time = 100;
+
+	if (!no_move_flag) {
+		if (myDist(this_unit.x, this_unit.y) > 5) {
+			TDW_MOVE_MoveToObject(this_unit);
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+		while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+			(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+			D2JSP_UTIL_GEN_FuzzyDelay(10);
+//		TDW_MOVE_MoveToObject(this_unit);
+//		D2JSP_UTIL_GEN_FuzzyDelay(50);
+	}
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	while ((this_unit.mode != desired_mode) && ((!try_count) ||
+		(try_count > current_count))) {
+		if (this_unit.mode == D2JSP_MODE_OBJECT_IDLE)
+			D2JSP_UTIL_InteractObject(this_unit);
+		else if (desired_mode == null)
+			break;
+		D2JSP_UTIL_GEN_FuzzyDelay(50);
+		for (count_1 = 0; count_1 < 100; count_1++) {
+			if (this_unit.mode == desired_mode)
+				break;
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+		if (this_unit.mode == desired_mode)
+			break;
+		D2JSP_UTIL_GEN_FuzzyDelay(try_time);
+		current_count++;
+	}
+
+	return(((this_unit.mode == desired_mode) ||
+		((desired_mode == null) && (this_unit.mode != 0))) ? 0 : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForAndTakeTileByClassid(tile_classid, try_count, try_time)
+{
+	var return_code = -1;
+	var tile_obj;
+
+	if ((arguments.length < 2) || (try_count < 0))
+		try_count = 0;
+
+	if ((arguments.length < 3) || (try_time < 1))
+		try_time = 50;
+
+	if ((tile_obj = TDW_MOVE_LookForTileByClassid(tile_classid, try_count,
+		try_time)) != null)
+		return_code = TDW_MOVE_TakeTileToArea(tile_obj, false, try_count,
+			try_time);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForAndTakeTileByArea(tile_area, try_count, try_time)
+{
+	var return_code = -1;
+	var tile_obj;
+
+	if ((arguments.length < 2) || (try_count < 0))
+		try_count = 0;
+
+	if ((arguments.length < 3) || (try_time < 1))
+		try_time = 50;
+
+	if ((tile_obj = TDW_MOVE_LookForTileByArea(tile_area, try_count,
+		try_time)) != null)
+		return_code = TDW_MOVE_TakeTileToArea(tile_obj, false, try_count,
+			try_time);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForTileByClassid(tile_classid, try_count, try_time)
+{
+	return(TDW_MOVE_LookForUnitByClassid(D2JSP_UTIL_GETUNIT_TILE, tile_classid,
+		try_count, try_time));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LookForTileByArea(tile_area, try_count, try_time)
+{
+	var current_count    = 0;
+	var nearest_distance = Number.MAX_VALUE;
+	var nearest_coords   = null;
+	var this_distance;
+	var this_obj;
+
+	if ((arguments.length < 2) || (try_count < 0))
+		try_count = 0;
+
+	if ((arguments.length < 3) || (try_time < 1))
+		try_time = 50;
+
+	do {
+		this_obj = getUnit(D2JSP_OBJ_TYPE_TILE);
+		if (this_obj) {
+			do {
+				if (this_obj.area == tile_area) {
+					this_distance = myDist(this_obj.x, this_obj.y);
+					if (this_distance < nearest_distance) {
+						nearest_distance = this_distance;
+						nearest_coords   = [this_obj.x, this_obj.y];
+					}
+				}
+			} while (this_obj && this_obj.getNext());
+			if (nearest_coords) {
+				this_obj = getUnit(D2JSP_OBJ_TYPE_TILE);
+				if (this_obj) {
+					do {
+						if ((this_obj.area == tile_area) &&
+							(this_obj.x == nearest_coords[0]) &&
+							(this_obj.y == nearest_coords[1]))
+							return(this_obj);
+					} while (this_obj && this_obj.getNext());
+				}
+			}
+		}
+		if (try_count && (try_count <= ++current_count))
+			break;
+		delay(try_time);
+	} while (1);
+
+	D2JSP_UTIL_LOG_GetALog().logError("Attempt to locate a tile for " +
+		" area " + tile_area + " (" + D2JSP_AREA_AreaToName(tile_area) +
+		") failed.");
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_TakeTileToArea(this_tile, no_move_flag, try_count, try_time)
+{
+	return(TDW_MOVE_TakeUnitToArea(this_tile, no_move_flag, try_count,
+		try_time));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_UseTBK()
+{
+	var tbk_count = 0;
+	var tsc_count = 0;
+	var tbk       = getUnit(D2JSP_UTIL_GETUNIT_ITEM, "tbk",
+							D2JSP_MODE_ITEM_IN_INVENTORY);
+
+	if (D2JSP_AREA_IsTown(me.area))
+		return(0);
+
+	if (tbk) {
+		do {
+			if (tbk.getStat(D2JSP_STAT_QUANTITY)) {
+				clickItem(D2JSP_ITEM_CLICK_BUTTON_RIGHT, tbk);
+				delay(250);
+				return(0);
+			}
+			tbk_count++;
+			tsc_count += tbk.getStat(D2JSP_STAT_QUANTITY);
+		} while (tbk.getNext("tbk", D2JSP_MODE_ITEM_IN_INVENTORY));
+	}
+
+	if (!tbk_count)
+		print("Couldn't find a Tome of Townportal in inventory.");
+	else if (!tsc_count)
+		print("There are no scrolls in Tomes of Townportal in inventory!");
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_WaypointUseInTown(target_area, wait_for_count)
+{
+	var way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+
+	if (!D2JSP_AREA_IsTown()) {
+		if (way_point_obj)
+			return(TDW_MOVE_WaypointUse(target_area, wait_for_count));
+		return(-4);
+	}
+
+	if ((!way_point_obj) || (myDist(way_point_obj.x, way_point_obj.y) > 5))
+		TDW_MOVE_COMPAT_TownMove("waypoint");
+
+	return(TDW_MOVE_WaypointUse(target_area, wait_for_count));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+/*
+	Return codes are as follow:
+		 0 = Success.
+		-1 = Unable to acquire the way point object.
+		-2 = The target area does not contain a waypoint.
+		-3 = The target area does not exist in the game.
+		 1 = You are already in the target area.
+		 2 = Unable to use the way point to transport to the desired location.
+		     You may not have the desired way point. I suppose this could also
+			  happen if there's a lot of lag.
+*/
+function TDW_MOVE_WaypointUse(target_area, wait_for_count)
+{
+	var start_area = me.area;
+	var count_1;
+	var way_point_obj;
+
+	if (!D2JSP_AREA_IsValidInGame(target_area))
+		return(-3);
+	else if (!D2JSP_AREA_HasWayPoint(target_area))
+		return(-2);
+	else if (me.area == target_area)
+		return(1);
+
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(wait_for_count)) || (wait_for_count < 1))
+		wait_for_count = TDW_MOVE_DefaultWPSecs;
+
+	way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+
+	if (!way_point_obj)
+		return(-1);
+
+/*
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+
+	if (myDist(way_point_obj.x, way_point_obj.y) > 7) {
+		D2JSP_UTIL_MoveTo(way_point_obj.x, way_point_obj.y);
+		delay(250);
+	}
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+
+	if (myDist(way_point_obj.x, way_point_obj.y) > 7)
+		D2JSP_UTIL_MoveTo(way_point_obj.x, way_point_obj.y);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+
+	if (myDist(way_point_obj.x, way_point_obj.y) > 5) {
+		for (count_1 = 0; count_1 < 50; count_1++) {
+			way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+			if (!way_point_obj)
+				return(-1);
+			if (myDist(way_point_obj.x, way_point_obj.y) <= 7)
+				break;
+			while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+				(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+			D2JSP_UTIL_MoveTo(way_point_obj.x, way_point_obj.y);
+			while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+				(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+			delay(50);
+		}
+	}
+*/
+
+/*
+	if (!TDW_MOVE_WaypointAccessDataDoneFlag)
+		TDW_MOVE_GetMyWayPointAccess();
+*/
+
+	if (myDist(way_point_obj.x, way_point_obj.y) > 5) {
+		if ((myDist(way_point_obj.x, way_point_obj.y) > 10) &&
+			D2JSP_AREA_IsTown())
+			TDW_MOVE_COMPAT_TownMove("waypoint");
+		if (myDist(way_point_obj.x, way_point_obj.y) > 5)
+			TDW_MOVE_MoveToObject(way_point_obj);
+	}
+
+/*
+	for (count_1 = 0; count_1 < 3; count_1++) {
+print("TDW_MOVE_WaypointUse() A: " + getUIFlag(D2JSP_UTIL_UI_WAYPOINT))
+		D2JSP_UTIL_InteractWaypoint(way_point_obj, target_area);
+print("TDW_MOVE_WaypointUse() B: " + getUIFlag(D2JSP_UTIL_UI_WAYPOINT))
+//		if (count_1)
+//			TDW_MOVE_WaypointCancel();
+//		way_point_obj.interact(target_area);
+print("TDW_MOVE_WaypointUse() C: (me.area == target_area) = " + ((me.area == target_area) ? true : false));
+		if (me.area == target_area)
+			break;
+		delay(250);
+		if (me.area == target_area)
+			break;
+	}
+*/
+
+	D2JSP_UTIL_InteractWaypoint(way_point_obj, target_area);
+
+	if (me.area != target_area) {
+		for (count_1 = 0; count_1 < (wait_for_count * 100); count_1++) {
+			if (me.area == target_area)
+				break;
+			delay(10);
+		}
+	}
+
+	if (me.area == target_area) {
+		var area_indices = D2JSP_AREA_AreaToWayPointIndices(start_area);
+		if (area_indices)
+			TDW_MOVE_WaypointAccessData[area_indices[0]][area_indices[1]] = true;
+		area_indices = D2JSP_AREA_AreaToWayPointIndices(target_area);
+		if (area_indices)
+			TDW_MOVE_WaypointAccessData[area_indices[0]][area_indices[1]] = true;
+	}
+
+	if (me.area != target_area)
+		TDW_MOVE_WaypointCancel();
+
+	return((me.area == target_area) ? 0 : 2);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// Always re-acquires the way point object in case you've transited.
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_WaypointCancel()
+{
+	var way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+
+	if (way_point_obj) {
+		D2JSP_UTIL_GEN_CancelObject(way_point_obj);
+		delay(50);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_GetMyWayPointAccess()
+{
+	if ((parseFloat(me.version) >= 0.32) && D2JSP_AREA_IsTown()) {
+		var way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+		if ((!way_point_obj) || (myDist(way_point_obj.x, way_point_obj.y) > 5)) {
+			TDW_MOVE_COMPAT_TownMove("waypoint");
+			way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+		}
+		return(TDW_MOVE_GetMyWayPointAccessBasic(way_point_obj));
+/*
+		if (!way_point_obj)
+			return(null);
+		if (myDist(way_point_obj.x, way_point_obj.y) > 5)
+			TDW_MOVE_MoveToObject(way_point_obj);
+		way_point_obj.interact();
+		while (!getUIFlag(D2JSP_UTIL_UI_WAYPOINT))
+			delay(50);
+		var wp_access = D2JSP_AREA_GetEmptyWaypointAccess();
+		for (var count_1 = 0; count_1 < wp_access.length; count_1++) {
+			for (var count_2 = 0; count_2 < wp_access[count_1].length; count_2++)
+				wp_access[count_1][count_2] =
+					D2JSP_AREA_IHaveWayPointArea(D2JSP_WayPoints[count_1][count_2]);
+		}
+		TDW_MOVE_WaypointCancel();
+		return(wp_access);
+*/
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_GetMyWayPointAccessBasic(way_point_obj)
+{
+	var my_interact_flag = false;
+
+	if (way_point_obj) {
+		if (myDist(way_point_obj.x, way_point_obj.y) > 5)
+			TDW_MOVE_MoveToObject(way_point_obj);
+/*
+		way_point_obj.interact();
+		while (!getUIFlag(D2JSP_UTIL_UI_WAYPOINT))
+			delay(50);
+		var wp_access = D2JSP_AREA_GetEmptyWaypointAccess();
+		for (var count_1 = 0; count_1 < wp_access.length; count_1++) {
+			for (var count_2 = 0; count_2 < wp_access[count_1].length; count_2++)
+				wp_access[count_1][count_2] =
+					D2JSP_AREA_IHaveWayPointArea(D2JSP_WayPoints[count_1][count_2]);
+		}
+		TDW_MOVE_WaypointCancel();
+		TDW_MOVE_WaypointAccessData = D2JSP_UTIL_GEN_CloneObject(wp_access);
+		return(wp_access);
+*/
+		if (!getUIFlag(D2JSP_UTIL_UI_WAYPOINT)) {
+			D2JSP_UTIL_LOG_GetALog().
+				logDebug("TDW_MOVE_GetMyWayPointAccessBasic(): " +
+				"About to interact()...");
+			my_interact_flag = true;
+			for (var count_1 = 0; count_1 < 10; count_1++) {
+				D2JSP_UTIL_InteractObject(way_point_obj);
+				D2JSP_UTIL_LOG_GetALog().
+					logDebug("TDW_MOVE_GetMyWayPointAccessBasic(): " + count_1 +
+					": " + "interact() done.");
+				D2JSP_UTIL_LOG_GetALog().
+					logDebug("TDW_MOVE_GetMyWayPointAccessBasic(): " + count_1 +
+					": " + "Waiting for getUIFlag(" + D2JSP_UTIL_UI_WAYPOINT +
+					") to set...");
+				for (var count_2 = 0; count_2 < 10; count_2++) {
+					if (getUIFlag(D2JSP_UTIL_UI_WAYPOINT))
+						break;
+					delay(100);
+				}
+				if (getUIFlag(D2JSP_UTIL_UI_WAYPOINT))
+					break;
+				D2JSP_UTIL_LOG_GetALog().
+					logDebug("TDW_MOVE_GetMyWayPointAccessBasic(): " + count_1 +
+					": " + "getUIFlag(" + D2JSP_UTIL_UI_WAYPOINT +
+					") not set within one second!!!");
+				delay(250);
+				TDW_MOVE_WaypointCancel();
+				delay(500);
+			}
+		}
+		if (getUIFlag(D2JSP_UTIL_UI_WAYPOINT)) {
+			D2JSP_UTIL_LOG_GetALog().
+				logDebug("TDW_MOVE_GetMyWayPointAccessBasic(): " + count_1 +
+				": " + "getUIFlag(" + D2JSP_UTIL_UI_WAYPOINT + ") is now set.");
+			var wp_access = D2JSP_AREA_GetEmptyWaypointAccess();
+			for (var count_1 = 0; count_1 < wp_access.length; count_1++) {
+				for (var count_2 = 0; count_2 < wp_access[count_1].length;
+					count_2++) {
+					D2JSP_UTIL_LOG_GetALog().
+						logMinutiae("TDW_MOVE_GetMyWayPointAccessBasic(): " +
+						"Getting waypoint access for index " + count_1 + ", " +
+						count_2);
+					wp_access[count_1][count_2] =
+						D2JSP_AREA_IHaveWayPointArea(D2JSP_WayPoints[count_1][count_2]);
+					delay(10);
+				}
+			}
+			D2JSP_UTIL_LOG_GetALog().
+				logDebug("TDW_MOVE_GetMyWayPointAccessBasic(): " +
+				"Waypoint access data has been retrieved.");
+			if (my_interact_flag) {
+				TDW_MOVE_WaypointCancel();
+				D2JSP_UTIL_LOG_GetALog().
+					logDebug("TDW_MOVE_GetMyWayPointAccessBasic(): " +
+					"Waypoint interact() is now cancelled.");
+			}
+			TDW_MOVE_WaypointAccessData         =
+				D2JSP_UTIL_GEN_CloneObject(wp_access);
+			TDW_MOVE_WaypointAccessDataDoneFlag = true;
+			return(wp_access);
+		}
+		else
+			D2JSP_UTIL_LOG_GetALog().
+				logWarning("TDW_MOVE_GetMyWayPointAccessBasic(): " + count_1 +
+				": " + "getUIFlag(" + D2JSP_UTIL_UI_WAYPOINT +
+				") was never detected as set.");
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_LogMyWayPointAccess()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	for (var count_1 = 0; count_1 < TDW_MOVE_WaypointAccessData.length;
+		count_1++) {
+		for (var count_2 = 0;
+			count_2 < TDW_MOVE_WaypointAccessData[count_1].length; count_2++)
+			log_obj.logInfo(count_1 + "\t" + count_2 + "\t" +
+				TDW_MOVE_WaypointAccessData[count_1][count_2] + "\t" +
+				D2JSP_WayPoints[count_1][count_2] + "\t" +
+				D2JSP_AREA_AreaToName(D2JSP_WayPoints[count_1][count_2]));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_ReviveMercAtActMercReviver()
+{
+	var npc_obj;
+
+	if ((npc_obj =
+		D2JSP_COMM_InteractWithNPC(TDW_MOVE_ActMercReviverList[me.act - 1]))) {
+		npc_obj.useMenu(D2JSP_NPC_USEMENU_RESURRECT_MERC);
+		D2JSP_NPC_CancelUIMenu(npc_obj);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_GoToActMercReviver()
+{
+	var npc_obj;
+
+	TDW_MOVE_COMPAT_TownMove(me.act, TDW_MOVE_ActMercReviverList[me.act - 1]);
+
+	npc_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT,
+		TDW_MOVE_ActMercReviverList[me.act - 1]);
+
+	if (npc_obj) {
+/*
+		if (myDist(npc_obj.x, npc_obj.y) > 5)
+			D2JSP_UTIL_MoveTo(npc_obj.x, npc_obj.y);
+		delay(500);
+		if (myDist(npc_obj.x, npc_obj.y) > 5)
+			D2JSP_UTIL_MoveTo(npc_obj.x, npc_obj.y);
+		delay(500);
+*/
+		TDW_MOVE_MoveToObject(npc_obj);
+	}
+
+	return(npc_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_RandomizeLocation(start_x, start_y, delta_x, delta_y)
+{
+	var new_x;
+	var new_y;
+
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(start_x)) || (start_x < 1))
+		start_x = me.x;
+
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(start_y)) || (start_y < 1))
+		start_y = me.y;
+
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(delta_x)) || (delta_x < 1))
+		delta_x = TDW_MOVE_DefaultRandomMove;
+
+	if ((!D2JSP_UTIL_GEN_TypeOfNumber(delta_y)) || (delta_y < 1))
+		delta_y = TDW_MOVE_DefaultRandomMove;
+
+	new_x = start_x + (rnd(0, delta_x) * ((!rnd(0, 1)) ? 1 : -1));
+	new_y = start_y + (rnd(0, delta_y) * ((!rnd(0, 1)) ? 1 : -1));
+
+/*
+print("TDW_MOVE_RandomizeLocation(" +
+	start_x + ", " + start_y + ", " + delta_x + ", " + delta_y + ") = [" +
+	new_x + ", " + new_y + "]");
+*/
+
+	D2JSP_UTIL_MoveTo(new_x, new_y);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_MoveToObject(this_obj, fudge_factor)
+{
+	TDW_MOVE_MoveToXYPair([this_obj.x, this_obj.y], fudge_factor);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_MoveToXY(in_x, in_y, fudge_factor)
+{
+	TDW_MOVE_MoveToXYPair([in_x, in_y], fudge_factor);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_MoveToXYPair(in_pair, fudge_factor)
+{
+	fudge_factor = ((arguments.length < 2) || (fudge_factor == null) ||
+		(fudge_factor < 1)) ? 5 : fudge_factor;
+
+	D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	var original_dist = D2JSP_SYLIB_myDistPair(in_pair);
+
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		var start_dist = D2JSP_SYLIB_myDistPair(in_pair);
+		if (start_dist <= fudge_factor)
+			break;
+		var start_pair = [me.x, me.y];
+		D2JSP_UTIL_MoveTo(in_pair[0], in_pair[1]);
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+		while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+			(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+			D2JSP_UTIL_GEN_FuzzyDelay(10);
+//		TDW_MOVE_DoPathList([in_pair, in_pair], 5, 50, fudge_factor);
+//		if (D2JSP_SYLIB_myDistPair(start_pair) < 2) {
+/*
+		if ((original_dist > 5) && (D2JSP_SYLIB_myDistPair(start_pair) < 2)) {
+D2JSP_UTIL_LOG_GetALog().logInfo("PERTUBING MOVEMENT PATH");
+			D2JSP_UTIL_MoveTo(me.x + rnd(-3, 3), me.y + rnd(-3, 3));
+			while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+				(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+				D2JSP_UTIL_GEN_FuzzyDelay(10);
+			D2JSP_UTIL_MoveTo(in_pair[0], in_pair[1]);
+			while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+				(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+				D2JSP_UTIL_GEN_FuzzyDelay(10);
+		}
+*/
+	}
+
+//	D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+/*
+	start_dist = D2JSP_SYLIB_myDistPair(in_pair);
+	if ((start_dist <= 3) || (start_dist < fudge_factor)) {
+		if (fudge_factor > 1) {
+			fudge_factor = Math.min(2, fudge_factor - 1);
+			D2JSP_UTIL_MoveTo(in_pair[0] + rnd(0 - fudge_factor, fudge_factor),
+				in_pair[1] + rnd(0 - fudge_factor, fudge_factor));
+			while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+				(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+				D2JSP_UTIL_GEN_FuzzyDelay(10);
+		}
+	}
+*/
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_DoPathList(path_list, wait_iterations, wait_time,
+	fudge_factor)
+{
+	if ((!arguments.length) || (typeof(path_list) != "object") ||
+		(!path_list.length))
+		return(-1);
+
+	if ((arguments.length < 2) || (wait_iterations < 1))
+		wait_iterations = TDW_MOVE_DefaultWaitIterations;
+
+	if ((arguments.length < 3) || (wait_time < 1))
+		wait_time = TDW_MOVE_DefaultWaitTime;
+
+	if (arguments.length < 4)				// Exact moves may be required...
+		fudge_factor = TDW_MOVE_DefaultFudgeFactor;
+
+	return(TDW_MOVE_DoPathListBasic(path_list, 0, path_list.length,
+		wait_iterations, wait_time, fudge_factor));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_DoPathListBasic(path_list, path_element_first,
+	path_element_count, wait_iterations, wait_time, fudge_factor)
+{
+	var element_term;
+	var count_1;
+	var count_2;
+	var current_distance;
+
+	if ((!arguments.length) || (typeof(path_list) != "object") ||
+		(!path_list.length))
+		return(-1);
+
+	if ((arguments.length < 2) || (path_element_first < 0))
+		path_element_first = 0;
+	else if (path_element_first >= path_list.length)
+		return(-1);
+
+	if ((arguments.length < 3) || (path_element_count < 1))
+		path_element_count = path_list.length - path_element_first;
+
+	if ((path_element_first + path_element_count) > path_list.length)
+		return(-1);
+
+	if ((arguments.length < 4) || (wait_iterations < 1))
+		wait_iterations = TDW_MOVE_DefaultWaitIterations;
+
+	if ((arguments.length < 5) || (wait_time < 1))
+		wait_time = TDW_MOVE_DefaultWaitTime;
+
+	if (arguments.length < 6)				// Exact moves may be required...
+		fudge_factor = TDW_MOVE_DefaultFudgeFactor;
+
+	element_term = path_element_first + path_element_count;
+
+	for (count_1 = path_element_first; count_1 < element_term; count_1++) {
+		D2JSP_UTIL_MoveTo(path_list[count_1][0], path_list[count_1][1]);
+		for (count_2 = 0; count_2 < wait_iterations; count_2++) {
+			delay(wait_time);
+			if (D2JSP_SYLIB_myDistPair(path_list[count_1]) <= fudge_factor)
+				break;
+			if ((me.mode != D2JSP_MODE_PLAYER_WALKING) &&
+				(me.mode != D2JSP_MODE_PLAYER_RUNNING))
+				break;
+		}
+		// If the player hasn't gotten to the intermediate destination but is
+		// still moving, we extend the grace period just a tad...
+		if ((D2JSP_SYLIB_myDistPair(path_list[count_1]) > fudge_factor) &&
+			((me.mode == D2JSP_MODE_PLAYER_WALKING) ||
+			(me.mode == D2JSP_MODE_PLAYER_RUNNING))) {
+			for (count_2 = 0; count_2 < 5; count_2++) {
+				delay(50);
+				if (D2JSP_SYLIB_myDistPair(path_list[count_1]) <= fudge_factor)
+					break;
+				if ((me.mode != D2JSP_MODE_PLAYER_WALKING) &&
+					(me.mode != D2JSP_MODE_PLAYER_RUNNING))
+					break;
+			}
+		}
+		if (D2JSP_SYLIB_myDistPair(path_list[count_1]) > fudge_factor)
+			return(-1);
+		delay(50);
+	}
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		if ((me.mode != D2JSP_MODE_PLAYER_WALKING) &&
+			(me.mode != D2JSP_MODE_PLAYER_RUNNING))
+			break;
+		delay(50);
+	}
+
+	while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+		(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN))
+		D2JSP_UTIL_GEN_FuzzyDelay(10);
+
+	return((D2JSP_SYLIB_myDistPair(path_list[element_term - 1]) <=
+		fudge_factor) ? 0 : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_GetNearestCoord(path_list)
+{
+	var nearest_coord_index = -1;
+	var nearest_coord       = Number.MAX_VALUE;
+	var this_distance;
+	var count_1;
+
+	for (count_1 = 0; count_1 < path_list.length; count_1++) {
+		if (((this_distance = D2JSP_SYLIB_myDistPair(path_list[count_1])) <
+			nearest_coord) || (!count_1)) {
+			nearest_coord       = this_distance;
+			nearest_coord_index = count_1;
+		}
+	}
+
+	return(nearest_coord_index);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_FindCoord(path_list, coordinate)
+{
+	var found_index = -1;
+	var count_1;
+
+	for (count_1 = 0; count_1 < path_list.length; count_1++) {
+		if (path_list[count_1] === coordinate) {
+			found_index = count_1;
+			break;
+		}
+	}
+
+	return(found_index);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// It may be that you'll want to use this on a copy of the array...
+function TDW_MOVE_SortPathList(path_list)
+{
+	path_list.sort(TDW_MOVE_CompareCoords);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_CompareCoords(coordinate_1, coordinate_2)
+{
+	var distance_1 = D2JSP_SYLIB_myDistPair(coordinate_1);
+	var distance_2 = D2JSP_SYLIB_myDistPair(coordinate_2);
+
+	return((distance_1 < distance_2) ? -1 :
+		(distance_1 > distance_2) ? 1 : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MOVE_ClonePath(source_path)
+{
+	var destination_path = new source_path.constructor();
+	var this_property;
+
+	for (this_property in source_path)
+		destination_path[this_property] = 
+			(typeof(source_path[this_property]) == "object") ?
+			TDW_MOVE_ClonePath(source_path[this_property]) :
+			source_path[this_property];
+
+	return(destination_path);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Takes two arrays of two elements representing the X and Y coordinates.
+// Should probably go into Syadasti's SyLib.d2h...
+function D2JSP_SYLIB_DistPair(x_y_pair_1, x_y_pair_2) {
+	return(Dist(x_y_pair_1[0], x_y_pair_1[1], x_y_pair_2[0], x_y_pair_2[1]));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Takes an array of two elements representing the X and Y coordinates.
+// Should probably go into Syadasti's SyLib.d2h...
+function D2JSP_SYLIB_myDistPair(x_y_pair) {
+	return(myDist(x_y_pair[0], x_y_pair[1]));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(TDW_INCLUDE_GUARD_Move_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+/*
+	// Some test data...
+var TDW_MOVE_Path_A2_WP_To_TP = [
+	[5071, 5086],
+	[5068, 5077],
+	[5068, 5076],
+	[5067, 5073],
+	[5065, 5066],
+	[5069, 5059],
+	[5075, 5060],
+	[5078, 5060],
+	[5088, 5060],
+	[5093, 5059],
+	[5097, 5059],
+	[5103, 5059],
+	[5107, 5059],
+	[5116, 5059],
+	[5126, 5060],
+	[5127, 5060],
+	[5136, 5060],
+	[5140, 5060],
+	[5146, 5060],
+	[5155, 5060],
+	[5161, 5060],
+	[5164, 5060],
+	[5165, 5059],
+	[5170, 5055]
+];
+
+	// Some more test data...
+var TDW_MOVE_Path_A2_TP_To_WP =
+	TDW_MOVE_ClonePath(TDW_MOVE_Path_A2_WP_To_TP).reverse();
+
+	// The path in Duriel's Lair from Duriel's location to Tyrael's.
+var TDW_MOVE_Area73 = [
+	[22638, 15693],
+	[22641, 15698],
+	[22638, 15702],
+	[22633, 15705],
+	[22628, 15707],
+	[22624, 15710],
+	[22619, 15710],
+	[22614, 15710],
+	[22609, 15707],
+	[22604, 15705],
+	[22599, 15705],
+	[22594, 15706],
+	[22589, 15706],
+	[22584, 15705],
+	[22580, 15702],
+	[22579, 15697],
+	[22577, 15692],
+	[22578, 15687],
+	[22578, 15682],
+	[22578, 15677],
+	[22579, 15672],
+	[22579, 15667],
+	[22579, 15662],
+	[22580, 15657],
+	[22581, 15652],
+	[22583, 15647],
+	[22579, 15644],
+	[22575, 15641],
+	[22575, 15636],
+	[22575, 15631],
+	[22574, 15626],
+	[22574, 15621],
+	[22576, 15616],
+	[22576, 15611],
+	[22576, 15606],
+	[22576, 15601]
+];
+
+	// The path in Durance 3 from the right-most Wyand's side) weapon rack to
+	// Mephisto's red portal which leads to Act 4.
+var TDW_MOVE_Area102 = [
+	[17573, 8005],
+	[17573, 8010],
+	[17573, 8015],
+	[17573, 8020],
+	[17570, 8025],
+	[17570, 8030],
+	[17570, 8035],
+	[17569, 8040],
+	[17569, 8045],
+	[17569, 8050],
+	[17568, 8055],
+	[17568, 8060],
+	[17569, 8065],
+	[17573, 8068],
+	[17577, 8071],
+	[17582, 8070],
+	[17587, 8070],
+	[17582, 8069],
+	[17577, 8070],
+	[17572, 8070],
+	[17568, 8067],
+	[17565, 8063],
+	[17560, 8061],
+	[17556, 8064],
+	[17556, 8069],
+	[17558, 8074],
+	[17561, 8078],
+	[17566, 8079],
+	[17571, 8077],
+	[17571, 8072],
+	[17575, 8069],
+	[17580, 8069],
+	[17585, 8069],
+	[17590, 8069],
+	[17595, 8070]
+];
+*/
+function main()
+{
+	var file_name = "output/RegressionTest.TDW_Move.d2l.txt";
+	var file_handle;
+
+	me.randommove = true;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+	print("Writing 'TDW_Move.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	if (file_handle) {
+		var wp_access = TDW_MOVE_GetMyWayPointAccess();
+		for (var count_1 = 0; count_1 < wp_access.length; count_1++) {
+			for (var count_2 = 0; count_2 < wp_access[count_1].length; count_2++)
+				file_handle.writeLine(count_1 + "\t" + count_2 + "\t" +
+					wp_access[count_1][count_2] + "\t" +
+					D2JSP_WayPoints[count_1][count_2] + "\t" +
+					D2JSP_AREA_AreaToName(D2JSP_WayPoints[count_1][count_2]));
+		}
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+
+/*
+	if ((me.area != D2JSP_AREA_LUT_GHOLEIN) ||
+		(D2JSP_SYLIB_myDistPair(TDW_MOVE_Path_A2_WP_To_TP[0]) < 50)) {
+		TDW_MOVE_COMPAT_TownMove(2, "waypoint");
+		if (me.area != D2JSP_AREA_LUT_GHOLEIN) {
+			print("Not in Lut Gholein --- aborting...");
+			stop();
+		}
+	}
+
+	print("Distance from Lut Gholein WP is: " +
+		D2JSP_SYLIB_myDistPair(TDW_MOVE_Path_A2_WP_To_TP[0]));
+
+	if (D2JSP_SYLIB_myDistPair(TDW_MOVE_Path_A2_WP_To_TP[0]) < 50) {
+		if (!TDW_MOVE_DoPathList(TDW_MOVE_Path_A2_WP_To_TP)) {
+			print("Waiting 10 seconds before returning...");
+			delay(10 * 1000);
+			TDW_MOVE_DoPathList(TDW_MOVE_Path_A2_TP_To_WP, 20, 50, 10);
+			print("Done!");
+		}
+	}
+	else {
+		print("Too far from Lut Gholein WP --- aborting...");
+		stop();
+	}
+*/
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+
+

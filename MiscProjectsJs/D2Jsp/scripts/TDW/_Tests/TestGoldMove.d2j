@@ -1,0 +1,115 @@
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/TDW_Move.d2l");
+includeonce("pwnsettings.d2l");
+includeonce("PwnageInclude.d2l");
+includeonce("BMpwnIt.d2l");
+
+const MLB_AR_GameLoadMS  = 2000;
+const MLB_AR_ExitSleepMS = 3000;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Run-time context info is stored here.
+// ////////////////////////////////////////////////////////////////////////////
+// Run-time context info is stored here.
+var TDW_BOT_ContextList = new Array();
+
+// This is a reference to the object used for logging.
+var MLB_AR_Log  = null;
+
+var TDW_ISF_Cfg = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var error_list = new Array();
+	var time_start;
+	var time_end;
+	var error_msg_string;
+
+	MLB_AR_Log = new D2JSP_UTIL_Log("output\\_____EraseMe." + me.realm +
+		"." + me.account + "." + me.name + ".log", "ArcaneRunner");
+
+	MLB_AR_Log.setLevelFile(D2JSP_UTIL_LOG_Level_DEBUG);
+MLB_AR_Log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+MLB_AR_Log.syncModeOn();
+
+	print("...waiting " + (1000 / 1000) +
+		" seconds for game load to complete...");
+	delay(1000);
+
+while (true) {
+	MLB_AR_ManageGold();
+
+	D2JSP_NPC_Heal();
+}
+
+	print("Stopping");
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	if (arguments[0] == 220) {
+		print("Stopping");
+		stop();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_AR_CheckMaxGold()
+{
+	if ((TDW_BOT_ContextList["mysnagit.gold.flag"] == true) &&
+		(me.getStat(D2JSP_STAT_GOLD) == (me.getStat(D2JSP_STAT_LEVEL) * 10000))) {
+		MLB_AR_Log.logInfo("Currently have maximum gold on person..." +
+			"turning gold collection off.");
+		TDW_BOT_ContextList["mysnagit.gold.flag"] = false;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_AR_ManageGold()
+{
+	var gold_move = D2JSP_ITEM_CanMoveExcessGoldToStash();
+	var stash_obj;
+
+	if (gold_move) {
+		MLB_AR_Log.logInfo("Moving " + gold_move + " gold to the stash.");
+		TDW_MOVE_COMPAT_TownMove("stash");
+		stash_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Bank");
+		if (stash_obj) {
+			TDW_MOVE_MoveToObject(stash_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+			D2JSP_UTIL_MoveTo(stash_obj.x, stash_obj.y);
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+			D2JSP_UTIL_InteractObject(stash_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+//			gold(gold_move, D2JSP_ITEM_GOLD_MOVE_INV_TO_STASH);
+gold(1, D2JSP_ITEM_GOLD_MOVE_INV_TO_STASH);
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+			D2JSP_COMM_CancelUIMenu(stash_obj);
+			D2JSP_UTIL_GEN_FuzzyDelay(250);
+		}
+		else
+			MLB_AR_Log.logWarning("Unable to interact with the stash.");
+	}
+
+	MLB_AR_CheckMaxGold();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

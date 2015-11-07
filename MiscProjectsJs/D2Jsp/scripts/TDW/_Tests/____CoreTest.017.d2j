@@ -1,0 +1,158 @@
+/*
+	___CoreTest.006.d2j
+
+	Symptoms    :
+
+		Catastrophic failure:
+			Assertion Failure
+			Location : D2Cient\UI\npcmenu.cpp, line #4363
+			Expression : sgUIState.hDialogWaiting == NULL
+
+	Tested under :
+		D2X Product and D2 Loader for
+			29.12 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+
+		I tested with Larzuk.
+*/
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+function main()
+{
+	var npc_name  = "Larzuk";
+	var MyLog     = new D2JSP_UTIL_Log("output/____CoreTest.017.log");
+	var npc_obj;
+	var other_npc_obj;
+	var quiver_obj;
+	var shop_return_code;
+
+	MyLog.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+	MyLog.syncModeOn();
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready.");
+
+	me.randommove = true;
+
+	while (true) {
+		me.overhead("Ready");
+		while (true) {
+			if ((quiver_obj = FindAnItem(me.name, "aqv")) == null) {
+				if (D2JSP_ITEM_CONT_FindSpace(1, 3, D2JSP_ITEM_CONT_BuildMapList(),
+					D2JSP_ITEM_CONT_SRC_INVENTORY) == null) {
+					MyLog.logError("No space in inventory for quivers.");
+					MyLog.logError("Stopping script");
+					stop();
+				}
+				break;
+			}
+			clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, quiver_obj);
+			me.overhead("Please rid character of arrow quivers");
+			for (count_2 = 0; count_2 < 200; count_2++) {
+				if (D2JSP_UTIL_GEN_CheckCursor(5, 10))
+					break;
+				delay(50);
+			}
+			if (!(quiver_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, null,
+				D2JSP_MODE_ITEM_ON_CURSOR))) {
+				MyLog.logError("Unable to locate the item found in inventory " +
+					"on the cursor.");
+				MyLog.logError("Stopping script");
+				stop();
+			}
+			// Tell the core to drop it on the ground...
+			quiver_obj.cancel();
+			delay(500);
+		}
+		while (true) {
+			D2JSP_ITEM_CONT_LogMapList();
+			if (D2JSP_ITEM_CONT_FindSpace(1, 3, D2JSP_ITEM_CONT_BuildMapList(),
+				D2JSP_ITEM_CONT_SRC_INVENTORY) == null)
+				break;
+			me.overhead("Buying arrows");
+			if (D2JSP_NPC_PurchaseFromVendor(npc_name, "aqv")) {
+				MyLog.logError("Stopping script");
+				stop();
+			}
+		}
+	}
+
+	print("Stopping script");
+	stop();
+}
+
+function CountItemsOwned(parent_name)
+{
+	var item_count = 0;
+	var this_item  = getUnit(4);
+	var this_parent;
+
+	if (this_item) {
+		do {
+ 			this_parent = this_item.getParent();
+			if (this_parent &&
+				(this_parent.name.toLowerCase() == parent_name.toLowerCase())) {
+				item_count++;
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	return(item_count);
+}
+
+function CountItemsAll()
+{
+	var item_count = 0;
+	var this_item  = getUnit(4);
+
+	if (this_item) {
+		do {
+			item_count++;
+		} while (this_item && this_item.getNext());
+	}
+
+	return(item_count);
+}
+
+function FindAnItem(parent_name, item_code)
+{
+	var this_item;
+	var this_parent;
+
+	this_item  = getUnit(4, item_code);
+	if (this_item) {
+		do {
+ 			this_parent = this_item.getParent();
+			if (this_parent &&
+				(this_parent.name.toLowerCase() == parent_name.toLowerCase())) {
+				return(this_item);
+			}
+		} while (this_item && this_item.getNext(item_code));
+	}
+
+	return(null);
+}
+
+function WriteItemList(parent_name, item_code)
+{
+	var this_item;
+	var this_parent;
+
+	this_item  = getUnit(4, item_code);
+	if (this_item) {
+		do {
+ 			this_parent = this_item.getParent();
+			if (this_parent &&
+				(this_parent.name.toLowerCase() == parent_name.toLowerCase()))
+				LogHandle.writeLine(">>> " + this_item.fname + ", [" +
+					this_item.x + ", " + this_item.y + "]");
+		} while (this_item && this_item.getNext(item_code));
+	}
+}
+
+

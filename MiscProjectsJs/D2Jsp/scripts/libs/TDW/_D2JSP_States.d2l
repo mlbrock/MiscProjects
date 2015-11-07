@@ -1,0 +1,645 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp States Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_States.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion state constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_States_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_States_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant state values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STATE_NONE                                                 = 0;
+var D2JSP_STATE_FREEZE                                               = 1;
+var D2JSP_STATE_POISON                                               = 2;
+var D2JSP_STATE_RESISTFIRE                                           = 3;
+var D2JSP_STATE_RESISTCOLD                                           = 4;
+var D2JSP_STATE_RESISTLIGHT                                          = 5;
+var D2JSP_STATE_RESISTMAGIC                                          = 6;
+var D2JSP_STATE_PLAYERBODY                                           = 7;
+var D2JSP_STATE_RESISTALL                                            = 8;
+var D2JSP_STATE_AMPLIFYDAMAGE                                        = 9;
+var D2JSP_STATE_FROZENARMOR                                          = 10;
+var D2JSP_STATE_COLD                                                 = 11;
+var D2JSP_STATE_INFERNO                                              = 12;
+var D2JSP_STATE_BLAZE                                                = 13;
+var D2JSP_STATE_BONEARMOR                                            = 14;
+var D2JSP_STATE_CONCENTRATE                                          = 15;
+var D2JSP_STATE_ENCHANT                                              = 16;
+var D2JSP_STATE_INNERSIGHT                                           = 17;
+var D2JSP_STATE_SKILL_MOVE                                           = 18;
+var D2JSP_STATE_WEAKEN                                               = 19;
+var D2JSP_STATE_CHILLINGARMOR                                        = 20;
+var D2JSP_STATE_STUNNED                                              = 21;
+var D2JSP_STATE_SPIDERLAY                                            = 22;
+var D2JSP_STATE_DIMVISION                                            = 23;
+var D2JSP_STATE_SLOWED                                               = 24;
+var D2JSP_STATE_FETISHAURA                                           = 25;
+var D2JSP_STATE_SHOUT                                                = 26;
+var D2JSP_STATE_TAUNT                                                = 27;
+var D2JSP_STATE_CONVICTION                                           = 28;
+var D2JSP_STATE_CONVICTED                                            = 29;
+var D2JSP_STATE_ENERGYSHIELD                                         = 30;
+var D2JSP_STATE_VENOMCLAWS                                           = 31;
+var D2JSP_STATE_BATTLEORDERS                                         = 32;
+var D2JSP_STATE_MIGHT                                                = 33;
+var D2JSP_STATE_PRAYER                                               = 34;
+var D2JSP_STATE_HOLYFIRE                                             = 35;
+var D2JSP_STATE_THORNS                                               = 36;
+var D2JSP_STATE_DEFIANCE                                             = 37;
+var D2JSP_STATE_THUNDERSTORM                                         = 38;
+var D2JSP_STATE_LIGHTNINGBOLT                                        = 39;
+var D2JSP_STATE_BLESSEDAIM                                           = 40;
+var D2JSP_STATE_STAMINA                                              = 41;
+var D2JSP_STATE_CONCENTRATION                                        = 42;
+var D2JSP_STATE_HOLYWIND                                             = 43;
+var D2JSP_STATE_HOLYWINDCOLD                                         = 44;
+var D2JSP_STATE_CLEANSING                                            = 45;
+var D2JSP_STATE_HOLYSHOCK                                            = 46;
+var D2JSP_STATE_SANCTUARY                                            = 47;
+var D2JSP_STATE_MEDITATION                                           = 48;
+var D2JSP_STATE_FANATICISM                                           = 49;
+var D2JSP_STATE_REDEMPTION                                           = 50;
+var D2JSP_STATE_BATTLECOMMAND                                        = 51;
+var D2JSP_STATE_PREVENTHEAL                                          = 52;
+var D2JSP_STATE_CONVERSION                                           = 53;
+var D2JSP_STATE_UNINTERRUPTABLE                                      = 54;
+var D2JSP_STATE_IRONMAIDEN                                           = 55;
+var D2JSP_STATE_TERROR                                               = 56;
+var D2JSP_STATE_ATTRACT                                              = 57;
+var D2JSP_STATE_LIFETAP                                              = 58;
+var D2JSP_STATE_CONFUSE                                              = 59;
+var D2JSP_STATE_DECREPIFY                                            = 60;
+var D2JSP_STATE_LOWERRESIST                                          = 61;
+var D2JSP_STATE_OPENWOUNDS                                           = 62;
+var D2JSP_STATE_DOPPLEZON                                            = 63;
+var D2JSP_STATE_CRITICALSTRIKE                                       = 64;
+var D2JSP_STATE_DODGE                                                = 65;
+var D2JSP_STATE_AVOID                                                = 66;
+var D2JSP_STATE_PENETRATE                                            = 67;
+var D2JSP_STATE_EVADE                                                = 68;
+var D2JSP_STATE_PIERCE                                               = 69;
+var D2JSP_STATE_WARMTH                                               = 70;
+var D2JSP_STATE_FIREMASTERY                                          = 71;
+var D2JSP_STATE_LIGHTNINGMASTERY                                     = 72;
+var D2JSP_STATE_COLDMASTERY                                          = 73;
+var D2JSP_STATE_SWORDMASTERY                                         = 74;
+var D2JSP_STATE_AXEMASTERY                                           = 75;
+var D2JSP_STATE_MACEMASTERY                                          = 76;
+var D2JSP_STATE_POLEARMMASTERY                                       = 77;
+var D2JSP_STATE_THROWINGMASTERY                                      = 78;
+var D2JSP_STATE_SPEARMASTERY                                         = 79;
+var D2JSP_STATE_INCREASEDSTAMINA                                     = 80;
+var D2JSP_STATE_IRONSKIN                                             = 81;
+var D2JSP_STATE_INCREASEDSPEED                                       = 82;
+var D2JSP_STATE_NATURALRESISTANCE                                    = 83;
+var D2JSP_STATE_FINGERMAGECURSE                                      = 84;
+var D2JSP_STATE_NOMANAREGEN                                          = 85;
+var D2JSP_STATE_JUSTHIT                                              = 86;
+var D2JSP_STATE_SLOWMISSILES                                         = 87;
+var D2JSP_STATE_SHIVERARMOR                                          = 88;
+var D2JSP_STATE_BATTLECRY                                            = 89;
+var D2JSP_STATE_BLUE                                                 = 90;
+var D2JSP_STATE_RED                                                  = 91;
+var D2JSP_STATE_DEATH_DELAY                                          = 92;
+var D2JSP_STATE_VALKYRIE                                             = 93;
+var D2JSP_STATE_FRENZY                                               = 94;
+var D2JSP_STATE_BERSERK                                              = 95;
+var D2JSP_STATE_REVIVE                                               = 96;
+var D2JSP_STATE_ITEMFULLSET                                          = 97;
+var D2JSP_STATE_SOURCEUNIT                                           = 98;
+var D2JSP_STATE_REDEEMED                                             = 99;
+var D2JSP_STATE_HEALTHPOT                                            = 100;
+var D2JSP_STATE_HOLYSHIELD                                           = 101;
+var D2JSP_STATE_JUST_PORTALED                                        = 102;
+var D2JSP_STATE_MONFRENZY                                            = 103;
+var D2JSP_STATE_CORPSE_NODRAW                                        = 104;
+var D2JSP_STATE_ALIGNMENT                                            = 105;
+var D2JSP_STATE_MANAPOT                                              = 106;
+var D2JSP_STATE_SHATTER                                              = 107;
+var D2JSP_STATE_SYNC_WARPED                                          = 108;
+var D2JSP_STATE_CONVERSION_SAVE                                      = 109;
+var D2JSP_STATE_PREGNANT                                             = 110;
+var D2JSP_STATE_111                                                  = 111;
+var D2JSP_STATE_RABIES                                               = 112;
+var D2JSP_STATE_DEFENSE_CURSE                                        = 113;
+var D2JSP_STATE_BLOOD_MANA                                           = 114;
+var D2JSP_STATE_BURNING                                              = 115;
+var D2JSP_STATE_DRAGONFLIGHT                                         = 116;
+var D2JSP_STATE_MAUL                                                 = 117;
+var D2JSP_STATE_CORPSE_NOSELECT                                      = 118;
+var D2JSP_STATE_SHADOWWARRIOR                                        = 119;
+var D2JSP_STATE_FERALRAGE                                            = 120;
+var D2JSP_STATE_SKILLDELAY                                           = 121;
+var D2JSP_STATE_PROGRESSIVE_DAMAGE                                   = 122;
+var D2JSP_STATE_PROGRESSIVE_STEAL                                    = 123;
+var D2JSP_STATE_PROGRESSIVE_OTHER                                    = 124;
+var D2JSP_STATE_PROGRESSIVE_FIRE                                     = 125;
+var D2JSP_STATE_PROGRESSIVE_COLD                                     = 126;
+var D2JSP_STATE_PROGRESSIVE_LIGHTNING                                = 127;
+var D2JSP_STATE_SHRINE_ARMOR                                         = 128;
+var D2JSP_STATE_SHRINE_COMBAT                                        = 129;
+var D2JSP_STATE_SHRINE_RESIST_LIGHTNING                              = 130;
+var D2JSP_STATE_SHRINE_RESIST_FIRE                                   = 131;
+var D2JSP_STATE_SHRINE_RESIST_COLD                                   = 132;
+var D2JSP_STATE_SHRINE_RESIST_POISON                                 = 133;
+var D2JSP_STATE_SHRINE_SKILL                                         = 134;
+var D2JSP_STATE_SHRINE_MANA_REGEN                                    = 135;
+var D2JSP_STATE_SHRINE_STAMINA                                       = 136;
+var D2JSP_STATE_SHRINE_EXPERIENCE                                    = 137;
+var D2JSP_STATE_FENRIS_RAGE                                          = 138;
+var D2JSP_STATE_WOLF                                                 = 139;
+var D2JSP_STATE_BEAR                                                 = 140;
+var D2JSP_STATE_BLOODLUST                                            = 141;
+var D2JSP_STATE_CHANGECLASS                                          = 142;
+var D2JSP_STATE_ATTACHED                                             = 143;
+var D2JSP_STATE_HURRICANE                                            = 144;
+var D2JSP_STATE_ARMAGEDDON                                           = 145;
+var D2JSP_STATE_INVIS                                                = 146;
+var D2JSP_STATE_BARBS                                                = 147;
+var D2JSP_STATE_WOLVERINE                                            = 148;
+var D2JSP_STATE_OAKSAGE                                              = 149;
+var D2JSP_STATE_VINE_BEAST                                           = 150;
+var D2JSP_STATE_CYCLONEARMOR                                         = 151;
+var D2JSP_STATE_CLAWMASTERY                                          = 152;
+var D2JSP_STATE_CLOAK_OF_SHADOWS                                     = 153;
+var D2JSP_STATE_RECYCLED                                             = 154;
+var D2JSP_STATE_WEAPONBLOCK                                          = 155;
+var D2JSP_STATE_CLOAKED                                              = 156;
+var D2JSP_STATE_QUICKNESS                                            = 157;
+var D2JSP_STATE_BLADESHIELD                                          = 158;
+var D2JSP_STATE_FADE                                                 = 159;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STATE_MINIMUM = D2JSP_STATE_NONE;
+var D2JSP_STATE_MAXIMUM = D2JSP_STATE_FADE;
+var D2JSP_STATE_COUNT   = (D2JSP_STATE_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STATE_ValidList = new Array();
+for (var count_1 = D2JSP_STATE_MINIMUM; count_1 <= D2JSP_STATE_MAXIMUM;
+	count_1++)
+	D2JSP_STATE_ValidList.push(count_1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STATE_StateToNameList = new Array(D2JSP_STATE_COUNT);
+D2JSP_STATE_StateToNameList[D2JSP_STATE_NONE]                    = "None";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FREEZE]                  = "Freeze";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_POISON]                  = "Poison";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RESISTFIRE]              = "Resist Fire";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RESISTCOLD]              = "Resist Cold";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RESISTLIGHT]             = "Resist Light";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RESISTMAGIC]             = "Resist Magic";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PLAYERBODY]              = "Player Body";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RESISTALL]               = "Resist All";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_AMPLIFYDAMAGE]           = "Amplify Damage";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FROZENARMOR]             = "Frozen Armor";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_COLD]                    = "Cold";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_INFERNO]                 = "Inferno";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BLAZE]                   = "Blaze";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BONEARMOR]               = "Bone Armor";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CONCENTRATE]             = "Concentrate";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_ENCHANT]                 = "Enchant";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_INNERSIGHT]              = "Inner Sight";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SKILL_MOVE]              = "Skill Move";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_WEAKEN]                  = "Weaken";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CHILLINGARMOR]           = "Chilling Armor";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_STUNNED]                 = "Stunned";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SPIDERLAY]               = "Spider Lay";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DIMVISION]               = "Division";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SLOWED]                  = "Slowed";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FETISHAURA]              = "Fetish Aura";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHOUT]                   = "Shout";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_TAUNT]                   = "Taunt";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CONVICTION]              = "Conviction";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CONVICTED]               = "Convicted";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_ENERGYSHIELD]            = "Energy Shield";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_VENOMCLAWS]              = "Venom Claws";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BATTLEORDERS]            = "Battle Orders";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_MIGHT]                   = "Might";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PRAYER]                  = "Prayer";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_HOLYFIRE]                = "Holy Fire";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_THORNS]                  = "Thorns";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DEFIANCE]                = "Defiance";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_THUNDERSTORM]            = "Thunderstorm";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_LIGHTNINGBOLT]           = "Lightning Bolt";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BLESSEDAIM]              = "Blessed Aim";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_STAMINA]                 = "Stamina";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CONCENTRATION]           = "Concentration";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_HOLYWIND]                = "Holy Wind";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_HOLYWINDCOLD]            = "Holy Wind Cold";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CLEANSING]               = "Cleansing";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_HOLYSHOCK]               = "Holy Shock";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SANCTUARY]               = "Sanctuary";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_MEDITATION]              = "Meditation";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FANATICISM]              = "Fanaticism";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_REDEMPTION]              = "Redemption";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BATTLECOMMAND]           = "Battle Command";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PREVENTHEAL]             = "Prevent Heal";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CONVERSION]              = "Conversion";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_UNINTERRUPTABLE]         = "Uninterruptible";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_IRONMAIDEN]              = "Iron Maiden";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_TERROR]                  = "Terror";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_ATTRACT]                 = "Attract";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_LIFETAP]                 = "Life Tap";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CONFUSE]                 = "Confuse";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DECREPIFY]               = "Decertify";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_LOWERRESIST]             = "Lower Resist";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_OPENWOUNDS]              = "Open Wounds";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DOPPLEZON]               = "Dopplezon";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CRITICALSTRIKE]          = "Critical Strike";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DODGE]                   = "Dodge";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_AVOID]                   = "Avoid";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PENETRATE]               = "Penetrate";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_EVADE]                   = "Evade";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PIERCE]                  = "Pierce";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_WARMTH]                  = "Warmth";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FIREMASTERY]             = "Fire Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_LIGHTNINGMASTERY]        = "Lightning Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_COLDMASTERY]             = "Cold Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SWORDMASTERY]            = "Sword Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_AXEMASTERY]              = "Axe Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_MACEMASTERY]             = "Mace Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_POLEARMMASTERY]          = "Polearm Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_THROWINGMASTERY]         = "Throwing Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SPEARMASTERY]            = "Spear Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_INCREASEDSTAMINA]        = "Increased Stamina";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_IRONSKIN]                = "Iron Skin";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_INCREASEDSPEED]          = "Increased Speed";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_NATURALRESISTANCE]       = "Natural Resistance";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FINGERMAGECURSE]         = "Finger Mage Curse";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_NOMANAREGEN]             = "No Mana Regen";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_JUSTHIT]                 = "Just Hit";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SLOWMISSILES]            = "Slow Missiles";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHIVERARMOR]             = "Shiver Armor";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BATTLECRY]               = "Battle Cry";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BLUE]                    = "Blue";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RED]                     = "Red";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DEATH_DELAY]             = "Death Delay";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_VALKYRIE]                = "Valkyrie";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FRENZY]                  = "Frenzy";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BERSERK]                 = "Berserk";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_REVIVE]                  = "Revive";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_ITEMFULLSET]             = "Item Full Set";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SOURCEUNIT]              = "Source Unit";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_REDEEMED]                = "Redeemed";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_HEALTHPOT]               = "Health Pot";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_HOLYSHIELD]              = "Holy Shield";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_JUST_PORTALED]           = "Just Portaled";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_MONFRENZY]               = "Mon Frenzy";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CORPSE_NODRAW]           = "Corpse No Draw";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_ALIGNMENT]               = "Alignment";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_MANAPOT]                 = "Mana Pot";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHATTER]                 = "Shatter";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SYNC_WARPED]             = "Sync Warped";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CONVERSION_SAVE]         = "Conversion Save";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PREGNANT]                = "Pregnant";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_111]                     = "111";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RABIES]                  = "Rabies";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DEFENSE_CURSE]           = "Defense Curse";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BLOOD_MANA]              = "Blood Mana";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BURNING]                 = "Burning";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_DRAGONFLIGHT]            = "Dragon Flight";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_MAUL]                    = "Maul";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CORPSE_NOSELECT]         = "Corpse No Select";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHADOWWARRIOR]           = "Shadow Warrior";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FERALRAGE]               = "Feral Rage";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SKILLDELAY]              = "Skill Delay";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PROGRESSIVE_DAMAGE]      = "Progressive Damage";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PROGRESSIVE_STEAL]       = "Progressive Steal";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PROGRESSIVE_OTHER]       = "Progressive Other";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PROGRESSIVE_FIRE]        = "Progressive Fire";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PROGRESSIVE_COLD]        = "Progressive Cold";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_PROGRESSIVE_LIGHTNING]   = "Progressive Lightning";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_ARMOR]            = "Shrine Armor";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_COMBAT]           = "Shrine Combat";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_RESIST_LIGHTNING] = "Shrine Resist Lightning";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_RESIST_FIRE]      = "Shrine Resist Fire";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_RESIST_COLD]      = "Shrine Resist Cold";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_RESIST_POISON]    = "Shrine Resist Poison";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_SKILL]            = "Shrine Skill";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_MANA_REGEN]       = "Shrine Mana Regen";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_STAMINA]          = "Shrine Stamina";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_SHRINE_EXPERIENCE]       = "Shrine Experience";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FENRIS_RAGE]             = "Fenris Rage";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_WOLF]                    = "Wolf";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BEAR]                    = "Bear";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BLOODLUST]               = "Bloodlust";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CHANGECLASS]             = "Change Class";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_ATTACHED]                = "Attached";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_HURRICANE]               = "Hurricane";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_ARMAGEDDON]              = "Armageddon";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_INVIS]                   = "Invis";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BARBS]                   = "Barbs";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_WOLVERINE]               = "Wolverine";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_OAKSAGE]                 = "Oak Sage";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_VINE_BEAST]              = "Vine Beast";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CYCLONEARMOR]            = "Cyclone Armor";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CLAWMASTERY]             = "Claw Mastery";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CLOAK_OF_SHADOWS]        = "Cloak Of Shadows";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_RECYCLED]                = "Recycled";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_WEAPONBLOCK]             = "Weapon Block";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_CLOAKED]                 = "Cloaked";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_QUICKNESS]               = "Quickness";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_BLADESHIELD]             = "Blade Shield";
+D2JSP_STATE_StateToNameList[D2JSP_STATE_FADE]                    = "Fade";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STATE_NameToStateList = new Array(D2JSP_STATE_COUNT);
+D2JSP_STATE_NameToStateList["none"]                    = D2JSP_STATE_NONE;
+D2JSP_STATE_NameToStateList["freeze"]                  = D2JSP_STATE_FREEZE;
+D2JSP_STATE_NameToStateList["poison"]                  = D2JSP_STATE_POISON;
+D2JSP_STATE_NameToStateList["resist fire"]             = D2JSP_STATE_RESISTFIRE;
+D2JSP_STATE_NameToStateList["resist cold"]             = D2JSP_STATE_RESISTCOLD;
+D2JSP_STATE_NameToStateList["resist light"]            = D2JSP_STATE_RESISTLIGHT;
+D2JSP_STATE_NameToStateList["resist magic"]            = D2JSP_STATE_RESISTMAGIC;
+D2JSP_STATE_NameToStateList["player body"]             = D2JSP_STATE_PLAYERBODY;
+D2JSP_STATE_NameToStateList["resist all"]              = D2JSP_STATE_RESISTALL;
+D2JSP_STATE_NameToStateList["amplify damage"]          = D2JSP_STATE_AMPLIFYDAMAGE;
+D2JSP_STATE_NameToStateList["frozen armor"]            = D2JSP_STATE_FROZENARMOR;
+D2JSP_STATE_NameToStateList["cold"]                    = D2JSP_STATE_COLD;
+D2JSP_STATE_NameToStateList["inferno"]                 = D2JSP_STATE_INFERNO;
+D2JSP_STATE_NameToStateList["blaze"]                   = D2JSP_STATE_BLAZE;
+D2JSP_STATE_NameToStateList["bone armor"]              = D2JSP_STATE_BONEARMOR;
+D2JSP_STATE_NameToStateList["concentrate"]             = D2JSP_STATE_CONCENTRATE;
+D2JSP_STATE_NameToStateList["enchant"]                 = D2JSP_STATE_ENCHANT;
+D2JSP_STATE_NameToStateList["inner sight"]             = D2JSP_STATE_INNERSIGHT;
+D2JSP_STATE_NameToStateList["skill move"]              = D2JSP_STATE_SKILL_MOVE;
+D2JSP_STATE_NameToStateList["weaken"]                  = D2JSP_STATE_WEAKEN;
+D2JSP_STATE_NameToStateList["chilling armor"]          = D2JSP_STATE_CHILLINGARMOR;
+D2JSP_STATE_NameToStateList["stunned"]                 = D2JSP_STATE_STUNNED;
+D2JSP_STATE_NameToStateList["spider lay"]              = D2JSP_STATE_SPIDERLAY;
+D2JSP_STATE_NameToStateList["division"]                = D2JSP_STATE_DIMVISION;
+D2JSP_STATE_NameToStateList["slowed"]                  = D2JSP_STATE_SLOWED;
+D2JSP_STATE_NameToStateList["fetish aura"]             = D2JSP_STATE_FETISHAURA;
+D2JSP_STATE_NameToStateList["shout"]                   = D2JSP_STATE_SHOUT;
+D2JSP_STATE_NameToStateList["taunt"]                   = D2JSP_STATE_TAUNT;
+D2JSP_STATE_NameToStateList["conviction"]              = D2JSP_STATE_CONVICTION;
+D2JSP_STATE_NameToStateList["convicted"]               = D2JSP_STATE_CONVICTED;
+D2JSP_STATE_NameToStateList["energy shield"]           = D2JSP_STATE_ENERGYSHIELD;
+D2JSP_STATE_NameToStateList["venom claws"]             = D2JSP_STATE_VENOMCLAWS;
+D2JSP_STATE_NameToStateList["battle orders"]           = D2JSP_STATE_BATTLEORDERS;
+D2JSP_STATE_NameToStateList["might"]                   = D2JSP_STATE_MIGHT;
+D2JSP_STATE_NameToStateList["prayer"]                  = D2JSP_STATE_PRAYER;
+D2JSP_STATE_NameToStateList["holy fire"]               = D2JSP_STATE_HOLYFIRE;
+D2JSP_STATE_NameToStateList["thorns"]                  = D2JSP_STATE_THORNS;
+D2JSP_STATE_NameToStateList["defiance"]                = D2JSP_STATE_DEFIANCE;
+D2JSP_STATE_NameToStateList["thunderstorm"]            = D2JSP_STATE_THUNDERSTORM;
+D2JSP_STATE_NameToStateList["lightning bolt"]          = D2JSP_STATE_LIGHTNINGBOLT;
+D2JSP_STATE_NameToStateList["blessed aim"]             = D2JSP_STATE_BLESSEDAIM;
+D2JSP_STATE_NameToStateList["stamina"]                 = D2JSP_STATE_STAMINA;
+D2JSP_STATE_NameToStateList["concentration"]           = D2JSP_STATE_CONCENTRATION;
+D2JSP_STATE_NameToStateList["holy wind"]               = D2JSP_STATE_HOLYWIND;
+D2JSP_STATE_NameToStateList["holy wind cold"]          = D2JSP_STATE_HOLYWINDCOLD;
+D2JSP_STATE_NameToStateList["cleansing"]               = D2JSP_STATE_CLEANSING;
+D2JSP_STATE_NameToStateList["holy shock"]              = D2JSP_STATE_HOLYSHOCK;
+D2JSP_STATE_NameToStateList["sanctuary"]               = D2JSP_STATE_SANCTUARY;
+D2JSP_STATE_NameToStateList["meditation"]              = D2JSP_STATE_MEDITATION;
+D2JSP_STATE_NameToStateList["fanaticism"]              = D2JSP_STATE_FANATICISM;
+D2JSP_STATE_NameToStateList["redemption"]              = D2JSP_STATE_REDEMPTION;
+D2JSP_STATE_NameToStateList["battle command"]          = D2JSP_STATE_BATTLECOMMAND;
+D2JSP_STATE_NameToStateList["prevent heal"]            = D2JSP_STATE_PREVENTHEAL;
+D2JSP_STATE_NameToStateList["conversion"]              = D2JSP_STATE_CONVERSION;
+D2JSP_STATE_NameToStateList["uninterruptible"]         = D2JSP_STATE_UNINTERRUPTABLE;
+D2JSP_STATE_NameToStateList["iron maiden"]             = D2JSP_STATE_IRONMAIDEN;
+D2JSP_STATE_NameToStateList["terror"]                  = D2JSP_STATE_TERROR;
+D2JSP_STATE_NameToStateList["attract"]                 = D2JSP_STATE_ATTRACT;
+D2JSP_STATE_NameToStateList["life tap"]                = D2JSP_STATE_LIFETAP;
+D2JSP_STATE_NameToStateList["confuse"]                 = D2JSP_STATE_CONFUSE;
+D2JSP_STATE_NameToStateList["decertify"]               = D2JSP_STATE_DECREPIFY;
+D2JSP_STATE_NameToStateList["lower resist"]            = D2JSP_STATE_LOWERRESIST;
+D2JSP_STATE_NameToStateList["open wounds"]             = D2JSP_STATE_OPENWOUNDS;
+D2JSP_STATE_NameToStateList["dopplezon"]               = D2JSP_STATE_DOPPLEZON;
+D2JSP_STATE_NameToStateList["critical strike"]         = D2JSP_STATE_CRITICALSTRIKE;
+D2JSP_STATE_NameToStateList["dodge"]                   = D2JSP_STATE_DODGE;
+D2JSP_STATE_NameToStateList["avoid"]                   = D2JSP_STATE_AVOID;
+D2JSP_STATE_NameToStateList["penetrate"]               = D2JSP_STATE_PENETRATE;
+D2JSP_STATE_NameToStateList["evade"]                   = D2JSP_STATE_EVADE;
+D2JSP_STATE_NameToStateList["pierce"]                  = D2JSP_STATE_PIERCE;
+D2JSP_STATE_NameToStateList["warmth"]                  = D2JSP_STATE_WARMTH;
+D2JSP_STATE_NameToStateList["fire mastery"]            = D2JSP_STATE_FIREMASTERY;
+D2JSP_STATE_NameToStateList["lightning mastery"]       = D2JSP_STATE_LIGHTNINGMASTERY;
+D2JSP_STATE_NameToStateList["cold mastery"]            = D2JSP_STATE_COLDMASTERY;
+D2JSP_STATE_NameToStateList["sword mastery"]           = D2JSP_STATE_SWORDMASTERY;
+D2JSP_STATE_NameToStateList["axe mastery"]             = D2JSP_STATE_AXEMASTERY;
+D2JSP_STATE_NameToStateList["mace mastery"]            = D2JSP_STATE_MACEMASTERY;
+D2JSP_STATE_NameToStateList["polearm mastery"]         = D2JSP_STATE_POLEARMMASTERY;
+D2JSP_STATE_NameToStateList["throwing mastery"]        = D2JSP_STATE_THROWINGMASTERY;
+D2JSP_STATE_NameToStateList["spear mastery"]           = D2JSP_STATE_SPEARMASTERY;
+D2JSP_STATE_NameToStateList["increased stamina"]       = D2JSP_STATE_INCREASEDSTAMINA;
+D2JSP_STATE_NameToStateList["iron skin"]               = D2JSP_STATE_IRONSKIN;
+D2JSP_STATE_NameToStateList["increased speed"]         = D2JSP_STATE_INCREASEDSPEED;
+D2JSP_STATE_NameToStateList["natural resistance"]      = D2JSP_STATE_NATURALRESISTANCE;
+D2JSP_STATE_NameToStateList["finger mage curse"]       = D2JSP_STATE_FINGERMAGECURSE;
+D2JSP_STATE_NameToStateList["no mana regen"]           = D2JSP_STATE_NOMANAREGEN;
+D2JSP_STATE_NameToStateList["just hit"]                = D2JSP_STATE_JUSTHIT;
+D2JSP_STATE_NameToStateList["slow missiles"]           = D2JSP_STATE_SLOWMISSILES;
+D2JSP_STATE_NameToStateList["shiver armor"]            = D2JSP_STATE_SHIVERARMOR;
+D2JSP_STATE_NameToStateList["battle cry"]              = D2JSP_STATE_BATTLECRY;
+D2JSP_STATE_NameToStateList["blue"]                    = D2JSP_STATE_BLUE;
+D2JSP_STATE_NameToStateList["red"]                     = D2JSP_STATE_RED;
+D2JSP_STATE_NameToStateList["death delay"]             = D2JSP_STATE_DEATH_DELAY;
+D2JSP_STATE_NameToStateList["valkyrie"]                = D2JSP_STATE_VALKYRIE;
+D2JSP_STATE_NameToStateList["frenzy"]                  = D2JSP_STATE_FRENZY;
+D2JSP_STATE_NameToStateList["berserk"]                 = D2JSP_STATE_BERSERK;
+D2JSP_STATE_NameToStateList["revive"]                  = D2JSP_STATE_REVIVE;
+D2JSP_STATE_NameToStateList["item full set"]           = D2JSP_STATE_ITEMFULLSET;
+D2JSP_STATE_NameToStateList["source unit"]             = D2JSP_STATE_SOURCEUNIT;
+D2JSP_STATE_NameToStateList["redeemed"]                = D2JSP_STATE_REDEEMED;
+D2JSP_STATE_NameToStateList["health pot"]              = D2JSP_STATE_HEALTHPOT;
+D2JSP_STATE_NameToStateList["holy shield"]             = D2JSP_STATE_HOLYSHIELD;
+D2JSP_STATE_NameToStateList["just portaled"]           = D2JSP_STATE_JUST_PORTALED;
+D2JSP_STATE_NameToStateList["mon frenzy"]              = D2JSP_STATE_MONFRENZY;
+D2JSP_STATE_NameToStateList["corpse no draw"]          = D2JSP_STATE_CORPSE_NODRAW;
+D2JSP_STATE_NameToStateList["alignment"]               = D2JSP_STATE_ALIGNMENT;
+D2JSP_STATE_NameToStateList["mana pot"]                = D2JSP_STATE_MANAPOT;
+D2JSP_STATE_NameToStateList["shatter"]                 = D2JSP_STATE_SHATTER;
+D2JSP_STATE_NameToStateList["sync warped"]             = D2JSP_STATE_SYNC_WARPED;
+D2JSP_STATE_NameToStateList["conversion save"]         = D2JSP_STATE_CONVERSION_SAVE;
+D2JSP_STATE_NameToStateList["pregnant"]                = D2JSP_STATE_PREGNANT;
+D2JSP_STATE_NameToStateList["111"]                     = D2JSP_STATE_111;
+D2JSP_STATE_NameToStateList["rabies"]                  = D2JSP_STATE_RABIES;
+D2JSP_STATE_NameToStateList["defense curse"]           = D2JSP_STATE_DEFENSE_CURSE;
+D2JSP_STATE_NameToStateList["blood mana"]              = D2JSP_STATE_BLOOD_MANA;
+D2JSP_STATE_NameToStateList["burning"]                 = D2JSP_STATE_BURNING;
+D2JSP_STATE_NameToStateList["dragon flight"]           = D2JSP_STATE_DRAGONFLIGHT;
+D2JSP_STATE_NameToStateList["maul"]                    = D2JSP_STATE_MAUL;
+D2JSP_STATE_NameToStateList["corpse no select"]        = D2JSP_STATE_CORPSE_NOSELECT;
+D2JSP_STATE_NameToStateList["shadow warrior"]          = D2JSP_STATE_SHADOWWARRIOR;
+D2JSP_STATE_NameToStateList["feral rage"]              = D2JSP_STATE_FERALRAGE;
+D2JSP_STATE_NameToStateList["skill delay"]             = D2JSP_STATE_SKILLDELAY;
+D2JSP_STATE_NameToStateList["progressive damage"]      = D2JSP_STATE_PROGRESSIVE_DAMAGE;
+D2JSP_STATE_NameToStateList["progressive steal"]       = D2JSP_STATE_PROGRESSIVE_STEAL;
+D2JSP_STATE_NameToStateList["progressive other"]       = D2JSP_STATE_PROGRESSIVE_OTHER;
+D2JSP_STATE_NameToStateList["progressive fire"]        = D2JSP_STATE_PROGRESSIVE_FIRE;
+D2JSP_STATE_NameToStateList["progressive cold"]        = D2JSP_STATE_PROGRESSIVE_COLD;
+D2JSP_STATE_NameToStateList["progressive lightning"]   = D2JSP_STATE_PROGRESSIVE_LIGHTNING;
+D2JSP_STATE_NameToStateList["shrine armor"]            = D2JSP_STATE_SHRINE_ARMOR;
+D2JSP_STATE_NameToStateList["shrine combat"]           = D2JSP_STATE_SHRINE_COMBAT;
+D2JSP_STATE_NameToStateList["shrine resist lightning"] = D2JSP_STATE_SHRINE_RESIST_LIGHTNING;
+D2JSP_STATE_NameToStateList["shrine resist fire"]      = D2JSP_STATE_SHRINE_RESIST_FIRE;
+D2JSP_STATE_NameToStateList["shrine resist cold"]      = D2JSP_STATE_SHRINE_RESIST_COLD;
+D2JSP_STATE_NameToStateList["shrine resist poison"]    = D2JSP_STATE_SHRINE_RESIST_POISON;
+D2JSP_STATE_NameToStateList["shrine skill"]            = D2JSP_STATE_SHRINE_SKILL;
+D2JSP_STATE_NameToStateList["shrine mana regen"]       = D2JSP_STATE_SHRINE_MANA_REGEN;
+D2JSP_STATE_NameToStateList["shrine stamina"]          = D2JSP_STATE_SHRINE_STAMINA;
+D2JSP_STATE_NameToStateList["shrine experience"]       = D2JSP_STATE_SHRINE_EXPERIENCE;
+D2JSP_STATE_NameToStateList["fenris rage"]             = D2JSP_STATE_FENRIS_RAGE;
+D2JSP_STATE_NameToStateList["wolf"]                    = D2JSP_STATE_WOLF;
+D2JSP_STATE_NameToStateList["bear"]                    = D2JSP_STATE_BEAR;
+D2JSP_STATE_NameToStateList["bloodlust"]               = D2JSP_STATE_BLOODLUST;
+D2JSP_STATE_NameToStateList["change class"]            = D2JSP_STATE_CHANGECLASS;
+D2JSP_STATE_NameToStateList["attached"]                = D2JSP_STATE_ATTACHED;
+D2JSP_STATE_NameToStateList["hurricane"]               = D2JSP_STATE_HURRICANE;
+D2JSP_STATE_NameToStateList["armageddon"]              = D2JSP_STATE_ARMAGEDDON;
+D2JSP_STATE_NameToStateList["invis"]                   = D2JSP_STATE_INVIS;
+D2JSP_STATE_NameToStateList["barbs"]                   = D2JSP_STATE_BARBS;
+D2JSP_STATE_NameToStateList["wolverine"]               = D2JSP_STATE_WOLVERINE;
+D2JSP_STATE_NameToStateList["oak sage"]                = D2JSP_STATE_OAKSAGE;
+D2JSP_STATE_NameToStateList["vine beast"]              = D2JSP_STATE_VINE_BEAST;
+D2JSP_STATE_NameToStateList["cyclone armor"]           = D2JSP_STATE_CYCLONEARMOR;
+D2JSP_STATE_NameToStateList["claw mastery"]            = D2JSP_STATE_CLAWMASTERY;
+D2JSP_STATE_NameToStateList["cloak of shadows"]        = D2JSP_STATE_CLOAK_OF_SHADOWS;
+D2JSP_STATE_NameToStateList["recycled"]                = D2JSP_STATE_RECYCLED;
+D2JSP_STATE_NameToStateList["weapon block"]            = D2JSP_STATE_WEAPONBLOCK;
+D2JSP_STATE_NameToStateList["cloaked"]                 = D2JSP_STATE_CLOAKED;
+D2JSP_STATE_NameToStateList["quickness"]               = D2JSP_STATE_QUICKNESS;
+D2JSP_STATE_NameToStateList["blade shield"]            = D2JSP_STATE_BLADESHIELD;
+D2JSP_STATE_NameToStateList["fade"]                    = D2JSP_STATE_FADE;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STATE_IsValid(state_number)
+{
+	return(((state_number >= D2JSP_STATE_MINIMUM) &&
+		(state_number <= D2JSP_STATE_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STATE_IsName(state_name)
+{
+	return((typeof(D2JSP_STATE_NameToStateList[state_name.toLowerCase()]) !=
+		"undefined") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STATE_StateToName(state_number)
+{
+	return((D2JSP_STATE_IsValid(state_number)) ?
+		D2JSP_STATE_StateToNameList[state_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STATE_NameToState(state_name)
+{
+	return((D2JSP_STATE_IsName(state_name)) ?
+		D2JSP_STATE_NameToStateList[state_name.toLowerCase()] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STATE_ParseToNumber(in_data)
+{
+	var tmp_number;
+	var tmp_data;
+
+	in_data  = D2JSP_UTIL_FORMAT_Trim(in_data + "");
+	tmp_data = in_data;
+	tmp_data = tmp_data.replace(/^\s+|\s+$/g, "");
+	tmp_data = tmp_data.replace(/\s+/g, "_");
+	tmp_data = tmp_data.replace(/^[^A-Za-z_]|[^A-Za-z0-9_]/g, "");
+	tmp_data = (tmp_data != "") ? tmp_data : "\"\"";
+
+	if (D2JSP_UTIL_FORMAT_IsDigit(in_data)) {
+		tmp_number = parseInt(in_data, 10);
+		return((D2JSP_STATE_IsValid(tmp_number)) ? tmp_number : -1);
+	}
+	else if (eval("((typeof(D2JSP_STATE_" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval("D2JSP_STATE_" + tmp_data.toUpperCase()));
+	else if (eval("((typeof(" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval(tmp_data.toUpperCase()));
+	else if (D2JSP_STATE_IsName(in_data))
+		return(D2JSP_STATE_NameToState(in_data));
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STATE_ParseToName(in_data)
+{
+	var tmp_number = D2JSP_STATE_ParseToNumber(in_data);
+
+	return((tmp_number != -1) ? D2JSP_STATE_StateToName(tmp_number) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_States_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output/RegressionTest._D2JSP_States.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_States.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+	if (file_handle) {
+		for (count_1 = 0; count_1 < D2JSP_STATE_StateToNameList.length; count_1++)
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_STATE_StateToNameList[count_1]);
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+
+// ////////////////////////////////////////////////////////////////////////////
+

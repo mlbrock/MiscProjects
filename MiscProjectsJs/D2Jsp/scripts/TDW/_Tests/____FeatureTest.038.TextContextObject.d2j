@@ -1,0 +1,185 @@
+include("TDW/_D2JSP_Utility.d2l");
+include("TDW/_D2JSP_Areas.d2l");
+include("TDW/ISF.d2l");
+
+var TDW_BOT_ConfigureList = new Array();
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["operation.core.version.minimum"]     = null;
+TDW_BOT_ConfigureList["operation.core.version.maximum"]     = null;
+TDW_BOT_ConfigureList["operation.wait.ms.start"]            =    0;
+TDW_BOT_ConfigureList["operation.wait.ms.exit"]             = 1000;
+TDW_BOT_ConfigureList["operation.wait.ms.exit.in.town"]     = 3000;
+TDW_BOT_ConfigureList["operation.public.speech"]            = false;
+TDW_BOT_ConfigureList["operation.public.trust"]             = false;
+TDW_BOT_ConfigureList["operation.d2jsp.me.showcast"]        = true;
+TDW_BOT_ConfigureList["operation.exit.normal.stop"]         = false;
+TDW_BOT_ConfigureList["operation.exit.take.waypoint"]       = D2JSP_AREA_NONE;
+TDW_BOT_ConfigureList["operation.exit.run.script"]          = "";
+TDW_BOT_ConfigureList["operation.tour"]                     = false;
+TDW_BOT_ConfigureList["operation.party"]                    = true;
+TDW_BOT_ConfigureList["operation.hostility.fight.softcore"] = true;
+TDW_BOT_ConfigureList["operation.hostility.fight.hardcore"] = false;
+// Note that the configuration option below is always set
+// to the value specified by the above two options in the
+// function TDW_BOT_CTX_ContextCreate() depending upon the
+// value of the appropriate softcore/hardcore option.
+TDW_BOT_ConfigureList["operation.hostility.fight"]          = false;
+TDW_BOT_ConfigureList["operation.bot.name"]                 = null;
+TDW_BOT_ConfigureList["operation.bot.config.file.name"]     = null;
+TDW_BOT_ConfigureList["operation.bot.time.start"]           = new Date();
+TDW_BOT_ConfigureList["operation.bot.time.end"]             = new Date();
+TDW_BOT_ConfigureList["operation.log.file.name"]            = null;
+TDW_BOT_ConfigureList["operation.log.configuration"]        = true;
+TDW_BOT_ConfigureList["operation.log.special.npc.stats"]    = true;
+TDW_BOT_ConfigureList["operation.log.special.npc.cluster"]  = true;
+TDW_BOT_ConfigureList["operation.log.cluster"]              = false;
+TDW_BOT_ConfigureList["operation.log.sync.mode"]            = false;
+TDW_BOT_ConfigureList["operation.log.level.file"]           = D2JSP_UTIL_LOG_Level_INFO;
+TDW_BOT_ConfigureList["operation.log.level.screen"]         = D2JSP_UTIL_LOG_Level_INFO;
+TDW_BOT_ConfigureList["operation.quit.on.error"]            = false;
+TDW_BOT_ConfigureList["operation.quit.on.hostile"]          = false;
+
+	// These two parameters have the following semantics:
+	//		1) If null, then no message of that type will be sent to BNet.
+	//		2) If the empty string (""), a message will be chosen at random
+	//			from the list of built-in messages.
+	//		3) If an array of strings, a message will be chosen at random
+	//			from that list.
+TDW_BOT_ConfigureList["operation.bnet.message.dnd"]         = null;
+TDW_BOT_ConfigureList["operation.bnet.message.away"]        = null;
+
+//TDW_BOT_ConfigureList["skill.precast"]                      =
+//	["Energy Shield", "Shiver Armor", "Thunder Storm"];
+TDW_BOT_ConfigureList["skill.precast"]                      = new Array();
+
+TDW_BOT_ConfigureList["skill.attack.ranged"]                = ["Frozen Orb"];
+//TDW_BOT_ConfigureList["skill.attack.local"]                 = ["Nova"];
+TDW_BOT_ConfigureList["skill.attack.local"]                 = ["Nova", "Nova", "Nova", "Nova", "Frost Nova"];
+TDW_BOT_ConfigureList["skill.attack.remove"]                = ["Chain Lightning", "Lightning"];
+TDW_BOT_ConfigureList["skill.attack.arrive.local.once"]     = ["Frost Nova"];
+TDW_BOT_ConfigureList["skill.telekinesis.radius"]           = 30;
+
+TDW_BOT_ConfigureList["teleport.step.size"]                 = 33;
+TDW_BOT_ConfigureList["teleport.step.size.increase"]        = 5;
+TDW_BOT_ConfigureList["teleport.step.size.max"]             = 160;
+TDW_BOT_ConfigureList["teleport.step.fudge.step"]           = 10;
+TDW_BOT_ConfigureList["teleport.step.fudge.final"]          = 3;
+
+TDW_BOT_ConfigureList["mana.regen.percentage"]              = 50;
+
+//TDW_BOT_ConfigureList["isf.configuration.file"]             = "settings/ISF.cfg";
+TDW_BOT_ConfigureList["isf.configuration.file"]             = null;
+TDW_BOT_ConfigureList["isf.configuration.file.sell"]        = null;
+TDW_BOT_ConfigureList["isf.configuration.file.gamble"]      = null;
+TDW_BOT_ConfigureList["town.logic.repair.percent"]          = 75;
+
+TDW_BOT_ConfigureList["town.logic.isf.stash"]               = TDW_BOT_MOVE_TownLogicStash;
+TDW_BOT_ConfigureList["town.logic.isf.force.sales"]         = false;
+TDW_BOT_ConfigureList["town.logic.isf.always.sell"]         = false;
+TDW_BOT_ConfigureList["town.logic.minimum.tbk.count"]       = 1;
+TDW_BOT_ConfigureList["town.logic.minimum.ibk.count"]       = 1;
+TDW_BOT_ConfigureList["town.logic.belt.discard.unused"]     = true;
+
+TDW_BOT_ConfigureList["mysnagit.radius"]                    = 35;
+TDW_BOT_ConfigureList["mysnagit.gold.flag"]                 = true;
+TDW_BOT_ConfigureList["mysnagit.gold.minimum"]              = 1000;
+TDW_BOT_ConfigureList["mysnagit.pop.chests"]                = true;
+TDW_BOT_ConfigureList["mysnagit.pop.chests.radius"]         = 20;
+TDW_BOT_ConfigureList["mysnagit.pop.chests.maximum"]        = 5;
+TDW_BOT_ConfigureList["mysnagit.pop.chests.flags"]          =
+	ISF_CHEST_FLAG_TRAP | ISF_CHEST_FLAG_SPECIAL;
+TDW_BOT_ConfigureList["mysnagit.pickup.belt.smart"]         = false;
+TDW_BOT_ConfigureList["mysnagit.pickup.belt.simple"]        = true;
+
+TDW_BOT_ConfigureList["snagit.active"]                      = false;
+TDW_BOT_ConfigureList["snagit.ini"]                         = "settings/snagit.ini";
+TDW_BOT_ConfigureList["chicken.me.hp"]                      = 35;
+TDW_BOT_ConfigureList["chicken.me.mp"]                      = -1;
+TDW_BOT_ConfigureList["chicken.mercenary.hp"]               = 25;
+// These are new.
+TDW_BOT_ConfigureList["town.revive.mercenary"]              = true;
+TDW_BOT_ConfigureList["town.heal.me.hp"]                    = 75;
+TDW_BOT_ConfigureList["town.heal.me.mp"]                    = 60;
+TDW_BOT_ConfigureList["town.heal.mercenary.hp"]             = 45;
+
+TDW_BOT_ConfigureList["potion.me.hp.health"]                = 75;
+TDW_BOT_ConfigureList["potion.mercenary.hp.health"]         = 75;
+TDW_BOT_ConfigureList["potion.me.hp.rejuvenation"]          = 50;
+TDW_BOT_ConfigureList["potion.mercenary.hp.rejuvenation"]   = 35;
+
+TDW_BOT_ConfigureList["mercernary.needed"]                  = true;
+
+TDW_BOT_ConfigureList["skill.precast.data"]                 = new Array();
+TDW_BOT_ConfigureList["skill.precast.data"][0]              = new Array();
+TDW_BOT_ConfigureList["skill.precast.data"][1]              = new Array();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Pre-configures the bot context. Will be updated when the function
+//	TDW_BOT_CTX_ContextCreate() is invoked during initialization...
+TDW_BOT_ContextList = new D2JSP_UTIL_CTX_Context(null, TDW_BOT_ConfigureList);
+// ////////////////////////////////////////////////////////////////////////////
+
+// Fake function for testing...
+function TDW_BOT_MOVE_TownLogicStash() {}
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/____FeatureTest.038." +
+		"TextContextObject.d2j.log", "FeatureTest.038", null, null, null, true);
+
+	my_log.level_file = D2JSP_UTIL_LOG_Level_MINUTIAE;
+
+	my_log.emitSep("=");
+	my_log.logInfoQuiet("Before Changes");
+	my_log.emitSep("-");
+	TDW_BOT_ContextList.toLog(my_log);
+	my_log.emitSep("=");
+
+	my_log.logInfo("Invalid Push Attempt #A-1");
+	TDW_BOT_ContextList.pushProperty("X.Y.Z", 666);
+
+	my_log.logInfo("Invalid Pop Attempt #A-1");
+	TDW_BOT_ContextList.popProperty("X.Y.Z");
+
+	my_log.logInfo("Invalid Remove Attempt #A-1");
+	TDW_BOT_ContextList.removeProperty("X.Y.Z");
+
+	my_log.logInfo("Valid Add Attempt #A-1");
+	TDW_BOT_ContextList.addProperty("X.Y.Z", 666);
+
+	my_log.logInfo("Invalid Add Attempt #A-1");
+	TDW_BOT_ContextList.addProperty("X.Y.Z", 666);
+
+	my_log.logInfo("Valid Remove Attempt #A-1");
+	TDW_BOT_ContextList.removeProperty("X.Y.Z", 666);
+
+	my_log.logInfo("Valid Push Attempt #1");
+	TDW_BOT_ContextList.pushProperty("town.heal.me.hp", 99);
+	my_log.logInfo("Valid Push Attempt #2");
+	TDW_BOT_ContextList.pushProperty("town.heal.me.hp", 98);
+	my_log.logInfo("Valid Push Attempt #3");
+	TDW_BOT_ContextList.pushProperty("town.heal.me.hp", 97);
+	my_log.logInfo("Valid Pop Attempt #1");
+	TDW_BOT_ContextList.popProperty("town.heal.me.hp");
+	my_log.logInfo("Valid Pop Attempt #2");
+	TDW_BOT_ContextList.popProperty("town.heal.me.hp");
+	my_log.logInfo("Valid Pop Attempt #1");
+	TDW_BOT_ContextList.popProperty("town.heal.me.hp");
+	my_log.logInfo("Invalid Pop Attempt #2");
+	TDW_BOT_ContextList.popProperty("town.heal.me.hp");
+
+	my_log.emitSep("=");
+	my_log.logInfoQuiet("After Changes");
+	my_log.emitSep("-");
+	TDW_BOT_ContextList.toLog(my_log);
+	my_log.emitSep("=");
+
+	my_log.closeLog();
+
+	print("Done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+

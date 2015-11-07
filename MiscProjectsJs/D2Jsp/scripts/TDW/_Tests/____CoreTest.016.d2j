@@ -1,0 +1,47 @@
+/*
+	___CoreTest.016.d2j
+
+	Symptoms    :
+
+		Catastrophic failure:
+			Assertion Failure
+			Location : D2Cient\UI\npcmenu.cpp, line #4363
+			Expression : sgUIState.hDialogWaiting = NULL
+*/
+
+const DoParentFlag = true;
+
+function main()
+{
+	var count_1;
+	var this_item;
+	var this_parent;
+	var parent_name;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready");
+
+	parent_name = me.name;
+
+	for (count_1 = 0; count_1 < 1000000; count_1++) {
+		this_item  = getUnit(4, "aqv");
+		if (this_item) {
+			do {
+if (DoParentFlag) {	// 
+				this_parent = this_item.getParent();
+				if (this_parent &&
+					(this_parent.name.toLowerCase() == parent_name.toLowerCase())) {
+					return(this_item);
+				}
+}
+else
+				;	// Nada
+			} while (this_item && this_item.getNext("aqv"));
+		}
+	}
+
+	print("Script ending.");
+}
+
+

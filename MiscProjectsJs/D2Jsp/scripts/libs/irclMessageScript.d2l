@@ -1,0 +1,9 @@
+function quitnext(string)
+{
+	print(string);
+	delay(1000);
+	f = fileOpen(me.account+"-requestgame.dat", 1);
+	f.writeLine("request game");
+	f.close();
+	quit();
+}

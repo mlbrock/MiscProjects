@@ -1,0 +1,1446 @@
+// ParseIt! Library
+// by blue mind
+// -----------------------------------------------------------------------------
+// History :
+//
+// 1.53 : Added in the ability to use | in the inis
+// 1.52 : Made the ini parsing one variable, and cleaned up code
+// 1.51 : Added in <autoid> support
+// 1.5c : Much easier to read logging
+// 1.5a : Fixed a possible memory leak...
+// 1.5 : Added in the ability to log items that are set not to be picked up
+// 1.4 : Bug fixes, added in distance code, and hopefully made it work with pickit
+// 1.3 : Added in belt management and ranged items
+// 1.2 : Added in a better method to deal with the ini in memory from FryGuy
+// 1.1a : Added in checking if items should be ided
+// 1.1 : Completed snagit
+// 1.0a : Added quote removal in the ini parsing
+// 1.0 : Added the start of the code for SnagIt!
+// 0.9a : Added better logging
+// 0.9 : Added quality checking for unique items
+// 0.8 : Added jewel checking method
+// 0.7e : Fixed a ton of bugs
+// 0.7d : Made the library universal to check mods of all items
+// 0.7c : stupid bug in 0.7b
+// 0.7b : removed the need to call getINI() from outside the script
+// 0.7 : items logging
+// 0.6 : standalone reusable library
+//       beta 20+ required for normal/exceptional/elite detection
+//       ini and mods parsing are working
+// 0.5 : ini parsing added
+// 0.4 : working and working fast already. anya support only
+// 0.3- : didn't bother to keep a history log
+
+/* ææææææææææææææææææææææææææææ
+Do not edit anything past this point!
+ææææææææææææææææææææææææææææ */
+
+// ** Logging related
+var logging=1;
+// BEGIN - RWG
+var fLog="output/pwndata/"+me.name+"ItemLog.pwn";
+// BEGIN - RWG
+
+// ** The INI
+var INI = new Array();
+var WhichINI="";
+var idValid=false;
+
+// ** SnagIt variables
+// BEGIN - RWG
+// - magic numbers suck
+//var bitcheck=0;
+//var DontLog=false;
+var optionBits=0;
+const OPTION_UNUSED = 1;
+const OPTION_GET_GLD = 2;
+const OPTION_GET_RVL = 4;
+const OPTION_GET_RVS = 8;
+const OPTION_FORCE_POTS = 16;
+var dontLog = false;
+var snagx=new Array();
+var snagy=new Array();
+var snagn=new Array();
+// END - RWG
+var SkipType=new Array();
+var snagrad=60;
+
+// ** Mods parsing
+var itemQual=["none","lowquality","normal","superior","magic","set","rare","unique","craft"];
+
+/* ææææææææææææææææææææææææææææ
+ShopIt! section:
+ææææææææææææææææææææææææææææ */
+
+function ShopIt(who)
+{
+	checkprint=0;
+
+	var shopitem = getItem(null,0);
+	if (shopitem) do
+	{
+		var owner = shopitem.getParent();
+		if (owner) if (owner.name==who)
+		{
+			// BEGIN - RWG
+			// - removed
+			//if (logging >= 1)
+			//	writedesc=(shopitem.prefix==""?"":shopitem.prefix +" ") +shopitem.name +(shopitem.suffix==""?"":" "+shopitem.suffix);
+			//if (logging >= 2)
+			//	writedesc+=getAllStats(shopitem);
+			writedesc = "";
+			// END - RWG
+
+			if(checkprint == 0)
+			{
+				print("Shopping at: " +who);
+				//DumpItems("While shopping at " + who);
+				checkprint++;
+			}
+
+			// BEGIN - RWG
+			if (CheckItem(shopitem, "settings/bmShopIt.ini"))
+			// END - RWG
+			{
+				// BEGIN - RWG
+				if (logging >= 1)
+					writedesc = GetDescription(shopitem);
+				if (logging >= 2)
+					writedesc += " | " + getAllStats(shopitem);
+				// END - RWG
+				shopitem.interact();
+				// BEGIN - RWG
+				// - eeeks! (not that i've _ever_ tried to buy anything...)
+				//DoDel(1000);
+				//LogItem(shopitem, writedesc, "Just bought a ", "BOUGHT");
+				var numtries = 0;
+				var mygold=MyGold();
+				while(mygold == MyGold())
+				{
+					delay(500); // RWG
+					numtries += 1;
+					if (numtries > 10) break;
+				}
+
+				if (logging >= 1)
+				if (mygold == MyGold())
+					LogItem(null, writedesc, "FAILED to buy a ", "MISSED"); 
+				else 
+					LogItem(null, writedesc, "Just bought a ", "BOUGHT"); 
+				// END - RWG
+			}
+			else // RWG
+			if (logging >= 4) // RWG PrintFile(STime()+" " +writedesc);
+				LogItem(shopitem, writedesc, "Just ignored a ", "IGNORED");
+		}
+	} while(shopitem && shopitem.getNext(null,0));
+	if(checkprint == 0) print("Shopping at " +who +"failed!  If this happens consistently, please increase your lag time, in MarPindleScript.d2j!");
+	// BEGIN - RWG
+	// - give my slow system a chance to collect it's marbles...
+	else DoDel(lag);
+	// END - RWG
+}
+
+function ShopHer(who) {ShopIt(who);}
+function ShopHim(who) {ShopIt(who);}
+
+/* ææææææææææææææææææææææææææææ
+SnagIt! section:
+ææææææææææææææææææææææææææææ */
+
+function SnagIt(which)
+{
+	var reloop=true;
+
+	// BEGIN - RWG
+	// - took out the normalitem stuff.  what happens when minions drop 5 piles
+	//   of gold, and pindle drops 2+ magical items you want to pickup?  you 
+	//   get the gold (dropped first) and only one of the items...
+	var snagqual=5;
+	if(WhichINI!=which) getINI(which);
+	// END - RWG
+	while(reloop)
+	{
+		//clearcursor(); // RWG
+		var snagitem = getItem();
+		reloop=false;
+		if (snagitem) itemloop : do
+		{
+			// RWG - if out of range, skip over.  may be in range later
+			//if(calcrange(snagitem.x, snagitem.y) <= snagrad)
+			if((snagitem.mode==3 || snagitem.mode==5) && snagitem.quality >= snagqual)
+			{
+//print ("checking " + GetDescription(snagitem));
+				for(m=0;m<=SkipType.length;m++)
+				{
+					if(SkipType[m]==parseInt(snagitem.itemtype))
+						continue itemloop;
+				}
+				// RWG - still need the snagx stuff, because you need to
+				//       rescan from the beginning after picking up gold
+				for(var pk=0;pk<snagx.length;pk++)
+				{
+					if(snagx[pk]==snagitem.x &&
+					   snagy[pk]==snagitem.y &&
+					   snagn[pk]==snagitem.code)
+					{
+						continue itemloop;
+					}
+				}
+				snagx.push(snagitem.x); snagy.push(snagitem.y); snagn.push(snagitem.code);
+
+				// - skip potions if belt is full and ForcePotions == false
+				if (snagitem.itemtype >= 76 && snagitem.itemtype <= 78)
+				if (!PickupPotions())
+					continue itemloop;
+
+				// - check all potions in case set in ini file
+				//if(snagitem.code!="gld" && snagitem.itemtype!=78)
+				if(Dist(me.x, me.y, snagitem.x, snagitem.y) <= snagrad)
+				if(snagitem.code!="gld" && (snagitem.itemtype < 76 || snagitem.itemtype > 78))
+				{
+					if (CheckItem(snagitem, which))
+					{
+						reloop=true;
+
+						PickUpItem(snagitem, writedesc);
+					}
+					else if (loganyhow)
+						LogItem(snagitem, writedesc, "Ignoring a ", "IGNORED");
+				}
+				else if(snagitem.code=="gld" && optionBits & OPTION_GET_GLD && !InvGoldFull())
+				{
+					// BEGIN - RWG
+					// - to confirm gold pickups
+					var myGold = me.getStat(14);
+					// END - RWG;
+
+					//print("Your gold is not full!  Picking up " + snagitem.getStat(14) + " gold!");
+					reloop=true;
+					if (Dist(me.x, me.y, snagitem.x, snagitem.y) > 30)
+						if (!GoToPoint(snagitem.x, snagitem.y)) continue itemloop;
+					if(me.classid!=1 || !DoCast("Telekinesis", 0, snagitem))
+					{
+						if (!MoveTo(snagitem.x, snagitem.y, true)) continue itemloop
+						if(snagitem.mode==3 || snagitem.mode==5) snagitem.interact();
+						//DoDel(200);// RWG - 500 slows things down too much
+					}
+					// BEGIN - RWG
+					// - confirm that gold was picked up
+					var attemptnum = 0;
+					var limit = 30;
+					while (myGold == me.getStat(14) && attemptnum++ < limit) delay(25);
+					if (myGold == me.getStat(14)) print("Gold pickup timed out after " + attemptnum*25 + " ms.  Moving on...");
+					else print("Picked up " + (me.getStat(14)-myGold) + " gold in " + attemptnum*25 + " ms!");
+					// RWG - since gold disappears once picked up, start from the beginning again
+					snagitem = getItem();
+					// END - RWG
+				}
+				// BEGIN - RWG
+				// - renamed function
+				// - no need to check these if item is gold
+				//if(countpotions())
+				else if(snagitem.code != "gld") // && PickupPotions())
+				// END - RWG
+				{
+					if(snagitem.code=="rvl" && optionBits & OPTION_GET_RVL)
+					{
+						reloop=true;
+						dontLog = true; // RWG - kludge.  use CheckItem()?
+						PickUpItem(snagitem);
+					}
+					if(snagitem.code=="rvs" && optionBits & OPTION_GET_RVS)
+					{
+						reloop=true;
+						dontLog = true; // RWG - kludge.  use CheckItem()?
+						PickUpItem(snagitem);
+					}
+				}
+			}
+		} while(snagitem && snagitem.getNext());
+		if(snagqual==5) reloop=true;
+		snagqual=0;
+	}
+}
+
+
+// BEGIN - RWG
+// - added second parameter to support logging
+// - lots of changes to support logging
+function PickUpItem(snagitem, writedesc)
+{
+	var gotIt=false
+
+	if (arguments.length < 2) writedesc = "";
+	clearcursor();
+
+	//if (Dist(me.x, me.y, snagitem.x, snagitem.y) < 25 || GoToPoint(snagitem.x, snagitem.y))
+	if (MoveTo(snagitem.x, snagitem.y, true))
+	if(snagitem.mode==3 || snagitem.mode==5)
+	{
+		snagitem.interact();
+		DoDel(50);
+		attemptnum=0;
+		tryagain=20;
+		while(snagitem.mode==3 || snagitem.mode==5)
+		{
+			DoDel(20);
+			attemptnum++;
+			if(attemptnum>=200) break;
+			if(attemptnum>=tryagain)
+			{
+				tryagain+=20;
+				if(snagitem.mode==3 || snagitem.mode==5)
+				{
+					clearcursor();
+					if(snagitem.mode==3 || snagitem.mode==5) snagitem.interact();
+				}
+				else
+					break;
+			}
+		}
+	}
+
+	if (snagitem.mode == 3 || snagitem.mode == 4 || snagitem.mode == 5)
+		gotIt = false;
+	else
+		gotIt = true;
+
+	if (gotIt)
+	{
+		if (idValid)
+			LogItem(snagitem, writedesc, "Just picked up a ", "CHECKING");
+		else 
+			LogItem(snagitem, writedesc, "Just picked up a ", "PICKED-UP");
+	}
+	else
+	{
+		LogItem(snagitem, writedesc, "FAILED to pick up a ", "MISSED");
+	}
+	clearcursor();
+	return gotIt;
+}
+// END - RWG
+
+
+/* ææææææææææææææææææææææææææææ
+SnagIt! belt management section:
+ææææææææææææææææææææææææææææ */
+/* ææææææææææææææææææææææææææææ
+Taken from Sherpya's common library's
+ææææææææææææææææææææææææææææ */
+
+// BEGIN - RWG
+// - renamed function to be more intuitive
+//function countpotions()
+function PickupPotions()
+// END - RWG
+{
+//print("ForcePotions is - " + optionBits + "&" + OPTION_FORCE_POTS + "=" + (optionBits & OPTION_FORCE_POTS))
+	if(optionBits & OPTION_FORCE_POTS) return true;
+	count = 0;
+	//start = getItem(null,2);
+	start = getItem();
+	if (start) do
+	{
+		// BEGIN - RWG
+		//owner = start.getParent();
+		//if (owner)
+		//{
+		//	if(start.mode==2 && owner.name==me.name)
+		//		count += 1;
+		//}
+		owner = start.getParent();
+		if (owner && owner.name && owner.name == me.name)
+		if (start.mode == 2 && ((start.itemtype >= 76 && start.itemtype <=78) || start.itemtype == 22))
+				count++;
+	//} while (start.getNext(null,2));
+	} while (start.getNext());
+//print("I have " + count + " potions.");
+	if(FindBelt()>count) return true;
+//print("My belt is full");
+	return false;
+}
+
+var beltscap = {
+	"lbl":   8, // Sash
+	"vbl":   8, // Light Belt
+	"mbl":   12, // Belt
+	"tbl":   12  // Heavy Belt
+}
+
+/* Returns the belt capability in rows */
+function BeltCapability(belt) // RWG
+{
+	if (beltscap[belt.code])
+		return beltscap[belt.code]
+
+	return 16;
+}
+
+/* Find the item of equiped belt */
+function FindBelt()
+{
+	// BEGIN - RWG
+	// - just get the belt directly...
+	/****
+	belt = false;
+	item = getItem(null, 1, 1);
+	if (item) do
+	{
+		if (item.itemloc == 8) // Belt
+		{
+			belt = item;
+			break;
+		}
+	} while (item && item.getNext(null, 1, 1 ));
+	****/
+	// - due to bug with getItem(), we must loop til we find a belt...
+	belt = getItem(null, 208);
+	if (belt) do
+	{
+		if (belt.itemtype == 19) break;
+		DumpItems("Invalid item returned from getItem(null,208):code="+ belt.code+":name"+belt.name+":mode"+belt.mode+":itemloc="+belt.itemloc+":coords="+belt.x+","+belt.y+":size="+belt.xsize+","+belt.ysize);
+	} while (belt && belt.getNext(null, 208));
+	// END - RWG
+
+	if (!belt || belt.itemtype != 19) return 4; // RWG
+//print("I'm wearing a (" +belt.code+","+belt.itemtype+") " + GetDescription(belt) + " belt.  It has " + BeltCapability(belt) + " slots");
+	return BeltCapability(belt); // RWG
+}
+
+/* ææææææææææææææææææææææææææææ
+ParseIt! section:
+ææææææææææææææææææææææææææææ */
+
+function ParseIt(which, cx, cy, DoLog)
+{
+	var parseitem = getItem(null,0);
+	if (parseitem) do
+	{
+		var owner = parseitem.getParent();
+		if (owner)
+			if (owner.name==me.name)
+			{
+				if ((parseitem.x == cx) && (parseitem.y == cy) && (parseitem.itemloc == 0))
+				{
+					KeepIt=CheckItem(parseitem, which);
+
+					// BEGIN - RWG
+					// - code cleanup
+					//if(parseitem.quality!=4) writedesc=parseitem.fname +" " +parseitem.name;
+					//else writedesc=(parseitem.prefix==""?"":parseitem.prefix +" ") +parseitem.name +(parseitem.suffix==""?"":" "+parseitem.suffix);
+					//if (logging >= 2) writedesc+=getAllStats(parseitem);
+					//if(KeepIt)
+					//{
+					//	if (logging == 1)
+					//		Slog(parseitem);
+					//	if (logging >= 2)
+					//		Slog(parseitem);
+					//	return KeepIt;
+					//}
+					//else if (parseitem.getFlag(0x10) && DoLog>=1 && logging >= 3)
+					//{
+					//	PrintFile(STime()+" " +writedesc);
+					//	print("Found and dropped a " +parseitem.fname);
+					//}
+					//
+					// return false;
+					if(KeepIt && DoLog >= 1)
+						LogItem(parseitem, writedesc, "Keeping a ", "KEPT");
+					else if (parseitem.getFlag(0x10) && DoLog>=1 && logging >= 3)
+						LogItem(parseitem, writedesc, "Dropping a ", "DROPPED");
+					return KeepIt;
+				}
+			}
+	} while(parseitem && parseitem.getNext(null,0));
+	return false;
+}
+
+/* ææææææææææææææææææææææææææææ
+SnagIt! and ParseIt! item parsing section:
+ææææææææææææææææææææææææææææ */
+
+// BEGIN - RWG
+//function CheckItem(item, which, snagqual)
+function CheckItem(item, which)
+// END - RWG
+{
+	if(WhichINI!=which) getINI(which);
+
+	lloop : for(i=0;i<INI[which].length;i++)
+	{
+		nKeys=INI[which][i].length;
+		idValid=false;
+		writedesc=false;
+		dontLog=false;
+		loganyhow=false;
+		var OrSkip=new Array();
+		for(j=1;j<nKeys;j++)
+		{
+			type=INI[which][i][j][0];
+			key=INI[which][i][j][1];
+			val=INI[which][i][j][2];
+			if(type=="|")
+			{
+				if(!OrCase(val,item,OrSkip))
+					continue lloop;
+			}
+			else
+			{
+				if(!KeyCase(type,key,val,item))
+					continue lloop;
+			}
+		}
+		if (loganyhow) return false; // RWG
+		debugprint("!!Keeping an item from section: " +INI[which][i][0],0);
+		return true;
+	}
+	return false;
+}
+
+function OrCase(string,item,OrSkip)
+{
+	LastOne=true;
+	divider=string.indexOf("|");
+	lastloop : while(LastOne)
+	{
+		debugprint(string,0);
+		if(divider==-1) LastOne=false;
+		if(LastOne)
+		{
+			cursub=string.substring(0,divider);
+			string=string.substring(divider+1);
+		} else cursub=string;
+		var TypeTable=["=",">","<","!"];
+		for (oi=0;oi<TypeTable.length;oi++)
+		{
+			nEndOfKey = cursub.indexOf(TypeTable[oi]);
+			if (nEndOfKey!=-1)
+			{
+				KeyName=cursub.substring(0,nEndOfKey);
+				KeyValue=StripQuotes(cursub.substring(nEndOfKey+1));
+				typeval=oi;
+				break;
+			}
+		}
+		debugprint("Argument: "+TypeTable[typeval]+" -- Entering KeyName: "+KeyName+" -- and KeyValue: "+KeyValue,0);
+		if(KeyCase(TypeTable[typeval],KeyName,KeyValue,item))
+		{
+			for (oi=0;oi<OrSkip.length;oi++)
+			{
+				if(OrSkip[oi][0]==TypeTable[typeval] && OrSkip[oi][1]==KeyName && OrSkip[oi][2]==KeyValue) continue lastloop;
+			}
+			OrSkip.push(TypeTable[typeval],KeyName,KeyValue);
+			return true;
+		}
+		divider=string.indexOf("|");
+	}
+	return false;
+}
+
+function KeyCase(type,key,val,item)
+{
+	switch(key)
+	{
+		case "description":	//Printed value for snagit
+		case "show":	//Place holder, in case someone uses the old command
+			writedesc=val;
+			return true;
+		case "pickup":	//If set to 0, it will log it but not pick it up
+			if (val==0) loganyhow=true;
+			return true;
+		case "iditem":	//If set to 1, will id the item if it is in your inventory
+			if (val==1) idValid=true;
+			return true;
+		case "log":	//If set to 0, the item will be picked up, but not logged
+			if (val==0) dontLog=true;
+			return true;
+		case "type":	//I have to set this up still
+			print("The option of picking up certain item types is not currently supported by SnagIt!");
+			return false;
+		case "mod":	//Specific mod names, like cruel
+			if(item.fname.toLowerCase().indexOf(val) == -1) return false;
+			return true;
+		case "isethereal":	//Ethereal check
+			if (val==1 && item.getFlag(0x400000) == 0) return false;
+			if (val==0 && item.getFlag(0x400000)) return false;
+			return true;
+		case "hassockets":	//Socket check
+			if (val==1 && !item.getFlag(0x800)) return false;
+			if (val==0 && item.getFlag(0x800)) return false;
+			return true;
+		case "identified":	//Identified check
+			if (val==0 && item.getFlag(0x10)) return false;
+			if (val==1 && item.getFlag(0x10) == 0) return false;
+			return true;
+		case "item":	//Item type, item code, or an items name
+		case "code":	//Item type, item code, or an items name
+			return CodeCase(type,val,item);
+		case "qual":	//Item quality, Such as magic or unique.  Number or name accepted.
+		case "level":	//Item quality, Such as magic or unique.  Number or name accepted.
+			return QualCase(type,val,item);
+		case "classlevel":	//Normal, elite, or exceptional.  Number or name accepted.
+			return ClassCase(type,val,item);
+		case "ilvl":	//The items ilvl.
+			return ilvlCase(type,val,item);
+		case "evalpu":
+			return item.eval(val);
+		case "evalid":
+			if (item.getFlag(0x10) == 0) return false; // not ID'd
+		//print("Now evaling " + item.fname + " against : " + val);
+		//print(item.getStat(204) + " & 0x1FF = " + (item.getStat(204)&0x1FF));
+			return item.eval(val);
+		default:	//Specific mod values, in numeric form.
+			return TypeCase(type,val,key,item);
+	}
+	return false;
+}
+
+function CodeCase(type,val,item)
+{
+	switch(type)
+	{
+		case "=":
+			if ((val!=item.code) && (val!=item.name.toLowerCase()) && (val!=String(item.itemtype))) return false;
+			return true;
+		case ">":
+			if (parseInt(val)<item.itemtype) return false;
+			return true;
+		case "<":
+			if (parseInt(val)>item.itemtype) return false;
+			return true;
+		case "!":
+			if ((val==item.code) || (val==item.name.toLowerCase()) || (val==String(item.itemtype))) return false;
+			return true;
+	}
+	return false;
+}
+
+function ilvlCase(type,val,item)
+{
+	switch(type)
+	{
+		case "=":
+			if (item.ilvl != parseInt(val)) return false;
+			return true;
+		case ">":
+			if (item.ilvl < parseInt(val)) return false;
+			return true;
+		case "<":
+			if (item.ilvl > parseInt(val)) return false;
+			return true;
+		case "!":
+			if (item.ilvl == parseInt(val)) return false;
+			return true;
+	}
+	return false;
+}
+
+function TypeCase(type,val,key,item)
+{
+	if(isNaN(parseInt(key,10)) || isNaN(parseInt(val,10))) return false;
+	switch(type)
+	{
+		case "=":
+			if (item.getStat(parseInt(key,10)) != parseInt(val,10)) return false;
+			return true;
+		case ">":
+			if (item.getStat(parseInt(key,10)) < parseInt(val,10)) return false;
+			return true;
+		case "<":
+			if (item.getStat(parseInt(key,10)) > parseInt(val,10)) return false;
+			return true;
+		case "!":
+			if (item.getStat(parseInt(key,10)) == parseInt(val,10)) return false;
+			return true;
+	}
+	return false;
+}
+
+function QualCase(type,val,item)
+{
+	// BEGIN - RWG
+	// - major bug fix
+	//QualPOS=getPosition(val,itemQual);
+	if (parseInt(val) == val)
+		QualPOS = val;
+	else
+		QualPOS=getPosition(val,itemQual);
+	// END - RWG
+	switch(type)
+	{
+		case "=":
+			if (item.quality!=QualPOS) return false;
+			return true;
+		case ">":
+			//if (item.quality<QualPOS) return false;
+			return true;
+		case "<":
+			if (item.quality>QualPOS || QualPOS==-1) return false;
+			return true;
+		case "!":
+			if (item.quality==QualPOS) return false;
+			return true;
+	}
+	return false;
+}
+
+function ClassCase(type,val,item)
+{
+	var itemClass=["normal","exceptional","elite"];
+	// BEGIN - RWG
+	// - major bug fix
+	//ClassPOS=getPosition(val,itemClass);
+	if (parseInt(val) == val)
+		ClassPOS = val;
+	else
+		ClassPOS=getPosition(val,itemClass);
+	// END - RWG
+	switch(type)
+	{
+		case "=":
+			if (item.itemclass!=ClassPOS) return false;
+			return true;
+		case ">":
+			if (item.itemclass<ClassPOS) return false;
+			return true;
+		case "<":
+			if (item.itemclass>ClassPOS || ClassPOS==-1) return false;
+			return true;
+		case "!":
+			if (item.itemclass==ClassPOS) return false;
+			return true;
+	}
+	return false;
+}
+
+/* ææææææææææææææææææææææææææææ
+Utility functions:
+ææææææææææææææææææææææææææææ */
+
+/* ææææææææææææææææææææææææææææ
+INI and logging section:
+ææææææææææææææææææææææææææææ */
+
+function PrintFile(string)
+{
+	FileWriteLog=fileOpen(fLog, 2);
+	if (FileWriteLog)
+	{
+		// BEGIN - RWG
+		// - add the <br> when building the html log
+		//FileWriteLog.writeLine(string +"<br> \n");
+		FileWriteLog.writeLine(string);
+		// END - RWG
+		FileWriteLog.close();
+	}
+}
+
+function getINI(which) {
+	// BEGIN - RWG
+	if (INI[which] && WhichINI != which)
+	{
+		initConfig(which);
+		return 0;
+	}
+	INI[which] = new Array();
+	//ClearINI();
+	// END - RWG
+	ipLoadFile(which);
+	if (INI[which] && (INI[which].length)) {
+		for (i=0;i<INI[which].length;i++)
+		{
+			for (j=1;j<INI[which][i].length;j++)
+			{
+				if (INI[which][i][j].length>1)
+				{
+					INI[which][i][j][1] = INI[which][i][j][1].toLowerCase();
+					if (INI[which][i][j][1]!="description" && INI[which][i][j][1].substring(0,4)!="eval")
+						INI[which][i][j][2] = INI[which][i][j][2].toLowerCase();
+				}
+			}
+		}
+		WhichINI=which;
+		initConfig(which);
+		return 0;
+	} else {
+		print("Error loading INI");
+		return 1;
+	}
+}
+
+function initConfig(which) {
+	var logLevels=["none","useful","all","full","mega"];
+	WhichINI=which;
+	SkipType = new Array();
+	ClearSnaglist();
+	for (i=0;i<INI[which].length;i++)
+	{
+		keyloop : for (j=0;j<INI[which][i].length;j++)
+		{
+			key=INI[which][i][j][1];
+			val=INI[which][i][j][2];
+			switch(key)
+			{
+				case "loglevel":
+					logging=getPosition(val.toLowerCase(),logLevels);
+					continue keyloop;
+				case "logfile":
+					// BEGIN - RWG
+					// - since html logging has the log
+					//   file names hardcoded, ignore this
+					//   if using them
+					if (!HtmlLogging)
+						fLog="output/"+me.name+val;
+					// END - RWG
+					continue keyloop;
+				case "goldenabled":
+					// BEGIN - RWG
+					// - bugfix
+					//if(val==1) GrabGold=true;
+					optionBits |= OPTION_GET_GLD;
+					// END - RWG
+					continue keyloop;
+				case "skip":
+					SkipType.push(parseInt(val));
+					continue keyloop;
+				case "pickupradius":
+					snagrad=val;
+					continue keyloop;
+				case "fillbelt":
+					if(val==0) optionBits |= OPTION_FORCE_POTS;
+					continue keyloop;
+			}
+			switch(val)
+			{
+				case "gld":
+					optionBits |= OPTION_GET_GLD;
+					continue keyloop;
+				case "rvl":
+					optionBits |= OPTION_GET_RVL;
+					continue keyloop;
+				case "rvs":
+					optionBits |= OPTION_GET_RVS;
+					continue keyloop;
+			}
+		}
+	}
+}
+
+function debugprint(String,dlevel) {
+	if (dlevel == 1 || dlevel > 2)
+		print(String);
+	if (dlevel >= 2)
+	{
+		fDebug = fileOpen("output/parseit-debug.txt", 2);
+		if(fDebug)
+		{
+			fDebug.writeLine(String);
+			fDebug.close
+		}
+	}
+}
+
+function getPosition(value,table) {
+	for (var k=0; k<table.length; k++) {
+		if (value==table[k]) return k;
+		// RWG - bugfix
+		//if (value==String(k)) return k;
+		if (value==String(table[k])) return k;
+	}
+	return -1;
+}
+
+// RWG - changed a bit
+function getAllStats(item) {
+	var output="";
+	for (i=0;i<324;i++)
+	{
+		if (item.getStat(i))
+		{
+			if(i==17) continue;
+			else if(i==7 || i==9 || i==11) statval=Math.floor(item.getStat(i) / 256);
+			else if(i==57 || i==58) statval=Math.floor((item.getStat(i) * item.getStat(59)) / 256);
+			else if(i == 56 || i==59) statval=Math.floor(item.getStat(i) / 25);
+			else statval=item.getStat(i);
+			if(output != "")
+				output += " | ";
+
+			output += Sy_StatNumberToName(i)+"("+i+")=" + statval + (statval == item.getStat(i) ? "" : "(" + item.getStat(i) + ")");
+		}
+	}
+	return output;
+}
+
+function Sy_StatNumberToName(stat) {
+  return [
+	"Strength",
+	"Energy",
+	"Dexterity",
+	"Vitality",
+	"STATPTS",
+	"NEWSKILLS",
+	"HITPOINTS",
+	"Life",
+	"MAXMANA",
+	"Mana",
+	"STAMINA",
+	"Stamina",
+	"LEVEL",
+	"EXPERIENCE",
+	"GOLD",
+	"GOLDBANK",
+	"%Enhanced Defense",
+	"ITEM_MAXDAMAGE_PERCENT",
+	"Enhanced Damage",
+	"Attack Rating",
+	"%To Block",
+	"1-handed Min Damage",
+	"1-handed Max Damage",
+	"2-handed Min Damage",
+	"2-handed Max Damage",
+	"DAMAGEPERCENT",
+	"MANARECOVERY",
+	"%Mana Regeneration",
+	"%Stamina Recovery",
+	"LASTEXP",
+	"NEXTEXP",
+	"Base Armor Class",
+	"Missile Defense",
+	"Melee Defense",
+	"Reduced Damage",
+	"Magic Damage Reduction",
+	"%Damage Reduction",
+	"MAGICRESIST",
+	"MAXMAGICRESIST",
+	"Fire Resistance",
+	"Max Fire Resistance",
+	"Lightning Resistance",
+	"Max Lightning Resistance",
+	"Cold Resistance",
+	"Max Cold Resistance",
+	"Poison Resistance",
+	"Max Poison Resistance",
+	"DAMAGEAURA",
+	"Min Fire Damage",
+	"Max Fire Damage",
+	"Min Lightning Damage",
+	"Max Lightning Damage",
+	"Min Magic Damage",
+	"max Magic Damage",
+	"Min Cold Damage",
+	"Max Cold Damage",
+	"Cold Duration", // RWG
+	"Min Poison Damage",
+	"Max Poison Damage",
+	"Poison Duration", // RWG
+	"Life Leach",
+	"LIFEDRAINMAXDAM",
+	"Mana Leach",
+	"MANADRAINMAXDAM",
+	"STAMDRAINMINDAM",
+	"STAMDRAINMAXDAM",
+	"STUNLENGTH",
+	"Speed Reduction",
+	"Base Attack Rate",
+	"OTHER_ANIMRATE",
+	"Quantity",
+	"VALUE",
+	"Durability",
+	"Max Durability", // RWG
+	"Replenish Life",
+	"%Enhanced Durability",
+	"%Max Life",
+	"%Max Mana",
+	"Attacker Takes Damage",
+	"%Gold Find",
+	"%Magic Find",
+	"KnockBack",
+	"ITEM_TIMEDURATION",
+	"Amazon Skills",
+	"Paladin Skills",
+	"Necro Skills",
+	"Sorceress Skills",
+	"Barbarian Skills",
+	"ITEM_DOUBLEHERBDURATION",
+	"Light Radiues",
+	"ITEM_LIGHTCOLOR",
+	"Minus Requirements",
+	"ITEM_FASTATTACKRATE",
+	"Increased Attack Speed",
+	"ITEM_FASTESTATTACKRATE",
+	"ITEM_FASTMOVEVELOCITY",
+	"Increased Run/Walk Speed",
+	"ITEM_FASTESTMOVEVELOCITY",
+	"ITEM_FASTGETHITRATE",
+	"Faster Hit Recovery",
+	"ITEM_FASTESTGETHITRATE",
+	"ITEM_FASTBLOCKRATE",
+	"Increased Block Speed",
+	"ITEM_FASTESTBLOCKRATE",
+	"ITEM_FASTCASTRATE",
+	"Faster Cast Rate",
+	"ITEM_FASTESTCASTRATE",
+	"Increase Single Skill",
+	"Increase Single Skill",
+	"Increase Single Skill",
+	"Reduce Poison Length",
+	"ITEM_NORMALDAMAGE",
+	"Hit Causes Monster to Flea[96=75%]",
+	"Hit Blinds Target",
+	"%Damage Goes to Mana",
+	"Ignore Target Defense",
+	"%Defense Reduction",
+	"Prevent Monster Heal",
+	"Half Freeze Duration",
+	"%Attack Rating",
+	"ITEM_DAMAGETARGETAC",
+	"Enhanced Damage to Demons",
+	"Enhanced Damage to Undead",
+	"Attack Rating to Demons",
+	"Attack Rating to Undead",
+	"ITEM_THROWABLE",
+	"Increase Fire Skills",
+	"ITEM_ALLSKILLS",
+	"Attacker Takes Lightning Damage",
+	"IRONMAIDEN_LEVEL",
+	"LIFETAP_LEVEL",
+	"THORNS_LEVEL",
+	"BONEARMOR",
+	"BONEARMORMAX",
+	"Freeze Target",
+	"Open Wounds",
+	"Crushing Blow",
+	"ITEM_KICKDAMAGE",
+	"Mana After kill",
+	"ITEM_HEALAFTERDEMONKILL",
+	"ITEM_EXTRABLOOD",
+	"Deadly Strike",
+	"%Fire Absorb",
+	"Fire Absorb",
+	"%Lightning Absorb",
+	"Lightning Absorb",
+	"%Magic Absorb",
+	"Magic Absorb",
+	"%Cold Absorb",
+	"Cold Absorb",
+	"Slows Target",
+	"ITEM_BLESSEDAIM",
+	"ITEM_DEFIANCE",
+	"Cannot Be Frozen",
+	"Decreased Stamina Drain",
+	"ITEM_REANIMATE",
+	"Pierce",
+	"Fires Magic Arrows",
+	"Fires Explosive Arrows",
+	"Base Min Throw Damage",
+	"Base Max Throw Damage",
+	"SKILL_HANDOFATHENA",
+	"SKILL_STAMINAPERCENT",
+	"SKILL_PASSIVE_STAMINAPERCENT",
+	"SKILL_CONCENTRATION",
+	"SKILL_ENCHANT",
+	"SKILL_PIERCE",
+	"SKILL_CONVICTION",
+	"SKILL_CHILLINGARMOR",
+	"SKILL_FRENZY",
+	"SKILL_DECREPIFY",
+	"SKILL_ARMOR_PERCENT",
+	"ALIGNMENT",
+	"TARGET0",
+	"TARGET1",
+	"GOLDLOST",
+	"CONVERSION_LEVEL",
+	"CONVERSION_MAXHP",
+	"UNIT_DOOVERLAY",
+	"Druid Skills",
+	"Assasin Skills",
+	"ITEM_ADDSKILL_SINGLE4",
+	"ITEM_ADDSKILL_SINGLE5",
+	"ITEM_ADDSKILL_SINGLE6",
+	"ITEM_ADDSKILL_SINGLE7",
+	"ITEM_ADDSKILL_SINGLE8",
+	"ITEM_ADDSKILL_SINGLE9",
+	"ITEM_ADDSKILL_SINGLE10",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Sockets",
+	"Cast On Attack",
+	"Cast On Attack",
+	"Cast On Attack",
+	"Cast On Striking",
+	"Cast On Striking",
+	"Cast On Striking",
+	"Cast On Being Hit",
+	"Cast On Being Hit",
+	"Cast On Being Hit",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Increased Armor Class Per Level",
+	"%Increased Armor Class Per Level",
+	"Increased Life Per Level",
+	"Increased Mana Per Level",
+	"Increased Max Damage Per Level",
+	"%Increased Max Damage Per Level",
+	"Increased Strength Per Level",
+	"Increased Dexterity Per Level",
+	"Increased Energy Per Level",
+	"Increased Vitality Per Level",
+	"Increased Attack Rating Per Level",
+	"%Increased Attack Rating Per Level",
+	"Increased Cold Max Damage Per Level",
+	"Increased Fire Max Damage Per Level",
+	"Increased Lightning Max Damage Per Level",
+	"Increased Poison Max Damage Per Level",
+	"Increased Cold Resistances Per Level",
+	"Increased Fire Resistances Per Level",
+	"Increased Lightning Resistances Per Level",
+	"Increased Poison Resistances Per Level",
+	"Cold Absorb Per Level",
+	"Fire Absorb Per Level",
+	"Lightning Absorb Per Level",
+	"Poison Absorb Per Level",
+	"Increase Attacker Takes Damage Per Level",
+	"Increase Gold Find Per Level",
+	"Increase Magic Find Per Level",
+	"Increase Stamina Recovery Per Level",
+	"Increase Stamina Per Level",
+	"Damage to Demons Per Level",
+	"Damage to Undead Per Level",
+	"Attack Rating vs. Demons Per Level",
+	"Attack Rating vs. Undead Per Level",
+	"Increased Crushing Blow Per Level",
+	"Increased Open Wounds Per Level",
+	"Increased Kick Damage Per Level",
+	"Increased Deadly Strike Per Level",
+	"ITEM_FIND_GEMS_PERLEVEL",
+	"Replenish Durability",
+	"ITEM_REPLENISH_QUANTITY",
+	"Increased Stack Size",
+	"ITEM_FIND_ITEM",
+	"ITEM_SLASH_DAMAGE",
+	"ITEM_SLASH_DAMAGE_PERCENT",
+	"ITEM_CRUSH_DAMAGE",
+	"ITEM_CRUSH_DAMAGE_PERCENT",
+	"ITEM_THRUST_DAMAGE",
+	"ITEM_THRUST_DAMAGE_PERCENT",
+	"ITEM_ABSORB_SLASH",
+	"ITEM_ABSORB_CRUSH",
+	"ITEM_ABSORB_THRUST",
+	"ITEM_ABSORB_SLASH_PERCENT",
+	"ITEM_ABSORB_CRUSH_PERCENT",
+	"ITEM_ABSORB_THRUST_PERCENT",
+	"ITEM_ARMOR_BYTIME",
+	"ITEM_ARMORPERCENT_BYTIME",
+	"ITEM_HP_BYTIME",
+	"ITEM_MANA_BYTIME",
+	"ITEM_MAXDAMAGE_BYTIME",
+	"ITEM_MAXDAMAGE_PERCENT_BYTIME",
+	"ITEM_STRENGTH_BYTIME",
+	"ITEM_DEXTERITY_BYTIME",
+	"ITEM_ENERGY_BYTIME",
+	"ITEM_VITALITY_BYTIME",
+	"ITEM_TOHIT_BYTIME",
+	"ITEM_TOHITPERCENT_BYTIME",
+	"ITEM_COLD_DAMAGEMAX_BYTIME",
+	"ITEM_FIRE_DAMAGEMAX_BYTIME",
+	"ITEM_LTNG_DAMAGEMAX_BYTIME",
+	"ITEM_POIS_DAMAGEMAX_BYTIME",
+	"ITEM_RESIST_COLD_BYTIME",
+	"ITEM_RESIST_FIRE_BYTIME",
+	"ITEM_RESIST_LTNG_BYTIME",
+	"ITEM_RESIST_POIS_BYTIME",
+	"ITEM_ABSORB_COLD_BYTIME",
+	"ITEM_ABSORB_FIRE_BYTIME",
+	"ITEM_ABSORB_LTNG_BYTIME",
+	"ITEM_ABSORB_POIS_BYTIME",
+	"ITEM_FIND_GOLD_BYTIME",
+	"ITEM_FIND_MAGIC_BYTIME",
+	"ITEM_REGENSTAMINA_BYTIME",
+	"ITEM_STAMINA_BYTIME",
+	"ITEM_DAMAGE_DEMON_BYTIME",
+	"ITEM_DAMAGE_UNDEAD_BYTIME",
+	"ITEM_TOHIT_DEMON_BYTIME",
+	"ITEM_TOHIT_UNDEAD_BYTIME",
+	"ITEM_CRUSHINGBLOW_BYTIME",
+	"ITEM_OPENWOUNDS_BYTIME",
+	"ITEM_KICK_DAMAGE_BYTIME",
+	"ITEM_DEADLYSTRIKE_BYTIME",
+	"ITEM_FIND_GEMS_BYTIME",
+	"ITEM_PIERCE_COLD",
+	"ITEM_PIERCE_FIRE",
+	"ITEM_PIERCE_LTNG",
+	"ITEM_PIERCE_POIS",
+	"ITEM_DAMAGE_VS_MONSTER",
+	"ITEM_DAMAGE_PERCENT_VS_MONSTER",
+	"ITEM_TOHIT_VS_MONSTER",
+	"ITEM_TOHIT_PERCENT_VS_MONSTER",
+	"ITEM_AC_VS_MONSTER",
+	"ITEM_AC_PERCENT_VS_MONSTER",
+	"FIRELENGTH",
+	"BURNINGMIN",
+	"BURNINGMAX",
+	"PROGRESSIVE_DAMAGE",
+	"PROGRESSIVE_STEAL",
+	"PROGRESSIVE_OTHER",
+	"PROGRESSIVE_FIRE",
+	"PROGRESSIVE_COLD",
+	"PROGRESSIVE_LIGHTNING",
+	"ITEM_EXTRA_CHARGES",
+	"PROGRESSIVE_TOHIT"
+  ][stat];
+}
+
+// Ini library v0.2 - by blue mind
+// -----------------------------------------------------------------------------
+// History :
+//
+// s.2 : accepts > and <, not only =
+//       returns a slightly different structure
+// 0.2 : bug corrections, now it works ;)
+// 0.1 : first draft, should get the job done at least. it only returns one big
+//       array containing all the info
+
+// The actual parsed content of the INI
+// this contains one array per section nItem in the ini
+// each section array is formed like this :
+// INI[0]=["Section Name",[TYPE,"First key name","First key value"],...]
+
+////////////////////////////////////////////////////////////////////////////////
+// ipLoadFile(strFileName)                                                    //
+////////////////////////////////////////////////////////////////////////////////
+// Loads the ini and fills INI with it                                        //
+// Will consider ; or // on the beginning of lines as a comment               //
+////////////////////////////////////////////////////////////////////////////////
+function ipLoadFile(strFileName) {
+	nDebug=0;
+	var nLines=0;
+
+	ipFile=fileOpen(strFileName, 0);
+	if (!ipFile) {
+		for (oi=0;oi<10;oi++) print("ÿc1Failed to open "+strFileName+" for reading");
+		DoDel(10000);
+		return;
+	}
+
+	FileLoop : while (!ipFile.eof) {
+		strCurrentLine = ipStripSpaces(ipFile.readLine());
+		nLines++;
+		debugprint("ÿc7Line "+nLines+" ÿc@"+strCurrentLine,nDebug);
+
+		// Check to see if this line is actually a comment, or is empty
+		if ((strCurrentLine=="") || (strCurrentLine[0]==";") || (strCurrentLine.indexOf("//")==0)) {
+			debugprint("ÿc9Skipping useless line, line n°"+nLines,nDebug);
+			continue;
+		}
+
+		// Check to see if it's a new section
+		if (strCurrentLine[0]=="[") {
+			// check if section name is actually valid
+			nEndOfSection = strCurrentLine.lastIndexOf("]");
+
+			// invalid section name, skip to next line and warn user
+			if (nEndOfSection < 2) {
+				print("Error at line "+nLines+" in "+strFileName+" : invalid section name");
+				continue;
+			}
+
+			nIniLen=INI[strFileName].length;
+			debugprint("ÿc/Starting section "+nIniLen+" at line "+nLines,nDebug);
+			INI[strFileName][nIniLen] = new Array();
+			INI[strFileName][nIniLen].push(strCurrentLine.substring(1,nEndOfSection));
+			continue;
+		}
+
+		if (strCurrentLine.substring(0,4) != "eval")
+		if(strCurrentLine.indexOf("|")!=-1)
+		{
+			nIniLen=INI[strFileName].length;
+			debugprint("ÿc\"Entering new or block: ("+strCurrentLine+") at line "+nLines+", inserting in section "+INI[strFileName][nIniLen-1][0],nDebug);
+			INI[strFileName][nIniLen-1].push(["|","orblock",strCurrentLine]);
+			continue;
+		}
+
+		// Then it must be a key
+		// Four types of keys : =, >, <, and !
+		var TypeTable=["=",">","<","!"];
+		for (oi=0;oi<TypeTable.length;oi++)
+		{
+			nEndOfKey = strCurrentLine.indexOf(TypeTable[oi]);
+			if (nEndOfKey!=-1) {
+				nIniLen=INI[strFileName].length;
+				strKeyName=strCurrentLine.substring(0,nEndOfKey);
+				strKeyValue=StripQuotes(strCurrentLine.substring(nEndOfKey+1),nLines);
+				debugprint("ÿc\"Entering new key ("+strKeyName+" "+TypeTable[oi]+" "+strKeyValue+") at line "+nLines+", inserting in section "+INI[strFileName][nIniLen-1][0],0);
+				INI[strFileName][nIniLen-1].push([TypeTable[oi],strKeyName,strKeyValue]);
+				continue FileLoop;
+			}
+		}
+
+		print("Some parsing error occurred at line "+nLines+" in "+strFileName+" : unknown case");
+	}
+	ipFile.close();
+}
+
+function StripQuotes(string) // RWG
+{
+	Quotes = string.indexOf("\"");
+	if (Quotes!=-1)
+	{
+		EndQuotes=string.lastIndexOf("\"");
+		if(EndQuotes==-1)
+		{
+			if(arguments.length>=2) print("ÿc1Invalid quotes at line #"+nLines+"!!!");
+			return string;
+		}
+		return string.substring(Quotes+1,EndQuotes);
+	}
+	return string;
+}
+
+// Removes the spaces and tabs at the beginning of the string
+function ipStripSpaces(strLine) {
+	var nLength=strLine.length;
+	var nPos=0;
+	while (nPos<nLength && ((strLine[nPos]==" ") || (strLine[nPos]=="	"))) {
+		nPos++;
+	}
+	return strLine.substring(nPos);
+}
+
+// BEGIN - RWG
+
+// - log an item to screen and file
+function LogItem(item, description, screenStr, logStr)
+{
+	var stats = "";
+	if (item) writedesc = GetDescription(item, description);
+	else writedesc = description;
+	if (writedesc.length)
+	{
+		print(screenStr + writedesc);
+		if(!dontLog)
+		{
+			if (item) stats = (logging >= 2 && item.itemtype != 74 && item.getFlag(0x10)) ? " | " + getAllStats(item) : "";
+			PrintFile(BuildTimeStamp() + " | " + logStr + " | " + RemoveColor(writedesc) + stats);
+		}
+	}
+}
+
+// - reset the contents of the ini file
+function ClearINI()
+{
+	if (INI[WhichINI] && (INI[WhichINI].length))
+	{
+		var l = INI[WhichINI].length;
+		for (var i=l-1;i>=0;i--)
+		{
+			while (INI[WhichINI][i].length > 0)
+				INI[WhichINI][i].pop();
+
+			INI[WhichINI].pop();
+		}
+	}
+	WhichINI[WhichINI] = "temp";
+	//INI=new Array();
+}
+
+function ClearSnaglist()
+{
+	while (snagx.length)
+		snagx.pop(); snagy.pop(); snagn.pop();
+	snagx = new Array(); snagy = new Array(); snagn = new Array();
+}
+
+function CleanUp()
+{
+return;
+	// - clean up our mess
+	ClearINI();
+	ClearSnaglist();
+	while (SkipType.length)
+		SkipType.pop();
+}
+
+// - return an items true name
+function AutoIDit(item)
+{
+	var desc="";
+	if(item.quality==5) file = fileOpen("settings/snagset.ini", 0);
+	else if(item.quality==7) file = fileOpen("settings/snagunique.ini", 0);
+	else file = false;
+	if (file)
+	{
+		while(!file.eof)
+		{
+			line = file.readLine();
+			a = line.split("=");
+			if (a.length == 2)
+			{
+				if (a[0] == item.code)
+				{
+						file.close();
+						return a[1] + (a[0] != "amu" && a[0] != "rin" ? " " + item.name : "");
+				}
+			}
+		}
+		file.close();
+		desc = "Undefined Item " + item.code + " = ";
+
+	}
+	return desc + (item.quality == 2 ? "" : itemQual[item.quality] + " ") + item.name;
+}
+
+// - do the auto-id stuff
+// - only way to stop logging is to set log=0 in INI
+function GetDescription(item, description)
+{
+	var itemColors=["ÿc0","ÿc0","ÿc0","ÿc0","ÿc3","ÿc2","ÿc9","ÿc4","ÿc8"];
+	var rExp = /<autoid>/gi;
+
+	if (!description || arguments.length < 2) 
+		description = "";
+
+	if (description.length || item.getFlag(0x10) == 0)
+	{
+		if(description.search(rExp) != -1)
+			return description.replace(rExp, itemColors[item.quality]+AutoIDit(item)+itemColors[0]);
+		else if (description.length <= 0)
+			description = AutoIDit(item);
+	}
+	else if (item.quality == 4)
+		description = (item.prefix == "" ? "" : item.prefix + " ") + item.name + (item.suffix == "" ? "" : " " + item.suffix);
+	else if (item.quality == 5 || item.quality == 7)
+		description = item.fname + " " + item.name;
+	else
+		description = (item.quality == 2 ? "" : item.fname + " ") + item.name;
+
+	return itemColors[item.quality] + description + itemColors[0];
+}
+
+function pickiton()
+{
+	// BEGIN - RWG
+	// - just wait til all stuff hits the floor
+	// - grabbing things out of the air isn't extaly human-like...
+	//DoDel(snagdelay);
+	var i = 0;
+	while (getItem(null, 5) && i++ < 20) { delay(50); }
+	// END - RWG
+	SnagIt("settings/"+charsnag);
+}
+
+

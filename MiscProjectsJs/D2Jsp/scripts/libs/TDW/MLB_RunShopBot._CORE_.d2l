@@ -1,0 +1,331 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+var D2J_RSB_MatchArray = new Array();
+D2J_RSB_MatchArray["asheara"] = ["Asheara", 3, "waypoint", "asheara", D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2];
+D2J_RSB_MatchArray["charsi"]  = ["Charsi",  1, "waypoint", "charsi",  D2JSP_AREA_COLD_PLAINS];
+D2J_RSB_MatchArray["drognan"] = ["Drognan", 2, "waypoint", "drognan", D2JSP_AREA_A2_SEWERS_LEVEL_2];
+D2J_RSB_MatchArray["elzix"]   = ["Elzix",   2, "waypoint", "elzix",   D2JSP_AREA_A2_SEWERS_LEVEL_2];
+D2J_RSB_MatchArray["fara"]    = ["Fara",    2, "waypoint", "fara",    D2JSP_AREA_A2_SEWERS_LEVEL_2];
+D2J_RSB_MatchArray["gheed"]   = ["Gheed",   1, "waypoint", "gheed",   D2JSP_AREA_COLD_PLAINS];
+D2J_RSB_MatchArray["halbu"]   = ["Halbu",   4, "waypoint", "halbu",   D2JSP_AREA_RIVER_OF_FLAME];
+D2J_RSB_MatchArray["jamella"] = ["Jamella", 4, "waypoint", "jamella", D2JSP_AREA_RIVER_OF_FLAME];
+D2J_RSB_MatchArray["larzuk"]  = ["Larzuk",  5, "waypoint", "larzuk",  D2JSP_AREA_RIGID_HIGHLANDS];
+D2J_RSB_MatchArray["malah"]   = ["Malah",   5, "waypoint", "malah",   D2JSP_AREA_RIGID_HIGHLANDS];
+D2J_RSB_MatchArray["ormus"]   = ["Ormus",   3, "waypoint", "ormus",   D2JSP_AREA_SPIDER_FOREST];
+
+const D2J_RSB_GameLoadMS  = 3000;
+const D2J_RSB_ExitSleepMS = 3000;
+
+function D2J_RSB_Start(shop_target)
+{
+	print("Running ShopBot for target '" + shop_target + "'");
+
+	print("...waiting " + (D2J_RSB_GameLoadMS / 1000) +
+		" seconds for game load to complete...");
+	delay(D2J_RSB_GameLoadMS);
+
+	me.randommove = true;
+
+	if (shop_target.toLowerCase() == "anya")
+		D2J_RSB_StartAnya();
+	else
+		D2J_RSB_StartGeneral(shop_target);
+
+	stop();
+}
+
+function D2J_RSB_StartGeneral(shop_target)
+{
+	var found_target;
+	var shop_act;
+	var shop_start;
+	var shop_path;
+	var shop_wp;
+	var town_wp;
+
+	if (!D2J_RSB_MatchArray[shop_target.toLowerCase()].length)
+		D2J_RSB_DelayWithMsg(shop_target, "Unsupported shop target");
+
+	shop_target = D2J_RSB_MatchArray[shop_target.toLowerCase()][0];
+	shop_act    = D2J_RSB_MatchArray[shop_target.toLowerCase()][1];
+	shop_start  = D2J_RSB_MatchArray[shop_target.toLowerCase()][2];
+	shop_path   = D2J_RSB_MatchArray[shop_target.toLowerCase()][3];
+	shop_wp     = D2J_RSB_MatchArray[shop_target.toLowerCase()][4];
+	town_wp     = D2JSP_WayPoints[shop_act - 1][0];
+
+	TDW_MOVE_COMPAT_TownMove(shop_act, shop_start);
+
+	if (me.area != town_wp)
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to get to " +
+			D2JSP_AREA_AreaToName(town_wp));
+
+	if (D2J_RSB_GoToWP())
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to locate " +
+			D2JSP_AREA_AreaToName(town_wp) + " waypoint");
+
+	raw("shopbot loadconfig MLB");
+	delay(1000);
+	raw("shopbot loadpath " + shop_path);
+	delay(1000);
+	raw("shopbot setnpc act" + shop_act + " " + shop_target);
+	delay(1000);
+	raw("shopbot townwp " + D2JSP_AREA_AreaToName(town_wp).toLowerCase());
+	delay(1000);
+	raw("shopbot otherwp " + D2JSP_AREA_AreaToName(shop_wp).toLowerCase());
+	delay(1000);
+
+	if (D2J_RSB_UseWP(shop_wp, 3))
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to use waypoint to " +
+			D2JSP_AREA_AreaToName(shop_wp));
+
+	delay(1000);
+
+	if (D2J_RSB_UseWP(town_wp, 3))
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to use waypoint to " +
+			D2JSP_AREA_AreaToName(town_wp));
+
+	print("Starting ShopBot...");
+	raw("shopbot start");
+}
+
+function D2J_RSB_StartAnya()
+{
+	var shop_target = "Anya";
+	var move_list   = [[10065, 13303], [10061, 13293]];
+	var move_portal = [me.x, me.y];
+	var move_index;
+
+	TDW_MOVE_COMPAT_TownMove(5, "portal");
+
+	if (me.area != D2JSP_AREA_HARROGATH)
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to get to Harrogath");
+
+	if (!TDW_MOVE_LookForPortal(D2JSP_AREA_NIHLATHAKS_TEMPLE, "", 10))
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to locate Anya's portal");
+
+	D2J_RSB_SetAndUseSkill("Energy Shield", 0)
+
+	D2J_RSB_SetAndUseSkill("Shiver Armor", 0);
+
+	TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_NIHLATHAKS_TEMPLE, "*", 10)
+	if (me.area != D2JSP_AREA_NIHLATHAKS_TEMPLE)
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to use Anya's portal");
+
+	D2J_RSB_SetAndUseSkill("Thunderstorm", 0);
+
+	print("Waiting 10 seconds for monsters to wake up...");
+	delay(10000);
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		move_index = count_1 % 2;
+		D2J_RSB_SetAndUseSkill("Teleport", 0, move_list[move_index][0],
+			move_list[move_index][1]);
+		D2J_RSB_SetSkill("Static Field", 0);
+		for (count_2 = 0; count_2 < 3; count_2++)
+			D2J_RSB_UseSkill(0);
+		D2J_RSB_SetAndUseSkill("Teleport", 0, move_list[move_index][0],
+			move_list[move_index][1]);
+		D2J_RSB_SetSkill("Nova", 0);
+		for (count_2 = 0; count_2 < 3; count_2++)
+			D2J_RSB_UseSkill(0);
+		print("Iteration " + (count_1 + 1) + " of 10 done.");
+	}
+
+	TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_HARROGATH, "*", 10)
+	if (me.area != D2JSP_AREA_HARROGATH)
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to use Anya's portal");
+
+	delay(1000);
+
+/*
+	raw("shopbot loadconfig MLB");
+	delay(1000);
+	raw("shopbot loadpath anyaportal");
+	delay(1000);
+	raw("shopbot setnpc act5 anya");
+	delay(1000);
+	raw("shopbot townwp " +
+		D2JSP_AREA_AreaToName(D2JSP_AREA_HARROGATH).toLowerCase());
+	delay(1000);
+	raw("shopbot otherwp " +
+		D2JSP_AREA_AreaToName(D2JSP_AREA_NIHLATHAKS_TEMPLE).toLowerCase());
+	delay(1000);
+*/
+
+	raw("shopbot loadconfig MLB." + shop_target);
+	delay(1000);
+	raw("shopbot loadpath anyaportal");
+	delay(1000);
+
+	TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_NIHLATHAKS_TEMPLE, "*", 10)
+	if (me.area != D2JSP_AREA_NIHLATHAKS_TEMPLE)
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to use Anya's portal");
+
+	delay(500);
+
+	TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_HARROGATH, "*", 10)
+	if (me.area != D2JSP_AREA_HARROGATH)
+		D2J_RSB_DelayWithMsg(shop_target, "Unable to use Anya's portal");
+
+	print("Starting ShopBot...");
+	raw("shopbot start");
+}
+
+function D2J_RSB_SetAndUseSkill(skill_name, skill_hand, skill_x, skill_y)
+{
+	var return_code;
+
+	if (!(return_code = D2J_RSB_SetSkill(skill_name, skill_hand))) {
+		if (arguments.length == 2)
+			return_code = D2J_RSB_UseSkill(skill_hand);
+		if (arguments.length == 3)
+			return_code = D2J_RSB_UseSkill(skill_hand, skill_x);
+		else
+			return_code = D2J_RSB_UseSkill(skill_hand, skill_x, skill_y);
+	}
+
+	return(return_code);
+}
+
+function D2J_RSB_SetSkill(skill_name, skill_hand)
+{
+	var return_code = 0;
+
+	if (D2J_RSB_WaitForIdle() > -1) {
+		me.setSkill(skill_name, skill_hand);
+		delay(50);
+		if (D2J_RSB_WaitForIdle() < 0)
+			return_code = -1;
+	}
+	else
+		return_code = -1;
+
+	return(return_code);
+}
+
+function D2J_RSB_UseSkill(skill_hand, skill_x, skill_y)
+{
+	var return_code = 0;
+
+	if ((!arguments.length) || (arguments.length > 3))
+		return_code = -1;
+	else if (D2J_RSB_WaitForIdle() > -1) {
+		if (arguments.length == 1)
+			me.useSkill(skill_hand);
+		else if (arguments.length == 2)
+			skill_x.useSkill(skill_hand);
+		else
+			me.useSkillAt(skill_x, skill_y, skill_hand);
+		delay(50);
+		if (D2J_RSB_WaitForIdle() < 0)
+			return_code = -1;
+	}
+	else
+		return_code = -1;
+
+	return(return_code);
+}
+
+function D2J_RSB_WaitForIdle(iteration_count, iteration_time)
+{
+	var wait_mode = -1;
+	var this_mode;
+	var count_1;
+
+	if ((!arguments.length) || (iteration_count < 1))
+		iteration_count = 10;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = 50;
+
+	for (count_1 = 0; count_1 < iteration_count; count_1++) {
+		this_mode = me.mode;
+		if ((this_mode == D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN) ||
+			(this_mode == D2JSP_MODE_PLAYER_STANDING_IN_TOWN)) {
+			wait_mode = this_mode;
+			break;
+		}
+		delay(iteration_time);
+	}
+
+	return(wait_mode);
+}
+
+function D2J_RSB_DelayWithMsg(shop_target, msg_string)
+{
+	D2J_RSB_WriteLogFile(shop_target, msg_string);
+	print(msg_string + " --- exiting...");
+	print("... Waiting " + (D2J_RSB_ExitSleepMS / 1000) + " seconds ...");
+	delay(D2J_RSB_ExitSleepMS);
+	print("...Exiting...");
+	delay(1000);
+	quit();
+}
+
+function D2J_RSB_WriteLogFile(shop_target, msg_string)
+{
+	var start_date = new Date();
+	var file_name;
+	var file_handle;
+
+	file_name = "RunShopBot." + me.realm + "." + me.account + "." +
+		me.name + ".txt";
+	file_handle = fileOpen(file_name, 2);
+	if (file_handle) {
+		file_handle.writeLine(start_date.toString() + ": " + shop_target +
+			": " + msg_string);
+		file_handle.close();
+	}
+	else
+		print("WARNING: Unable to open RunShopBot.d2j output file '" + file_name +
+			"' for writing.");
+}
+
+function D2J_RSB_GoToWP()
+{
+	var count_1;
+	var way_point_obj;
+
+	way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+
+	if (!way_point_obj)
+		return(-1);
+
+	for (count_1 = 0; count_1 < 10; count_1++) {
+		D2JSP_UTIL_MoveTo(way_point_obj.x, way_point_obj.y);
+		delay(100);
+	}
+
+	return(0);
+}
+
+function D2J_RSB_UseWP(target_area, wait_for_count)
+{
+	var count_1;
+	var way_point_obj;
+
+	way_point_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+
+	if (!way_point_obj)
+		return(-1);
+
+	print("Going through waypoint.");
+	TDW_MOVE_MoveToObject(way_point_obj);
+	way_point_obj.interact(target_area);
+	delay(250);
+	D2JSP_UTIL_GEN_CancelObject();
+	delay(250);
+
+	for (count_1 = 0; count_1 < (wait_for_count * 100); count_1++) {
+		if (me.area == target_area)
+			break;
+		delay(50);
+	}
+
+	return((me.area == target_area) ? 0 : -1);
+}
+
+

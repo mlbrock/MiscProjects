@@ -1,0 +1,78 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+// Baal Minion spawn missile is classid 550. It's mode is (so far) 6.
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_MM_HeaderList_1 = [
+	D2JSP_UTIL_FORMAT_RJust("ClassId", 7),
+	D2JSP_UTIL_FORMAT_RJust("Owner", 5),
+	D2JSP_UTIL_FORMAT_RJust("OwnerType", 9),
+	D2JSP_UTIL_FORMAT_RJust("Mode", 4),
+	D2JSP_UTIL_FORMAT_LJust("Coordinates", 14)
+];
+var TDW_MM_HeaderText_1 = "";
+var TDW_MM_HeaderText_2 = "";
+var TDW_MM_HeaderText_3 = "";
+for (var count_1 = 0; count_1 < TDW_MM_HeaderList_1.length; count_1++) {
+	TDW_MM_HeaderText_1[count_1] = ((count_1) ? " " : "") +
+		TDW_MM_HeaderList_1[count_1];
+	TDW_MM_HeaderText_2[count_1] = ((count_1) ? " " : "") +
+		D2JSP_UTIL_FORMAT_LPad("", TDW_MM_HeaderList_1[count_1].length, "=");
+	TDW_MM_HeaderText_3[count_1] = ((count_1) ? " " : "") +
+		D2JSP_UTIL_FORMAT_LPad("", TDW_MM_HeaderList_1[count_1].length, "-");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log        = new D2JSP_UTIL_Log("output/TDW_MonitorMissiles.log",
+		"TDW_MonitorMissiles");
+	var missile_hash  = new Array();
+	var missile_count = 0;
+	var loop_count    = 0;
+
+	print("Waiting for game load to complete...");
+	D2JSP_UTIL_GEN_CheckGameReady();
+	print("Ready.");
+
+	my_log.logInfoQuiet(TDW_MM_HeaderText_2);
+	my_log.logInfoQuiet(TDW_MM_HeaderText_1);
+	my_log.logInfoQuiet(TDW_MM_HeaderText_3);
+
+	while (true) {
+		if (!(loop_count % 25))
+			D2JSP_UTIL_BNET_OverheadSafe("Looking for missiles (" + missile_count + ")");
+//		var missile_obj = getUnit(D2JSP_UTIL_GETUNIT_MISSILE);
+//		var missile_obj = getUnit(3);
+		var missile_obj = getUnit(D2JSP_UTIL_GETUNIT_MISSILE);
+		if (missile_obj) {
+			do {
+				if (!(missile_obj.classid in missile_hash)) {
+					print("New missile [" + missile_obj.classid + "]");
+/*
+					for (var this_prop in missile_obj) {
+						if (typeof(missile_obj[this_prop]) != "undefined")
+							my_log.logInfo(this_prop + " = " + missile_obj[this_prop]);
+					}
+					my_log.emitSep("-");
+*/
+					missile_hash[missile_obj.classid] = 1;
+					missile_count++;
+				}
+				my_log.logInfoQuiet(
+					D2JSP_UTIL_FORMAT_RJust(missile_obj.classid, 7) + " " +
+					D2JSP_UTIL_FORMAT_RJust(missile_obj.owner, 5) + " " +
+					D2JSP_UTIL_FORMAT_RJust(missile_obj.ownertype, 9) + " " +
+					D2JSP_UTIL_FORMAT_RJust(missile_obj.mode, 4) + " [" +
+					D2JSP_UTIL_FORMAT_RJust(missile_obj.x, 5) + ", " +
+					D2JSP_UTIL_FORMAT_RJust(missile_obj.y, 5) + "]");
+			} while (missile_obj && missile_obj.getNext());
+		}
+		delay(10);
+		loop_count++;
+	}
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

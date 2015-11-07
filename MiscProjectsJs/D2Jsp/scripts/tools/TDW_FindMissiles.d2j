@@ -1,0 +1,40 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+function main()
+{
+	var my_log        = new D2JSP_UTIL_Log("output/TDW_FindMissiles.log");
+	var missile_hash  = new Array();
+	var missile_count = 0;
+	var loop_count    = 0;
+
+	print("Waiting for game load to complete...");
+	D2JSP_UTIL_GEN_CheckGameReady();
+	print("Ready.");
+
+	while (true) {
+		if (!(loop_count % 25))
+			D2JSP_UTIL_BNET_OverheadSafe("Looking for missiles (" + missile_count + ")");
+//		var missile_obj = getUnit(D2JSP_UTIL_GETUNIT_MISSILE);
+//		var missile_obj = getUnit(3);
+		var missile_obj = getUnit(D2JSP_UTIL_GETUNIT_MISSILE);
+		if (missile_obj) {
+			do {
+				if (!(missile_obj.id in missile_hash)) {
+					D2JSP_UTIL_BNET_OverheadSafe("New missile [" + missile_obj.id + "]");
+					for (var this_prop in missile_obj) {
+						if (typeof(missile_obj[this_prop]) != "undefined")
+							my_log.logInfo(this_prop + " = " + missile_obj[this_prop]);
+					}
+					my_log.emitSep("-");
+					missile_hash[missile_obj.id] = 1;
+					missile_count++;
+				}
+			} while (missile_obj && missile_obj.getNext());
+		}
+		delay(10);
+		loop_count++;
+	}
+
+}
+
+

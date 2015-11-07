@@ -1,0 +1,410 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Item Flag Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_ItemFlags.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion item flags constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_ItemFlags_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_ItemFlags_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant item flag values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMFLAG_RUNEWORD		= 0X4000000; //	set if it is a runeword (note that 'ith' qualifies ;)
+var D2JSP_ITEMFLAG_NAMED			= 0x1000000; //	has a custom name "Player's item"
+var D2JSP_ITEMFLAG_ANY				= 0x800000; //	was set for all items tested (tested in inv, stash, store)
+var D2JSP_ITEMFLAG_ETHEREAL		= 0x400000; //	0 if not ethereal
+var D2JSP_ITEMFLAG_RUNE_OR_POT	= 0x200000; //	rune or potion, also set for mephisto's soulstone
+var D2JSP_ITEMFLAG_START_ITEM		= 0x20000; //	an item that a new character starts with (like javelin and buckler, and the minor healings at the start)
+var D2JSP_ITEMFLAG_EAR				= 0x10000; //	a player ear
+var D2JSP_ITEMFLAG_NOT_IN_SOCKET	= 0x4000; //	0 if in socket, 0 if in belt, 0 if equipped or equipped by merc, 0 for gems/charms/..
+var D2JSP_ITEMFLAG_IN_STORE		= 0x2000; //	in trade or gamble screen
+var D2JSP_ITEMFLAG_SOCKETED		= 0x800; //	the item has sockets (they can be full or empty)
+var D2JSP_ITEMFLAG_REJUV			= 0x400; //	only seen set for full rejuvs for now
+var D2JSP_ITEMFLAG_BROKEN			= 0x100; //	just a bet, but i'm pretty sure it's correct
+var D2JSP_ITEMFLAG_SWITCH_OUT		= 0x80; //	a weapon switch command was performed, and this item is no longer being used
+var D2JSP_ITEMFLAG_SWITCH_IN		= 0x40; //	a weapon switch command was performed, and this item is now being used
+var D2JSP_ITEMFLAG_IDENTIFIED		= 0x10; //	0 if unid
+var D2JSP_ITEMFLAG_IN_SOCKET		= 0x8; //	8 if in socket, valid for rune and jewels, not gems
+var D2JSP_ITEMFLAG_EQUIPPED		= 0x1; //	player or merc is wearing the item (don't trust too much, especially when bit 9 is set)
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMFLAG_MINIMUM = D2JSP_ITEMFLAG_EQUIPPED;
+var D2JSP_ITEMFLAG_MAXIMUM = D2JSP_ITEMFLAG_RUNEWORD;
+var D2JSP_ITEMFLAG_COUNT   = 17;
+var D2JSP_ITEMFLAG_MASK    = (D2JSP_ITEMFLAG_RUNEWORD |
+										  D2JSP_ITEMFLAG_NAMED |
+										  D2JSP_ITEMFLAG_ANY |
+										  D2JSP_ITEMFLAG_ETHEREAL |
+										  D2JSP_ITEMFLAG_RUNE_OR_POT |
+										  D2JSP_ITEMFLAG_START_ITEM |
+										  D2JSP_ITEMFLAG_EAR |
+										  D2JSP_ITEMFLAG_NOT_IN_SOCKET |
+										  D2JSP_ITEMFLAG_IN_STORE |
+										  D2JSP_ITEMFLAG_SOCKETED |
+										  D2JSP_ITEMFLAG_REJUV |
+										  D2JSP_ITEMFLAG_BROKEN |
+										  D2JSP_ITEMFLAG_SWITCH_OUT |
+										  D2JSP_ITEMFLAG_SWITCH_IN |
+										  D2JSP_ITEMFLAG_IDENTIFIED |
+										  D2JSP_ITEMFLAG_IN_SOCKET |
+										  D2JSP_ITEMFLAG_EQUIPPED)
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMFLAG_ValidList =  [
+	D2JSP_ITEMFLAG_RUNEWORD,
+	D2JSP_ITEMFLAG_NAMED,
+	D2JSP_ITEMFLAG_ANY,
+	D2JSP_ITEMFLAG_ETHEREAL,
+	D2JSP_ITEMFLAG_RUNE_OR_POT,
+	D2JSP_ITEMFLAG_START_ITEM,
+	D2JSP_ITEMFLAG_EAR,
+	D2JSP_ITEMFLAG_NOT_IN_SOCKET,
+	D2JSP_ITEMFLAG_IN_STORE,
+	D2JSP_ITEMFLAG_SOCKETED,
+	D2JSP_ITEMFLAG_REJUV,
+	D2JSP_ITEMFLAG_BROKEN,
+	D2JSP_ITEMFLAG_SWITCH_OUT,
+	D2JSP_ITEMFLAG_SWITCH_IN,
+	D2JSP_ITEMFLAG_IDENTIFIED,
+	D2JSP_ITEMFLAG_IN_SOCKET,
+	D2JSP_ITEMFLAG_EQUIPPED
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Map item flags to text strings...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMFLAG_List =  [
+	{ value: D2JSP_ITEMFLAG_RUNEWORD,		name: "Runeword"			},
+	{ value: D2JSP_ITEMFLAG_NAMED,			name: "Named"				},
+	{ value: D2JSP_ITEMFLAG_ANY,				name: "Any"					},
+	{ value: D2JSP_ITEMFLAG_ETHEREAL,		name: "Ethereal"			},
+	{ value: D2JSP_ITEMFLAG_RUNE_OR_POT,	name: "Rune_Or_Pot"		},
+	{ value: D2JSP_ITEMFLAG_START_ITEM,		name: "Start_Item"		},
+	{ value: D2JSP_ITEMFLAG_EAR,				name: "Ear"					},
+	{ value: D2JSP_ITEMFLAG_NOT_IN_SOCKET,	name: "Not_In_Socket"	},
+	{ value: D2JSP_ITEMFLAG_IN_STORE,		name: "In_Store"			},
+	{ value: D2JSP_ITEMFLAG_SOCKETED,		name: "Socketed"			},
+	{ value: D2JSP_ITEMFLAG_REJUV,			name: "Rejuv"				},
+	{ value: D2JSP_ITEMFLAG_BROKEN,			name: "Broken"				},
+	{ value: D2JSP_ITEMFLAG_SWITCH_OUT,		name: "Switch_Out"		},
+	{ value: D2JSP_ITEMFLAG_SWITCH_IN,		name: "Switch_In"			},
+	{ value: D2JSP_ITEMFLAG_IDENTIFIED,		name: "Identified"		},
+	{ value: D2JSP_ITEMFLAG_IN_SOCKET,		name: "In_Socket"			},
+	{ value: D2JSP_ITEMFLAG_EQUIPPED,		name: "Equipped"			}
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Map item flag names and synonyms to item flags...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ITEMFLAG_NameList = new Array();
+D2JSP_ITEMFLAG_NameList["isruneword"]       = D2JSP_ITEMFLAG_RUNEWORD;
+D2JSP_ITEMFLAG_NameList["is_rune_word"]     = D2JSP_ITEMFLAG_RUNEWORD;
+D2JSP_ITEMFLAG_NameList["is rune word"]     = D2JSP_ITEMFLAG_RUNEWORD;
+D2JSP_ITEMFLAG_NameList["runeword"]         = D2JSP_ITEMFLAG_RUNEWORD;
+D2JSP_ITEMFLAG_NameList["rune_word"]        = D2JSP_ITEMFLAG_RUNEWORD;
+D2JSP_ITEMFLAG_NameList["rune word"]        = D2JSP_ITEMFLAG_RUNEWORD;
+D2JSP_ITEMFLAG_NameList["isnamed"]          = D2JSP_ITEMFLAG_NAMED;
+D2JSP_ITEMFLAG_NameList["is_named"]         = D2JSP_ITEMFLAG_NAMED;
+D2JSP_ITEMFLAG_NameList["is named"]         = D2JSP_ITEMFLAG_NAMED;
+D2JSP_ITEMFLAG_NameList["named"]            = D2JSP_ITEMFLAG_NAMED;
+D2JSP_ITEMFLAG_NameList["isany"]            = D2JSP_ITEMFLAG_ANY;
+D2JSP_ITEMFLAG_NameList["is_any"]           = D2JSP_ITEMFLAG_ANY;
+D2JSP_ITEMFLAG_NameList["is any"]           = D2JSP_ITEMFLAG_ANY;
+D2JSP_ITEMFLAG_NameList["any"]              = D2JSP_ITEMFLAG_ANY;
+D2JSP_ITEMFLAG_NameList["isethereal"]       = D2JSP_ITEMFLAG_ETHEREAL;
+D2JSP_ITEMFLAG_NameList["is_ethereal"]      = D2JSP_ITEMFLAG_ETHEREAL;
+D2JSP_ITEMFLAG_NameList["is ethereal"]      = D2JSP_ITEMFLAG_ETHEREAL;
+D2JSP_ITEMFLAG_NameList["ethereal"]         = D2JSP_ITEMFLAG_ETHEREAL;
+D2JSP_ITEMFLAG_NameList["isruneorpot"]      = D2JSP_ITEMFLAG_RUNE_OR_POT;
+D2JSP_ITEMFLAG_NameList["is_rune_or_pot"]   = D2JSP_ITEMFLAG_RUNE_OR_POT;
+D2JSP_ITEMFLAG_NameList["is rune or pot"]   = D2JSP_ITEMFLAG_RUNE_OR_POT;
+D2JSP_ITEMFLAG_NameList["isruneorpot"]      = D2JSP_ITEMFLAG_RUNE_OR_POT;
+D2JSP_ITEMFLAG_NameList["runeorpot"]        = D2JSP_ITEMFLAG_RUNE_OR_POT;
+D2JSP_ITEMFLAG_NameList["rune_or_pot"]      = D2JSP_ITEMFLAG_RUNE_OR_POT;
+D2JSP_ITEMFLAG_NameList["rune or pot"]      = D2JSP_ITEMFLAG_RUNE_OR_POT;
+D2JSP_ITEMFLAG_NameList["isstartitem"]      = D2JSP_ITEMFLAG_START_ITEM;
+D2JSP_ITEMFLAG_NameList["is_start_item"]    = D2JSP_ITEMFLAG_START_ITEM;
+D2JSP_ITEMFLAG_NameList["is start item"]    = D2JSP_ITEMFLAG_START_ITEM;
+D2JSP_ITEMFLAG_NameList["startitem"]        = D2JSP_ITEMFLAG_START_ITEM;
+D2JSP_ITEMFLAG_NameList["start_item"]       = D2JSP_ITEMFLAG_START_ITEM;
+D2JSP_ITEMFLAG_NameList["start item"]       = D2JSP_ITEMFLAG_START_ITEM;
+D2JSP_ITEMFLAG_NameList["isear"]            = D2JSP_ITEMFLAG_EAR;
+D2JSP_ITEMFLAG_NameList["is_ear"]           = D2JSP_ITEMFLAG_EAR;
+D2JSP_ITEMFLAG_NameList["is ear"]           = D2JSP_ITEMFLAG_EAR;
+D2JSP_ITEMFLAG_NameList["ear"]              = D2JSP_ITEMFLAG_EAR;
+D2JSP_ITEMFLAG_NameList["isnotinsocket"]    = D2JSP_ITEMFLAG_NOT_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["is_not_in_socket"] = D2JSP_ITEMFLAG_NOT_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["is not in socket"] = D2JSP_ITEMFLAG_NOT_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["notinsocket"]      = D2JSP_ITEMFLAG_NOT_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["not_in_socket"]    = D2JSP_ITEMFLAG_NOT_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["not in socket"]    = D2JSP_ITEMFLAG_NOT_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["isinstore"]        = D2JSP_ITEMFLAG_IN_STORE;
+D2JSP_ITEMFLAG_NameList["is_in_store"]      = D2JSP_ITEMFLAG_IN_STORE;
+D2JSP_ITEMFLAG_NameList["is in store"]      = D2JSP_ITEMFLAG_IN_STORE;
+D2JSP_ITEMFLAG_NameList["instore"]          = D2JSP_ITEMFLAG_IN_STORE;
+D2JSP_ITEMFLAG_NameList["in_store"]         = D2JSP_ITEMFLAG_IN_STORE;
+D2JSP_ITEMFLAG_NameList["in store"]         = D2JSP_ITEMFLAG_IN_STORE;
+D2JSP_ITEMFLAG_NameList["issocketed"]       = D2JSP_ITEMFLAG_SOCKETED;
+D2JSP_ITEMFLAG_NameList["is_socketed"]      = D2JSP_ITEMFLAG_SOCKETED;
+D2JSP_ITEMFLAG_NameList["is socketed"]      = D2JSP_ITEMFLAG_SOCKETED;
+D2JSP_ITEMFLAG_NameList["socketed"]         = D2JSP_ITEMFLAG_SOCKETED;
+D2JSP_ITEMFLAG_NameList["hassockets"]       = D2JSP_ITEMFLAG_SOCKETED;
+D2JSP_ITEMFLAG_NameList["has_sockets"]      = D2JSP_ITEMFLAG_SOCKETED;
+D2JSP_ITEMFLAG_NameList["has sockets"]      = D2JSP_ITEMFLAG_SOCKETED;
+D2JSP_ITEMFLAG_NameList["isrejuv"]          = D2JSP_ITEMFLAG_REJUV;
+D2JSP_ITEMFLAG_NameList["is_rejuv"]         = D2JSP_ITEMFLAG_REJUV;
+D2JSP_ITEMFLAG_NameList["is rejuv"]         = D2JSP_ITEMFLAG_REJUV;
+D2JSP_ITEMFLAG_NameList["rejuv"]            = D2JSP_ITEMFLAG_REJUV;
+D2JSP_ITEMFLAG_NameList["isbroken"]         = D2JSP_ITEMFLAG_BROKEN;
+D2JSP_ITEMFLAG_NameList["is_broken"]        = D2JSP_ITEMFLAG_BROKEN;
+D2JSP_ITEMFLAG_NameList["is broken"]        = D2JSP_ITEMFLAG_BROKEN;
+D2JSP_ITEMFLAG_NameList["broken"]           = D2JSP_ITEMFLAG_BROKEN;
+D2JSP_ITEMFLAG_NameList["isswitchout"]      = D2JSP_ITEMFLAG_SWITCH_OUT;
+D2JSP_ITEMFLAG_NameList["is_switch_out"]    = D2JSP_ITEMFLAG_SWITCH_OUT;
+D2JSP_ITEMFLAG_NameList["is switch out"]    = D2JSP_ITEMFLAG_SWITCH_OUT;
+D2JSP_ITEMFLAG_NameList["switchout"]        = D2JSP_ITEMFLAG_SWITCH_OUT;
+D2JSP_ITEMFLAG_NameList["switch_out"]       = D2JSP_ITEMFLAG_SWITCH_OUT;
+D2JSP_ITEMFLAG_NameList["switch out"]       = D2JSP_ITEMFLAG_SWITCH_OUT;
+D2JSP_ITEMFLAG_NameList["isswitchin"]       = D2JSP_ITEMFLAG_SWITCH_IN;
+D2JSP_ITEMFLAG_NameList["is_switch_in"]     = D2JSP_ITEMFLAG_SWITCH_IN;
+D2JSP_ITEMFLAG_NameList["is switch in"]     = D2JSP_ITEMFLAG_SWITCH_IN;
+D2JSP_ITEMFLAG_NameList["switchin"]         = D2JSP_ITEMFLAG_SWITCH_IN;
+D2JSP_ITEMFLAG_NameList["switch_in"]        = D2JSP_ITEMFLAG_SWITCH_IN;
+D2JSP_ITEMFLAG_NameList["switch in"]        = D2JSP_ITEMFLAG_SWITCH_IN;
+D2JSP_ITEMFLAG_NameList["isidentified"]     = D2JSP_ITEMFLAG_IDENTIFIED;
+D2JSP_ITEMFLAG_NameList["is_identified"]    = D2JSP_ITEMFLAG_IDENTIFIED;
+D2JSP_ITEMFLAG_NameList["is identified"]    = D2JSP_ITEMFLAG_IDENTIFIED;
+D2JSP_ITEMFLAG_NameList["identified"]       = D2JSP_ITEMFLAG_IDENTIFIED;
+D2JSP_ITEMFLAG_NameList["isinsocket"]       = D2JSP_ITEMFLAG_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["is_in_socket"]     = D2JSP_ITEMFLAG_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["is in socket"]     = D2JSP_ITEMFLAG_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["insocket"]         = D2JSP_ITEMFLAG_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["in_socket"]        = D2JSP_ITEMFLAG_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["in socket"]        = D2JSP_ITEMFLAG_IN_SOCKET;
+D2JSP_ITEMFLAG_NameList["isequipped"]       = D2JSP_ITEMFLAG_EQUIPPED;
+D2JSP_ITEMFLAG_NameList["is_equipped"]      = D2JSP_ITEMFLAG_EQUIPPED;
+D2JSP_ITEMFLAG_NameList["is equipped"]      = D2JSP_ITEMFLAG_EQUIPPED;
+D2JSP_ITEMFLAG_NameList["equipped"]         = D2JSP_ITEMFLAG_EQUIPPED;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_IsValidItemFlag(in_flag)
+{
+	var count_1;
+
+	for (count_1 = 0; count_1 < D2JSP_ITEMFLAG_List.length; count_1++) {
+		if (in_flag == D2JSP_ITEMFLAG_List[count_1].value)
+			return(true);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_ItemFlagToIndex(in_flag)
+{
+	var count_1;
+
+	for (count_1 = 0; count_1 < D2JSP_ITEMFLAG_List.length; count_1++) {
+		if (in_flag == D2JSP_ITEMFLAG_List[count_1].value)
+			return(count_1);
+	}
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_ItemFlagToName(in_flag)
+{
+	var flag_index = D2JSP_ITEMFLAG_ItemFlagToIndex(in_flag);
+
+	return((flag_index != -1) ? D2JSP_ITEMFLAG_List[flag_index].name :
+		"*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_NameToItemFlag(itemflag_name)
+{
+	var itemflag_name = itemflag_name.toLowerCase();
+
+	return((typeof(D2JSP_ITEMFLAG_NameList[itemflag_name]) != "undefined") ?
+		D2JSP_ITEMFLAG_NameList[itemflag_name] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_ItemFlagParseToNumber(in_itemflag)
+{
+	var tmp_number;
+	var tmp_data;
+
+	in_itemflag = D2JSP_UTIL_FORMAT_Trim(in_itemflag + "");
+	tmp_data    = in_itemflag;
+	tmp_data    = tmp_data.replace(/^\s+|\s+$/g, "");
+	tmp_data    = tmp_data.replace(/\s+/g, "_");
+	tmp_data    = tmp_data.replace(/^[^A-Za-z_]|[^A-Za-z0-9_]/g, "");
+	tmp_data    = (tmp_data != "") ? tmp_data : "\"\"";
+
+	if (D2JSP_UTIL_FORMAT_IsDigit(in_itemflag)) {
+		tmp_number = parseInt(in_itemflag, 10);
+		return((D2JSP_ITEMFLAG_IsValidItemFlag(tmp_number)) ? tmp_number : -1);
+	}
+	else if (eval("((typeof(D2JSP_ITEMFLAG_" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval("D2JSP_ITEMFLAG_" + tmp_data.toUpperCase()));
+	else if (eval("((typeof(" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval(tmp_data.toUpperCase()));
+	else
+		return(D2JSP_ITEMFLAG_NameToItemFlag(in_itemflag));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_ItemFlagParseToName(in_itemflag)
+{
+	var tmp_number = D2JSP_ITEMFLAG_ItemFlagParseToNumber(in_itemflag);
+
+	return(D2JSP_ITEMFLAG_ItemFlagToName(tmp_number));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_GetString(item_flag)
+{
+	var count_1    = D2JSP_ITEMFLAG_List.length;
+	var out_string = "";
+	var done_count = 0;
+
+	while (count_1--) {
+		if (item_flag & D2JSP_ITEMFLAG_List[count_1].value) {
+			out_string += ((done_count++) ? "|" : "") +
+				D2JSP_ITEMFLAG_List[count_1].name;
+			item_flag -= D2JSP_ITEMFLAG_List[count_1].value;
+		}
+	}
+
+	if (!done_count)
+		out_string = "*INVALID(0x" + item_flag.toString(16) + ")*";
+	else if (item_flag)
+		out_string += "|*INVALID_REMAINDER(0x" + item_flag.toString(16) + ")*";
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_GetFlagsForItem(in_item)
+{
+	var count_1    = D2JSP_ITEMFLAG_List.length;
+	var out_value = 0;
+
+	for (count_1 = 0; count_1 < D2JSP_ITEMFLAG_List.length; count_1++)
+		out_value |= (in_item.getFlag(D2JSP_ITEMFLAG_List[count_1].value)) ?
+			D2JSP_ITEMFLAG_List[count_1].value : 0;
+
+	return(out_value);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ITEMFLAG_GetStringForItem(in_item)
+{
+	return(D2JSP_ITEMFLAG_GetString(D2JSP_ITEMFLAG_GetFlagsForItem(in_item)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_ItemFlags_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output\\RegressionTest._D2JSP_ItemFlags.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_States.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+	if (file_handle) {
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_RUNEWORD);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_NAMED);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_ANY);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_ETHEREAL);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_RUNE_OR_POT);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_START_ITEM);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_EAR);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_NOT_IN_SOCKET);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_IN_STORE);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_SOCKETED);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_REJUV);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_BROKEN);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_SWITCH_OUT);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_SWITCH_IN);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_IDENTIFIED);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_IN_SOCKET);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_EQUIPPED);
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_MASK);		// All flags ORed.
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, 4);								// Test invalid value.
+		TEST_D2JSP_ITEMFLAG_DoTest(file_handle, D2JSP_ITEMFLAG_MASK | 4);	// Test invalid value.
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+
+function TEST_D2JSP_ITEMFLAG_DoTest(file_handle, value)
+{
+	var hex_string;
+
+	hex_string = "00000000" + value.toString(16);
+
+	file_handle.writeLine("0x" + hex_string.substring(hex_string.length - 8) +
+		" = " + D2JSP_ITEMFLAG_GetString(value));
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+

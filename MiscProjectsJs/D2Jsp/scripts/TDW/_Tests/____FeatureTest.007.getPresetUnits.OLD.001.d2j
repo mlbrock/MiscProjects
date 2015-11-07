@@ -1,0 +1,73 @@
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+/*
+	var preset_list = MyGetPresetUnits(getRoom(0));
+
+// Room Basis X,Y: 1088, 592
+// Room Basis X,Y: 5440, 2960
+// 
+	while (preset_list.length)
+		print("[" + preset_list.shift() + "]");
+*/
+
+	print("Looking for type 5 objects with a classid 61...");
+	var found_list = new Array();
+	var room_obj   = getRoom();
+//var room_obj   = getRoom(0);
+	if (room_obj) {
+		do {
+			var preset_list = MyGetPresetUnits(room_obj);
+			while (preset_list.length) {
+//print("--->A:[" + preset_list[0] + "]");
+//print("--->B:[" + preset_list[0][0] + "]");
+//print("--->C:[" + preset_list[0][0][0] + "]");
+				if ((preset_list[0][0] == 61) && (preset_list[0][1] == 5))
+					found_list.push([preset_list[0][0], preset_list[0][1],
+						(room_obj.x * 5) + preset_list[0][2],
+						(room_obj.y * 5) + preset_list[0][3]]);
+				preset_list.shift();
+			}
+//break;
+		} while (room_obj && room_obj.getNext());
+	}
+
+	print("Found " + found_list.length + " matching items.");
+	while (found_list.length)
+		print("[" + found_list.shift() + "]");
+}
+
+function MyGetPresetUnits(room_obj)
+{
+	var unit_list = room_obj.getPresetUnits();
+	var out_list  = new Array();
+
+//print("getPresetUnits() returned: " + typeof(unit_list));
+	if (!unit_list)
+		return([]);
+
+	if (unit_list.length % 4) {
+		print("FATAL ERROR: getPresetUnits() returned " + unit_list.length +
+			" elements.");
+		print("STOPPING");
+		stop();
+	}
+	else if (unit_list.length) {
+		var tmp_hash = new Array();
+//print("getPresetUnits() total element count = " + unit_list.length);
+		for (var count_1 = 0; count_1 < unit_list.length; count_1 += 4)
+			tmp_hash[unit_list[count_1] + "|" + unit_list[count_1 + 1] + "|" +
+				unit_list[count_1 + 2] + "|" + unit_list[count_1 + 3]] =
+				[unit_list[count_1], unit_list[count_1 + 1],
+				unit_list[count_1 + 2], unit_list[count_1 + 3]];
+		for (var this_prop in tmp_hash)
+			out_list.push(tmp_hash[this_prop]);
+//print("getPresetUnits() unique object = " + out_list.length);
+	}
+
+	return(out_list);
+}
+

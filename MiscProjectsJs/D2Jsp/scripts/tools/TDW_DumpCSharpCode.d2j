@@ -1,0 +1,3185 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+//includeonce("TDW/_D2JSP_BaseStats.d2l");
+//includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/TDW_Path.d2l");
+includeonce("TDW/TDW_PathLink.d2l");
+includeonce("TDW/ISF.d2l");
+
+var CSHARP_FILE_NAME = "output/C#DataDump.cs";
+
+// ////////////////////////////////////////////////////////////////////////////
+var botNET_MAP_AreaLevel           = new Array();
+var botNET_MAP_AreaLevel_MaxLength = 0;
+var botNET_MAP_SkillType           = new Array();
+var botNET_MAP_SkillType_MaxLength = 0;
+var botNET_MAP_ItemType            = new Array();
+var botNET_MAP_ItemType_MaxLength  = 0;
+var botNET_MAP_Stat                = new Array();
+var botNET_MAP_Stat_MaxLength      = 0;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var file_handle = fileOpen(CSHARP_FILE_NAME, 1);
+
+	if (file_handle != null) {
+//DumpLevelInfo_Arcane(file_handle);
+//print("********** STOPPING **********");
+//stop();
+		DumpArea(file_handle);
+DumpAreaLinks(file_handle);
+print("********** STOPPING **********");
+stop();
+		DumpWaypoints(file_handle);
+		DumpItemType(file_handle)
+		DumpItem(file_handle);
+		DumpStat(file_handle);
+		DumpExtendedStats(file_handle);
+		DumpState(file_handle);
+		DumpSkill(file_handle);
+		DumpbotNetMappings(file_handle);
+DumpSkillStats(file_handle);
+		DumpLevelInfo_Arcane(file_handle);
+		print("Done.");
+	}
+	else
+		print("ERROR: Unable to open C# code file '" + CSHARP_FILE_NAME +
+			"' for writing.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpItemType(file_handle)
+{
+/*
+	print("Writing item type data...");
+
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Array of data for TDW.ItemType.Instance");
+	file_handle.writeLine("\t\t// ----- -- ---- --- ---------------------");
+	file_handle.writeLine("\t\t//    string code;");
+	file_handle.writeLine("\t\t//    int    item_type;");
+	file_handle.writeLine("\t\t//    string name;");
+	EmitHyphens(file_handle);
+	file_handle.writeLine("\t\t// There are " +
+		D2JSP_ITEMTYPE_TypeToNameList.length + " item types. " +
+		"Size arraylists appropriately.");
+	EmitComment(file_handle);
+
+	for (var count_1 = 0; count_1 < D2JSP_ITEMTYPE_TypeToNameList.length;
+		count_1++) {
+		var this_code = D2JSP_ITEMTYPE_TypeToNameList[count_1];
+		var code_str  = GetPaddedString(this_code, 4);
+		file_handle.writeLine("\t\tcode_hash.Add(" +
+			code_str + ", new Datum(" +
+			code_str + ", " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 4) + ", " +
+			"\"" + D2JSP_ITEMTYPE_TypeToTextList[count_1] + "\"));");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Create a hash by item type name...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tforeach (string this_key in code_hash.GetKeys())");
+	file_handle.writeLine("\t\t\tname_hash.Add(this_key, code_hash[this_key]);");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add synonyms to the item type name hash...");
+	EmitComment(file_handle);
+	var name_hash = new Array();
+	for (var count_1 = 0; count_1 < D2JSP_ITEMTYPE_TypeToTextList.length;
+		count_1++)
+		name_hash[D2JSP_ITEMTYPE_TypeToTextList[count_1].toLowerCase()] = count_1;
+	for (var this_prop in D2JSP_ITEMTYPE_TextToTypeList) {
+		if (!(this_prop in name_hash)) {
+			file_handle.writeLine("\t\tname_hash.Add(\"" +
+				this_prop + "\",\n" +
+				"\t\t\tname_hash[\"" +
+				D2JSP_ITEMTYPE_TypeToTextList[
+				D2JSP_ITEMTYPE_TextToTypeList[this_prop]] + "\"]);");
+		}
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+*/
+	print("Writing item type data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	for (var count_1 = 0; count_1 < D2JSP_ITEMTYPE_TypeToTextList.length;
+		count_1++) {
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(D2JSP_ITEMTYPE_TypeToTextList[count_1]));
+		var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+			D2JSP_UTIL_FORMAT_InitCaps(base_name));
+		if (base_name == "Quest") {
+			base_name = "Quest Item";
+			enum_name = "QuestItem";
+		}
+		if (enum_name == "MagicBowQuiv") {
+			base_name = "Magic Bow Quiver";
+			enum_name = "MagicBowQuiver";
+		}
+		else if (enum_name == "MagicXbowQuiv") {
+			base_name = "Magic Crossbow Quiver";
+			enum_name = "MagicCrossBowQuiver";
+		}
+		else if (enum_name == "Crossbow")
+			enum_name = "CrossBow";
+		else if (enum_name == "CrossbowQuiver")
+			enum_name = "CrossBowQuiver";
+		else if (enum_name == "RejuvPotion") {
+			base_name = "Rejuvenation Potion";
+			enum_name = "RejuvenationPotion";
+		}
+		else if (enum_name == "ThrownWeapon") {
+			base_name = "Throwing Weapon";
+			enum_name = "ThrowingWeapon";
+		}
+		base_max_length    = Math.max(base_max_length, base_name.length);
+		enum_max_length    = Math.max(enum_max_length, enum_name.length);
+		base_list[count_1] = base_name;
+		enum_list[count_1] = enum_name;
+		data_count++;
+		name_hash[base_name.toLowerCase()] = true;
+		botNET_MAP_ItemType[count_1] = enum_name;
+	}
+	botNET_MAP_ItemType_MaxLength = enum_max_length;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the enumerations...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 ItemType Enumerations TDW.ItemType.Type");
+	file_handle.writeLine("\t\t// -- -------- ------------ -----------------");
+	file_handle.writeLine("public enum Type {");
+		for (var count_1 = 0; count_1 < enum_list.length; count_1++)
+			file_handle.writeLine("\t" +
+				D2JSP_UTIL_FORMAT_LJust(enum_list[count_1], enum_max_length) +
+				" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+				(((count_1 + 1) < enum_list.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 ItemType Data TDW.ItemType.Data");
+	file_handle.writeLine("\t// -- -------- ---- -----------------");
+	file_handle.writeLine("\tpublic static Datum[] base_list = new Datum[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++) {
+		var this_code = D2JSP_ITEMTYPE_TypeToNameList[count_1];
+		var code_str  = GetPaddedString(this_code, base_max_length);
+		file_handle.writeLine("\t\t" +
+			"new Datum(" + code_str + ", " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 4) + ", " +
+			"\"" + base_list[count_1] + "\")" +
+			(((count_1 + 1) < base_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	for (var this_prop in D2JSP_ITEMTYPE_TextToTypeList) {
+		var tmp_prop = this_prop.toLowerCase();
+		if ((!(this_prop in name_hash)) && (!(this_prop in syn_hash)))
+			syn_hash[tmp_prop] = D2JSP_ITEMTYPE_TextToTypeList[this_prop];
+	}
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit static constructor code...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Populate the code hash...");
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tcode_hash.Add(base_list[count_1].code, " +
+		"count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	file_handle.writeLine("\t\t// Populate the name hash...");
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1].name, " +
+		"count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these synonyms to name hash...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(syn_hash[this_prop], 3) + ");");
+	}
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpItem(file_handle)
+{
+/*
+	print("Writing item data...");
+
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Array of data for TDW.Item.Instance");
+	file_handle.writeLine("\t\t// ----- -- ---- --- -----------------");
+	file_handle.writeLine("\t\t//    string           code;");
+	file_handle.writeLine("\t\t//    string           item_type_code;");
+	file_handle.writeLine("\t\t//    string           alt_gfx;");
+	file_handle.writeLine("\t\t//    string           code_norm;");
+	file_handle.writeLine("\t\t//    string           code_uber;");
+	file_handle.writeLine("\t\t//    string           code_ultra;");
+	file_handle.writeLine("\t\t//    string           upgrade_nm;");
+	file_handle.writeLine("\t\t//    string           upgrade_hell;");
+	file_handle.writeLine("\t\t//    TDW.ItemCategory category;");
+	file_handle.writeLine("\t\t//    TDW.ItemClass    item_class;");
+	file_handle.writeLine("\t\t//    string           name;");
+	EmitHyphens(file_handle);
+	file_handle.writeLine("\t\t// There are " +
+		D2JSP_UTIL_GEN_CountHashElements(D2JSP_ITEM_ItemList) + " items. " +
+		"Size arraylists appropriately.");
+	EmitComment(file_handle);
+
+	file_handle.writeLine("\t\t// Create a hash by item code for all items...");
+	for (var this_code in D2JSP_ITEM_ItemList) {
+		var this_item  = D2JSP_ITEM_ItemList[this_code];
+		var category   = (this_item[D2JSP_ITEM_ELEMENT_CATEGORY] == "A") ?
+			"TDW.ItemCategory.Armor" :
+			((this_item[D2JSP_ITEM_ELEMENT_CATEGORY] == "M") ?
+			"TDW.ItemCategory.Miscellaneous" :
+			((this_item[D2JSP_ITEM_ELEMENT_CATEGORY] == "W") ?
+			"TDW.ItemCategory.Weapon" : "???"));
+		var item_class = (this_item[D2JSP_ITEM_ELEMENT_ITEMCLASS] ==
+			D2JSP_ITEM_CLASS_NORMAL) ? "Normal" :
+			((this_item[D2JSP_ITEM_ELEMENT_ITEMCLASS] ==
+			D2JSP_ITEM_CLASS_EXCEPTIONAL) ? "Exceptional" :
+			((this_item[D2JSP_ITEM_ELEMENT_ITEMCLASS] ==
+			D2JSP_ITEM_CLASS_ELITE) ? "Elite" : "None"));
+		file_handle.writeLine("\t\tcode_hash.Add(" +
+			"\"" + this_code + "\", new Datum(" +
+			"\"" + this_code + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_ITEMTYPE] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_ALT_GFX] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_CODE_NORM] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_CODE_UBER] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_CODE_ULTRA] + "\",\n\t\t\t" +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_UPGRADE_NM] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_UPGRADE_HELL] + "\", " +
+			category + ",\n\t\t\t" +
+			GetPaddedDatum("TDW.ItemClass." + item_class, 25) + ", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_NAME] + "\"));");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Create a hash by item name...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tforeach (string this_key in code_hash.GetKeys())");
+	file_handle.writeLine("\t\t\tname_hash.Add(this_key, code_hash[this_key]);");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add synonyms to the item name hash...");
+	EmitComment(file_handle);
+	var name_hash = new Array();
+	for (var this_prop in D2JSP_ITEM_ItemList)
+		name_hash[D2JSP_ITEM_ItemList[this_prop][D2JSP_ITEM_ELEMENT_NAME].
+			toLowerCase()] = this_prop;
+	for (var this_prop in D2JSP_ITEM_NameToCodeList) {
+		if (!(this_prop in name_hash)) {
+			var tmp_prop = this_prop.replace(/\n/, "\\n");
+			file_handle.writeLine("\t\tname_hash.Add(\"" +
+				tmp_prop + "\",\n" +
+				"\t\t\tname_hash[\"" +
+				D2JSP_ITEM_ItemList[D2JSP_ITEM_NameToCodeList[this_prop]]
+				[D2JSP_ITEM_ELEMENT_NAME] + "\"]);");
+		}
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+*/
+	print("Writing item data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var code_list       = new Array();
+	var name_hash       = new Array();
+	var code_hash       = new Array();
+	var count_1         = 0;
+	for (var this_prop in D2JSP_ITEM_ItemList) {
+		var base_name      = D2JSP_ITEM_ItemList[this_prop][D2JSP_ITEM_ELEMENT_NAME];
+		var code_name      = this_prop;
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(base_name));
+		var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+			D2JSP_UTIL_FORMAT_InitCaps(base_name));
+		base_max_length    = Math.max(base_max_length, base_name.length);
+		enum_max_length    = Math.max(enum_max_length, enum_name.length);
+		base_list[count_1] = base_name;
+		code_list[count_1] = code_name;
+		enum_list[count_1] = enum_name;
+		name_hash[base_name.toLowerCase()] = count_1;
+		code_hash[code_name.toLowerCase()] = count_1;
+		data_count++;
+		count_1++;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 Item Data TDW.Item.Data");
+	file_handle.writeLine("\t// -- ---- ---- -------------");
+	file_handle.writeLine("\tpublic static Datum[] base_list = new Datum[] {");
+	for (var count_1 = 0; count_1 < code_list.length; count_1++) {
+		var this_code = code_list[count_1];
+		var this_item = D2JSP_ITEM_ItemList[this_code];
+		var type_code = this_item[D2JSP_ITEM_ELEMENT_ITEMTYPE];
+		var type_str  = GetPaddedString(type_code, base_max_length);
+		var category  = (this_item[D2JSP_ITEM_ELEMENT_CATEGORY] == "A") ?
+			"TDW.ItemCategory.Armor" :
+			((this_item[D2JSP_ITEM_ELEMENT_CATEGORY] == "M") ?
+			"TDW.ItemCategory.Miscellaneous" :
+			((this_item[D2JSP_ITEM_ELEMENT_CATEGORY] == "W") ?
+			"TDW.ItemCategory.Weapon" : "???"));
+		var item_class = (this_item[D2JSP_ITEM_ELEMENT_ITEMCLASS] ==
+			D2JSP_ITEM_CLASS_NORMAL) ? "Normal" :
+			((this_item[D2JSP_ITEM_ELEMENT_ITEMCLASS] ==
+			D2JSP_ITEM_CLASS_EXCEPTIONAL) ? "Exceptional" :
+			((this_item[D2JSP_ITEM_ELEMENT_ITEMCLASS] ==
+			D2JSP_ITEM_CLASS_ELITE) ? "Elite" : "None"));
+		file_handle.writeLine("\t\tnew Datum(" +
+			"\"" + this_code + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_ITEMTYPE] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_ALT_GFX] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_CODE_NORM] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_CODE_UBER] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_CODE_ULTRA] + "\",\n\t\t\t" +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_UPGRADE_NM] + "\", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_UPGRADE_HELL] + "\", " +
+			category + ",\n\t\t\t" +
+			GetPaddedDatum("TDW.ItemClass." + item_class, 25) + ", " +
+			"\"" + this_item[D2JSP_ITEM_ELEMENT_NAME] + "\")" +
+			(((count_1 + 1) < base_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	for (var this_prop in D2JSP_ITEM_NameToCodeList) {
+		var tmp_prop = this_prop.toLowerCase();
+		var tmp_prop = this_prop.replace(/\n/, "\\n");
+		if ((!(this_prop in name_hash)) && (!(this_prop in syn_hash)) &&
+			(!(tmp_prop in syn_hash)))
+			syn_hash[tmp_prop] = code_hash[D2JSP_ITEM_NameToCodeList[this_prop]];
+	}
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit static constructor code...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Populate the code hash...");
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tcode_hash.Add(base_list[count_1].code, " +
+		"count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	file_handle.writeLine("\t\t// Populate the name hash...");
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1].name, " +
+		"count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these synonyms to name hash...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(syn_hash[this_prop], 3) + ");");
+	}
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpStat(file_handle)
+{
+	print("Writing stat data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	for (var count_1 = 0; count_1 < D2JSP_STAT_StatNameList.length; count_1++) {
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(D2JSP_STAT_StatNameList[count_1]));
+		var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+			D2JSP_UTIL_FORMAT_InitCaps(base_name));
+		base_max_length    = Math.max(base_max_length, base_name.length);
+		enum_max_length    = Math.max(enum_max_length, enum_name.length);
+		base_list[count_1] = base_name;
+		enum_list[count_1] = enum_name;
+		data_count++;
+		name_hash[base_name.toLowerCase()] = true;
+		botNET_MAP_Stat[count_1] = enum_name;
+	}
+	botNET_MAP_Stat_MaxLength = enum_max_length;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the enumerations...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 Stat Enumerations TDW.Stat");
+	file_handle.writeLine("\t\t// -- ---- ------------ --------");
+	file_handle.writeLine("public enum Stat {");
+		for (var count_1 = 0; count_1 < enum_list.length; count_1++)
+			file_handle.writeLine("\t" +
+				D2JSP_UTIL_FORMAT_LJust(enum_list[count_1], enum_max_length) +
+				" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+				(((count_1 + 1) < enum_list.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 Stat String Names TDW.StatData");
+	file_handle.writeLine("\t// -- ---- ------ ----- ------------");
+	file_handle.writeLine("\tpublic static string[] base_list = new string[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++)
+		file_handle.writeLine("\t\t\"" + base_list[count_1] + "\"" +
+			(((count_1 + 1) < base_list.length) ? "," : ""));
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	for (var this_prop in D2JSP_STAT_NameToStatList) {
+		if (!(this_prop in name_hash))
+			syn_hash[this_prop] = D2JSP_STAT_NameToStatList[this_prop];
+	}
+	// Add any synonyms from the names in the form '^Item (.*)$' as '(.*)'
+	for (var count_1 = 0; count_1 < base_list.length; count_1++) {
+		var match_name = base_list[count_1].match(/^Item\s+(.+)$/i);
+		if (match_name && (match_name.length == 2)) {
+			match_name[1].toLowerCase();
+			if ((!(match_name[1] in name_hash)) && (!(match_name[1] in syn_hash)))
+				syn_hash[match_name[1]] = count_1;
+		}
+	}
+	// Add the enumeration names as synonyms...
+	for (var count_1 = 0; count_1 < enum_list.length; count_1++) {
+		var tmp_name = enum_list[count_1].toLowerCase();
+		if ((!(tmp_name in name_hash)) && (!(tmp_name in syn_hash)))
+			syn_hash[tmp_name] = count_1;
+	}
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the synonyms...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1], count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(syn_hash[this_prop], 3) + ");");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+/*
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1], count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in D2JSP_STAT_NameToStatList) {
+		if (!(this_prop in name_hash))
+			file_handle.writeLine("\t\tname_hash.Add(\"" + this_prop + "\", " +
+				D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_NameToStatList[this_prop], 3) +
+				");");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+*/
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpExtendedStats(file_handle)
+{
+	print("Writing extended stat data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	for (var count_1 = 0; count_1 < ISF_StatExtendedList.length; count_1++) {
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(ISF_StatExtendedList[count_1][0]));
+		var enum_name      = base_name;
+		enum_name      = enum_name.replace(/\-/g, " ");
+		enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+			D2JSP_UTIL_FORMAT_InitCaps(enum_name));
+		base_max_length    = Math.max(base_max_length, base_name.length);
+		enum_max_length    = Math.max(enum_max_length, enum_name.length);
+		base_list[count_1] = base_name;
+		enum_list[count_1] = enum_name;
+		data_count++;
+		name_hash[base_name.toLowerCase()] = true;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the enumerations...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 StatExtendedType Enumerations TDW.StatExtendedType");
+	file_handle.writeLine("\t\t// -- ---------------- ------------ --------------------");
+	file_handle.writeLine("public enum StatExtendedType {");
+		for (var count_1 = 0; count_1 < enum_list.length; count_1++)
+			file_handle.writeLine("\t" +
+				D2JSP_UTIL_FORMAT_LJust(enum_list[count_1], enum_max_length) +
+				" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 2) +
+				(((count_1 + 1) < enum_list.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 StatExtended String Names TDW.StatExtendedInfo");
+	file_handle.writeLine("\t// -- ------------ ------ ----- --------------------");
+	file_handle.writeLine("\tpublic static StatExtended[] base_list = new StatExtended[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++) {
+		var this_one = ISF_StatExtendedList[count_1];
+		file_handle.writeLine("\t\tnew StatExtended(" +
+			"\"" + base_list[count_1] + "\",\n" +
+			"\t\t\t" + GetPaddedDatum("botNET.Stat." +
+			botNET_MAP_Stat[this_one[1]], botNET_MAP_Stat_MaxLength + 12) +
+			((this_one.length == 2) ? "" : (", " + this_one[2])) + ")" +
+			(((count_1 + 1) < base_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	var mix_list = [
+		["enhanced",	"enhance"],
+		["defense",		"def"],
+		["damage",		"dmg"],
+		["percentage",	"percent"],
+		["percentage",	"%"],
+		["minimum",		"min"],
+		["maximum",		"max"],
+		["one handed",	"onehanded"],
+		["one handed",	"one-handed"],
+		["one handed",	"1handed"],
+		["one handed",	"1 handed"],
+		["one handed",	"1-handed"],
+		["one handed",	"onehand"],
+		["one handed",	"one hand"],
+		["one handed",	"one-hand"],
+		["one handed",	"1hand"],
+		["one handed",	"1 hand"],
+		["one handed",	"1-hand"],
+		["two handed",	"twohanded"],
+		["two handed",	"two-handed"],
+		["two handed",	"2handed"],
+		["two handed",	"2 handed"],
+		["two handed",	"2-handed"],
+		["two handed",	"twohand"],
+		["two handed",	"two hand"],
+		["two handed",	"two-hand"],
+		["two handed",	"2hand"],
+		["two handed",	"2 hand"],
+		["two handed",	"2-hand"],
+
+		["one-handed",	"onehanded"],
+		["one-handed",	"one-handed"],
+		["one-handed",	"1handed"],
+		["one-handed",	"1 handed"],
+		["one-handed",	"1-handed"],
+		["one-handed",	"onehand"],
+		["one-handed",	"one hand"],
+		["one-handed",	"one-hand"],
+		["one-handed",	"1hand"],
+		["one-handed",	"1 hand"],
+		["one-handed",	"1-hand"],
+		["two-handed",	"twohanded"],
+		["two-handed",	"two-handed"],
+		["two-handed",	"2handed"],
+		["two-handed",	"2 handed"],
+		["two-handed",	"2-handed"],
+		["two-handed",	"twohand"],
+		["two-handed",	"two hand"],
+		["two-handed",	"two-hand"],
+		["two-handed",	"2hand"],
+		["two-handed",	"2 hand"],
+		["two-handed",	"2-hand"]
+	]
+	for (var count_0 = 0; count_0 < base_list.length; count_0++) {
+		var this_try   = base_list[count_0].toLowerCase();
+		var try_hash   = new Array();
+		var found_flag;
+		try_hash[this_try] = true;
+		if ((!(this_try in name_hash)) && (!(this_try in syn_hash)))
+			syn_hash[this_try] = count_0;
+//file_handle.writeLine(">>>>>>>>>> SRC: [" + this_try + "]");
+		do {
+			found_flag = false;
+			for (var this_prop in try_hash) {
+				var tmp_try_hash = new Array();
+				for (var count_2 = 0; count_2 < mix_list.length; count_2++) {
+					var found_index;
+					if ((found_index = this_prop.indexOf(mix_list[count_2][0])) > -1) {
+						var tmp_prop = this_prop;
+						var prop_len = this_prop.length;
+						var mix_len  = mix_list[count_2][0].length;
+						if (!found_index)
+							tmp_prop = mix_list[count_2][1] + " " + tmp_prop.substr(mix_len);
+						else
+							tmp_prop            = tmp_prop.substr(0, found_index) +
+								" " + mix_list[count_2][1] + " " +
+								tmp_prop.substr(found_index + mix_len);
+						tmp_prop               = D2JSP_UTIL_FORMAT_Trim(
+							D2JSP_UTIL_FORMAT_OneSpace(tmp_prop));
+						tmp_try_hash[tmp_prop] = true;
+						found_flag             = true;
+//file_handle.writeLine(">>>>>>>>>> DST: [" + tmp_prop + "]");
+					}
+				}
+				for (var tmp_prop in tmp_try_hash) {
+					if ((!(tmp_prop in name_hash)) && (!(tmp_prop in syn_hash)))
+						syn_hash[tmp_prop] = count_0;
+				}
+				try_hash = tmp_try_hash;
+			}
+		} while (found_flag);
+/*
+file_handle.writeLine("********** SRC: [" + this_try + "]");
+		for (var tmp_prop in try_hash) {
+			if ((!(tmp_prop in name_hash)) && (!(tmp_prop in syn_hash)))
+{
+file_handle.writeLine("********** DST: [" + tmp_prop + "]");
+				syn_hash[tmp_prop] = count_1;
+}
+		}
+*/
+	}
+/*
+	// Add the enumeration names as synonyms...
+	for (var count_1 = 0; count_1 < enum_list.length; count_1++) {
+		var tmp_name = enum_list[count_1].toLowerCase();
+		if ((!(tmp_name in name_hash)) && (!(tmp_name in syn_hash)))
+			syn_hash[tmp_name] = count_1;
+	}
+*/
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the synonyms...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1].name, count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", " +
+			"((int) TDW.StatExtendedType." + enum_list[syn_hash[this_prop]] + "));");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+/*
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1], count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in D2JSP_STAT_NameToStatList) {
+		if (!(this_prop in name_hash))
+			file_handle.writeLine("\t\tname_hash.Add(\"" + this_prop + "\", " +
+				D2JSP_UTIL_FORMAT_RJust(D2JSP_STAT_NameToStatList[this_prop], 3) +
+				");");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+*/
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpState(file_handle)
+{
+	print("Writing state data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	for (var count_1 = 0; count_1 < D2JSP_STATE_StateToNameList.length;
+		count_1++) {
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(D2JSP_STATE_StateToNameList[count_1]));
+		var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+			D2JSP_UTIL_FORMAT_InitCaps(base_name));
+		if (enum_name == "111")
+			enum_name = "Unknown_111";
+		base_max_length    = Math.max(base_max_length, base_name.length);
+		enum_max_length    = Math.max(enum_max_length, enum_name.length);
+		base_list[count_1] = base_name;
+		enum_list[count_1] = enum_name;
+		data_count++;
+		name_hash[base_name.toLowerCase()] = true;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the enumerations...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 State Enumerations TDW.State");
+	file_handle.writeLine("\t\t// -- ----- ------------ ---------");
+	file_handle.writeLine("public enum State {");
+		for (var count_1 = 0; count_1 < enum_list.length; count_1++)
+			file_handle.writeLine("\t" +
+				D2JSP_UTIL_FORMAT_LJust(enum_list[count_1], enum_max_length) +
+				" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+				(((count_1 + 1) < enum_list.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 State String Names TDW.StateInfo");
+	file_handle.writeLine("\t// -- ----- ------ ----- -------------");
+	file_handle.writeLine("\tpublic static string[] base_list = new string[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++)
+		file_handle.writeLine("\t\t\"" + base_list[count_1] + "\"" +
+			(((count_1 + 1) < base_list.length) ? "," : ""));
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	for (var this_prop in D2JSP_STATE_NameToStateList) {
+		this_prop = this_prop.toLowerCase();
+		if (!(this_prop in name_hash))
+			syn_hash[this_prop] = D2JSP_STATE_NameToStateList[this_prop];
+	}
+	// Add any synonyms from the names in the form '^Shrine (.*)$' as '(.*) Shrine'
+	for (var count_1 = 0; count_1 < base_list.length; count_1++) {
+		var match_name = base_list[count_1].match(/^Shrine\s+(.+)$/i);
+		if (match_name && (match_name.length == 2)) {
+			match_name[1].toLowerCase();
+			if ((!(match_name[1] in name_hash)) && (!(match_name[1] in syn_hash)))
+				syn_hash[match_name[1] + " Shrine"] = count_1;
+		}
+	}
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the synonyms...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1], count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(syn_hash[this_prop], 3) + ");");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpSkill(file_handle)
+{
+	print("Writing skill data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	for (var count_1 = 0; count_1 < D2JSP_SKILL_SkillList.length; count_1++) {
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(D2JSP_SKILL_SkillList[count_1]));
+		var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+			D2JSP_UTIL_FORMAT_InitCaps(base_name));
+		if (count_1 == D2JSP_SKILL_QUICKNESS) {
+			base_name = "Burst Of Speed";
+			enum_name = "BurstOfSpeed";
+			D2JSP_SKILL_NameList["quickness"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_CYCLE_OF_LIFE) {
+			base_name = "Carrion Vine";
+			enum_name = "CarrionVine";
+			D2JSP_SKILL_NameList["cycle of life"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_DOPPLEZON) {
+			base_name = "Decoy";
+			enum_name = "Decoy";
+			D2JSP_SKILL_NameList["dopplezon"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_FIRE_TRAUMA) {
+			base_name = "Fire Blast";
+			enum_name = "FireBlast";
+			D2JSP_SKILL_NameList["fire trauma"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_FIRE_TRAUMA) {
+			base_name = "Fire Blast";
+			enum_name = "FireBlast";
+			D2JSP_SKILL_NameList["fire trauma"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_ERUPTION) {
+			base_name = "Fissure";
+			enum_name = "Fissure";
+			D2JSP_SKILL_NameList["eruption"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_HEART_OF_WOLVERINE) {
+			base_name = "Heart Of The Wolverine";
+			enum_name = "HeartOfTheWolverine";
+			D2JSP_SKILL_NameList["heart of wolverine"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_SHAPE_SHIFTING) {
+			base_name = "Lycanthropy";
+			enum_name = "Lycanthropy";
+			D2JSP_SKILL_NameList["shape shifting"] = count_1;
+			D2JSP_SKILL_NameList["shapeshifting"]  = count_1;
+			D2JSP_SKILL_NameList["shape-shifting"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_ROYAL_STRIKE) {
+			base_name = "Phoenix Strike";
+			enum_name = "PhoenixStrike";
+			D2JSP_SKILL_NameList["royal strike"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_PLAGUE_POPPY) {
+			base_name = "Poison Creeper";
+			enum_name = "PoisonCreeper";
+			D2JSP_SKILL_NameList["plague poppy"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_SHOCK_FIELD) {
+			base_name = "Shock Web";
+			enum_name = "ShockWeb";
+			D2JSP_SKILL_NameList["shock field"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_VINES) {
+			base_name = "Solar Creeper";
+			enum_name = "SolarCreeper";
+			D2JSP_SKILL_NameList["vines"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_SUMMON_FENRIS) {
+			base_name = "Summon Dire Wolf";
+			enum_name = "SummonDireWolf";
+			D2JSP_SKILL_NameList["summon fenris"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_WAKE_OF_FIRE_SENTRY) {
+			base_name = "Wake Of Fire";
+			enum_name = "WakeOfFire";
+			D2JSP_SKILL_NameList["wake of fire sentry"] = count_1;
+		}
+		else if (count_1 == D2JSP_SKILL_INFERNO_SENTRY) {
+			base_name = "Wake Of Inferno";
+			enum_name = "WakeOfInferno";
+			D2JSP_SKILL_NameList["wake of inferno sentry"] = count_1;
+			D2JSP_SKILL_NameList["inferno sentry"]         = count_1;
+		}
+		base_max_length    = Math.max(base_max_length, base_name.length);
+		enum_max_length    = Math.max(enum_max_length, enum_name.length);
+		base_list[count_1] = base_name;
+		enum_list[count_1] = enum_name;
+		data_count++;
+		name_hash[base_name.toLowerCase()] = true;
+		if (D2JSP_SKILL_IsValidForPlayerAny(count_1)) {
+			botNET_MAP_SkillType[botNET_MAP_SkillType.length] = [enum_name, count_1];
+			botNET_MAP_SkillType_MaxLength =
+				Math.max(botNET_MAP_SkillType_MaxLength, enum_name.length);
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the enumerations...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 Skill Enumerations TDW.Skill.Type");
+	file_handle.writeLine("\t\t// -- ----- ------------ --------------");
+	file_handle.writeLine("public enum Type {");
+		for (var count_1 = 0; count_1 < enum_list.length; count_1++)
+			file_handle.writeLine("\t" +
+				D2JSP_UTIL_FORMAT_LJust(enum_list[count_1], enum_max_length) +
+				" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+				(((count_1 + 1) < enum_list.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 Skill String Names TDW.Skill.Data");
+	file_handle.writeLine("\t// -- ----- ------ ----- --------------");
+	file_handle.writeLine("\tpublic static string[] base_list = new string[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++)
+		file_handle.writeLine("\t\t\"" + base_list[count_1] + "\"" +
+			(((count_1 + 1) < base_list.length) ? "," : ""));
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	for (var this_prop in D2JSP_SKILL_NameList) {
+		tmp_prop = this_prop.toLowerCase();
+		if ((!(this_prop in name_hash)) && (!(tmp_prop in syn_hash)))
+			syn_hash[tmp_prop] = D2JSP_SKILL_NameList[this_prop];
+	}
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the synonyms...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Populate the name hash...");
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1], count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(syn_hash[this_prop], 3) + ");");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpArea(file_handle)
+{
+	print("Writing area data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	botNET_MAP_AreaLevel    = new Array();
+	for (var count_1 = 0; count_1 < D2JSP_AREA_List.length; count_1++) {
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(D2JSP_AREA_List[count_1].area_name));
+		if (base_name == "Tal Rasha's Tomb")
+			base_name += " " + (count_1 - 65).toString();
+/*
+		var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+			D2JSP_UTIL_FORMAT_InitCaps(base_name.replace(/'s/g, "s")));
+*/
+		var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(D2JSP_UTIL_FORMAT_InitCaps(
+			D2JSP_UTIL_FORMAT_Trim(D2JSP_AREA_List[count_1].area_name_mpq)));
+		enum_name = enum_name.replace(/'s/gi, "s");
+		if (base_name == "*NOT-AN-AREA*")
+			enum_name = "None";
+		else if (enum_name == "TalRashasTomb")
+			enum_name += (count_1 - 65).toString();
+		else if (enum_name == "RigidHighlands")
+			enum_name = "FrigidHighlands";
+		else if (enum_name.match(/^TheWorldstoneKeepLevel\d$/) != null)
+			enum_name = "TheWorldStoneKeepLevel" + (count_1 - 127).toString();
+		else if ((count_1 >= D2JSP_AREA_A2_SEWERS_LEVEL_1) &&
+			(count_1 <= D2JSP_AREA_A2_SEWERS_LEVEL_3))
+			enum_name += "Act2";
+		else if ((count_1 == D2JSP_AREA_A3_SEWERS_LEVEL_1) ||
+			(count_1 == D2JSP_AREA_A3_SEWERS_LEVEL_2))
+			enum_name += "Act3";
+		base_max_length    = Math.max(base_max_length, base_name.length);
+		enum_max_length    = Math.max(enum_max_length, enum_name.length);
+		base_list[count_1] = base_name;
+		enum_list[count_1] = enum_name;
+		data_count++;
+		name_hash[base_name.toLowerCase()] = count_1;
+		botNET_MAP_AreaLevel[count_1] = enum_name;
+	}
+	botNET_MAP_AreaLevel_MaxLength = enum_max_length;
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the enumerations...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 Area Enumerations TDW.Area.Type");
+	file_handle.writeLine("\t\t// -- ---- ------------ -------------");
+	file_handle.writeLine("public enum Type {");
+		for (var count_1 = 0; count_1 < enum_list.length; count_1++)
+			file_handle.writeLine("\t" +
+				D2JSP_UTIL_FORMAT_LJust(enum_list[count_1], enum_max_length) +
+				" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+				(((count_1 + 1) < enum_list.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 Areas TDW.Area.Data");
+	file_handle.writeLine("\t// -- ----- -------------");
+	file_handle.writeLine("\tpublic static Area[] base_list = new Area[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++)
+		file_handle.writeLine("\t\tnew Area(" +
+			"botNET.AreaLevel." + enum_list[count_1] + ",\n" +
+			"\t\t\t\"" + base_list[count_1] + "\",\n" +
+			"\t\t\t\"" + D2JSP_AREA_List[count_1].area_name_mpq + "\",\n" +
+			"\t\t\t" + GetBoolean(D2JSP_AREA_List[count_1].is_inside) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(D2JSP_AREA_List[count_1].drlg_type, 2) + ", " +
+			D2JSP_AREA_List[count_1].level_type + ", " +
+			D2JSP_UTIL_FORMAT_RJust(D2JSP_AREA_List[count_1].sub_type, 2) + ", " +
+			GetBoolean(D2JSP_AREA_List[count_1].is_complex) + ")" +
+			(((count_1 + 1) < base_list.length) ? "," : ""));
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	for (var count_1 = 1; count_1 < D2JSP_AREA_List.length; count_1++) {
+		var tmp_prop;
+		var this_prop;
+		// English text names...
+		this_prop = D2JSP_AREA_List[count_1].area_name.toLowerCase();
+		if ((!(this_prop in name_hash)) && (!(this_prop in syn_hash)))
+			syn_hash[this_prop] = count_1;
+		tmp_prop = this_prop;
+		tmp_prop = tmp_prop.replace(/'s/gi, "s");
+		if ((tmp_prop != this_prop) &&
+			(!(tmp_prop in name_hash)) && (!(tmp_prop in syn_hash)))
+			syn_hash[tmp_prop] = count_1;
+		tmp_prop = this_prop;
+		tmp_prop = tmp_prop.replace(/'s/gi, "");
+		if ((tmp_prop != this_prop) &&
+			(!(tmp_prop in name_hash)) && (!(tmp_prop in syn_hash)))
+			syn_hash[tmp_prop] = count_1;
+		// MPQ Names
+		this_prop = D2JSP_AREA_List[count_1].area_name_mpq.toLowerCase();
+		if ((!(this_prop in name_hash)) && (!(this_prop in syn_hash)))
+			syn_hash[this_prop] = count_1;
+		tmp_prop = this_prop;
+		tmp_prop = tmp_prop.replace(/'s/gi, "s");
+		if ((tmp_prop != this_prop) &&
+			(!(tmp_prop in name_hash)) && (!(tmp_prop in syn_hash)))
+			syn_hash[tmp_prop] = count_1;
+		tmp_prop = this_prop;
+		tmp_prop = tmp_prop.replace(/'s/gi, "");
+		if ((tmp_prop != this_prop) &&
+			(!(tmp_prop in name_hash)) && (!(tmp_prop in syn_hash)))
+			syn_hash[tmp_prop] = count_1;
+	}
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the synonyms...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Populate the name hash...");
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tif (!name_hash.ContainsKey(" +
+		"base_list[count_1].name))");
+	file_handle.writeLine("\t\t\t\tname_hash.Add(base_list[count_1].name, base_list[count_1]);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", base_list[" +
+				D2JSP_UTIL_FORMAT_RJust(syn_hash[this_prop], 3) + "]);");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpWaypoints(file_handle)
+{
+	print("Writing waypoint data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	for (var count_1 = 0; count_1 < D2JSP_AREA_WaypointObjList.length;
+		count_1++) {
+		for (var count_2 = 0;
+			count_2 < D2JSP_AREA_WaypointObjList[count_1].length; count_2++) {
+			var this_wp           = D2JSP_AREA_WaypointObjList[count_1][count_2];
+			var enum_name         = "botNET.AreaLevel." + botNET_MAP_AreaLevel[this_wp.area];
+			enum_max_length       = Math.max(enum_max_length, enum_name.length);
+			base_list[data_count] = [count_1, count_2];
+			enum_list[data_count] = enum_name;
+			data_count++;
+//			name_hash[base_name.toLowerCase()] = count_1;
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 Waypoints TDW.Waypoint.Data");
+	file_handle.writeLine("\t// -- --------- -----------------");
+	file_handle.writeLine("\tpublic static Waypoint[] base_list = new Waypoint[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++) {
+		var this_wp = D2JSP_AREA_WaypointObjList[base_list[count_1][0]]
+			[base_list[count_1][1]];
+		file_handle.writeLine("\t\tnew Waypoint(" +
+			GetPaddedDatum(enum_list[count_1],
+				enum_max_length) + ", " +
+			(base_list[count_1][0] + 1) + ", " +
+			(base_list[count_1][1] + 1) + ", " +
+			this_wp.unit_id_spec + "" +
+			((!this_wp.room_spec.length) ? "" :
+				(",\n\t\t\t" + this_wp.room_spec)) +
+			(((count_1 + 1) < base_list.length) ? ")," : ")"));
+	}
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpSkillStats(file_handle)
+{
+	print("Writing skill stat data...");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the data...
+	// //////////////////////////////////////////////////////////////////////
+	var data_count      = 0;
+	var base_max_length = 0;
+	var enum_max_length = 0;
+	var base_list       = new Array();
+	var enum_list       = new Array();
+	var name_hash       = new Array();
+	for (var count_1 = 0; count_1 < ISF_SkillNameList.length; count_1++) {
+		var base_name      = D2JSP_UTIL_FORMAT_OneSpace(
+			D2JSP_UTIL_FORMAT_Trim(ISF_SkillNameList[count_1]));
+		if (base_name != "Skill Tree Any") {
+			var enum_name      = D2JSP_UTIL_FORMAT_NoSpace(
+				D2JSP_UTIL_FORMAT_InitCaps(base_name));
+			base_max_length    = Math.max(base_max_length, base_name.length);
+			enum_max_length    = Math.max(enum_max_length, enum_name.length);
+			base_list[data_count] = base_name;
+			enum_list[data_count] = enum_name;
+			data_count++;
+			name_hash[base_name.toLowerCase()] = true;
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the enumerations...
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 StatSkillType Enumerations TDW.StatSkillType");
+	file_handle.writeLine("\t\t// -- ------------- ------------ -----------------");
+	file_handle.writeLine("public enum StatSkillType {");
+	for (var count_1 = 0; count_1 < enum_list.length; count_1++)
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(enum_list[count_1], enum_max_length) +
+			" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < enum_list.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+
+	var MyStatSkillClass = [
+		"All",
+		"Class",
+		"Tree",
+		"Single",
+		"Elemental"
+	];
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// D2 StatSkillClass Enumerations TDW.StatSkillClass");
+	file_handle.writeLine("\t\t// -- -------------- ------------ ------------------");
+	file_handle.writeLine("public enum StatSkillClass {");
+	for (var count_1 = 0; count_1 < MyStatSkillClass.length; count_1++)
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(MyStatSkillClass[count_1], 9) +
+			" = " + D2JSP_UTIL_FORMAT_RJust(count_1, 1) +
+			(((count_1 + 1) < MyStatSkillClass.length) ? "," : ""));
+	file_handle.writeLine("}");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the basic data array...
+	// //////////////////////////////////////////////////////////////////////
+	var final_list = new Array();
+	file_handle.writeLine("");
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t// D2 StatSkill String Names TDW.StatSkillInfo");
+	file_handle.writeLine("\t// -- --------- ------ ----- -----------------");
+	file_handle.writeLine("\tpublic static StatSkill[] base_list = new StatSkill[] {");
+	for (var count_1 = 0; count_1 < base_list.length; count_1++) {
+		var this_name  = base_list[count_1];
+		var this_one   = ISF_SkillMap[this_name.toLowerCase()];
+		if (this_one == null) {
+			print("********** ERROR **********");
+			stop();
+		}
+		final_list.push(ISF_SkillMap[this_name.toLowerCase()]);
+		var stat_class =
+			(this_one[0] == ISF_QUAL_NAME_TYPE_SKILL_ALL)     ? MyStatSkillClass[0] :
+			(this_one[0] == ISF_QUAL_NAME_TYPE_SKILL_CLASS)   ? MyStatSkillClass[1] :
+			(this_one[0] == ISF_QUAL_NAME_TYPE_SKILL_TREE)    ? MyStatSkillClass[2] :
+			(this_one[0] == ISF_QUAL_NAME_TYPE_SKILL_SINGLE)  ? MyStatSkillClass[3] :
+			(this_one[0] == ISF_QUAL_NAME_TYPE_SKILL_ELEMENT) ? MyStatSkillClass[4] :
+			"********** ERROR **********";
+		var selector = this_one[2];
+		selector = (selector instanceof D2JSP_SKILL_Tree) ?
+			selector.value_110 : selector;
+		file_handle.writeLine("\t\tnew StatSkill(" +
+			"\"" + base_list[count_1] + "\",\n" +
+			"\t\t\t" + "TDW.StatSkillClass." + stat_class + ",\n" +
+			"\t\t\t" + GetPaddedDatum("botNET.Stat." +
+			botNET_MAP_Stat[this_one[1]], botNET_MAP_Stat_MaxLength + 12) +
+			((selector != null) ? (", " + D2JSP_UTIL_FORMAT_RJust(selector, 3)) :
+				"") +
+			(((count_1 + 1) < base_list.length) ? ")," : ")"));
+	}
+	file_handle.writeLine("\t};");
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Prepare the synonym data...
+	// //////////////////////////////////////////////////////////////////////
+	// Get the current D2jsp synonyms...
+	var syn_hash = new Array();
+	// Add the equivalent skill stat mappings...
+	for (var this_prop in ISF_SkillMap) {
+		var tmp_prop = this_prop.toLowerCase();
+		if ((!(tmp_prop in name_hash)) && (!(tmp_prop in syn_hash))) {
+			var this_spec = ISF_SkillMap[this_prop];
+			for (var count_1 = 0; count_1 < final_list.length; count_1++) {
+				if ((this_spec[0] == final_list[count_1][0]) &&
+					 (this_spec[1] == final_list[count_1][1]) &&
+					 (this_spec[2] == final_list[count_1][2]))
+					 syn_hash[tmp_prop] = count_1;
+			}
+		}
+	}
+/*
+	// Add the enumeration names as synonyms...
+	for (var count_1 = 0; count_1 < enum_list.length; count_1++) {
+		var tmp_name = enum_list[count_1].toLowerCase();
+		if ((!(tmp_name in name_hash)) && (!(tmp_name in syn_hash)))
+			syn_hash[tmp_name] = count_1;
+	}
+*/
+	// Determine the maximum length of a synonym...
+	var max_syn_length = 0;
+	for (var this_prop in syn_hash)
+		max_syn_length = Math.max(max_syn_length, this_prop.length);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Emit the synonyms...
+	// //////////////////////////////////////////////////////////////////////
+	EmitComment(file_handle);
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Put this into the static constructor...");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\tfor (int count_1 = 0; " +
+		"count_1 < base_list.Length; count_1++)");
+	file_handle.writeLine("\t\t\tname_hash.Add(base_list[count_1], count_1);");
+	EmitComment(file_handle);
+	file_handle.writeLine("\t\t// Add these as synonyms...");
+	for (var this_prop in syn_hash) {
+		file_handle.writeLine("\t\tname_hash.Add(" +
+			GetPaddedString(this_prop, max_syn_length) + ", " +
+			"((int) TDW.StatSkillType." + enum_list[syn_hash[this_prop]] + "));");
+	}
+	EmitComment(file_handle);
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpbotNetMappings(file_handle)
+{
+	print("Writing botNET data...");
+
+	EmitComment(file_handle)
+	EmitComment(file_handle)
+	file_handle.writeLine("// The botNET namespace");
+	EmitComment(file_handle)
+	file_handle.writeLine("");
+	
+	file_handle.writeLine("namespace botNET {");
+	file_handle.writeLine("");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.ItemClass
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public enum ItemClass {");
+	file_handle.writeLine("	Normal      = 0,");
+	file_handle.writeLine("	Exceptional = 1,");
+	file_handle.writeLine("	Elite       = 2,");
+	file_handle.writeLine("	None        = 3");
+	file_handle.writeLine("}");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.AreaLevel
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public enum AreaLevel {");
+	for (var count_1 = 0; count_1 < botNET_MAP_AreaLevel.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(botNET_MAP_AreaLevel[count_1],
+			botNET_MAP_AreaLevel_MaxLength) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < botNET_MAP_AreaLevel.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// public sealed delegate BeginGameEventHandler : System.MulticastDelegate
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.CharacterClass
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public enum CharacterClass {");
+	for (var count_1 = 0; count_1 < D2JSP_CLASS_ID_NameList.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(D2JSP_CLASS_ID_NameList[count_1],
+			"Necromancer".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < D2JSP_CLASS_ID_NameList.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// public sealed delegate ChatLineEventHandler : System.MulticastDelegate
+
+	// public class ChatLineMessageEventArgs : System.EventArgs
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.ClickType
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = ["LeftDown", "LeftHold", "LeftUp", "RightDown", "RightHold",
+		"RightUp"];
+	file_handle.writeLine("public enum ClickType {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(tmp_list[count_1],
+			9) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// public class CommandLine : System.Object
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.DifficultyType
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public enum DifficultyType {");
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_GameDifficulty.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(D2JSP_UTIL_GameDifficulty[count_1],
+			"Nightmare".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < D2JSP_UTIL_GameDifficulty.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// public sealed delegate DrawBeginEventHandler : System.MulticastDelegate
+
+	// public sealed delegate DrawEndEventHandler : System.MulticastDelegate
+
+	// public sealed delegate EndGameEventHandler : System.MulticastDelegate
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.EquipmentLocation
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = [
+		"NotEquipped",
+		"Helmet",
+		"Amulet",
+		"Armor",
+		"RightHandSlot1",
+		"LeftHandSlot1",
+		"LeftRing",
+		"RightRing",
+		"Belt",
+		"Boots",
+		"Gloves",
+		"RightHandSlot2",
+		"LeftHandSlot2"
+	];
+	file_handle.writeLine("public enum EquipmentLocation {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(tmp_list[count_1],
+			"RightHandSlot1".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.GameType
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = ["Classic", "LoD"];
+	file_handle.writeLine("public enum GameType {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(tmp_list[count_1],
+			"Classic".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.ItemLocation
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = [
+		"Ground",
+		"Equipped",
+		"Belt",
+		"Inventory",
+		"Store",
+		"Unk5",
+		"Cube",
+		"Stash",
+		"Unk8",
+		"Unk9",
+	];
+	file_handle.writeLine("public enum ItemLocation {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(tmp_list[count_1],
+			"Inventory".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.PotionType
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = [
+		"Antidote       = 514",
+		"AnyHealing     =   1",
+		"AnyMana        =   2",
+		"GreaterHealing = 590",
+		"GreaterMana    = 595",
+		"Healing        = 589",
+		"LightHealing   = 588",
+		"LightMana      = 593",
+		"Mana           = 594",
+		"MinorHealing   = 597",
+		"MinorMana      = 592",
+		"Stamina        = 513",
+		"SuperHealing   = 591",
+		"SuperMana      = 596",
+		"Thawing        = 517"
+	];
+	file_handle.writeLine("public enum PotionType {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" + tmp_list[count_1] +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.PriceType
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = ["Buy", "Sell", "Gamble"];
+	file_handle.writeLine("public enum PriceType {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(tmp_list[count_1],
+			"Gamble".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.QualityType
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public enum QualityType {");
+	file_handle.writeLine("\tNotApplicable = 0,");
+	file_handle.writeLine("\tLowQuality    = 1,");
+	file_handle.writeLine("\tNormal        = 2,");
+	file_handle.writeLine("\tSuperior      = 3,");
+	file_handle.writeLine("\tMagic         = 4,");
+	file_handle.writeLine("\tSet           = 5,");
+	file_handle.writeLine("\tRare          = 6,");
+	file_handle.writeLine("\tUnique        = 7,");
+	file_handle.writeLine("\tCrafted       = 8");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.SkillHand
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = ["Right", "Left"];
+	file_handle.writeLine("public enum SkillHand {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(tmp_list[count_1],
+			"Right".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.UnitType
+	// //////////////////////////////////////////////////////////////////////
+	var tmp_list = [
+		"Player",
+		"NPC",
+		"Object",
+//		"Missile",
+		"Missle",
+		"Item",
+		"Warp",
+		"UnkItemType6"
+	];
+	file_handle.writeLine("public enum UnitType {");
+	for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(tmp_list[count_1],
+			"UnkItemType6".length) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < tmp_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.SkillType
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public enum SkillType {");
+	for (var count_1 = 0; count_1 < botNET_MAP_SkillType.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(botNET_MAP_SkillType[count_1][0],
+			botNET_MAP_SkillType_MaxLength) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(botNET_MAP_SkillType[count_1][1], 3) +
+			(((count_1 + 1) < botNET_MAP_SkillType.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.ItemType
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public enum ItemType {");
+	for (var count_1 = 0; count_1 < botNET_MAP_ItemType.length; count_1++) {
+		file_handle.writeLine("\t" +
+			D2JSP_UTIL_FORMAT_LJust(botNET_MAP_ItemType[count_1],
+			botNET_MAP_ItemType_MaxLength) + " = " +
+			D2JSP_UTIL_FORMAT_RJust(count_1, 3) +
+			(((count_1 + 1) < botNET_MAP_SkillType.length) ? "," : ""));
+	}
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.Game
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public class Game {");
+	file_handle.writeLine("\tpublic static void          ClickScreen ( botNET.SkillHand hand , bool ShiftKey , int ScreenX , int ScreenY ) { }");
+	file_handle.writeLine("\tpublic static void          Cancel (  ) { }");
+	file_handle.writeLine("\tpublic static void          ClickScreenRight ( System.Int32 ScreenX , System.Int32 ScreenY , System.Boolean ShiftKey ) { }");
+	file_handle.writeLine("\tpublic static void          ClickUIScreen ( System.Int32 MenuItem ) { }");
+	file_handle.writeLine("\tpublic static void          ClickWPButton ( System.Int32 wpButton ) { }");
+	file_handle.writeLine("\tpublic static void          ClickWPPage ( System.Int32 wpPage ) { }");
+	file_handle.writeLine("\tpublic static void          Exit (  ) { }");
+	file_handle.writeLine("\tpublic static void          Exit ( System.Int32 flags ) { }");
+	file_handle.writeLine("//\tprotected override void     Finalize (  ) { }");
+	file_handle.writeLine("\tpublic static int           GetUIState ( System.Int32 flag ) { return(0); }");
+	file_handle.writeLine("\tpublic static System.IntPtr GetWindowHandle (  ) { return(((System.IntPtr) 0)); }");
+	file_handle.writeLine("\tpublic static void          Print ( string msg ) {");
+	file_handle.writeLine("\t\tSystem.Console.WriteLine(msg);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void          Print ( string msg , System.Int32 type ) {");
+	file_handle.writeLine("\t\tSystem.Console.WriteLine(type + \"=\" + msg);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void          Print ( string[] msgs ) {");
+	file_handle.writeLine("\t\tforeach (string this_msg in msgs)");
+	file_handle.writeLine("\t\t\tSystem.Console.WriteLine(this_msg);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void          Print ( System.Exception ExceptionToPrint ) {");
+	file_handle.writeLine("\t\tGame.Print(\"GAME EXCEPTION: \" + ExceptionToPrint.Message.ToString());");
+	file_handle.writeLine("\t\tGame.Print(\"GAME STACK    : \" + ExceptionToPrint.StackTrace);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void          PrintToBnet ( string msg ) {");
+	file_handle.writeLine("\t\tSystem.Console.WriteLine(PlayerName + \":\" + msg);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void          Quit (  ) { }");
+	file_handle.writeLine("/*");
+	file_handle.writeLine("\tprotected static void       raise_OnBeginGameEvent ( botNET.GameEventArgs i1 ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnChatLineEvent ( botNET.ChatLineMessageEventArgs i1 ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnDrawBeginEvent (  ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnDrawEndEvent (  ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnKeyClickEvent ( botNET.KeyClickEventArgs i1 ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnMouseDownEvent ( botNET.MouseClickEventArgs i1 ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnMouseRepeatEvent ( botNET.MouseClickEventArgs i1 ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnMouseUpEvent ( botNET.MouseClickEventArgs i1 ) { }");
+	file_handle.writeLine("\tprotected static void       raise_OnPacketReceiveEvent ( botNET.PacketReceiveEventArgs i1 ) { }");
+	file_handle.writeLine("*/");
+	file_handle.writeLine("\tpublic static string        ReadLine (  ) { return(\"\"); }");
+	file_handle.writeLine("\tpublic static string        ReadLine ( System.Boolean PassThrough ) { return(\"\"); }");
+	file_handle.writeLine("\tpublic static void          Repair (  ) { }");
+	file_handle.writeLine("\tpublic static void          ScreenDrawRectangle ( System.Int32 Xloc , System.Int32 Yloc , System.Int32 Width , System.Int32 Height , System.Int32 Color , System.Int32 Transparency ) { }");
+	file_handle.writeLine("\tpublic static void          ScreenDrawText ( string text , System.Int32 Xloc , System.Int32 Yloc , System.Int32 Color , System.Int32 Font , System.Int32 Alignment ) { }");
+	file_handle.writeLine("\tpublic static void          SendKey ( System.Int32 KeyCode ) { }");
+	file_handle.writeLine("\tpublic static void          SendKey ( System.UInt32 KeyCode1 , System.UInt32 KeyCode2 ) { }");
+	file_handle.writeLine("\tpublic static void          SendMouseClick ( System.Int32 x , System.Int32 y , botNET.ClickType clicktype ) { }");
+	file_handle.writeLine("\tpublic static void          SendPacketToChatServer ( byte[] buf ) { }");
+	file_handle.writeLine("\tpublic static void          SendPacketToGame ( byte[] buf ) { }");
+	file_handle.writeLine("\tpublic static void          SendPacketToServer ( byte[] buf ) { }");
+	file_handle.writeLine("");
+	file_handle.writeLine("\t// Values");
+	file_handle.writeLine("\tpublic static string         account_name     = \"MyAccount\";");
+	file_handle.writeLine("\tpublic static DifficultyType difficulty       = DifficultyType.Normal;");
+	file_handle.writeLine("\tpublic static string         game_description = \"The Game Description\";");
+	file_handle.writeLine("\tpublic static string         game_ip          = \"127.0.0.1\";");
+	file_handle.writeLine("\tpublic static string         game_name        = \"The Game Name\";");
+	file_handle.writeLine("\tpublic static string         game_password    = \"The Game Password\";");
+	file_handle.writeLine("\tpublic static bool           game_status      = true;");
+	file_handle.writeLine("\tpublic static int            game_type        = 1;");
+	file_handle.writeLine("\tpublic static bool           is_hard_core     = false;");
+	file_handle.writeLine("\tpublic static DifficultyType max_difficulty   = DifficultyType.Hell;");
+	file_handle.writeLine("\tpublic static long           memory_usage     = 12345678;");
+	file_handle.writeLine("\tpublic static string         player_name      = \"MyPlayerName\";");
+	file_handle.writeLine("\tpublic static string         realm            = \"USEast\";");
+	file_handle.writeLine("\tpublic static string         sub_realm        = \"USEast\";");
+	file_handle.writeLine("\t//");
+	file_handle.writeLine("");
+	file_handle.writeLine("\tpublic static string AccountName {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(account_name);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static DifficultyType Difficulty {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		 return(difficulty);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static string GameDescription {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(game_description);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static string GameIP {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(game_ip);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\t");
+	file_handle.writeLine("\tpublic static string GameName {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(game_name);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static string GamePassword {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(game_password);");
+	file_handle.writeLine("\t	} ");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool GameStatus {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		 return(game_status);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int GameType {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(game_type);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool IsHardCore {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(is_hard_core);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static DifficultyType MaxDifficulty {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(max_difficulty);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static long MemoryUsage {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(memory_usage);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static string PlayerName {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(player_name);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static string Realm {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(realm);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static string SubRealm {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(sub_realm);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\t");
+	file_handle.writeLine("\tpublic static string          Path                = \"K:\\\\Program Files\\\\Diablo II Hacks\\\\botNET\\\\SimEnv\";");
+	file_handle.writeLine("\tpublic static string          AssembliesDirectory = Path + \"\\\\Assemblies\";");
+	file_handle.writeLine("\tpublic static double          botNETVersion       = 0.34;");
+	file_handle.writeLine("\tpublic static string          botNETVersionString = \"0.3.4\";");
+	file_handle.writeLine("\tpublic static bool            ClickMapMode        = false;");
+	file_handle.writeLine("\tpublic static bool            DebugInfo           = false;");
+	file_handle.writeLine("\tpublic static bool            DebugMode           = false;");
+	file_handle.writeLine("\tpublic static System.DateTime GameStartTime       = new System.DateTime();");
+	file_handle.writeLine("\tpublic static bool            IsInGame            = true;");
+	file_handle.writeLine("\tpublic static string          LibrariesDirectory  = Path + \"\\\\Libraries\";");
+	file_handle.writeLine("\tpublic static string          OutputDirectory     = Path + \"\\\\Output\";");
+	file_handle.writeLine("\tpublic static string          SettingsDirectory   = Path + \"\\\\Settings\";");
+	file_handle.writeLine("\tpublic static string          WorkingDirectory    = Path;");
+	file_handle.writeLine("}");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.Me
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public class Me {");
+	file_handle.writeLine("\tpublic                  Me() { }");
+	file_handle.writeLine("\tpublic static bool      CheckWaypoint(AreaLevel WaypointArea) {");
+	file_handle.writeLine("\t	return(true);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      ClickBelt(ClickType ClickTypeToUse, bool UseShiftKey, int BeltSlot) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      ClickEquipment(EquipmentLocation Location) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      ClickItem(ClickType ClickTypeToUse, bool UseShiftKey, bool UseCtrlKey, ItemLocation Location) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      ClickItem(ClickType ClickTypeToUse, bool UseShiftKey, bool UseCtrlKey, Unit ItemToClick) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      ClickItem(ClickType ClickTypeToUse, bool UseShiftKey, bool UseCtrlKey, ItemLocation Location, int XCoord, int YCoord) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool      ClickMap(ClickType ClickTypeToUse, bool UseShiftKey, Unit UnitToClick) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool      ClickMap(ClickType ClickTypeToUse, bool UseShiftKey, int XCoord, int YCoord) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool      CompareTo(Unit CompareUnit) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit      GetBeltItem(int BeltSlot) {");
+	file_handle.writeLine("\t	return(null);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit      GetEquippedItem(EquipmentLocation loc) {");
+	file_handle.writeLine("\t	return(null);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit      GetPotion(PotionType pt) {");
+	file_handle.writeLine("\t	return(null);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int       GetSkillLevel(SkillType SkillToCheck) {");
+	file_handle.writeLine("\t	return(1);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static SkillType GetSkillOnHand(SkillHand HandToCheck) {");
+	file_handle.writeLine("\t	return((HandToCheck == SkillHand.Left) ? left_skill : right_skill);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int       GetStat(int Stat) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int       GetStat(int Stat, int SubStat) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool      GetState(int State) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      Interact(Unit UnitToInteractWith) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      MoveTo(Unit UnitToMoveTo) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      MoveTo(int XCoord, int YCoord) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      Overhead(string OverheadMessage) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      SetSkill(SkillType SkillToSet, SkillHand HandToUse) {");
+	file_handle.writeLine("\t	if (HandToUse == SkillHand.Left)");
+	file_handle.writeLine("\t		left_skill = SkillToSet;");
+	file_handle.writeLine("\t	else");
+	file_handle.writeLine("\t		right_skill = SkillToSet;");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      SwitchWeaponSlot(int Slot) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void      UsePotion(int BeltSlot, bool GiveToMerc) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("");
+	file_handle.writeLine("\t// Values");
+	file_handle.writeLine("\tpublic static int       act          = 1;");
+	file_handle.writeLine("\tpublic static AreaLevel area         = ((AreaLevel) 1);");
+	file_handle.writeLine("//\tpublic static Room      current_room = new Room();");
+	file_handle.writeLine("\tpublic static int       hp           = 1000;");
+	file_handle.writeLine("\tpublic static int       hp_max       = 1000;");
+	file_handle.writeLine("\tpublic static SkillType left_skill   = SkillType.Attack;");
+	file_handle.writeLine("\tpublic static int       mode         = 0;");
+	file_handle.writeLine("\tpublic static int       mp           = 500;");
+	file_handle.writeLine("\tpublic static int       mp_max       = 500;");
+	file_handle.writeLine("\tpublic static SkillType right_skill  = SkillType.Attack;");
+	file_handle.writeLine("\tpublic static int       stamina      = 250;");
+	file_handle.writeLine("\tpublic static int       stamina_max  = 250;");
+	file_handle.writeLine("\tpublic static int       x            = 2500;");
+	file_handle.writeLine("\tpublic static int       y            = 2501;");
+	file_handle.writeLine("\t//");
+	file_handle.writeLine("");
+	file_handle.writeLine("\tpublic static int Act {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(act);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static botNET.AreaLevel Area {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(area);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\t");
+	file_handle.writeLine("\tpublic static Unit[] Belt {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(new Unit[0]);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int BeltSlotCount {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(4);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool Busy {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(false);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int CharacterLevel {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(80);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int ClassID {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(1);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit Corpse {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(null);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit Cube {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(null);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Mapping.Room CurrentRoom {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(Mapping.Room.GetCurrent());");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int CurrentWeaponSlot {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(0);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit CursorItem {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(null);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int Difficulty {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(((int) Game.Difficulty));");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int GameType {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(Game.GameType);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int HP {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(hp);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int HPMax {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(hp_max);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int ID {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(1);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool InTown {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(true);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Inventory {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(new Unit[0]);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static bool IsHardCore {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(Game.IsHardCore);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static SkillType LeftSkill {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(left_skill);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t	set {");
+	file_handle.writeLine("\t		left_skill = value;");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static botNET.AreaLevel Level {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(area);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int MaxDifficulty {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(Game.MaxDifficulty);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit Mecenary {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(null);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int Mode {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(mode);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int MP {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(mp);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int MPMax {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(mp_max);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static string Name {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(Game.PlayerName);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static SkillType RightSkill {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(right_skill);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t	set {");
+	file_handle.writeLine("\t		right_skill = value;");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit SelectedUnit {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(null);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int Stamina {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(stamina);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int StaminaMax {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(stamina_max);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit Stash {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(null);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static double Version {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(Game.botNETVersion);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int X {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(x);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static int Y {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(y);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\t");
+	file_handle.writeLine("}");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.Unit
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public class Unit {");
+	file_handle.writeLine("\tpublic bool CompareTo(Unit CompareUnit) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get() {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(PresetUnit PUnit) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(UnitType type) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(UnitType type, int classid) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(UnitType type, string name) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(UnitType type, int classid, bool getFirst) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(UnitType type, int classid, int mode) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(UnitType type, string name, bool getFirst) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(UnitType type, string name, int mode) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit[] Get(int xPos, int yPos, int dist) {");
+	file_handle.writeLine("\t	return(new Unit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int GetBaseStat(int stat) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int GetBaseStat(int stat, int sub) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Unit GetByID(int ID) {");
+	file_handle.writeLine("\t	return(null);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int GetPrice(PriceType pricetype, int NPCClassID) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int GetStat(int stat) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int GetStat(int stat, int sub) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int GetStat3(int stat) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int GetStat3(int stat, int sub) {");
+	file_handle.writeLine("\t	return(0);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic bool GetState(int state) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic void Overhead(string msg) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\t");
+	file_handle.writeLine("\t// Values");
+	file_handle.writeLine("\tpublic int               Act              = 1;");
+	file_handle.writeLine("\tpublic string[]          AllStats         = new string[0];");
+	file_handle.writeLine("\tpublic int               Busy             = 0;");
+	file_handle.writeLine("\tpublic int               ClassID          = 666;");
+	file_handle.writeLine("\tpublic string            Code             = \"\";");
+	file_handle.writeLine("\tpublic EquipmentLocation EquippedLocation = EquipmentLocation.NotEquipped;");
+	file_handle.writeLine("\tpublic uint              Flags            = 0;");
+	file_handle.writeLine("\tpublic uint              Flags2           = 0;");
+	file_handle.writeLine("\tpublic string            FullName         = \"\";");
+	file_handle.writeLine("\tpublic int               HP               = 0;");
+	file_handle.writeLine("\tpublic int               HPMax            = 0;");
+	file_handle.writeLine("\tpublic int               ID               = 667;");
+	file_handle.writeLine("\tpublic Unit[]            Inventory        = new Unit[0];");
+	file_handle.writeLine("\tpublic bool              IsSelectable     = true;");
+	file_handle.writeLine("\tpublic ItemType          ItemType         = ItemType.None;");
+	file_handle.writeLine("\tpublic ItemLocation      Location         = ItemLocation.Ground;");
+	file_handle.writeLine("\tpublic int               Mode             = 0;");
+	file_handle.writeLine("\tpublic int               MP               = 0;");
+	file_handle.writeLine("\tpublic int               MPMax            = 0;");
+	file_handle.writeLine("\tpublic string            Name             = \"Some NPC\";");
+	file_handle.writeLine("\tpublic Unit              Parent           = null;");
+	file_handle.writeLine("\tpublic uint              PointerAddress   = 0x12345678;");
+	file_handle.writeLine("\tpublic string            Prefix           = \"\";");
+	file_handle.writeLine("\tpublic QualityType       Quality          = QualityType.NotApplicable;");
+	file_handle.writeLine("\tpublic int               Stamina          = 0;");
+	file_handle.writeLine("\tpublic int               StaminaMax       = 0;");
+	file_handle.writeLine("\tpublic string            Suffix           = \"\";");
+	file_handle.writeLine("\tpublic Unit              Target           = null;");
+	file_handle.writeLine("\tpublic UnitType          Type             = UnitType.NPC;");
+	file_handle.writeLine("\tpublic bool              Valid            = true;");
+	file_handle.writeLine("\tpublic int               X                = 2525;");
+	file_handle.writeLine("\tpublic int               Y                = 2526;");
+	file_handle.writeLine("}");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.PresetUnit
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public class PresetUnit {");
+	file_handle.writeLine("\t// MLB: Made public for testing purposes.");
+	file_handle.writeLine("\tpublic PresetUnit(int Type, int ID, int X, int Y) {");
+	file_handle.writeLine("\t	this.Type = Type;");
+	file_handle.writeLine("\t	this.ID   = ID;");
+	file_handle.writeLine("\t	this.X    = X;");
+	file_handle.writeLine("\t	this.Y    = Y;");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static PresetUnit[] Get() {");
+	file_handle.writeLine("\t return(new PresetUnit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static PresetUnit[] Get(botNET.AreaLevel LevelID) {");
+	file_handle.writeLine("\t return(new PresetUnit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static PresetUnit[] Get(botNET.AreaLevel LevelID, botNET.UnitType Type) {");
+	file_handle.writeLine("\t return(new PresetUnit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static PresetUnit[] Get(botNET.AreaLevel LevelID, botNET.UnitType Type, uint ID) {");
+	file_handle.writeLine("\t return(new PresetUnit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static PresetUnit[] Get(botNET.AreaLevel LevelID, botNET.UnitType Type, uint ID, System.Collections.ArrayList RoomID) {");
+	file_handle.writeLine("\t return(new PresetUnit[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int ID   = 0;");
+	file_handle.writeLine("\tpublic int Type = 0;");
+	file_handle.writeLine("\tpublic int X    = 0;");
+	file_handle.writeLine("\tpublic int Y    = 0;");
+	file_handle.writeLine("}");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.Mapping.Room
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("namespace Mapping {");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class Coordinate {");
+	file_handle.writeLine("\tpublic Coordinate(Coordinate coord) {");
+	file_handle.writeLine("\t	this.X = coord.X;");
+	file_handle.writeLine("\t	this.Y = coord.Y;");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Coordinate(int x, int y) {");
+	file_handle.writeLine("\t	this.X = x;");
+	file_handle.writeLine("\t	this.Y = y;");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int X;");
+	file_handle.writeLine("\tpublic int Y;");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class Room {");
+	file_handle.writeLine("\t// MLB: Made public for testing purposes.");
+	file_handle.writeLine("\tpublic Room() {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Room[] Get() {");
+	file_handle.writeLine("\t	return(new Room[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Room[] Get(botNET.AreaLevel Level) {");
+	file_handle.writeLine("\t	return(new Room[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Room[] Get(botNET.AreaLevel Level, int x, int y) {");
+	file_handle.writeLine("\t	return(new Room[0]);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static Room GetCurrent() {");
+	file_handle.writeLine("\t	return(null);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Array CollisionData {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(new int[SizeY, SizeX]);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int LevelX = 3840;");
+	file_handle.writeLine("\tpublic int LevelY = 4880;");
+	file_handle.writeLine("\tpublic int MaxX   = 4120;");
+	file_handle.writeLine("\tpublic int MaxY   = 5080;");
+	file_handle.writeLine("\tpublic int Number = 1;");
+	file_handle.writeLine("\tpublic int SizeX  = 40;");
+	file_handle.writeLine("\tpublic int SizeY  = 40;");
+	file_handle.writeLine("\tpublic int X      = 4080;");
+	file_handle.writeLine("\tpublic int Y      = 5040;");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class Map {");
+	file_handle.writeLine("\tpublic Map() { }");
+	file_handle.writeLine("\tpublic virtual void Dump(int Bit, string file) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual Coordinate FindClosestWalkable(Coordinate coord) {");
+	file_handle.writeLine("\t	return(new Coordinate(Me.X, Me.Y));");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual Coordinate FindClosestWalkable(int _x, int _y) {");
+	file_handle.writeLine("\t	return(new Coordinate(Me.X, Me.Y));");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual void Initialize() {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual bool IsInRange(Coordinate coord) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual bool IsInRange(int XCoord, int YCoord) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual bool IsWalkable(Coordinate coord) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual bool IsWalkable(int _x, int _y) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual bool LOS(int StartX, int StartY, int EndX, int EndY) {");
+	file_handle.writeLine("\t	return(false);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic virtual void SetExits() {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic System.Array CollisionData;");
+	file_handle.writeLine("\tpublic bool         IsInitialized;");
+	file_handle.writeLine("\tpublic int          MaxX;");
+	file_handle.writeLine("\tpublic int          MaxY;");
+	file_handle.writeLine("\tpublic int          SizeX;");
+	file_handle.writeLine("\tpublic int          SizeY;");
+	file_handle.writeLine("\tpublic int          X;");
+	file_handle.writeLine("\tpublic int          Y;");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class LevelMap : Map {");
+	file_handle.writeLine("\tpublic LevelMap() {");
+	file_handle.writeLine("\t	this.level = Me.Level;");
+	file_handle.writeLine("\t	this.rooms = Room.Get();");
+	file_handle.writeLine("\t	this.setdata();");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic LevelMap(int LevelNumber)");
+	file_handle.writeLine("\t{");
+	file_handle.writeLine("\t	this.level = LevelNumber;");
+	file_handle.writeLine("\t	this.rooms = Room.Get(this.level);");
+	file_handle.writeLine("\t	this.setdata();");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic override void Initialize() {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic botNET.AreaLevel Level {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t	 return(this.level);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Room[] Rooms {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return(this.rooms);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tprivate void setdata() {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tprivate botNET.AreaLevel level; ");
+	file_handle.writeLine("\tprivate Room[] rooms; ");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("}// namespace Mapping");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.Pathing
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("namespace Pathing {");
+	file_handle.writeLine("");
+	file_handle.writeLine("public enum Heuristic {");
+	file_handle.writeLine("	MaxDXDY          = 0,");
+	file_handle.writeLine("	Euclidian        = 1,");
+	file_handle.writeLine("	DiagonalShortcut = 2,");
+	file_handle.writeLine("	ManHattan        = 3,");
+	file_handle.writeLine("	None             = 4");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class Mover {");
+	file_handle.writeLine("\tpublic Mover(Pather PatherToUse) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic static void CastAtXY(SkillType Skill, SkillHand Hand, int TargetX, int TargetY) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic bool Move() {");
+	file_handle.writeLine("\treturn(true);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic bool Move(int StartPoint) {");
+	file_handle.writeLine("\treturn(true);");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic void RaiseMoverCallBackHandler(MoverEventArgs e) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic delegate void MoverCallBackHandler(MoverEventArgs e);");
+	file_handle.writeLine("\tpublic event MoverCallBackHandler OnMoverCallBack;");
+	file_handle.writeLine("\tpublic int WalkDelay = 0; ");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class MoverEventArgs {")
+	file_handle.writeLine("\tpublic MoverEventArgs(Mapping.Coordinate c, int i, Mover m) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Mapping.Coordinate CurrentCoordinate; ");
+	file_handle.writeLine("\tpublic int                CurrentPathPoint; ");
+	file_handle.writeLine("\tpublic Mover              MoverUsed;");
+	file_handle.writeLine("\tpublic Pather             PatherUsed; ");
+	file_handle.writeLine("\tpublic Path               PathUsed; ");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class Path {");
+	file_handle.writeLine("\tpublic Path() {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path(System.Collections.ArrayList coords) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic System.Collections.ArrayList CoordinateList {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return this.coordinates;");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic int Count {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return this.coordinates.Count;");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Mapping.Coordinate this[int param] {");
+	file_handle.writeLine("\t	get {");
+	file_handle.writeLine("\t		return ((Mapping.Coordinate) this.coordinates[param]);");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t	set {");
+	file_handle.writeLine("\t		this.coordinates[param] = value;");
+	file_handle.writeLine("\t	}");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tprivate System.Collections.ArrayList coordinates;");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class Pather {");
+	file_handle.writeLine("\tpublic Pather(Mapping.Map mMap) {");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Pather(Mapping.Map mMap, PatherConfig PatherConfiguration) {");
+	file_handle.writeLine("\t	this.PatherConfiguration = PatherConfiguration;");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path FindPath(PresetUnit Preset) {");
+	file_handle.writeLine("\t	this.PresetUnitUsed = Preset;");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path FindPath(int DestinationX, int DestinationY) {");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path FindPath(int DestinationX, int DestinationY, int StartX, int StartY) {");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path FindPathToLevel() {");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path FindPathToWarp(int WarpID) {");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path FindPathToWarp(int[] WarpID) {");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic Path FindPathToWaypoint() {");
+	file_handle.writeLine("\t	return(new Path());");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic PatherConfig PatherConfiguration;");
+	file_handle.writeLine("\tpublic PresetUnit   PresetUnitUsed;");
+	file_handle.writeLine("\tpublic double       LastScore = 0.0;");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public class PatherConfig {");
+	file_handle.writeLine("\tpublic PatherConfig(Heuristic HeuristicType, double Factor, int PathPointDistance, Reduction ReductionType) {");
+	file_handle.writeLine("\t	this.HeuristicType     = HeuristicType;");
+	file_handle.writeLine("\t	this.Factor            = Factor;");
+	file_handle.writeLine("\t	this.PathPointDistance = PathPointDistance;");
+	file_handle.writeLine("\t	this.ReductionType     = ReductionType;");
+	file_handle.writeLine("\t}");
+	file_handle.writeLine("\tpublic double    Factor;");
+	file_handle.writeLine("\tpublic Heuristic HeuristicType;");
+	file_handle.writeLine("\tpublic int       PathPointDistance;");
+	file_handle.writeLine("\tpublic Reduction ReductionType;");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("public enum Reduction {");
+	file_handle.writeLine("	TeleportReduction = 0,");
+	file_handle.writeLine("	WalkingReduction  = 1");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+
+	file_handle.writeLine("}// namespace Pathing");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// botNET.Iloadable interface
+	// //////////////////////////////////////////////////////////////////////
+	file_handle.writeLine("public interface ILoadable : System.IDisposable {");
+	file_handle.writeLine("\tvoid EndGame(System.TimeSpan GameLength);");
+	file_handle.writeLine("\tvoid EnterMainMenu(); ");
+	file_handle.writeLine("\tvoid Load(long ID);");
+	file_handle.writeLine("\tvoid NewGame(); ");
+	file_handle.writeLine("\tvoid UserCommand(string command, string[] args); ");
+	file_handle.writeLine("\tvoid UserStart(); ");
+	file_handle.writeLine("\tvoid UserStop(); ");
+	file_handle.writeLine("\tstring          Author { get; } ");
+	file_handle.writeLine("\tstring          Description { get; }");
+	file_handle.writeLine("\tSystem.DateTime ReleaseDate { get; } ");
+	file_handle.writeLine("\tstring          Title { get; }");
+	file_handle.writeLine("\tdouble          Version { get; }");
+	file_handle.writeLine("}");
+	file_handle.writeLine("");
+	// //////////////////////////////////////////////////////////////////////
+
+	file_handle.writeLine("");
+	file_handle.writeLine("} // namespace botNET");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function GetPaddedString(in_string, in_width)
+{
+	return(D2JSP_UTIL_FORMAT_LJust("\"" + in_string + "\"", 1 + in_width + 1));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function GetPaddedDatum(in_string, in_width)
+{
+	return(D2JSP_UTIL_FORMAT_LJust(in_string, in_width));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function GetBoolean(in_value, in_width)
+{
+	return(D2JSP_UTIL_FORMAT_LJust(in_value, 5));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function EmitComment(file_handle)
+{
+	file_handle.writeLine("\t\t" +
+		"// ////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function EmitCommentFull(file_handle)
+{
+	file_handle.writeLine("// ////////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function EmitHyphens(file_handle)
+{
+	file_handle.writeLine("\t\t" +
+		"// ----------------------------------------------------------------");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpLevelInfo_Arcane(file_handle)
+{
+	DumpLevelInfo(file_handle, D2JSP_AREA_ARCANE_SANCTUARY);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpLevelInfo(file_handle, area)
+{
+	var area_name = D2JSP_AREA_AreaToName(area);
+
+	TDW_MOVE_ReturnToTown();
+
+	if (D2JSP_AREA_GetAct(area) != me.act)
+		TDW_MOVE_TownMove(D2JSP_AREA_GetAct(area), "waypoint");
+
+	print("Creating area level map info for " + area + " (" + area_name + ")");
+	TDW_PATH_CreateArea(area);
+	print("Writing area level map info for " + area + " (" + area_name + ")");
+
+	EmitCommentFull(file_handle);
+	EmitCommentFull(file_handle);
+	file_handle.writeLine("// LevelMap info for " + area + " (" + area_name + ")");
+	EmitCommentFull(file_handle);
+	file_handle.writeLine("public class SetLevelMap_" + area + " {");
+	file_handle.writeLine("\tpublic SetLevelMap_" + area + "() {");
+	file_handle.writeLine("\t\tbotNET.Mapping.LevelMap.SRC_level = SRC_level;");
+	file_handle.writeLine("\t\tbotNET.Mapping.LevelMap.SRC_rooms = SRC_rooms;");
+	file_handle.writeLine("\t}");
+
+	file_handle.writeLine("\tstatic botNET.AreaLevel      SRC_level = " +
+		"((botNET.AreaLevel) " + area + ");");
+	file_handle.writeLine("\tstatic botNET.Mapping.Room[] SRC_rooms = " +
+		"new botNET.Mapping.Room[] {");
+
+	var room_list = TDW_PATH_MapGlobal.area_list[area].room_list;
+	for (var count_1 = 0; count_1 < room_list.length; count_1++) {
+		var this_room    = room_list[count_1];
+		var tmp_string_1 = "\t\tnew botNET.Mapping.Room(";
+		// LevelX
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.levelx, 5) + ", ";
+		// LevelY
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.levely, 5) + ", ";
+
+		// MaxX
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.x_2 + 1, 5) + ", ";
+		// MaxY
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.y_2 + 1, 5) + ", ";
+
+		// Number
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.number, 5) + ", ";
+
+		// SizeX
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.xSize1, 5) + ", ";
+		// SizeY
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.ySize1, 5) + ", ";
+		
+		// X
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.xStart, 5) + ", ";
+		// Y
+		tmp_string_1 += D2JSP_UTIL_FORMAT_RJust(this_room.yStart, 5) + ",\n";
+
+		// CollData
+		tmp_string_1 += "\t\t\tnew ushort[" + this_room.ySize1 + ", " +
+			this_room.xSize1 + "] {\n";
+
+		var tmp_string_2 = "";
+		for (var count_2 = 0; count_2 < this_room.ySize1; count_2++) {
+			tmp_string_2 += "\t\t\t\t{ ";
+			for (var count_3 = 0; count_3 < this_room.xSize1; count_3++)
+{
+				tmp_string_2 += ((!count_3) ? "" : ", ") +
+					"0x" + D2JSP_UTIL_FORMAT_ZeroFill(
+					this_room.coll_table[count_2][count_3].toString(16), 2);
+//	if (count_3 == 3)
+//		break;
+}
+			tmp_string_2 += " }" +
+				(((count_2 + 1) < this_room.ySize1) ? "," : "") + "\n";
+		}
+		file_handle.writeLine(tmp_string_1 + tmp_string_2 +
+			"\t\t\t}\n\t\t)" + (((count_1 + 1) < room_list.length) ? "," : ""));
+	}
+	file_handle.writeLine("\t};");
+
+	file_handle.writeLine("}");
+	EmitCommentFull(file_handle);
+	file_handle.writeLine("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks(file_handle)
+{
+	print("Writing area linkage data...");
+
+	file_handle.writeLine("\tMapLink[] map_link_list = new MapLink[] {");
+	for (var count_1 = 0; count_1 < botNET_MAP_AreaLevel.length; count_1++) {
+		file_handle.writeLine("\t\t// Links to botNET.AreaLevel." +
+			botNET_MAP_AreaLevel[count_1] + " / " +
+			D2JSP_AREA_AreaNameList[count_1]);
+		file_handle.writeLine("\t\tnew MapLink(");
+		var link_spec = TDW_PATH_AreaLink[count_1].link_spec;
+		for (var count_2 = 0; count_2 < link_spec.length; count_2++) {
+			var this_link  = link_spec[count_2];
+//file_handle.writeLine("// ********** TYPE OF LINK = " + typeof(this_link) +
+//	" = " + D2JSP_UTIL_FORMAT_FunctionToName(this_link.constructor));
+			var tmp_string = DumpAreaLinks_Any(this_link, 3);
+			file_handle.writeLine(tmp_string +
+				(((count_2 + 1) < link_spec.length) ? "," : ""));
+		}
+		if (!count_1) {
+			var tmp_string = DumpAreaLinks_Any(new TDW_PATH_LinkExit(0, 0), 3);
+			file_handle.writeLine(tmp_string +
+				(((count_2 + 1) < link_spec.length) ? "," : ""));
+		}
+		file_handle.writeLine("\t\t)" +
+			(((count_1 + 1) < botNET_MAP_AreaLevel.length) ? "," : ""));
+	}
+	file_handle.writeLine("\t};");
+	file_handle.writeLine("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_Any(this_link, indentation)
+{
+	var out_string = "";
+
+  	if (this_link instanceof TDW_PATH_LinkExit)
+		out_string = DumpAreaLinks_Exit(this_link, indentation);
+	else if (this_link instanceof TDW_PATH_LinkObject)
+		out_string =
+			DumpAreaLinks_Object(this_link, indentation);
+	else if (this_link instanceof TDW_PATH_LinkTile)
+		out_string =
+			DumpAreaLinks_Tile(this_link, indentation);
+	else if (this_link instanceof TDW_PATH_LinkTownMove)
+		out_string =
+			DumpAreaLinks_TownMove(this_link, indentation);
+	else {
+		out_string = "// ********** ERROR **********";
+		out_string += D2JSP_UTIL_FORMAT_RepeatString("\t", indentation) +
+			"new " + this_link.toClassName() + "()";
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_Exit(this_link, indentation)
+{
+	var out_string = "";
+	var out_tab_1  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation);
+	var out_tab_2  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation + 1);
+	
+	out_string += out_tab_1 + "new LinkExit(" +
+		"AreaLevel." + botNET_MAP_AreaLevel[this_link.source_area] + ",\n" +
+		out_tab_2 + "AreaLevel." +
+		botNET_MAP_AreaLevel[this_link.destination_area] + ")";
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_Object(this_link, indentation)
+{
+	var out_string = "";
+	var out_tab_1  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation);
+	var out_tab_2  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation + 1);
+	
+	out_string += out_tab_1 + "new LinkObject(" +
+		"AreaLevel." + botNET_MAP_AreaLevel[this_link.source_area] + ",\n" +
+		out_tab_2 + "AreaLevel." +
+			botNET_MAP_AreaLevel[this_link.destination_area] + ",\n";
+/*
+	out_string += out_tab_2 + ((this_link.room_spec == null) ? "new int[0]" :
+		("new int[] { " + this_link.room_spec + " }")) + ", ";
+	out_string += ((this_link.unit_id_spec == null) ? "new int[0]" :
+		("new int[] { " + this_link.unit_id_spec + " }")) + ",\n";
+*/
+	out_string += out_tab_2 + DumpAreaLinks_IntArray(this_link.room_spec) +
+		", ";
+	out_string += DumpAreaLinks_UIntArray(this_link.unit_id_spec) + ",\n";
+
+	out_string += out_tab_2 + ((this_link.desired_mode == null) ?
+		"Mode.None" : "Mode.Object_Opened") + ", ";
+	out_string += DumpAreaLinks_LinkFlags(this_link.link_flags) + ", ";
+	if (this_link.linked_object == null)
+		out_string += " null)";
+	else {
+		out_string += "\n" + DumpAreaLinks_Any(this_link.linked_object,
+			indentation + 1) + ")";
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_Tile(this_link, indentation)
+{
+	var out_string = "";
+	var out_tab_1  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation);
+	var out_tab_2  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation + 1);
+	
+	out_string += out_tab_1 + "new LinkWarp(" +
+		"AreaLevel." + botNET_MAP_AreaLevel[this_link.source_area] + ",\n" +
+		out_tab_2 + "AreaLevel." +
+			botNET_MAP_AreaLevel[this_link.destination_area] + ",\n";
+/*
+	out_string += out_tab_2 + ((this_link.room_spec == null) ? "new int[0]" :
+		("new int[] { " + this_link.room_spec + " }")) + ", ";
+	out_string += ((this_link.unit_id_spec == null) ? "new int[0]" :
+		("new int[] { " + this_link.unit_id_spec + " }")) + ",\n";
+*/
+	out_string += out_tab_2 + DumpAreaLinks_IntArray(this_link.room_spec) +
+		", ";
+	out_string += DumpAreaLinks_UIntArray(this_link.unit_id_spec) + ",\n";
+
+	out_string += out_tab_2 + ((this_link.desired_mode == null) ?
+		"Mode.None" : "Mode.Object_Opened") + ", ";
+	out_string += DumpAreaLinks_LinkFlags(this_link.link_flags) + ", ";
+	if (this_link.linked_object == null)
+		out_string += " null)";
+	else {
+		out_string += "\n" + DumpAreaLinks_Any(this_link.linked_object,
+			indentation + 1) + ")";
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_TownMove(this_link, indentation)
+{
+	var out_string = "";
+	var out_tab_1  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation);
+	var out_tab_2  = D2JSP_UTIL_FORMAT_RepeatString("\t", indentation + 1);
+	
+	out_string += out_tab_1 + "new LinkTownMove(" +
+		"AreaLevel." + botNET_MAP_AreaLevel[this_link.source_area] + ",\n" +
+		out_tab_2 + "AreaLevel." +
+			botNET_MAP_AreaLevel[this_link.destination_area] + ",\n";
+	out_string += out_tab_2 + "\"" + this_link.town_move_command + "\", ";
+	out_string += DumpAreaLinks_LinkFlags(this_link.link_flags) + ", ";
+	if (this_link.linked_object == null)
+		out_string += " null)";
+	else {
+		out_string += "\n" + DumpAreaLinks_Any(this_link.linked_object,
+			indentation + 1) + ")";
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_LinkFlags(link_flags)
+{
+	var out_string = "";
+
+	if (!link_flags)
+		out_string = "LinkFlags.None";
+	else {
+		if (link_flags & TDW_PATH_LINK_FLAG_NO_MODE_CHANGE)
+			out_string += "LinkFlags.NoModeChange";
+		if (link_flags & TDW_PATH_LINK_FLAG_MULTIPLE)
+			out_string += ((out_string != "") ? " | " : "") + "LinkFlags.Multiple";
+		if (link_flags & TDW_PATH_LINK_FLAG_NON_PRESET_FIRST)
+			out_string += ((out_string != "") ? " | " : "") + "LinkFlags.NonPresetFirst";
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_IntArray(int_array)
+{
+	var out_string = "";
+
+	if ((int_array == null) || (!int_array.length))
+		out_string = "new int[0]";
+	else
+		out_string = ("new int[] { " + int_array + " }");
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function DumpAreaLinks_UIntArray(int_array)
+{
+	var out_string = "";
+
+	if ((int_array == null) || (!int_array.length))
+		out_string = "new uint[0]";
+	else
+		out_string = ("new uint[] { " + int_array + " }");
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,123 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("SyLib.d2l");
+
+const TDW_MP_MarkKey      = 220;		// This is the slash key ('\').
+
+var TDW_MP_FileHandle     = null;
+
+var TDW_MP_Last_X     = -1;
+var TDW_MP_Last_Y     = -1;
+
+var TDW_MP_LookAroundSecs = 10;
+var TDW_MP_LogDistance    = 999999999;
+var TDW_MP_LogIntervalMS  = 1000;
+
+function main() {
+
+	var last_area  = -1;
+	var start_date = new Date();
+	var show_count = 0;
+	var file_name;
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+
+	file_name = "output/TDW_MarkPath." + me.realm + "." + me.account + "." +
+		me.name + ".txt";
+
+	TDW_MP_FileHandle = fileOpen(file_name, 2);
+	if (TDW_MP_FileHandle) {
+		last_area     = me.area;
+		TDW_MP_Last_X = me.x;
+		TDW_MP_Last_Y = me.y;
+		TDW_MP_FileHandle.writeLine("// ////////////////////////////");
+		TDW_MP_FileHandle.writeLine("// ////////////////////////////");
+		TDW_MP_FileHandle.writeLine("// TDW_MarkPath.d2j Output File");
+		TDW_MP_FileHandle.writeLine("// ////////////////////////////");
+		TDW_MP_FileHandle.writeLine("//");
+		TDW_MP_FileHandle.writeLine("// Start Date    : " + start_date.toString());
+		TDW_MP_FileHandle.writeLine("// Start Act     : " + me.act);
+		TDW_MP_FileHandle.writeLine("// Start Area    : " + me.area + " (" +
+			D2JSP_AREA_AreaToName(me.area) + ")");
+		TDW_MP_FileHandle.writeLine("// Start Location: " +
+			TDW_MP_Last_X + ", " + TDW_MP_Last_Y);
+		TDW_MP_FileHandle.writeLine("// Log Distance  : " + TDW_MP_LogDistance);
+		TDW_MP_FileHandle.writeLine("// Log Interval  : " + TDW_MP_LogIntervalMS +
+			" milliseconds");
+		TDW_MP_FileHandle.writeLine("//");
+		TDW_MP_FileHandle.writeLine("// ////////////////////////////");
+		TDW_MP_FileHandle.writeLine("//");
+		TDW_MP_FileHandle.writeLine("// Area = " + last_area + " (" +
+			D2JSP_AREA_AreaToName(last_area) + ")");
+		TDW_MP_DoSnapshot(TDW_MP_Last_X, TDW_MP_Last_Y, "initial position");
+		show_count = 0;
+		print("TDW_MarkPath facility is ready for character movement.");
+		while (1) {
+			if (last_area != me.area) {
+				last_area = me.area;
+				TDW_MP_Last_X    = me.x;
+				TDW_MP_Last_Y    = me.y;
+				print("New area is " + last_area + " (" +
+					D2JSP_AREA_AreaToName(last_area) + ")");
+				TDW_MP_FileHandle.writeLine("// Area = " + last_area + " (" +
+					D2JSP_AREA_AreaToName(last_area) + ")");
+				TDW_MP_DoSnapshot(TDW_MP_Last_X, TDW_MP_Last_Y, "area change");
+				show_count = 0;
+			}
+			tmp_x = me.x;
+			tmp_y = me.y;
+			if (Dist(tmp_x, tmp_y, TDW_MP_Last_X, TDW_MP_Last_Y) >=
+				TDW_MP_LogDistance) {
+//				TDW_MP_Last_X = tmp_x;
+//				TDW_MP_Last_Y = tmp_y;
+//				TDW_MP_DoSnapshot(TDW_MP_Last_X, TDW_MP_Last_Y, "automatic");
+				TDW_MP_DoSnapshot(tmp_x, tmp_y, "automatic");
+				show_count = 0;
+			}
+			delay(1);
+			if (++show_count >= 250) {
+				D2JSP_UTIL_BNET_OverheadSafe(me.area + ": [" + me.x + ", " + me.y + "]");
+				show_count = 0;
+			}
+		}
+	}
+	else
+		print("Unable to open TDW_MarkPath.d2j output file '" + file_name +
+			"' for writing.");
+}
+
+function TDW_MP_ShowLocation(last_X, last_Y)
+{
+	D2JSP_UTIL_BNET_OverheadSafe(me.area + ": " + FormatCoordXY(last_X, last_Y));
+}
+
+function TDW_MP_DoSnapshot(last_X, last_Y, mark_type)
+{
+	TDW_MP_ShowLocation(last_X, last_Y);
+	TDW_MP_FileHandle.writeLine("\t" + FormatCoordXY(last_X, last_Y) +
+		",\t// Delta = " + FormatCoordXY(last_X - TDW_MP_Last_X,
+		last_Y - TDW_MP_Last_Y));
+	print("Marked path " + FormatCoordXY(last_X, last_Y) +
+		" (" + mark_type + ")");
+	TDW_MP_Last_X = last_X;
+	TDW_MP_Last_Y = last_Y;
+}
+
+function FormatCoord(in_coord)
+{
+	return(D2JSP_UTIL_FORMAT_RJust(in_coord, 5));
+}
+
+function FormatCoordXY(in_x, in_y)
+{
+	return("[" + FormatCoord(in_x) + ", " + FormatCoord(in_y) + "]");
+}
+
+function keypressHandler()
+{
+	if (arguments[0] == TDW_MP_MarkKey)
+		TDW_MP_DoSnapshot(me.x, me.y, "requested");
+}
+

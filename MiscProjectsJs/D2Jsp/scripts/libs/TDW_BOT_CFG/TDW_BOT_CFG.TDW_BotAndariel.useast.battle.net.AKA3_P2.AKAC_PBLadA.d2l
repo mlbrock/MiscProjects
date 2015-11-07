@@ -1,0 +1,8 @@
+include("TDW_BOT_CFG/TDW_BOT_CFG.TDW_BotAndariel.SENIOR.d2l");
+
+include("TDW_BOT_CFG/TDW_BOT_CFG.useast.battle.net.AKA3_P2.AKAC_PBLadA.d2l");
+
+	// Too slow for Andariel
+	TDW_BOT_ConfigureList["skill.attack.remove"] = ["Meteor"];
+
+

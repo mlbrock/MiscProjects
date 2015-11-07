@@ -1,0 +1,2863 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Skills Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Skills.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion skill constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Skills_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Skills_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/_D2JSP_Missiles.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant skill values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_ATTACK                     = 0;
+var D2JSP_SKILL_KICK                       = 1;
+var D2JSP_SKILL_THROW                      = 2;
+var D2JSP_SKILL_UNSUMMON                   = 3;
+var D2JSP_SKILL_LEFT_HAND_THROW            = 4;
+var D2JSP_SKILL_LEFT_HAND_SWING            = 5;
+	// Amazon skills..,
+var D2JSP_SKILL_MAGIC_ARROW                = 6;
+var D2JSP_SKILL_FIRE_ARROW                 = 7;
+var D2JSP_SKILL_INNER_SIGHT                = 8;
+var D2JSP_SKILL_CRITICAL_STRIKE            = 9;
+var D2JSP_SKILL_JAB                        = 10;
+var D2JSP_SKILL_COLD_ARROW                 = 11;
+var D2JSP_SKILL_MULTIPLE_SHOT              = 12;
+var D2JSP_SKILL_DODGE                      = 13;
+var D2JSP_SKILL_POWER_STRIKE               = 14;
+var D2JSP_SKILL_POISON_JAVELIN             = 15;
+var D2JSP_SKILL_EXPLODING_ARROW            = 16;
+var D2JSP_SKILL_SLOW_MISSILES              = 17;
+var D2JSP_SKILL_AVOID                      = 18;
+var D2JSP_SKILL_IMPALE                     = 19;
+var D2JSP_SKILL_LIGHTNING_BOLT             = 20;
+var D2JSP_SKILL_ICE_ARROW                  = 21;
+var D2JSP_SKILL_GUIDED_ARROW               = 22;
+var D2JSP_SKILL_PENETRATE                  = 23;
+var D2JSP_SKILL_CHARGED_STRIKE             = 24;
+var D2JSP_SKILL_PLAGUE_JAVELIN             = 25;
+var D2JSP_SKILL_STRAFE                     = 26;
+var D2JSP_SKILL_IMMOLATION_ARROW           = 27;
+var D2JSP_SKILL_DOPPLEZON                  = 28;
+var D2JSP_SKILL_EVADE                      = 29;
+var D2JSP_SKILL_FEND                       = 30;
+var D2JSP_SKILL_FREEZING_ARROW             = 31;
+var D2JSP_SKILL_VALKYRIE                   = 32;
+var D2JSP_SKILL_PIERCE                     = 33;
+var D2JSP_SKILL_LIGHTNING_STRIKE           = 34;
+var D2JSP_SKILL_LIGHTNING_FURY             = 35;
+	// Sorceress skills..,
+var D2JSP_SKILL_FIRE_BOLT                  = 36;
+var D2JSP_SKILL_WARMTH                     = 37;
+var D2JSP_SKILL_CHARGED_BOLT               = 38;
+var D2JSP_SKILL_ICE_BOLT                   = 39;
+var D2JSP_SKILL_FROZEN_ARMOR               = 40;
+var D2JSP_SKILL_INFERNO                    = 41;
+var D2JSP_SKILL_STATIC_FIELD               = 42;
+var D2JSP_SKILL_TELEKINESIS                = 43;
+var D2JSP_SKILL_FROST_NOVA                 = 44;
+var D2JSP_SKILL_ICE_BLAST                  = 45;
+var D2JSP_SKILL_BLAZE                      = 46;
+var D2JSP_SKILL_FIRE_BALL                  = 47;
+var D2JSP_SKILL_NOVA                       = 48;
+var D2JSP_SKILL_LIGHTNING                  = 49;
+var D2JSP_SKILL_SHIVER_ARMOR               = 50;
+var D2JSP_SKILL_FIRE_WALL                  = 51;
+var D2JSP_SKILL_ENCHANT                    = 52;
+var D2JSP_SKILL_CHAIN_LIGHTNING            = 53;
+var D2JSP_SKILL_TELEPORT                   = 54;
+var D2JSP_SKILL_GLACIAL_SPIKE              = 55;
+var D2JSP_SKILL_METEOR                     = 56;
+var D2JSP_SKILL_THUNDER_STORM              = 57;
+var D2JSP_SKILL_ENERGY_SHIELD              = 58;
+var D2JSP_SKILL_BLIZZARD                   = 59;
+var D2JSP_SKILL_CHILLING_ARMOR             = 60;
+var D2JSP_SKILL_FIRE_MASTERY               = 61;
+var D2JSP_SKILL_HYDRA                      = 62;
+var D2JSP_SKILL_LIGHTNING_MASTERY          = 63;
+var D2JSP_SKILL_FROZEN_ORB                 = 64;
+var D2JSP_SKILL_COLD_MASTERY               = 65;
+	// Necromancer skills...
+var D2JSP_SKILL_AMPLIFY_DAMAGE             = 66;
+var D2JSP_SKILL_TEETH                      = 67;
+var D2JSP_SKILL_BONE_ARMOR                 = 68;
+var D2JSP_SKILL_SKELETON_MASTERY           = 69;
+var D2JSP_SKILL_RAISE_SKELETON             = 70;
+var D2JSP_SKILL_DIM_VISION                 = 71;
+var D2JSP_SKILL_WEAKEN                     = 72;
+var D2JSP_SKILL_POISON_DAGGER              = 73;
+var D2JSP_SKILL_CORPSE_EXPLOSION           = 74;
+var D2JSP_SKILL_CLAY_GOLEM                 = 75;
+var D2JSP_SKILL_IRON_MAIDEN                = 76;
+var D2JSP_SKILL_TERROR                     = 77;
+var D2JSP_SKILL_BONE_WALL                  = 78;
+var D2JSP_SKILL_GOLEM_MASTERY              = 79;
+var D2JSP_SKILL_RAISE_SKELETAL_MAGE        = 80;
+var D2JSP_SKILL_CONFUSE                    = 81;
+var D2JSP_SKILL_LIFE_TAP                   = 82;
+var D2JSP_SKILL_POISON_EXPLOSION           = 83;
+var D2JSP_SKILL_BONE_SPEAR                 = 84;
+var D2JSP_SKILL_BLOODGOLEM                 = 85;
+var D2JSP_SKILL_ATTRACT                    = 86;
+var D2JSP_SKILL_DECREPIFY                  = 87;
+var D2JSP_SKILL_BONE_PRISON                = 88;
+var D2JSP_SKILL_SUMMON_RESIST              = 89;
+var D2JSP_SKILL_IRONGOLEM                  = 90;
+var D2JSP_SKILL_LOWER_RESIST               = 91;
+var D2JSP_SKILL_POISON_NOVA                = 92;
+var D2JSP_SKILL_BONE_SPIRIT                = 93;
+var D2JSP_SKILL_FIREGOLEM                  = 94;
+var D2JSP_SKILL_REVIVE                     = 95;
+	// Paladin skills...
+var D2JSP_SKILL_SACRIFICE                  = 96;
+var D2JSP_SKILL_SMITE                      = 97;
+var D2JSP_SKILL_MIGHT                      = 98;
+var D2JSP_SKILL_PRAYER                     = 99;
+var D2JSP_SKILL_RESIST_FIRE                = 100;
+var D2JSP_SKILL_HOLY_BOLT                  = 101;
+var D2JSP_SKILL_HOLY_FIRE                  = 102;
+var D2JSP_SKILL_THORNS                     = 103;
+var D2JSP_SKILL_DEFIANCE                   = 104;
+var D2JSP_SKILL_RESIST_COLD                = 105;
+var D2JSP_SKILL_ZEAL                       = 106;
+var D2JSP_SKILL_CHARGE                     = 107;
+var D2JSP_SKILL_BLESSED_AIM                = 108;
+var D2JSP_SKILL_CLEANSING                  = 109;
+var D2JSP_SKILL_RESIST_LIGHTNING           = 110;
+var D2JSP_SKILL_VENGEANCE                  = 111;
+var D2JSP_SKILL_BLESSED_HAMMER             = 112;
+var D2JSP_SKILL_CONCENTRATION              = 113;
+var D2JSP_SKILL_HOLY_FREEZE                = 114;
+var D2JSP_SKILL_VIGOR                      = 115;
+var D2JSP_SKILL_CONVERSION                 = 116;
+var D2JSP_SKILL_HOLY_SHIELD                = 117;
+var D2JSP_SKILL_HOLY_SHOCK                 = 118;
+var D2JSP_SKILL_SANCTUARY                  = 119;
+var D2JSP_SKILL_MEDITATION                 = 120;
+var D2JSP_SKILL_FIST_OF_THE_HEAVENS        = 121;
+var D2JSP_SKILL_FANATICISM                 = 122;
+var D2JSP_SKILL_CONVICTION                 = 123;
+var D2JSP_SKILL_REDEMPTION                 = 124;
+var D2JSP_SKILL_SALVATION                  = 125;
+	// Barabarian skills...
+var D2JSP_SKILL_BASH                       = 126;
+var D2JSP_SKILL_SWORD_MASTERY              = 127;
+var D2JSP_SKILL_AXE_MASTERY                = 128;
+var D2JSP_SKILL_MACE_MASTERY               = 129;
+var D2JSP_SKILL_HOWL                       = 130;
+var D2JSP_SKILL_FIND_POTION                = 131;
+var D2JSP_SKILL_LEAP                       = 132;
+var D2JSP_SKILL_DOUBLE_SWING               = 133;
+var D2JSP_SKILL_POLE_ARM_MASTERY           = 134;
+var D2JSP_SKILL_THROWING_MASTERY           = 135;
+var D2JSP_SKILL_SPEAR_MASTERY              = 136;
+var D2JSP_SKILL_TAUNT                      = 137;
+var D2JSP_SKILL_SHOUT                      = 138;
+var D2JSP_SKILL_STUN                       = 139;
+var D2JSP_SKILL_DOUBLE_THROW               = 140;
+var D2JSP_SKILL_INCREASED_STAMINA          = 141;
+var D2JSP_SKILL_FIND_ITEM                  = 142;
+var D2JSP_SKILL_LEAP_ATTACK                = 143;
+var D2JSP_SKILL_CONCENTRATE                = 144;
+var D2JSP_SKILL_IRON_SKIN                  = 145;
+var D2JSP_SKILL_BATTLE_CRY                 = 146;
+var D2JSP_SKILL_FRENZY                     = 147;
+var D2JSP_SKILL_INCREASED_SPEED            = 148;
+var D2JSP_SKILL_BATTLE_ORDERS              = 149;
+var D2JSP_SKILL_GRIM_WARD                  = 150;
+var D2JSP_SKILL_WHIRLWIND                  = 151;
+var D2JSP_SKILL_BERSERK                    = 152;
+var D2JSP_SKILL_NATURAL_RESISTANCE         = 153;
+var D2JSP_SKILL_WAR_CRY                    = 154;
+var D2JSP_SKILL_BATTLE_COMMAND             = 155;
+	// ... end Barbarian skills
+var D2JSP_SKILL_FIRE_HIT                   = 156;
+var D2JSP_SKILL_UNHOLYBOLT                 = 157;
+var D2JSP_SKILL_SKELETONRAISE              = 158;
+var D2JSP_SKILL_MAGGOTEGG                  = 159;
+var D2JSP_SKILL_SHAMANFIRE                 = 160;
+var D2JSP_SKILL_MAGOTTUP                   = 161;
+var D2JSP_SKILL_MAGOTTDOWN                 = 162;
+var D2JSP_SKILL_MAGOTTLAY                  = 163;
+var D2JSP_SKILL_ANDRIALSPRAY               = 164;
+var D2JSP_SKILL_JUMP                       = 165;
+var D2JSP_SKILL_SWARM_MOVE                 = 166;
+var D2JSP_SKILL_NEST                       = 167;
+var D2JSP_SKILL_QUICK_STRIKE               = 168;
+var D2JSP_SKILL_VAMPIREFIREBALL            = 169;
+var D2JSP_SKILL_VAMPIREFIREWALL            = 170;
+var D2JSP_SKILL_VAMPIREMETEOR              = 171;
+var D2JSP_SKILL_GARGOYLETRAP               = 172;
+var D2JSP_SKILL_SPIDERLAY                  = 173;
+var D2JSP_SKILL_VAMPIREHEAL                = 174;
+var D2JSP_SKILL_VAMPIRERAISE               = 175;
+var D2JSP_SKILL_SUBMERGE                   = 176;
+var D2JSP_SKILL_FETISHAURA                 = 177;
+var D2JSP_SKILL_FETISHINFERNO              = 178;
+var D2JSP_SKILL_ZAKARUMHEAL                = 179;
+var D2JSP_SKILL_EMERGE                     = 180;
+var D2JSP_SKILL_RESURRECT                  = 181;
+var D2JSP_SKILL_BESTOW                     = 182;
+var D2JSP_SKILL_MISSILESKILL1              = 183;
+var D2JSP_SKILL_MONTELEPORT                = 184;
+var D2JSP_SKILL_PRIMELIGHTNING             = 185;
+var D2JSP_SKILL_PRIMEBOLT                  = 186;
+var D2JSP_SKILL_PRIMEBLAZE                 = 187;
+var D2JSP_SKILL_PRIMEFIREWALL              = 188;
+var D2JSP_SKILL_PRIMESPIKE                 = 189;
+var D2JSP_SKILL_PRIMEICENOVA               = 190;
+var D2JSP_SKILL_PRIMEPOISONBALL            = 191;
+var D2JSP_SKILL_PRIMEPOISONNOVA            = 192;
+var D2JSP_SKILL_DIABLIGHT                  = 193;
+var D2JSP_SKILL_DIABCOLD                   = 194;
+var D2JSP_SKILL_DIABFIRE                   = 195;
+var D2JSP_SKILL_FINGERMAGESPIDER           = 196;
+var D2JSP_SKILL_DIABWALL                   = 197;
+var D2JSP_SKILL_DIABRUN                    = 198;
+var D2JSP_SKILL_DIABPRISON                 = 199;
+var D2JSP_SKILL_POISONBALLTRAP             = 200;
+var D2JSP_SKILL_ANDYPOISONBOLT             = 201;
+var D2JSP_SKILL_HIREABLEMISSILE            = 202;
+var D2JSP_SKILL_DESERTTURRET               = 203;
+var D2JSP_SKILL_ARCANETOWER                = 204;
+var D2JSP_SKILL_MONBLIZZARD                = 205;
+var D2JSP_SKILL_MOSQUITO                   = 206;
+var D2JSP_SKILL_CURSEDBALLTRAPRIGHT        = 207;
+var D2JSP_SKILL_CURSEDBALLTRAPLEFT         = 208;
+var D2JSP_SKILL_MONFROZENARMOR             = 209;
+var D2JSP_SKILL_MONBONEARMOR               = 210;
+var D2JSP_SKILL_MONBONESPIRIT              = 211;
+var D2JSP_SKILL_MONCURSECAST               = 212;
+var D2JSP_SKILL_HELLMETEOR                 = 213;
+var D2JSP_SKILL_REGURGITATOREAT            = 214;
+var D2JSP_SKILL_MONFRENZY                  = 215;
+var D2JSP_SKILL_QUEENDEATH                 = 216;
+var D2JSP_SKILL_SCROLL_OF_IDENTIFY         = 217;
+var D2JSP_SKILL_BOOK_OF_IDENTIFY           = 218;
+var D2JSP_SKILL_SCROLL_OF_TOWNPORTAL       = 219;
+var D2JSP_SKILL_BOOK_OF_TOWNPORTAL         = 220;
+	// Druid skills
+var D2JSP_SKILL_RAVEN                      = 221;
+var D2JSP_SKILL_PLAGUE_POPPY               = 222;
+var D2JSP_SKILL_WEREWOLF                   = 223;
+var D2JSP_SKILL_WEARWOLF                   = 223;
+var D2JSP_SKILL_SHAPE_SHIFTING             = 224;
+var D2JSP_SKILL_FIRESTORM                  = 225;
+var D2JSP_SKILL_OAK_SAGE                   = 226;
+var D2JSP_SKILL_SUMMON_SPIRIT_WOLF         = 227;
+var D2JSP_SKILL_WEREBEAR                   = 228;
+var D2JSP_SKILL_WEARBEAR                   = 228;
+var D2JSP_SKILL_MOLTEN_BOULDER             = 229;
+var D2JSP_SKILL_ARCTIC_BLAST               = 230;
+var D2JSP_SKILL_CYCLE_OF_LIFE              = 231;
+var D2JSP_SKILL_FERAL_RAGE                 = 232;
+var D2JSP_SKILL_MAUL                       = 233;
+var D2JSP_SKILL_ERUPTION                   = 234;
+var D2JSP_SKILL_CYCLONE_ARMOR              = 235;
+var D2JSP_SKILL_HEART_OF_WOLVERINE         = 236;
+var D2JSP_SKILL_SUMMON_FENRIS              = 237;
+var D2JSP_SKILL_RABIES                     = 238;
+var D2JSP_SKILL_FIRE_CLAWS                 = 239;
+var D2JSP_SKILL_TWISTER                    = 240;
+var D2JSP_SKILL_VINES                      = 241;
+var D2JSP_SKILL_HUNGER                     = 242;
+var D2JSP_SKILL_SHOCK_WAVE                 = 243;
+var D2JSP_SKILL_VOLCANO                    = 244;
+var D2JSP_SKILL_TORNADO                    = 245;
+var D2JSP_SKILL_SPIRIT_OF_BARBS            = 246;
+var D2JSP_SKILL_SUMMON_GRIZZLY             = 247;
+var D2JSP_SKILL_FURY                       = 248;
+var D2JSP_SKILL_ARMAGEDDON                 = 249;
+var D2JSP_SKILL_HURRICANE                  = 250;
+	// Assassin skills...
+var D2JSP_SKILL_FIRE_TRAUMA                = 251;
+var D2JSP_SKILL_CLAW_MASTERY               = 252;
+var D2JSP_SKILL_PSYCHIC_HAMMER             = 253;
+var D2JSP_SKILL_TIGER_STRIKE               = 254;
+var D2JSP_SKILL_DRAGON_TALON               = 255;
+var D2JSP_SKILL_SHOCK_FIELD                = 256;
+var D2JSP_SKILL_BLADE_SENTINEL             = 257;
+var D2JSP_SKILL_QUICKNESS                  = 258;
+var D2JSP_SKILL_FISTS_OF_FIRE              = 259;
+var D2JSP_SKILL_DRAGON_CLAW                = 260;
+var D2JSP_SKILL_CHARGED_BOLT_SENTRY        = 261;
+var D2JSP_SKILL_WAKE_OF_FIRE_SENTRY        = 262;
+var D2JSP_SKILL_WEAPON_BLOCK               = 263;
+var D2JSP_SKILL_CLOAK_OF_SHADOWS           = 264;
+var D2JSP_SKILL_COBRA_STRIKE               = 265;
+var D2JSP_SKILL_BLADE_FURY                 = 266;
+var D2JSP_SKILL_FADE                       = 267;
+var D2JSP_SKILL_SHADOW_WARRIOR             = 268;
+var D2JSP_SKILL_CLAWS_OF_THUNDER           = 269;
+var D2JSP_SKILL_DRAGON_TAIL                = 270;
+var D2JSP_SKILL_LIGHTNING_SENTRY           = 271;
+var D2JSP_SKILL_INFERNO_SENTRY             = 272;
+var D2JSP_SKILL_MIND_BLAST                 = 273;
+var D2JSP_SKILL_BLADES_OF_ICE              = 274;
+var D2JSP_SKILL_DRAGON_FLIGHT              = 275;
+var D2JSP_SKILL_DEATH_SENTRY               = 276;
+var D2JSP_SKILL_BLADE_SHIELD               = 277;
+var D2JSP_SKILL_VENOM                      = 278;
+var D2JSP_SKILL_SHADOW_MASTER              = 279;
+var D2JSP_SKILL_ROYAL_STRIKE               = 280;
+var D2JSP_SKILL_WAKE_OF_DESTRUCTION_SENTRY = 281;
+	// end Assassin skills
+var D2JSP_SKILL_IMP_INFERNO                = 282;
+var D2JSP_SKILL_IMP_FIREBALL               = 283;
+var D2JSP_SKILL_BAAL_TAUNT                 = 284;
+var D2JSP_SKILL_BAAL_CORPSE_EXPLODE        = 285;
+var D2JSP_SKILL_BAAL_MONSTER_SPAWN         = 286;
+var D2JSP_SKILL_CATAPULT_CHARGED_BALL      = 287;
+var D2JSP_SKILL_CATAPULT_SPIKE_BALL        = 288;
+var D2JSP_SKILL_SUCK_BLOOD                 = 289;
+var D2JSP_SKILL_CRY_HELP                   = 290;
+var D2JSP_SKILL_HEALING_VORTEX             = 291;
+var D2JSP_SKILL_TELEPORT_2                 = 292;
+var D2JSP_SKILL_SELFRESURRECT              = 293;
+var D2JSP_SKILL_VINE_ATTACK                = 294;
+var D2JSP_SKILL_OVERSEER_WHIP              = 295;
+var D2JSP_SKILL_BARBS_AURA                 = 296;
+var D2JSP_SKILL_WOLVERINE_AURA             = 297;
+var D2JSP_SKILL_OAK_SAGE_AURA              = 298;
+var D2JSP_SKILL_IMP_FIRE_MISSILE           = 299;
+var D2JSP_SKILL_IMPREGNATE                 = 300;
+var D2JSP_SKILL_SIEGE_BEAST_STOMP          = 301;
+var D2JSP_SKILL_MINIONSPAWNER              = 302;
+var D2JSP_SKILL_CATAPULTBLIZZARD           = 303;
+var D2JSP_SKILL_CATAPULTPLAGUE             = 304;
+var D2JSP_SKILL_CATAPULTMETEOR             = 305;
+var D2JSP_SKILL_BOLTSENTRY                 = 306;
+var D2JSP_SKILL_CORPSECYCLER               = 307;
+var D2JSP_SKILL_DEATHMAUL                  = 308;
+var D2JSP_SKILL_DEFENSE_CURSE              = 309;
+var D2JSP_SKILL_BLOOD_MANA                 = 310;
+var D2JSP_SKILL_INFERNO_SENTRY_2           = 311;
+var D2JSP_SKILL_DEATH_SENTRY_2             = 312;
+var D2JSP_SKILL_SENTRY_LIGHTNING           = 313;
+var D2JSP_SKILL_FENRIS_RAGE                = 314;
+var D2JSP_SKILL_BAAL_TENTACLE              = 315;
+var D2JSP_SKILL_BAAL_NOVA                  = 316;
+var D2JSP_SKILL_BAAL_INFERNO               = 317;
+var D2JSP_SKILL_BAAL_COLD_MISSILES         = 318;
+if (parseFloat(me.version) >= 0.3518) {
+	var D2JSP_SKILL_MEGADEMONINFERNO        = 319;
+	var D2JSP_SKILL_EVILHUTSPAWNER          = 320;
+	var D2JSP_SKILL_COUNTESSFIREWALL        = 321;
+	var D2JSP_SKILL_IMPBOLT                 = 322;
+	var D2JSP_SKILL_HORRARCTIC_BLAST        = 323;
+	var D2JSP_SKILL_DEASENTRY_LTNG          = 324;
+	var D2JSP_SKILL_VINECYCLER              = 325;
+	var D2JSP_SKILL_BEARSMITE               = 326;
+	var D2JSP_SKILL_RESURRECT2              = 327;
+	var D2JSP_SKILL_BLOODLORDFRENZY         = 328;
+	var D2JSP_SKILL_BATELEPORT              = 329;
+	var D2JSP_SKILL_ITELEPORT               = 330;
+	var D2JSP_SKILL_BACLONE_TELEPORT        = 331;
+	var D2JSP_SKILL_ZAKARUMLIGHTNING        = 332;
+	var D2JSP_SKILL_VAMPIREMISSILE          = 333;
+	var D2JSP_SKILL_MEPHISTOMISSILE         = 334;
+	var D2JSP_SKILL_DOOMKNIGHTMISSILE       = 335;
+	var D2JSP_SKILL_ROGUEMISSILE            = 336;
+	var D2JSP_SKILL_HYDRAMISSILE            = 337;
+	var D2JSP_SKILL_NECROMAGEMISSILE        = 338;
+	var D2JSP_SKILL_MONBOW                  = 339;
+	var D2JSP_SKILL_MONFIREARROW            = 340;
+	var D2JSP_SKILL_MONCOLDARROW            = 341;
+	var D2JSP_SKILL_MONEXPLODINGARROW       = 342;
+	var D2JSP_SKILL_MONFREEZINGARROW        = 343;
+	var D2JSP_SKILL_MONPOWERSTRIKE          = 344;
+	var D2JSP_SKILL_SUCCUBUSBOLT            = 345;
+	var D2JSP_SKILL_MEPHFROSTNOVA           = 346;
+	var D2JSP_SKILL_MONICESPEAR             = 347;
+	var D2JSP_SKILL_SHAMANICE               = 348;
+	var D2JSP_SKILL_DIABLOGEDDON            = 349;
+	var D2JSP_SKILL_DELERICHANGE            = 350;
+	var D2JSP_SKILL_NIHLATHAKCORPSEEXPLOSION= 351;
+	var D2JSP_SKILL_SERPENTCHARGE           = 352;
+	var D2JSP_SKILL_TRNOVA                  = 353;
+	var D2JSP_SKILL_UNHOLYBOLTEX            = 354;
+	var D2JSP_SKILL_SHAMANFIREEX            = 355;
+	var D2JSP_SKILL_IFIRE_MISSILE_EX        = 356;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_MINIMUM = D2JSP_SKILL_ATTACK;
+var D2JSP_SKILL_MAXIMUM = (parseFloat(me.version) >= 0.3518) ?
+	D2JSP_SKILL_IFIRE_MISSILE_EX : D2JSP_SKILL_BAAL_COLD_MISSILES;
+var D2JSP_SKILL_COUNT   = (D2JSP_SKILL_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_ValidList = new Array();
+for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+	count_1++)
+	D2JSP_SKILL_ValidList.push(count_1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (parseFloat(me.version) < 0.3518) {
+var D2JSP_SKILL_SkillList = [
+	"Attack",
+	"Kick",
+	"Throw",
+	"Unsummon",
+	"Left Hand Throw",
+	"Left Hand Swing",
+	"Magic Arrow",
+	"Fire Arrow",
+	"Inner Sight",
+	"Critical Strike",
+	"Jab",
+	"Cold Arrow",
+	"Multiple Shot",
+	"Dodge",
+	"Power Strike",
+	"Poison Javelin",
+	"Exploding Arrow",
+	"Slow Missiles",
+	"Avoid",
+	"Impale",
+	"Lightning Bolt",
+	"Ice Arrow",
+	"Guided Arrow",
+	"Penetrate",
+	"Charged Strike",
+	"Plague Javelin",
+	"Strafe",
+	"Immolation Arrow",
+	"Dopplezon",
+	"Evade",
+	"Fend",
+	"Freezing Arrow",
+	"Valkyrie",
+	"Pierce",
+	"Lightning Strike",
+	"Lightning Fury",
+	"Fire Bolt",
+	"Warmth",
+	"Charged Bolt",
+	"Ice Bolt",
+	"Frozen Armor",
+	"Inferno",
+	"Static Field",
+	"Telekinesis",
+	"Frost Nova",
+	"Ice Blast",
+	"Blaze",
+	"Fire Ball",
+	"Nova",
+	"Lightning",
+	"Shiver Armor",
+	"Fire Wall",
+	"Enchant",
+	"Chain Lightning",
+	"Teleport",
+	"Glacial Spike",
+	"Meteor",
+	"Thunder Storm",
+	"Energy Shield",
+	"Blizzard",
+	"Chilling Armor",
+	"Fire Mastery",
+	"Hydra",
+	"Lightning Mastery",
+	"Frozen Orb",
+	"Cold Mastery",
+	"Amplify Damage",
+	"Teeth",
+	"Bone Armor",
+	"Skeleton Mastery",
+	"Raise Skeleton",
+	"Dim Vision",
+	"Weaken",
+	"Poison Dagger",
+	"Corpse Explosion",
+	"Clay Golem",
+	"Iron Maiden",
+	"Terror",
+	"Bone Wall",
+	"Golem Mastery",
+	"Raise Skeletal Mage",
+	"Confuse",
+	"Life Tap",
+	"Poison Explosion",
+	"Bone Spear",
+	"Blood Golem",
+	"Attract",
+	"Decrepify",
+	"Bone Prison",
+	"Summon Resist",
+	"Iron Golem",
+	"Lower Resist",
+	"Poison Nova",
+	"Bone Spirit",
+	"Fire Golem",
+	"Revive",
+	"Sacrifice",
+	"Smite",
+	"Might",
+	"Prayer",
+	"Resist Fire",
+	"Holy Bolt",
+	"Holy Fire",
+	"Thorns",
+	"Defiance",
+	"Resist Cold",
+	"Zeal",
+	"Charge",
+	"Blessed Aim",
+	"Cleansing",
+	"Resist Lightning",
+	"Vengeance",
+	"Blessed Hammer",
+	"Concentration",
+	"Holy Freeze",
+	"Vigor",
+	"Conversion",
+	"Holy Shield",
+	"Holy Shock",
+	"Sanctuary",
+	"Meditation",
+	"Fist Of The Heavens",
+	"Fanaticism",
+	"Conviction",
+	"Redemption",
+	"Salvation",
+	"Bash",
+	"Sword Mastery",
+	"Axe Mastery",
+	"Mace Mastery",
+	"Howl",
+	"Find Potion",
+	"Leap",
+	"Double Swing",
+	"Pole Arm Mastery",
+	"Throwing Mastery",
+	"Spear Mastery",
+	"Taunt",
+	"Shout",
+	"Stun",
+	"Double Throw",
+	"Increased Stamina",
+	"Find Item",
+	"Leap Attack",
+	"Concentrate",
+	"Iron Skin",
+	"Battle Cry",
+	"Frenzy",
+	"Increased Speed",
+	"Battle Orders",
+	"Grim Ward",
+	"Whirlwind",
+	"Berserk",
+	"Natural Resistance",
+	"War Cry",
+	"Battle Command",
+	"Fire Hit",
+	"Unholybolt",
+	"Skeletonraise",
+	"Maggotegg",
+	"Shamanfire",
+	"Magottup",
+	"Magottdown",
+	"Magottlay",
+	"Andrialspray",
+	"Jump",
+	"Swarm Move",
+	"Nest",
+	"Quick Strike",
+	"Vampirefireball",
+	"Vampirefirewall",
+	"Vampiremeteor",
+	"Gargoyletrap",
+	"Spiderlay",
+	"Vampireheal",
+	"Vampireraise",
+	"Submerge",
+	"Fetishaura",
+	"Fetishinferno",
+	"Zakarumheal",
+	"Emerge",
+	"Resurrect",
+	"Bestow",
+	"Missileskill1",
+	"Monteleport",
+	"Primelightning",
+	"Primebolt",
+	"Primeblaze",
+	"Primefirewall",
+	"Primespike",
+	"Primeicenova",
+	"Primepoisonball",
+	"Primepoisonnova",
+	"Diablight",
+	"Diabcold",
+	"Diabfire",
+	"Fingermagespider",
+	"Diabwall",
+	"Diabrun",
+	"Diabprison",
+	"Poisonballtrap",
+	"Andypoisonbolt",
+	"Hireablemissile",
+	"Desertturret",
+	"Arcanetower",
+	"Monblizzard",
+	"Mosquito",
+	"Cursedballtrapright",
+	"Cursedballtrapleft",
+	"Monfrozenarmor",
+	"Monbonearmor",
+	"Monbonespirit",
+	"Moncursecast",
+	"Hellmeteor",
+	"Regurgitatoreat",
+	"Monfrenzy",
+	"Queendeath",
+	"Scroll Of Identify",
+	"Tome Of Identify",
+	"Scroll Of Town Portal",
+	"Tome Of Town Portal",
+	"Raven",
+	"Plague Poppy",
+	"Werewolf",
+	"Shape Shifting",
+	"Firestorm",
+	"Oak Sage",
+	"Summon Spirit Wolf",
+	"Werebear",
+	"Molten Boulder",
+	"Arctic Blast",
+	"Cycle Of Life",
+	"Feral Rage",
+	"Maul",
+	"Eruption",
+	"Cyclone Armor",
+	"Heart Of Wolverine",
+	"Summon Fenris",
+	"Rabies",
+	"Fire Claws",
+	"Twister",
+	"Vines",
+	"Hunger",
+	"Shock Wave",
+	"Volcano",
+	"Tornado",
+	"Spirit Of Barbs",
+	"Summon Grizzly",
+	"Fury",
+	"Armageddon",
+	"Hurricane",
+	"Fire Trauma",
+	"Claw Mastery",
+	"Psychic Hammer",
+	"Tiger Strike",
+	"Dragon Talon",
+	"Shock Field",
+	"Blade Sentinel",
+	"Quickness",
+	"Fists Of Fire",
+	"Dragon Claw",
+	"Charged Bolt Sentry",
+	"Wake Of Fire Sentry",
+	"Weapon Block",
+	"Cloak Of Shadows",
+	"Cobra Strike",
+	"Blade Fury",
+	"Fade",
+	"Shadow Warrior",
+	"Claws Of Thunder",
+	"Dragon Tail",
+	"Lightning Sentry",
+	"Inferno Sentry",
+	"Mind Blast",
+	"Blades Of Ice",
+	"Dragon Flight",
+	"Death Sentry",
+	"Blade Shield",
+	"Venom",
+	"Shadow Master",
+	"Royal Strike",
+	"Wake Of Destruction Sentry",
+	"Imp Inferno",
+	"Imp Fireball",
+	"Baal Taunt",
+	"Baal Corpse Explode",
+	"Baal Monster Spawn",
+	"Catapult Charged Ball",
+	"Catapult Spike Ball",
+	"Suck Blood",
+	"Cry Help",
+	"Healing Vortex",
+	"Teleport 2",
+	"Selfresurrect",
+	"Vine Attack",
+	"Overseer Whip",
+	"Barbs Aura",
+	"Wolverine Aura",
+	"Oak Sage Aura",
+	"Imp Fire Missile",
+	"Impregnate",
+	"Siege Beast Stomp",
+	"Minionspawner",
+	"Catapultblizzard",
+	"Catapultplague",
+	"Catapultmeteor",
+	"Boltsentry",
+	"Corpsecycler",
+	"Deathmaul",
+	"Defense Curse",
+	"Blood Mana",
+	"Inferno Sentry 2",
+	"Death Sentry 2",
+	"Sentry Lightning",
+	"Fenris Rage",
+	"Baal Tentacle",
+	"Baal Nova",
+	"Baal Inferno",
+	"Baal Cold Missiles"
+];
+}
+else {
+var D2JSP_SKILL_SkillList = [
+	"Attack",
+	"Kick",
+	"Throw",
+	"Unsummon",
+	"Left Hand Throw",
+	"Left Hand Swing",
+	"Magic Arrow",
+	"Fire Arrow",
+	"Inner Sight",
+	"Critical Strike",
+	"Jab",
+	"Cold Arrow",
+	"Multiple Shot",
+	"Dodge",
+	"Power Strike",
+	"Poison Javelin",
+	"Exploding Arrow",
+	"Slow Missiles",
+	"Avoid",
+	"Impale",
+	"Lightning Bolt",
+	"Ice Arrow",
+	"Guided Arrow",
+	"Penetrate",
+	"Charged Strike",
+	"Plague Javelin",
+	"Strafe",
+	"Immolation Arrow",
+	"Dopplezon",
+	"Evade",
+	"Fend",
+	"Freezing Arrow",
+	"Valkyrie",
+	"Pierce",
+	"Lightning Strike",
+	"Lightning Fury",
+	"Fire Bolt",
+	"Warmth",
+	"Charged Bolt",
+	"Ice Bolt",
+	"Frozen Armor",
+	"Inferno",
+	"Static Field",
+	"Telekinesis",
+	"Frost Nova",
+	"Ice Blast",
+	"Blaze",
+	"Fire Ball",
+	"Nova",
+	"Lightning",
+	"Shiver Armor",
+	"Fire Wall",
+	"Enchant",
+	"Chain Lightning",
+	"Teleport",
+	"Glacial Spike",
+	"Meteor",
+	"Thunder Storm",
+	"Energy Shield",
+	"Blizzard",
+	"Chilling Armor",
+	"Fire Mastery",
+	"Hydra",
+	"Lightning Mastery",
+	"Frozen Orb",
+	"Cold Mastery",
+	"Amplify Damage",
+	"Teeth",
+	"Bone Armor",
+	"Skeleton Mastery",
+	"Raise Skeleton",
+	"Dim Vision",
+	"Weaken",
+	"Poison Dagger",
+	"Corpse Explosion",
+	"Clay Golem",
+	"Iron Maiden",
+	"Terror",
+	"Bone Wall",
+	"Golem Mastery",
+	"Raise Skeletal Mage",
+	"Confuse",
+	"Life Tap",
+	"Poison Explosion",
+	"Bone Spear",
+	"Blood Golem",
+	"Attract",
+	"Decrepify",
+	"Bone Prison",
+	"Summon Resist",
+	"Iron Golem",
+	"Lower Resist",
+	"Poison Nova",
+	"Bone Spirit",
+	"Fire Golem",
+	"Revive",
+	"Sacrifice",
+	"Smite",
+	"Might",
+	"Prayer",
+	"Resist Fire",
+	"Holy Bolt",
+	"Holy Fire",
+	"Thorns",
+	"Defiance",
+	"Resist Cold",
+	"Zeal",
+	"Charge",
+	"Blessed Aim",
+	"Cleansing",
+	"Resist Lightning",
+	"Vengeance",
+	"Blessed Hammer",
+	"Concentration",
+	"Holy Freeze",
+	"Vigor",
+	"Conversion",
+	"Holy Shield",
+	"Holy Shock",
+	"Sanctuary",
+	"Meditation",
+	"Fist Of The Heavens",
+	"Fanaticism",
+	"Conviction",
+	"Redemption",
+	"Salvation",
+	"Bash",
+	"Sword Mastery",
+	"Axe Mastery",
+	"Mace Mastery",
+	"Howl",
+	"Find Potion",
+	"Leap",
+	"Double Swing",
+	"Pole Arm Mastery",
+	"Throwing Mastery",
+	"Spear Mastery",
+	"Taunt",
+	"Shout",
+	"Stun",
+	"Double Throw",
+	"Increased Stamina",
+	"Find Item",
+	"Leap Attack",
+	"Concentrate",
+	"Iron Skin",
+	"Battle Cry",
+	"Frenzy",
+	"Increased Speed",
+	"Battle Orders",
+	"Grim Ward",
+	"Whirlwind",
+	"Berserk",
+	"Natural Resistance",
+	"War Cry",
+	"Battle Command",
+	"Fire Hit",
+	"Unholybolt",
+	"Skeletonraise",
+	"Maggotegg",
+	"Shamanfire",
+	"Magottup",
+	"Magottdown",
+	"Magottlay",
+	"Andrialspray",
+	"Jump",
+	"Swarm Move",
+	"Nest",
+	"Quick Strike",
+	"Vampirefireball",
+	"Vampirefirewall",
+	"Vampiremeteor",
+	"Gargoyletrap",
+	"Spiderlay",
+	"Vampireheal",
+	"Vampireraise",
+	"Submerge",
+	"Fetishaura",
+	"Fetishinferno",
+	"Zakarumheal",
+	"Emerge",
+	"Resurrect",
+	"Bestow",
+	"Missileskill1",
+	"Monteleport",
+	"Primelightning",
+	"Primebolt",
+	"Primeblaze",
+	"Primefirewall",
+	"Primespike",
+	"Primeicenova",
+	"Primepoisonball",
+	"Primepoisonnova",
+	"Diablight",
+	"Diabcold",
+	"Diabfire",
+	"Fingermagespider",
+	"Diabwall",
+	"Diabrun",
+	"Diabprison",
+	"Poisonballtrap",
+	"Andypoisonbolt",
+	"Hireablemissile",
+	"Desertturret",
+	"Arcanetower",
+	"Monblizzard",
+	"Mosquito",
+	"Cursedballtrapright",
+	"Cursedballtrapleft",
+	"Monfrozenarmor",
+	"Monbonearmor",
+	"Monbonespirit",
+	"Moncursecast",
+	"Hellmeteor",
+	"Regurgitatoreat",
+	"Monfrenzy",
+	"Queendeath",
+	"Scroll Of Identify",
+	"Tome Of Identify",
+	"Scroll Of Town Portal",
+	"Tome Of Town Portal",
+	"Raven",
+	"Plague Poppy",
+	"Werewolf",
+	"Shape Shifting",
+	"Firestorm",
+	"Oak Sage",
+	"Summon Spirit Wolf",
+	"Werebear",
+	"Molten Boulder",
+	"Arctic Blast",
+	"Cycle Of Life",
+	"Feral Rage",
+	"Maul",
+	"Eruption",
+	"Cyclone Armor",
+	"Heart Of Wolverine",
+	"Summon Fenris",
+	"Rabies",
+	"Fire Claws",
+	"Twister",
+	"Vines",
+	"Hunger",
+	"Shock Wave",
+	"Volcano",
+	"Tornado",
+	"Spirit Of Barbs",
+	"Summon Grizzly",
+	"Fury",
+	"Armageddon",
+	"Hurricane",
+	"Fire Trauma",
+	"Claw Mastery",
+	"Psychic Hammer",
+	"Tiger Strike",
+	"Dragon Talon",
+	"Shock Field",
+	"Blade Sentinel",
+	"Quickness",
+	"Fists Of Fire",
+	"Dragon Claw",
+	"Charged Bolt Sentry",
+	"Wake Of Fire Sentry",
+	"Weapon Block",
+	"Cloak Of Shadows",
+	"Cobra Strike",
+	"Blade Fury",
+	"Fade",
+	"Shadow Warrior",
+	"Claws Of Thunder",
+	"Dragon Tail",
+	"Lightning Sentry",
+	"Inferno Sentry",
+	"Mind Blast",
+	"Blades Of Ice",
+	"Dragon Flight",
+	"Death Sentry",
+	"Blade Shield",
+	"Venom",
+	"Shadow Master",
+	"Royal Strike",
+	"Wake Of Destruction Sentry",
+	"Imp Inferno",
+	"Imp Fireball",
+	"Baal Taunt",
+	"Baal Corpse Explode",
+	"Baal Monster Spawn",
+	"Catapult Charged Ball",
+	"Catapult Spike Ball",
+	"Suck Blood",
+	"Cry Help",
+	"Healing Vortex",
+	"Teleport 2",
+	"Selfresurrect",
+	"Vine Attack",
+	"Overseer Whip",
+	"Barbs Aura",
+	"Wolverine Aura",
+	"Oak Sage Aura",
+	"Imp Fire Missile",
+	"Impregnate",
+	"Siege Beast Stomp",
+	"Minionspawner",
+	"Catapultblizzard",
+	"Catapultplague",
+	"Catapultmeteor",
+	"Boltsentry",
+	"Corpsecycler",
+	"Deathmaul",
+	"Defense Curse",
+	"Blood Mana",
+	"Inferno Sentry 2",
+	"Death Sentry 2",
+	"Sentry Lightning",
+	"Fenris Rage",
+	"Baal Tentacle",
+	"Baal Nova",
+	"Baal Inferno",
+	"Baal Cold Missiles",
+	"Mega Demon Inferno",
+	"Evil Hut Spawner",
+	"Countess Firewall",
+	"Imp Bolt",
+	"Horror Arctic Blast",
+	"Death Sentry Lightning",
+	"Vine Cycler",
+	"Bear Smite",
+	"Resurrect 2",
+	"Blood Lord Frenzy",
+	"Baal Teleport",
+	"Imp Teleport",
+	"Baal Clone Teleport",
+	"Zakarum Lightning",
+	"Vampire Missile",
+	"Mephisto Missile",
+	"Doom Knight Missile",
+	"Rogue Missile",
+	"Hydra Missile",
+	"Necromage Missile",
+	"Monster Bow",
+	"Monster Fire Arrow",
+	"Monster Cold Arrow",
+	"Monster Exploding Arrow",
+	"Monster Freezing Arrow",
+	"Monster Power Strike",
+	"Succubus Bolt",
+	"Mephisto Frost Nova",
+	"Monster Ice Spear",
+	"Shaman Ice",
+	"Diablogeddon",
+	"Delerium Change",
+	"Nihlathak Corpse Explosion",
+	"Serpent Charge",
+	"Trap Nova",
+	"UnHoly BoltEx",
+	"Shaman FireEx",
+	"Imp Fire Missile Ex"
+];
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_NameList = new Array();
+for (var count_1 = 0; count_1 < D2JSP_SKILL_SkillList.length; count_1++)
+	D2JSP_SKILL_NameList[D2JSP_SKILL_SkillList[count_1].toLowerCase()] = count_1;
+D2JSP_SKILL_NameList["firewall"]             = D2JSP_SKILL_FIRE_WALL;
+D2JSP_SKILL_NameList["wearwolf"]             = D2JSP_SKILL_WEREWOLF;
+D2JSP_SKILL_NameList["wearbear"]             = D2JSP_SKILL_WEREBEAR;
+D2JSP_SKILL_NameList["wake of inferno"]      = D2JSP_SKILL_INFERNO_SENTRY;
+D2JSP_SKILL_NameList["book of identify"]     = D2JSP_SKILL_BOOK_OF_IDENTIFY;
+D2JSP_SKILL_NameList["scroll of townportal"] = D2JSP_SKILL_SCROLL_OF_TOWNPORTAL;
+D2JSP_SKILL_NameList["tome of townportal"]   = D2JSP_SKILL_BOOK_OF_TOWNPORTAL;
+D2JSP_SKILL_NameList["book of town portal"]  = D2JSP_SKILL_BOOK_OF_TOWNPORTAL;
+D2JSP_SKILL_NameList["book of townportal"]   = D2JSP_SKILL_BOOK_OF_TOWNPORTAL;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Class id constants...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_CLASS_ID_AMAZON      = 0;
+var D2JSP_CLASS_ID_SORCERESS   = 1;
+var D2JSP_CLASS_ID_NECROMANCER = 2;
+var D2JSP_CLASS_ID_PALADIN     = 3;
+var D2JSP_CLASS_ID_BARBARIAN   = 4;
+var D2JSP_CLASS_ID_DRUID       = 5;
+var D2JSP_CLASS_ID_ASSASSIN    = 6;
+var D2JSP_CLASS_ID_ALL         = -1;
+
+var D2JSP_CLASS_ID_COUNT       = 7;
+
+var D2JSP_CLASS_ID_NameList    = [
+	"Amazon",
+	"Sorceress",
+	"Necromancer",
+	"Paladin",
+	"Barbarian",
+	"Druid",
+	"Assassin"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_Tree(char_class, value_109, value_110, name)
+{
+	this.char_class = char_class;
+	this.tree_index = value_109;
+	this.value_109  = value_109;
+	this.value_110  = value_110;
+	this.name       = name;
+
+	this.toString  = D2JSP_SKILL_Tree_toString;
+
+	function D2JSP_SKILL_Tree_toString() {
+		return("character class = " + this.char_class + ", value 1.09 = " +
+			this.value_109 + ", value 1.10 = " + this.value_110 + ", name = " +
+			this.name);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_TreeList = [
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_AMAZON,       0,  0, "Bow and Crossbow Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_AMAZON,       1,  1, "Passive and Magic Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_AMAZON,       2,  2, "Javelin and Spear Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_SORCERESS,    3,  8, "Fire Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_SORCERESS,    4,  9, "Lightning Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_SORCERESS,    5, 10, "Cold Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_NECROMANCER,  6, 16, "Curses Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_NECROMANCER,  7, 17, "Poison and Bone Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_NECROMANCER,  8, 18, "Necromancer Summoning Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_PALADIN,      9, 24, "Paladin Combat Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_PALADIN,     10, 25, "Offensive Auras Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_PALADIN,     11, 26, "Defensive Auras Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_BARBARIAN,   12, 32, "Barbarian Combat Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_BARBARIAN,   13, 33, "Masteries Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_BARBARIAN,   14, 34, "Warcries Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_DRUID,       15, 40, "Druid Summoning Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_DRUID,       16, 41, "Shape Shifting Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_DRUID,       17, 42, "Elemental Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_ASSASSIN,    18, 48, "Traps Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_ASSASSIN,    19, 49, "Shadow Disciplines Skills"),
+	new D2JSP_SKILL_Tree(D2JSP_CLASS_ID_ASSASSIN,    20, 50, "Martial Arts Skills")
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_TreeNameList = new Array();
+for (var count_1 = 0; count_1 < D2JSP_SKILL_TreeList.length; count_1++) {
+	tmp_list  = new Array();
+	tmp_name  = D2JSP_SKILL_TreeList[count_1].name.toLowerCase();
+	char_name = D2JSP_CLASS_ID_NameList[D2JSP_SKILL_TreeList[count_1].
+		char_class].toLowerCase() + " ";
+	tmp_list.push(tmp_name, tmp_name + " tree");
+	tmp_name = tmp_name.replace(/ skills/gi, " skill");
+	tmp_list.push(tmp_name, tmp_name + " tree");
+	tmp_name = tmp_name.replace(/ skill/gi, "");
+	tmp_list.push(tmp_name, tmp_name + " tree");
+	if (tmp_name.indexOf(char_name) == -1) {
+		tmp_list_2 = new Array();
+		for (var count_2 = 0; count_2 < tmp_list.length; count_2++)
+			tmp_list_2.push(char_name + tmp_list[count_2]);
+		tmp_list = tmp_list.concat(tmp_list_2);
+	}
+	for (var count_2 = 0; count_2 < tmp_list.length; count_2++)
+		D2JSP_SKILL_TreeNameList[tmp_list[count_2]] = D2JSP_SKILL_TreeList[count_1];
+}
+delete tmp_list;
+delete tmp_name;
+delete char_name;
+delete tmp_list_2;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TreeNameToObject(tree_name)
+{
+	return(D2JSP_SKILL_TreeNameList[tree_name]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TreeNameToName(tree_name)
+{
+	return((D2JSP_SKILL_TreeNameList[tree_name]) ?
+		D2JSP_SKILL_TreeNameList[tree_name].name : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Note: Element [7] is all player classes.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_PlayerClassIndices = [
+	[D2JSP_SKILL_MAGIC_ARROW,		D2JSP_SKILL_LIGHTNING_FURY],
+	[D2JSP_SKILL_FIRE_BOLT,			D2JSP_SKILL_COLD_MASTERY],
+	[D2JSP_SKILL_AMPLIFY_DAMAGE,	D2JSP_SKILL_REVIVE],
+	[D2JSP_SKILL_SACRIFICE,			D2JSP_SKILL_SALVATION],
+	[D2JSP_SKILL_BASH,				D2JSP_SKILL_BATTLE_COMMAND],
+	[D2JSP_SKILL_RAVEN,				D2JSP_SKILL_HURRICANE],
+//	[D2JSP_SKILL_FIRE_TRAUMA,		D2JSP_SKILL_WAKE_OF_DESTRUCTION_SENTRY],
+	[D2JSP_SKILL_FIRE_TRAUMA,		D2JSP_SKILL_ROYAL_STRIKE],
+	[D2JSP_SKILL_ATTACK,				D2JSP_SKILL_LEFT_HAND_SWING]
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Character class skill offset info...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_ClassSkillOffsets = new Array(D2JSP_CLASS_ID_COUNT);
+for (var count_1 = 0; count_1 < D2JSP_SKILL_ClassSkillOffsets.length; count_1++) {
+	D2JSP_SKILL_ClassSkillOffsets[count_1] = new Array(30);
+	for (count_2 = 0; count_2 < 30; count_2++)
+		D2JSP_SKILL_ClassSkillOffsets[count_1][count_2] =
+			D2JSP_SKILL_PlayerClassIndices[count_1][0] + 1;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Pre cast skill information...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_PreCastList = new Array();
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_UNSUMMON + ""]           = [true,  D2JSP_CLASS_ID_ALL];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_VALKYRIE + ""]           = [true,  D2JSP_CLASS_ID_AMAZON];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_FROZEN_ARMOR + ""]       = [true,  D2JSP_CLASS_ID_SORCERESS];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SHIVER_ARMOR + ""]       = [true,  D2JSP_CLASS_ID_SORCERESS];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_ENCHANT + ""]            = [true,  D2JSP_CLASS_ID_SORCERESS];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_THUNDER_STORM + ""]      = [false, D2JSP_CLASS_ID_SORCERESS];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_ENERGY_SHIELD + ""]      = [true,  D2JSP_CLASS_ID_SORCERESS];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CHILLING_ARMOR + ""]     = [true,  D2JSP_CLASS_ID_SORCERESS];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_BONE_ARMOR + ""]         = [true,  D2JSP_CLASS_ID_NECROMANCER];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CLAY_GOLEM + ""]         = [true,  D2JSP_CLASS_ID_NECROMANCER];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_BLOODGOLEM + ""]         = [true,  D2JSP_CLASS_ID_NECROMANCER];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_IRONGOLEM + ""]          = [true,  D2JSP_CLASS_ID_NECROMANCER];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_FIREGOLEM + ""]          = [true,  D2JSP_CLASS_ID_NECROMANCER];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SACRIFICE + ""]          = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_MIGHT + ""]              = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_PRAYER + ""]             = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_RESIST_FIRE + ""]        = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_HOLY_FIRE + ""]          = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_THORNS + ""]             = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_DEFIANCE + ""]           = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_RESIST_COLD + ""]        = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_BLESSED_AIM + ""]        = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CLEANSING + ""]          = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_RESIST_LIGHTNING + ""]   = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CONCENTRATION + ""]      = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_HOLY_FREEZE + ""]        = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_HOLY_SHOCK + ""]         = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SANCTUARY + ""]          = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_MEDITATION + ""]         = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_FANATICISM + ""]         = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CONVICTION + ""]         = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SALVATION + ""]          = [true,  D2JSP_CLASS_ID_PALADIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SHOUT + ""]              = [false, D2JSP_CLASS_ID_BARBARIAN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_BATTLE_ORDERS + ""]      = [false, D2JSP_CLASS_ID_BARBARIAN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_BATTLE_COMMAND + ""]     = [false, D2JSP_CLASS_ID_BARBARIAN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_RAVEN + ""]              = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_PLAGUE_POPPY + ""]       = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_WEREWOLF + ""]           = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_OAK_SAGE + ""]           = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SUMMON_SPIRIT_WOLF + ""] = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_WEARBEAR + ""]           = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CYCLE_OF_LIFE + ""]      = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CYCLONE_ARMOR + ""]      = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_HEART_OF_WOLVERINE + ""] = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SUMMON_FENRIS + ""]      = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_VINES + ""]              = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SPIRIT_OF_BARBS + ""]    = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SUMMON_GRIZZLY + ""]     = [true,  D2JSP_CLASS_ID_DRUID];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_BLADE_SENTINEL + ""]     = [true,  D2JSP_CLASS_ID_ASSASSIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_CLOAK_OF_SHADOWS + ""]   = [false, D2JSP_CLASS_ID_ASSASSIN];
+D2JSP_SKILL_PreCastList[D2JSP_SKILL_SHADOW_MASTER + ""]      = [true,  D2JSP_CLASS_ID_ASSASSIN];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_DefaultSpellCastStartCount  = 20;
+var D2JSP_SKILL_DefaultSpellCastStartTime   = 50;
+
+var D2JSP_SKILL_DefaultSpellCastFinishCount = 20;
+var D2JSP_SKILL_DefaultSpellCastFinishTime  = 50;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetMasteryPercent(in_skill, skill_level)
+{
+	if (D2JSP_SKILL_IsValid(in_skill)) {
+		skill_level = (D2JSP_UTIL_GEN_TypeOfNumber(skill_level)) ? skill_level :
+			me.getSkill(in_skill, 0);
+		if (skill_level) {
+			if (in_skill == D2JSP_SKILL_FIRE_MASTERY)
+				return(30 + ((skill_level - 1) * 7));
+			if (in_skill == D2JSP_SKILL_LIGHTNING_MASTERY)
+				return(50 + ((skill_level - 1) * 12));
+		}
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_ColdMasteryPercents_109 = [
+	 0,
+	23,
+	34,
+	42,
+	49,
+	55,
+	59,
+	63,
+	65,
+	69,
+	71,
+	73,
+	75,
+	77,
+	79,
+	80,
+	82,
+	82,
+	83,
+	84,
+	85
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetColdMasteryPercent(skill_level)
+{
+	skill_level = (D2JSP_UTIL_GEN_TypeOfNumber(skill_level)) ? skill_level :
+		me.getSkill(D2JSP_SKILL_COLD_MASTERY, 0);
+
+	if (skill_level) {
+		if (parseFloat(me.version) >= 0.3518)
+			return(20 + ((skill_level - 1) * 5));
+		else
+			return(D2JSP_SKILL_ColdMasteryPercents_109[Math.min(skill_level, 20)] +
+				((skill_level <= 20) ? 0 : (skill_level - 20)));
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetMultiplier(in_skill, skill_level)
+{
+	if (D2JSP_SKILL_IsValid(in_skill)) {
+		skill_level = (D2JSP_UTIL_GEN_TypeOfNumber(skill_level)) ? skill_level :
+			me.getSkill(D2JSP_SKILL_ToSkillNameForUse(this.id));
+		if (skill_level) {
+			switch (in_skill) {
+				case D2JSP_SKILL_CHARGED_BOLT	:
+					return((parseFloat(me.version) < 0.3518) ?
+						(3 + (skill_level - 1)) :
+						Math.min(24, 3 + (skill_level - 1)));
+				default								:
+					break;
+			}
+		}
+	}
+
+	return(1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (parseFloat(me.version) < 0.3316) {
+	var D2JSP_SKILLINFO_NAME               =   1;	// D2JSP_BASE_SKILLS_SKILL
+	var D2JSP_SKILLINFO_CLASSID            =   2;	// D2JSP_BASE_SKILLS_CHARCLASS
+	var D2JSP_SKILLINFO_MONSTERONLY        =   3;	// D2JSP_BASE_SKILLS_MONSTER
+	var D2JSP_SKILLINFO_ENHANCEABLE        =   4;	//	D2JSP_SKILLINFO_ENHANCEABLE
+	var D2JSP_SKILLINFO_CLASS_REQ          =   7;	// D2JSP_BASE_SKILLS_CLASSREQ
+	var D2JSP_SKILLINFO_LEFTSKILL          =  58;	// D2JSP_BASE_SKILLS_LEFTSKL
+	var D2JSP_SKILLINFO_IS_AURA            =  46;	// D2JSP_BASE_SKILLS_ISAURA
+	var D2JSP_SKILLINFO_IN_TOWN            =  63;	// D2JSP_BASE_SKILLS_INTOWN
+	var D2JSP_SKILLINFO_PASSIVE            =  66;	// D2JSP_BASE_SKILLS_PASSIVE
+	var D2JSP_SKILLINFO_ELEM_TYPE          =  90;	//	D2JSP_BASE_SKILLS_ETYPE
+	var D2JSP_SKILLINFO_NAME_LOCAL         = 100;
+}
+else if (parseFloat(me.version) < 0.3518) {
+	var D2JSP_SKILLINFO_NAME               = D2JSP_BASE_SKILLS_SKILL;
+	var D2JSP_SKILLINFO_CLASSID            = D2JSP_BASE_SKILLS_CHARCLASS;
+	var D2JSP_SKILLINFO_MONSTERONLY        = D2JSP_BASE_SKILLS_MONSTER;
+	var D2JSP_SKILLINFO_ENHANCEABLE        = D2JSP_BASE_SKILLS_ENHANCEABLE;
+	var D2JSP_SKILLINFO_CLASS_REQ          = D2JSP_BASE_SKILLS_CLASSREQ;
+	var D2JSP_SKILLINFO_LEFTSKILL          = D2JSP_BASE_SKILLS_LEFTSKL;
+	var D2JSP_SKILLINFO_IS_AURA            = D2JSP_BASE_SKILLS_ISAURA;
+	var D2JSP_SKILLINFO_IN_TOWN            = D2JSP_BASE_SKILLS_INTOWN;
+	var D2JSP_SKILLINFO_PASSIVE            = D2JSP_BASE_SKILLS_PASSIVE;
+	var D2JSP_SKILLINFO_ELEM_TYPE          = D2JSP_BASE_SKILLS_ETYPE;
+	var D2JSP_SKILLINFO_DELAY              = D2JSP_BASE_SKILLS_DELAY;
+	var D2JSP_SKILLINFO_HITSHIFT           = D2JSP_BASE_SKILLS_HITSHIFT;
+	var D2JSP_SKILLINFO_EMIN               = D2JSP_BASE_SKILLS_EMIN;
+	var D2JSP_SKILLINFO_EMAX               = D2JSP_BASE_SKILLS_EMAX;
+	var D2JSP_SKILLINFO_ELEVEL_1           = D2JSP_BASE_SKILLS_ELEV1;
+	var D2JSP_SKILLINFO_ELEVEL_2           = D2JSP_BASE_SKILLS_ELEV2;
+	var D2JSP_SKILLINFO_ELEVEL_3           = D2JSP_BASE_SKILLS_ELEV3;
+		// No locale name available in .34 and .35, so use the base name.
+	var D2JSP_SKILLINFO_NAME_LOCAL         = D2JSP_BASE_SKILLS_SKILL;
+}
+else {
+	var D2JSP_SKILLINFO_NAME               = D2JSP_BASE_SKILLS_SKILL;
+	var D2JSP_SKILLINFO_CLASSID            = D2JSP_BASE_SKILLS_CHARCLASS;
+	var D2JSP_SKILLINFO_MAX_LEVEL          = D2JSP_BASE_SKILLS_MAXLVL;
+	var D2JSP_SKILLINFO_ENHANCEABLE        = D2JSP_BASE_SKILLS_ENHANCEABLE;
+//	var D2JSP_SKILLINFO_CLASS_REQ          = D2JSP_BASE_SKILLS_CLASSREQ;
+	var D2JSP_SKILLINFO_CLASS_REQ          = D2JSP_BASE_SKILLS_CHARCLASS;
+//	var D2JSP_SKILLINFO_LEFTSKILL          = D2JSP_BASE_SKILLS_LEFTSKL;
+	var D2JSP_SKILLINFO_LEFTSKILL          = D2JSP_BASE_SKILLS_LEFTSKILL;
+//	var D2JSP_SKILLINFO_IS_AURA            = D2JSP_BASE_SKILLS_ISAURA;
+	var D2JSP_SKILLINFO_IS_AURA            = D2JSP_BASE_SKILLS_AURA;
+	var D2JSP_SKILLINFO_IN_TOWN            = D2JSP_BASE_SKILLS_INTOWN;
+	var D2JSP_SKILLINFO_PASSIVE            = D2JSP_BASE_SKILLS_PASSIVE;
+	var D2JSP_SKILLINFO_ELEM_TYPE          = D2JSP_BASE_SKILLS_ETYPE;
+	var D2JSP_SKILLINFO_DELAY              = D2JSP_BASE_SKILLS_DELAY;
+	var D2JSP_SKILLINFO_HITSHIFT           = D2JSP_BASE_SKILLS_HITSHIFT;
+	var D2JSP_SKILLINFO_EMIN               = D2JSP_BASE_SKILLS_EMIN;
+	var D2JSP_SKILLINFO_EMAX               = D2JSP_BASE_SKILLS_EMAX;
+//	var D2JSP_SKILLINFO_ELEVEL_1           = D2JSP_BASE_SKILLS_ELEV1;
+//	var D2JSP_SKILLINFO_ELEVEL_2           = D2JSP_BASE_SKILLS_ELEV2;
+//	var D2JSP_SKILLINFO_ELEVEL_3           = D2JSP_BASE_SKILLS_ELEV3;
+	var D2JSP_SKILLINFO_ELEVEL_MIN_1       = D2JSP_BASE_SKILLS_EMINLEV1;
+	var D2JSP_SKILLINFO_ELEVEL_MIN_2       = D2JSP_BASE_SKILLS_EMINLEV2;
+	var D2JSP_SKILLINFO_ELEVEL_MIN_3       = D2JSP_BASE_SKILLS_EMINLEV3;
+	var D2JSP_SKILLINFO_ELEVEL_MIN_4       = D2JSP_BASE_SKILLS_EMINLEV4;
+	var D2JSP_SKILLINFO_ELEVEL_MIN_5       = D2JSP_BASE_SKILLS_EMINLEV5;
+	var D2JSP_SKILLINFO_ELEVEL_MAX_1       = D2JSP_BASE_SKILLS_EMAXLEV1;
+	var D2JSP_SKILLINFO_ELEVEL_MAX_2       = D2JSP_BASE_SKILLS_EMAXLEV2;
+	var D2JSP_SKILLINFO_ELEVEL_MAX_3       = D2JSP_BASE_SKILLS_EMAXLEV3;
+	var D2JSP_SKILLINFO_ELEVEL_MAX_4       = D2JSP_BASE_SKILLS_EMAXLEV4;
+	var D2JSP_SKILLINFO_ELEVEL_MAX_5       = D2JSP_BASE_SKILLS_EMAXLEV5;
+		// No locale name available in .34 and .35, so use the base name.
+	var D2JSP_SKILLINFO_NAME_LOCAL         = D2JSP_BASE_SKILLS_SKILL;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetBaseSkillInfo(skill_id, skill_info_id)
+{
+	return((parseFloat(me.version) < 0.3518) ?
+		D2JSP_UTIL_getSkillInfo(skill_id, skill_info_id) : VVV);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_LastUsedTime = new Array(D2JSP_SKILL_COUNT);
+for (var count_1 = 0; count_1 < D2JSP_SKILL_LastUsedTime.length; count_1++)
+	D2JSP_SKILL_LastUsedTime[count_1] = 0;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_IsValid(in_skill)
+{
+	return(((in_skill >= D2JSP_SKILL_MINIMUM) &&
+		(in_skill <= D2JSP_SKILL_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetSkillDelay(skill_id)
+{
+	var delay = (D2JSP_SKILL_IsValid(skill_id)) ?
+		D2JSP_UTIL_getSkillInfo(skill_id, D2JSP_SKILLINFO_DELAY) : 0;
+
+	return(((delay > 0) && (delay != 0xFFFF)) ? delay : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_TimedSkillList = new Array();
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_PLAGUE_JAVELIN + ""]             =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_PLAGUE_JAVELIN);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_IMMOLATION_ARROW + ""]           =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_IMMOLATION_ARROW);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_FIRE_WALL + ""]                  =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_FIRE_WALL);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_METEOR + ""]                     =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_METEOR);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_BLIZZARD + ""]                   =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_BLIZZARD);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_HYDRA + ""]                      =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_HYDRA);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_FROZEN_ORB + ""]                 =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_FROZEN_ORB);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_FIST_OF_THE_HEAVENS + ""]        =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_FIST_OF_THE_HEAVENS);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_WEREWOLF + ""]                   =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_WEREWOLF);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_FIRESTORM + ""]                  =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_FIRESTORM);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_WEREBEAR + ""]                   =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_WEREBEAR);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_MOLTEN_BOULDER + ""]             =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_MOLTEN_BOULDER);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_ERUPTION + ""]                   =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_ERUPTION);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_VOLCANO + ""]                    =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_VOLCANO);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_ARMAGEDDON + ""]                 =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_ARMAGEDDON);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_HURRICANE + ""]                  =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_HURRICANE);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_BLADE_SENTINEL + ""]             =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_BLADE_SENTINEL);
+D2JSP_SKILL_TimedSkillList[D2JSP_SKILL_DRAGON_FLIGHT + ""]              =
+	D2JSP_SKILL_GetSkillDelay(D2JSP_SKILL_DRAGON_FLIGHT);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_SKILL_LastTimedSkillUse = getTickCount();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_CheckTimedSkillCast(skill_id)
+{
+	var delay = D2JSP_SKILL_TimedSkillList[skill_id + ""];
+
+/*
+if (parseFloat(me.version) < 0.3518)
+	return(((delay == null) || (getTickCount() >=
+		((D2JSP_SKILL_LastTimedSkillUse + 200) + (delay * 40)))) ? true : false);
+else
+	return(((delay == null) || (getTickCount() >=
+		(D2JSP_SKILL_LastTimedSkillUse + delay + 200))) ? true : false);
+*/
+	return((delay && me.getState(D2JSP_STATE_SKILLDELAY)) ? false : true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_Core(skill_id)
+{
+	this.getCleanName        = D2JSP_SKILL_Core_getCleanName;
+	this.toString            = D2JSP_SKILL_Core_toString;
+	this.toStringListItem    = D2JSP_SKILL_Core_toStringListItem;
+	this.toStringListHeader  = D2JSP_SKILL_Core_toStringListHeader;
+	this.toStringListTrailer = D2JSP_SKILL_Core_toStringListTrailer;
+
+	if ((skill_id >= D2JSP_SKILL_MINIMUM) && (skill_id <= D2JSP_SKILL_MAXIMUM)) {
+		this.id             = skill_id;
+		this.name           = this.getCleanName(skill_id);
+		this.name_lc        = this.name.toLowerCase();
+		this.name_local     = (parseFloat(me.version) < 0.3518) ?
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_NAME_LOCAL) :
+			getLocaleString(D2JSP_UTIL_getSkillDescInfo(skill_id,
+				D2JSP_BASE_SKILLDESC_STR_NAME));
+		this.name_local_lc  = this.name_local.toLowerCase();
+		this.use_name       = D2JSP_SKILL_ToSkillNameForUse(this.id);
+		this.level          = me.getSkill(this.use_name);
+		this.classid        =
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_CLASSID);
+		this.class_req      =
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_CLASS_REQ);
+if (parseFloat(me.version) < 0.3518) {
+		this.monster_only   =
+			(D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_MONSTERONLY)) ?
+			true : false;
+		this.max_level      = (this.monster_only) ? 0 : 20;
+}
+else {
+		this.max_level      =
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_MAX_LEVEL);
+		this.monster_only   = (this.max_level || 
+			(this.id == D2JSP_SKILL_SCROLL_OF_IDENTIFY) ||
+			(this.id == D2JSP_SKILL_BOOK_OF_IDENTIFY) ||
+			(this.id == D2JSP_SKILL_SCROLL_OF_TOWNPORTAL) ||
+			(this.id == D2JSP_SKILL_BOOK_OF_TOWNPORTAL)) ? false : true;
+}
+		this.is_enhanceable =
+			(D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ENHANCEABLE)) ?
+			true : false;
+/*
+		this.hand_both      =
+			(!D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_LEFTSKILL)) ?
+			true : false;
+*/
+		this.hand_both      =
+			(!D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_LEFTSKILL)) ?
+			false : true;
+		this.in_town        =
+			(D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_IN_TOWN)) ?
+			true : false;
+		this.is_passive     =
+			(D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_PASSIVE)) ?
+			true : false;
+		this.is_aura        =
+			(D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_IS_AURA)) ?
+			true : false;
+/*
+		this.is_attack      = ((!this.monster_only) && this.is_enhanceable &&
+									(!this.in_town) && (!this.is_passive) &&
+									(!this.is_aura)) ? true : false;
+*/
+		var skill_missile   = D2JSP_MISSILE_GetByLinkedSkill(this.id);
+if (parseFloat(me.version) < 0.3515) {
+		this.distance       = ((this.id == D2JSP_SKILL_FROST_NOVA) ||
+			(this.id == D2JSP_SKILL_NOVA)) ? 13 : 25;
+}
+else {
+		this.distance       = (skill_missile) ?
+			skill_missile[D2JSP_BASE_MISSILES_RANGE] : 0;
+		// Fix-up for Charged Bolt (98 in MPQ Missiles.txt).
+		this.distance       = (this.id == D2JSP_SKILL_CHARGED_BOLT) ?
+			20 : this.distance;
+}
+		this.is_attack      = ((!this.monster_only) &&
+									(!this.in_town) && (!this.is_passive) &&
+									(!this.is_aura)) ? true : false;
+
+		this.is_attack      = (this.id == D2JSP_SKILL_TELEPORT) ? false :
+			this.is_attack;
+		this.element_type   =
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEM_TYPE);
+		this.element_dmg    = (this.is_attack) ? this.element_type : null;
+		this.element_dmg    = (this.id == D2JSP_SKILL_STATIC_FIELD) ?
+			D2JSP_UTIL_DAMAGE_LIGHT : this.element_dmg;
+		this.is_radial      = ((this.id == D2JSP_SKILL_FROST_NOVA)   ||
+									 (this.id == D2JSP_SKILL_NOVA)) ? true : false;
+		this.delay          = D2JSP_SKILL_GetSkillDelay(this.id);
+		this.hitshift       =
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_HITSHIFT);
+		this.mastery_id     = ((this.classid != D2JSP_CLASS_ID_SORCERESS) ||
+			(!this.is_attack)) ? -1 :
+			((this.element_dmg == D2JSP_UTIL_DAMAGE_FIRE) ?
+				D2JSP_SKILL_FIRE_MASTERY :
+			((this.element_dmg == D2JSP_UTIL_DAMAGE_LIGHT) ?
+				D2JSP_SKILL_LIGHTNING_MASTERY :
+			((this.element_dmg == D2JSP_UTIL_DAMAGE_COLD) ?
+				D2JSP_SKILL_COLD_MASTERY : -1)));
+		this.mastery_use_name = (this.mastery_id != -1) ?
+			D2JSP_SKILL_ToSkillNameForUse(this.mastery_id) : null;
+		this.stack_size     = (this.id == D2JSP_SKILL_FIRE_WALL) ? 3 : 1;
+		this.multiplier     = 1;
+		this.ebase          = [
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_EMIN),
+			D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_EMAX)
+		];
+if (parseFloat(me.version) < 0.3518) {
+		this.elevels        = [
+			[D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_1),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_2),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_3)],
+			[D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_1),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_2),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_3)]
+		];
+}
+else {
+		this.elevels        = [
+			[D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MIN_1),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MIN_2),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MIN_3),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MIN_4),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MIN_5)],
+			[D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MAX_1),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MAX_2),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MAX_3),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MAX_4),
+			 D2JSP_UTIL_getSkillInfo(this.id, D2JSP_SKILLINFO_ELEVEL_MAX_5)]
+		];
+}
+		}
+	}
+
+	function D2JSP_SKILL_Core_getCleanName(skill_id) {
+		var skill_name = null;
+		if ((skill_id >= D2JSP_SKILL_MINIMUM) &&
+			(skill_id <= D2JSP_SKILL_MAXIMUM)) {
+			skill_name = (parseFloat(me.version) < 0.3518) ?
+				D2JSP_UTIL_getSkillInfo(skill_id, D2JSP_SKILLINFO_NAME) :
+				getLocaleString(D2JSP_UTIL_getSkillDescInfo(skill_id,
+					D2JSP_BASE_SKILLDESC_STR_NAME));
+if (!D2JSP_UTIL_GEN_TypeOfStringNotEmpty(skill_name)) {
+	skill_name = "SKILL_NAME_" + skill_id;
+	print("***** ERROR ON SKILL ID " + skill_id + " --- NO NAME FOUND (SET TO " +
+		skill_name + ")");
+}
+//print("SKIL NAME = " + skill_name);
+			for (var count_1 = 0; count_1 < skill_name.length; count_1++) {
+				var char_code = skill_name.charCodeAt(count_1);
+				if ((char_code < 32) || (char_code > 127)) {
+					skill_name = D2JSP_SKILL_ToSkillName(skill_id);
+					break;
+				}
+			}
+		}
+if (skill_id == 221)
+	print("***** RETURNING [" + skill_name + "]");
+		return(skill_name);
+	}
+
+	function D2JSP_SKILL_Core_toString() {
+		return(this.toStringListItem());
+	}
+
+	function D2JSP_SKILL_Core_toStringListItem() {
+		var props      = ["id", "name", "classid", "class_req", "distance",
+			"delay", "monster_only",
+			"is_enhanceable", "hand_both", "in_town", "is_passive", "is_aura",
+			"is_attack", "element_type", "element_dmg", "is_radial"];
+		var widths     = [3, 32, 7, 9, 8, 5, 12, 11, 11, 7, 7, 5, 6, 14, 14, 6];
+		var tmp_string = "";
+
+		for (var count_1 = 0; count_1 < props.length; count_1++)
+			tmp_string += ((count_1) ? " " : "") +
+				D2JSP_UTIL_FORMAT_LJust(this[props[count_1]], widths[count_1]);
+
+		return(tmp_string);
+	}
+
+	function D2JSP_SKILL_Core_toStringListHeader() {
+		var names      = ["Id", "Name", "ClassId", "Class Req", "Distance",
+								"Delay", "Monster Only",
+								"Enhanceable", "Either Hand", "In Town", "Passive",
+								"Aura", "Attack", "Element Type", "Element Dmg",
+								"Radial"];
+		var widths     = [3, 32, 7, 9, 8, 5, 12, 11, 11, 7, 7, 5, 6, 14, 14, 6];
+		var tmp_string = "";
+
+		for (var count_1 = 0; count_1 < names.length; count_1++)
+			tmp_string += ((count_1) ? " " : "") +
+				D2JSP_UTIL_FORMAT_LJust(names[count_1], widths[count_1]);
+
+		return(tmp_string);
+	}
+
+	function D2JSP_SKILL_Core_toStringListTrailer() {
+		var widths     = [3, 32, 7, 9, 8, 5, 12, 11, 11, 7, 7, 5, 6, 14, 14, 6];
+		var tmp_string = "";
+
+		for (var count_1 = 0; count_1 < widths.length; count_1++)
+			tmp_string += ((count_1) ? " " : "") +
+				D2JSP_UTIL_FORMAT_LJust("", widths[count_1], "-");
+
+		return(tmp_string);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (parseFloat(me.version) < 0.3518) {
+var D2JSP_SKILL_ELevels = [
+	[  2,   8,   1,   7],
+	[  9,  16,   8,   8],
+	[ 17, 100,  16, 100]
+];
+}
+else {
+var D2JSP_SKILL_ELevels = [
+	[  2,   8,   1,   7],
+	[  9,  16,   8,   8],
+	[ 17,  22,  16,   6],
+	[ 23,  28,  22,   6],
+	[ 29, 999,  16, 999]
+];
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_Damage(skill_core, skill_level, mastery_level)
+{
+	var mastery_core = null;
+
+	skill_level = (D2JSP_UTIL_GEN_TypeOfNumber(skill_level)) ? skill_level :
+		me.getSkill(skill_core.use_name);
+
+	if (skill_core.mastery_id) {
+		mastery_level = (D2JSP_UTIL_GEN_TypeOfNumber(mastery_level)) ?
+			mastery_level : me.getSkill(skill_core.mastery_use_name);
+		mastery_core = new D2JSP_SKILL_Core(skill_core.mastery_id);
+	}
+
+	this.id              = skill_core.id;
+	this.level           = skill_level;
+	this.name            = skill_core.name;
+	this.shift_value     = 1 << skill_core.hitshift;
+	this.stack_size      = skill_core.stack_size;
+	this.mastery_percent = (mastery_core != null) ?
+		D2JSP_SKILL_GetMasteryPercent(mastery_core.id, mastery_level) : 0;
+	this.multiplier      = D2JSP_SKILL_GetMultiplier(skill_core.id, skill_level);
+	this.base            = [0, 0];
+	this.shifted         = [0, 0];
+	this.stacked         = [0, 0];
+	this.damage_mastery  = [0, 0];
+	this.damage_final    = [0, 0];
+	this.damage_mean     = 0;
+
+if (parseFloat(me.version) < 0.3801) {
+	if (skill_level && skill_core.is_attack) {
+		for (var count_1 = 0; count_1 < 2; count_1++) {
+			this.base[count_1] = skill_core.ebase[count_1];
+			for (var count_2 = 0; count_2 < D2JSP_SKILL_ELevels.length; count_2++) {
+				if (skill_level < D2JSP_SKILL_ELevels[count_2][0])
+					break;
+				this.base[count_1] += Math.min(D2JSP_SKILL_ELevels[count_2][3],
+					Math.max(0, skill_level - D2JSP_SKILL_ELevels[count_2][2])) *
+					skill_core.elevels[count_1][count_2];
+			}
+			// Basic damage adjustment.
+			if ((!count_1) && ((skill_core.id == D2JSP_SKILL_LIGHTNING) ||
+				(skill_core.id == D2JSP_SKILL_CHAIN_LIGHTNING)))
+				this.base[count_1] = 1;
+//print("Basic Damage   " + count_1 + ": " + this.base[count_1]);
+			this.shifted[count_1] = this.base[count_1] * this.shift_value;
+//print("Shifted Damage " + count_1 + ": " + this.shifted[count_1]);
+			this.stacked[count_1] = Math.floor(((this.stack_size > 1) ?
+				(this.shifted[count_1] * 25 * this.stack_size) :
+				this.shifted[count_1]) / 256);
+//print("Stacked Damage " + count_1 + ": " + this.stacked[count_1]);
+			this.damage_mastery[count_1] = (this.mastery_percent) ?
+				(this.stacked[count_1] + Math.floor(this.stacked[count_1] *
+				(this.mastery_percent / 100))) : this.stacked[count_1];
+//print("Mastery Damage " + count_1 + ": " + this.damage_mastery[count_1]);
+			this.damage_final[count_1]   = this.damage_mastery[count_1] *
+				this.multiplier;
+//print("Final Damage   " + count_1 + ": " + this.damage_final[count_1]);
+		}
+		// Uses the multiplied damage.
+		this.damage_mean = this.damage_final[0] +
+			((this.damage_final[1] - this.damage_final[0]) / 2);
+		// Uses simple damage.
+//		this.damage_mean = this.damage_mastery[0] +
+//			((this.damage_mastery[1] - this.damage_mastery[0]) / 2);
+		// An attempt at a heuristic...
+		this.damage_use  = (this.damage_final[0] +
+			((this.damage_final[1] - this.damage_final[0]) / 2)) /
+			((this.multiplier <= 1) ? 1 : (this.multiplier / 4));
+	}
+}
+else {
+	if (skill_level && skill_core.is_attack) {
+		for (var count_1 = 0; count_1 < 2; count_1++) {
+			this.base[count_1] = skill_core.ebase[count_1];
+			for (var count_2 = 0; count_2 < D2JSP_SKILL_ELevels.length; count_2++) {
+				if (skill_level < D2JSP_SKILL_ELevels[count_2][0])
+					break;
+				this.base[count_1] += Math.min(D2JSP_SKILL_ELevels[count_2][3],
+					Math.max(0, skill_level - D2JSP_SKILL_ELevels[count_2][2])) *
+					skill_core.elevels[count_1][count_2];
+			}
+			// Basic damage adjustment.
+			if ((!count_1) && ((skill_core.id == D2JSP_SKILL_LIGHTNING) ||
+				(skill_core.id == D2JSP_SKILL_CHAIN_LIGHTNING)))
+				this.base[count_1] = 1;
+			this.shifted[count_1] = this.base[count_1] * this.shift_value;
+			this.stacked[count_1] = Math.floor(((this.stack_size > 1) ?
+				(this.shifted[count_1] * 25 * this.stack_size) :
+				this.shifted[count_1]) / 256);
+			this.damage_mastery[count_1] = (this.mastery_percent) ?
+				(this.stacked[count_1] + Math.floor(this.stacked[count_1] *
+				(this.mastery_percent / 100))) : this.stacked[count_1];
+		}
+		this.damage_final[0] =
+			(me.getSkillDamageMin(skill_core.id, skill_level) >> 8) * this.multiplier;
+		this.damage_final[1] =
+			(me.getSkillDamageMax(skill_core.id, skill_level) >> 8) * this.multiplier;
+		this.damage_mean     = this.damage_final[0] +
+			((this.damage_final[1] - this.damage_final[0]) / 2);
+		this.damage_use      = (this.damage_final[0] +
+			((this.damage_final[1] - this.damage_final[0]) / 2)) /
+			((this.multiplier <= 1) ? 1 : (this.multiplier / 4));
+	}
+}
+
+	this.toString                    = D2JSP_SKILL_Damage_toString;
+	this.toStringFormatted           = D2JSP_SKILL_Damage_toStringFormatted;
+	this.toStringBasic               = D2JSP_SKILL_Damage_toStringBasic;
+	this.toStringBasicFormatted      = D2JSP_SKILL_Damage_toStringBasicFormatted;
+	this.toStringMultiplier          = D2JSP_SKILL_Damage_toStringMultiplier;
+	this.toStringMultiplierFormatted = D2JSP_SKILL_Damage_toStringMultiplierFormatted;
+
+	function D2JSP_SKILL_Damage_toString() {
+		return("level " + this.level + " " + this.name + " Use Damage: " +
+			this.damage_use.toFixed(2) + " Mean Damage: " +
+			this.damage_mean.toFixed(2) + " Source Damage: [" +
+			this.toStringBasic() + "]");
+	}
+
+	function D2JSP_SKILL_Damage_toStringFormatted() {
+		return("level " + D2JSP_UTIL_FORMAT_RJust(this.level, 3) + " " +
+			D2JSP_UTIL_FORMAT_LJust(this.name, 24) + " Use Damage: " +
+			D2JSP_UTIL_FORMAT_RJust(this.damage_use.toFixed(2), 9) +
+			" Mean Damage: " +
+			D2JSP_UTIL_FORMAT_RJust(this.damage_mean.toFixed(2), 9) +
+			" Source Damage: [" + this.toStringBasicFormatted() + "]");
+	}
+
+	function D2JSP_SKILL_Damage_toStringBasic() {
+		return(this.damage_final[0] + " - " + this.damage_final[1] +
+			this.toStringMultiplier());
+	}
+
+	function D2JSP_SKILL_Damage_toStringBasicFormatted() {
+		return(D2JSP_UTIL_FORMAT_RJust(this.damage_final[0], 6) + " - " +
+			D2JSP_UTIL_FORMAT_RJust(this.damage_final[1], 6) +
+			this.toStringMultiplierFormatted());
+	}
+
+	function D2JSP_SKILL_Damage_toStringMultiplier() {
+		return((this.multiplier <= 1) ? "" : (" (" + this.damage_mastery[0] +
+			" - " + this.damage_mastery[1] + " X " + this.multiplier +
+			" multiplier)"));
+	}
+
+	function D2JSP_SKILL_Damage_toStringMultiplierFormatted() {
+		return((this.multiplier <= 1) ? "" : (" (" +
+			D2JSP_UTIL_FORMAT_RJust(this.damage_mastery[0], 5) + " - " +
+			D2JSP_UTIL_FORMAT_RJust(this.damage_mastery[1], 5) + " X " +
+			D2JSP_UTIL_FORMAT_RJust(this.multiplier, 3) + " multiplier)"));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_Core_CompareByLevel(item_1, item_2)
+{
+	return((item_1.level < item_2.level) ? -1 : (item_1.level > item_2.level) ?
+		1 : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetInfoForClassid(in_classid)
+{
+	var out_list = new Array();
+
+	in_classid = (arguments.length) ? in_classid : me.classid;
+
+	if ((in_classid >= 0) && (in_classid < 7)) {
+		for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+			count_1++) {
+			if (((count_1 >= D2JSP_SKILL_PlayerClassIndices[in_classid][0]) &&
+				(count_1 <= D2JSP_SKILL_PlayerClassIndices[in_classid][1])) ||
+				((count_1 >= D2JSP_SKILL_PlayerClassIndices[7][0]) &&
+				(count_1 <= D2JSP_SKILL_PlayerClassIndices[7][1]))) {
+				var skill_info = new D2JSP_SKILL_Core(count_1);
+				if (((skill_info.classid == in_classid) ||
+					(skill_info.classid & 255)) && (!skill_info.monster_only))
+					out_list.push(skill_info);
+			}
+		}
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetAttacksForMe(skill_info_list)
+{
+	var attack_skill_list = new Array(D2JSP_UTIL_DAMAGE_COUNT);
+
+	skill_info_list = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(skill_info_list) &&
+		skill_info_list.length && (skill_info_list instanceof D2JSP_SKILL_Core)) ?
+		skill_info_list : D2JSP_SKILL_GetInfoForClassid(me.classid);
+
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++)
+		attack_skill_list[count_1] = new Array();
+
+	for (var count_1 = 0; count_1 < skill_info_list.length; count_1++) {
+		var this_skill = skill_info_list[count_1];
+		if (((this_skill.classid == me.classid) || (this_skill.classid == 255)) &&
+			this_skill.is_attack && (this_skill.element_dmg >= 0) &&
+			(this_skill.element_dmg < D2JSP_UTIL_DAMAGE_COUNT)) {
+			var use_name = D2JSP_SKILL_ToSkillNameForUse(this_skill.id);
+			if ((this_skill.level = me.getSkill(use_name)) > 0)
+				attack_skill_list[this_skill.element_dmg].push(this_skill);
+		}
+	}
+
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+		attack_skill_list[count_1].sort(D2JSP_SKILL_Core_CompareByLevel);
+		attack_skill_list[count_1].reverse();
+	}
+
+	return(attack_skill_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_IsValidForPlayerAny(in_skill)
+{
+	if (D2JSP_SKILL_IsValid(in_skill)) {
+		if ((in_skill == D2JSP_SKILL_SCROLL_OF_IDENTIFY) ||
+			(in_skill == D2JSP_SKILL_BOOK_OF_IDENTIFY) ||
+			(in_skill == D2JSP_SKILL_SCROLL_OF_TOWNPORTAL) ||
+			(in_skill == D2JSP_SKILL_BOOK_OF_TOWNPORTAL))
+			return(true);
+		for (var count_1 = 0; count_1 < D2JSP_SKILL_PlayerClassIndices.length;
+			count_1++) {
+			if ((in_skill >= D2JSP_SKILL_PlayerClassIndices[count_1][0]) &&
+				(in_skill <= D2JSP_SKILL_PlayerClassIndices[count_1][1]))
+				return(true);
+		}
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_IsValidForPlayerClass(in_skill, in_classid)
+{
+	if (D2JSP_SKILL_IsValid(in_skill) && ((arguments.length < 2) ||
+		((in_classid >= 0) && (in_classid < 7)))) {
+		in_classid = (arguments.length >= 2) ? in_classid : me.classid;
+		if (((in_skill >= D2JSP_SKILL_PlayerClassIndices[in_classid][0]) &&
+			(in_skill <= D2JSP_SKILL_PlayerClassIndices[in_classid][1])) ||
+			((in_skill >= D2JSP_SKILL_PlayerClassIndices[7][0]) &&
+			(in_skill <= D2JSP_SKILL_PlayerClassIndices[7][1])))
+			return(true);
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_SkillToStateName(in_skill)
+{
+	var skill_name = D2JSP_SKILL_ToSkillName(in_skill);
+
+	return((skill_name == "Thunder Storm") ? "Thunderstorm" : skill_name);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_ToSkillName(in_skill)
+{
+	var skill_number = D2JSP_SKILL_ToSkillNumber(in_skill);
+
+	return((skill_number > -1) ? D2JSP_SKILL_SkillList[skill_number] :
+		"*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_ToSkillNumber(in_skill)
+{
+	if (typeof(in_skill) == "number")
+		return(in_skill);
+	else if ((typeof(in_skill) == "string") &&
+		(typeof(D2JSP_SKILL_NameList[D2JSP_UTIL_FORMAT_LowerCase(in_skill)]) !=
+		"undefined"))
+		return(D2JSP_SKILL_NameList[D2JSP_UTIL_FORMAT_LowerCase(in_skill)]);
+	else
+		return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_ToSkillNameForUse(in_skill)
+{
+	var skill_number = D2JSP_SKILL_ToSkillNumber(in_skill);
+	var skill_name   = null;
+
+	if (parseFloat(me.version) > 0.34)
+		return(D2JSP_SKILL_ToSkillName(in_skill));
+
+	if (skill_number > -1) {
+		skill_name = D2JSP_SKILL_SkillList[skill_number];
+		if (skill_name.length >= 16) {
+			var classid = ((skill_number == D2JSP_SKILL_SCROLL_OF_IDENTIFY) ||
+				(skill_number == D2JSP_SKILL_BOOK_OF_IDENTIFY) ||
+				(skill_number == D2JSP_SKILL_SCROLL_OF_TOWNPORTAL) ||
+				(skill_number == D2JSP_SKILL_BOOK_OF_TOWNPORTAL)) ? 0 : me.classid;
+			skill_name = skill_name.substring(0, 16) +
+				String.fromCharCode(classid) + ((skill_name.length > 17) ?
+				skill_name.substring(17) : "");
+		}
+	}
+
+	return(skill_name);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetPreCast(in_skill)
+{
+	in_skill = D2JSP_SKILL_ToSkillNumber(in_skill);
+
+	return((typeof(D2JSP_SKILL_PreCastList[in_skill + ""]) != "undefined") ?
+		D2JSP_SKILL_PreCastList[in_skill + ""] : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_IsValidPreCast(in_skill)
+{
+	var this_pre_cast = D2JSP_SKILL_GetPreCast(in_skill);
+
+	return((typeof(this_pre_cast) != null) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_IsPreCastForClass(in_skill, class_id)
+{
+	var this_pre_cast = D2JSP_SKILL_GetPreCast(in_skill);
+
+	if (arguments.length < 2)
+		class_id = me.classid;
+
+	return(((this_pre_cast != null) && (this_pre_cast[1] == class_id)) ?
+		true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_IsPreCastForClassInTown(in_skill, class_id)
+{
+	var this_pre_cast = D2JSP_SKILL_GetPreCast(in_skill);
+
+	if (arguments.length < 2)
+		class_id = me.classid;
+
+	return(((this_pre_cast != null) && this_pre_cast[0] &&
+		(this_pre_cast[1] == class_id)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetRadiusStaticFieldInYards(skill_level)
+{
+	skill_level = (D2JSP_UTIL_GEN_TypeOfNumber(skill_level) &&
+		(skill_level > 0)) ? skill_level : me.getSkill("Static Field");
+
+	return(3.3 + ((skill_level - 1) * 0.7) - (Math.floor(skill_level / 3) * 0.1));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// From MBM Bot
+// StaticRange = Math.floor((3.3 + 0.6 * me.getSkill(STATICFIELD)) * 1.4);
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_GetRadiusStaticField(skill_level)
+{
+	return(D2JSP_SKILL_GetRadiusStaticFieldInYards(skill_level) * (3 / 2));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_SetAndUseSkill(skill_name, skill_hand, skill_x, skill_y)
+{
+	var return_code;
+
+	if (!(return_code = D2JSP_SKILL_SetSkill(skill_name, skill_hand))) {
+		if (arguments.length == 2)
+			return_code = D2JSP_SKILL_UseSkill(skill_hand);
+		else if (arguments.length == 3)
+			return_code = D2JSP_SKILL_UseSkill(skill_hand, skill_x);
+		else
+			return_code = D2JSP_SKILL_UseSkill(skill_hand, skill_x, skill_y);
+	}
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_SetAndUseSkillBasic(sync_flag, skill_name, skill_hand,
+		skill_x, skill_y)
+{
+	var return_code;
+	var log_obj = D2JSP_UTIL_LOG_GetLastLog();
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_SetAndUseSkillBasic(" + sync_flag +
+			", " + skill_name + ", " + skill_hand + ", " + skill_x + ", " +
+			skill_y + "): ENTRY: ");
+
+	if (!(return_code = D2JSP_SKILL_SetSkill(skill_name, skill_hand))) {
+		if (arguments.length == 3)
+			return_code = D2JSP_SKILL_UseSkillBasic(sync_flag, skill_hand);
+		else if (arguments.length == 4)
+			return_code = D2JSP_SKILL_UseSkillBasic(sync_flag, skill_hand, skill_x);
+		else
+			return_code = D2JSP_SKILL_UseSkillBasic(sync_flag, skill_hand, skill_x,
+				skill_y);
+	}
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_SetAndUseSkillBasic(" + sync_flag +
+			", " + skill_name + ", " + skill_hand + ", " + skill_x + ", " +
+			skill_y + "): EXIT = " + return_code);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_SetSkill(skill_name, skill_hand)
+{
+	var return_code = 0;
+	var count_1     = 0;
+	var log_obj     = D2JSP_UTIL_LOG_GetLastLog();
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_SetSkill() entry: " +
+			"(\"" + skill_name + "\", " + skill_hand + ")");
+
+	if (skill_name.toLowerCase() == me.getSkill(skill_hand).toLowerCase())
+		return_code = 0;
+	else if ((!me.getSkill(skill_name)) || (skill_hand < 0) || (skill_hand > 1))
+		return_code = -1;
+//	else if (D2JSP_SKILL_WaitForIdle() > -1) {
+	else if (true) {
+		me.setSkill(skill_name, skill_hand);
+		for (count_1 = 0; count_1 < 100; count_1++) {
+			if (skill_name.toLowerCase() == me.getSkill(skill_hand).toLowerCase())
+				break;
+			delay(10);
+		}
+	}
+	else
+		return_code = -3;
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_SetSkill() exit : " +
+			"(\"" + skill_name + "\", " + skill_hand + ") = " + return_code +
+			" / actual iteration count = " + count_1);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+var D2JSP_SKILL_TimedSkillBasis = 500;
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_UseSkill(skill_hand, skill_x, skill_y)
+{
+	var return_code = 0;
+	var log_obj     = D2JSP_UTIL_LOG_GetLastLog();
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_UseSkill() entry: " +
+			"(" + skill_hand + ", " + skill_x + ", " + skill_y + ")");
+
+	if (parseFloat(me.version) < 0.33) {
+		if ((!arguments.length) || (arguments.length > 3))
+			return_code = -1;
+/*
+		else if (D2JSP_SKILL_WaitForIdle() > -1) {
+			if (arguments.length == 1)
+				me.useSkill(skill_hand);
+			else if (arguments.length == 2)
+				skill_x.useSkill(skill_hand);
+			else
+				me.useSkillAt(skill_x, skill_y, skill_hand);
+			if (D2JSP_SKILL_WaitForSpellCastCycle() < 0)
+				return_code = -2;
+			if (D2JSP_SKILL_WaitForIdle() < 0)
+				return_code = -3;
+		}
+		else
+			return_code = -4;
+*/
+		else {
+			D2JSP_SKILL_WaitForIdle();
+			if (arguments.length == 1)
+				me.useSkill(skill_hand);
+			else if (arguments.length == 2)
+				skill_x.useSkill(skill_hand);
+			else
+				me.useSkillAt(skill_x, skill_y, skill_hand);
+			D2JSP_SKILL_LastUsedTime
+				[D2JSP_SKILL_ToSkillNumber(me.getSkill(skill_hand))] = getTickCount();
+//			if (D2JSP_SKILL_WaitForSpellCastStart() < 0)
+//			if (D2JSP_SKILL_WaitForSpellCastCycle() < 0)
+				return_code = -2;
+			if (D2JSP_SKILL_WaitForIdle() < 0)
+				return_code = -3;
+		}
+	}
+	else {
+		if ((!arguments.length) || (arguments.length > 3))
+			return_code = -1;
+//		else if (D2JSP_SKILL_WaitForIdle() > -1) {
+		else if (true) {
+			if (me.mode == D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL)
+				D2JSP_SKILL_WaitForIdle(100, 10);
+			else
+				D2JSP_SKILL_WaitForIdle();
+			if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+				log_obj.logMinutiae("D2JSP_SKILL_UseSkill()      : Initial idle done.");
+			var hand_down;
+			var hand_hold;
+			var hand_up;
+			if (!skill_hand) {
+				hand_down = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_DOWN;
+				hand_hold = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_HOLD;
+				hand_up   = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_UP;
+			}
+			else {
+				hand_down = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_DOWN;
+				hand_hold = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_HOLD;
+				hand_up   = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_UP;
+			}
+if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+	log_obj.logMinutiae("D2JSP_SKILL_UseSkill()      : Timered skill window = " +
+		(D2JSP_SKILL_LastTimedSkillUse + D2JSP_SKILL_TimedSkillBasis) +
+		", current time = " + getTickCount());
+			while ((D2JSP_SKILL_LastTimedSkillUse + D2JSP_SKILL_TimedSkillBasis) >
+				getTickCount())
+				delay(10);
+if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+	log_obj.logMinutiae("D2JSP_SKILL_UseSkill()      : Timered skill window done.");
+			if (arguments.length == 1)
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, me.x, me.y);
+			else if (arguments.length == 2)
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, skill_x);
+			else
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, skill_x, skill_y);
+			delay(0);
+			if (arguments.length == 1)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, me.x, me.y);
+			else if (arguments.length == 2)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x);
+			else
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x, skill_y);
+D2JSP_SKILL_WaitForIdle();
+			var skill_id = D2JSP_SKILL_ToSkillNumber(me.getSkill(skill_hand));
+			D2JSP_SKILL_LastUsedTime[skill_id] = getTickCount();
+			if ((skill_id + "") in D2JSP_SKILL_TimedSkillList)
+				D2JSP_SKILL_LastTimedSkillUse = getTickCount();
+//			delay(10);
+//			if (D2JSP_SKILL_WaitForSpellCastStart() < 0)
+//				return_code = -2;
+//			if (D2JSP_SKILL_WaitForIdle() < 0)
+//				return_code = -3;
+/*
+			delay(10);
+			if (arguments.length == 1)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, me.x, me.y);
+			else if (arguments.length == 2)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x.x, skill_x.y);
+//				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x);
+			else
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x, skill_y);
+*/
+		}
+		else
+			return_code = -4;
+	}
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_UseSkill() exit : " +
+			"(" + skill_hand + ", " + skill_x + ", " + skill_y + ") = " +
+			return_code);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_UseSkillBasic(sync_flag, skill_hand, skill_x, skill_y)
+{
+	var return_code = 0;
+	var log_obj     = D2JSP_UTIL_LOG_GetLastLog();
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_UseSkillBasic() ENTRY: " + "(" +
+			sync_flag + ", " + skill_hand + ", " + skill_x + ", " + skill_y + ")");
+
+	if (parseFloat(me.version) < 0.33) {
+		if ((!arguments.length) || (arguments.length > 4))
+			return_code = -1;
+		else {
+			if (sync_flag)
+				D2JSP_SKILL_WaitForIdle();
+//			D2JSP_SKILL_WaitForIdle();
+			if (arguments.length == 2)
+				me.useSkill(skill_hand);
+			else if (arguments.length == 3)
+				skill_x.useSkill(skill_hand);
+			else
+				me.useSkillAt(skill_x, skill_y, skill_hand);
+			var skill_id = D2JSP_SKILL_ToSkillNumber(me.getSkill(skill_hand));
+			D2JSP_SKILL_LastUsedTime[skill_id] = getTickCount();
+			if ((skill_id + "") in D2JSP_SKILL_TimedSkillList)
+				D2JSP_SKILL_LastTimedSkillUse = getTickCount();
+			D2JSP_SKILL_WaitForSpellCastStart();
+			if (sync_flag) {
+				if (D2JSP_SKILL_WaitForIdle() < 0)
+					return_code = -3;
+			}
+		}
+	}
+	else if (parseFloat(me.version) < 0.3518) {
+		if ((!arguments.length) || (arguments.length > 4))
+			return_code = -1;
+//		else if (D2JSP_SKILL_WaitForIdle() > -1) {
+		else if (true) {
+sync_flag = true;
+			if (sync_flag)
+				D2JSP_SKILL_WaitForIdle();
+//			D2JSP_SKILL_WaitForIdle();
+			var hand_down;
+			var hand_hold;
+			var hand_up;
+			if (!skill_hand) {
+				hand_down = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_DOWN;
+				hand_hold = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_HOLD;
+				hand_up   = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_UP;
+			}
+			else {
+				hand_down = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_DOWN;
+				hand_hold = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_HOLD;
+				hand_up   = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_UP;
+			}
+			while ((D2JSP_SKILL_LastTimedSkillUse + D2JSP_SKILL_TimedSkillBasis) >
+				getTickCount())
+				delay(10);
+			if (arguments.length == 2)
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, me.x, me.y);
+			else if (arguments.length == 3)
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, skill_x);
+			else
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, skill_x, skill_y);
+			if (arguments.length == 2)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, me.x, me.y);
+			else if (arguments.length == 3)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x);
+			else
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x, skill_y);
+			var skill_id = D2JSP_SKILL_ToSkillNumber(me.getSkill(skill_hand));
+			D2JSP_SKILL_LastUsedTime[skill_id] = getTickCount();
+			if ((skill_id + "") in D2JSP_SKILL_TimedSkillList)
+				D2JSP_SKILL_LastTimedSkillUse = getTickCount();
+			D2JSP_SKILL_WaitForSpellCastStart();
+			if (sync_flag) {
+				if (D2JSP_SKILL_WaitForIdle() < 0)
+					return_code = -3;
+			}
+		}
+		else
+			return_code = -4;
+	}
+	else {
+		if ((!arguments.length) || (arguments.length > 4))
+			return_code = -1;
+//		else if (D2JSP_SKILL_WaitForIdle() > -1) {
+		else if (true) {
+			if (me.mode == D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL)
+				D2JSP_SKILL_WaitForIdle(100, 10);
+			else
+				D2JSP_SKILL_WaitForIdle();
+			var hand_down;
+			var hand_hold;
+			var hand_up;
+			if (!skill_hand) {
+				hand_down = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_DOWN;
+				hand_hold = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_HOLD;
+				hand_up   = D2JSP_UTIL_CLICKMAP_TYPE_RIGHT_UP;
+			}
+			else {
+				hand_down = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_DOWN;
+				hand_hold = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_HOLD;
+				hand_up   = D2JSP_UTIL_CLICKMAP_TYPE_LEFT_UP;
+			}
+			while ((D2JSP_SKILL_LastTimedSkillUse + 500) > getTickCount())
+				delay(10);
+			if (arguments.length == 2)
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, me.x, me.y);
+			else if (arguments.length == 3)
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, skill_x);
+			else
+				clickMap(hand_down, D2JSP_UTIL_CLICKMAP_SHIFT_ON, skill_x, skill_y);
+			delay(0);
+			if (arguments.length == 2)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, me.x, me.y);
+			else if (arguments.length == 3)
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x);
+			else
+				clickMap(hand_up, D2JSP_UTIL_CLICKMAP_SHIFT_OFF, skill_x, skill_y);
+D2JSP_SKILL_WaitForIdle();
+			var skill_id = D2JSP_SKILL_ToSkillNumber(me.getSkill(skill_hand));
+			D2JSP_SKILL_LastUsedTime[skill_id] = getTickCount();
+			if ((skill_id + "") in D2JSP_SKILL_TimedSkillList)
+				D2JSP_SKILL_LastTimedSkillUse = getTickCount();
+			if (sync_flag)
+				D2JSP_SKILL_WaitForSpellCastStart();
+			if (sync_flag) {
+				if (D2JSP_SKILL_WaitForIdle() < 0)
+					return_code = -3;
+			}
+		}
+		else
+			return_code = -4;
+	}
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_UseSkillBasic() EXIT : " +
+			"(" + sync_flag + ", " + skill_hand + ", " + skill_x + ", " + skill_y +
+			") = " + return_code);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TeleportToObject(destination)
+{
+	D2JSP_SKILL_TeleportTo(destination.x, destination.y);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TeleportToPair(destination)
+{
+	D2JSP_SKILL_TeleportTo(destination[0], destination[1]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TeleportTo(skill_x, skill_y)
+{
+//D2JSP_SKILL_WaitForIdle();
+//	D2JSP_SKILL_SetAndUseSkill("Teleport", 0, skill_x, skill_y);
+	D2JSP_SKILL_SetAndUseSkill("Teleport", 0, skill_x, skill_y);
+//	D2JSP_SKILL_SetAndUseSkillBasic(false, "Teleport", 0, skill_x, skill_y);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TelekinesisOn(target_obj, skill_hand)
+{
+	var return_code;
+
+	if (arguments.length < 2)
+		skill_hand = 0;
+
+	if (!(return_code = D2JSP_SKILL_SetSkill("Telekinesis", skill_hand)))
+		return_code = D2JSP_SKILL_UseSkill(skill_hand, target_obj);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_TelekinesisOnFast(target_obj, skill_hand)
+{
+	var return_code;
+
+	if (arguments.length < 2)
+		skill_hand = 0;
+
+	if (!(return_code = D2JSP_SKILL_SetSkill("Telekinesis", skill_hand)))
+		target_obj.useSkill(skill_hand);
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_StaticField(sync_flag, plus_milliseconds)
+{
+/*
+	if ((D2JSP_SKILL_LastUsedTime[D2JSP_SKILL_STATIC_FIELD] +
+		plus_milliseconds) <= getTickCount()) {
+		D2JSP_SKILL_SetAndUseSkillBasic(sync_flag, "Static Field", 0);
+		return(true);
+	}
+
+	return(false);
+*/
+	var return_code;
+
+	if ((return_code = D2JSP_SKILL_StaticFieldIsReady(plus_milliseconds)))
+		return_code = (!D2JSP_SKILL_SetAndUseSkillBasic(sync_flag,
+			"Static Field", 0)) ? true : false;
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_StaticFieldIsReady(plus_milliseconds)
+{
+	return(((D2JSP_SKILL_LastUsedTime[D2JSP_SKILL_STATIC_FIELD] +
+		plus_milliseconds) <= getTickCount()) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForIdle(iteration_count, iteration_time)
+{
+	var wait_mode = -1;
+	var count_1   = 0;
+	var log_obj   = D2JSP_UTIL_LOG_GetLastLog();
+	var increment;
+	var this_mode;
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForIdle() entry: " +
+			"(" + iteration_count + ", " + iteration_time + ")");
+
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = 20;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = 50;
+
+	increment = (iteration_count > 0) ? 1 : 0;
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForIdle() fixup: " +
+			"(" + iteration_count + ", " + iteration_time + ")");
+
+	for (count_1 = 0; count_1 < iteration_count; count_1 += increment) {
+		this_mode = me.mode;
+		if ((this_mode == D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN) ||
+			(this_mode == D2JSP_MODE_PLAYER_STANDING_IN_TOWN)) {
+			wait_mode = this_mode;
+			break;
+		}
+		delay(iteration_time);
+	}
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForIdle() exit : " +
+			"(" + iteration_count + ", " + iteration_time + ") = " + wait_mode +
+			" / actual iteration count = " + count_1);
+
+	return(wait_mode);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForSpellCastCycle(iteration_count, iteration_time)
+{
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = 20;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = 50;
+
+	D2JSP_SKILL_WaitForSpellCastStart(iteration_count, iteration_time);
+
+	return(D2JSP_SKILL_WaitForSpellCastFinish(iteration_count, iteration_time));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForSpellCastStart(iteration_count, iteration_time)
+{
+	var wait_mode = -1;
+	var count_1   = 0;
+	var log_obj   = D2JSP_UTIL_LOG_GetLastLog();
+	var increment;
+	var this_mode;
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForSpellCastStart() entry: " +
+			"(" + iteration_count + ", " + iteration_time + ")");
+
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = D2JSP_SKILL_DefaultSpellCastStartCount;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = D2JSP_SKILL_DefaultSpellCastStartTime;
+
+	increment = (iteration_count > 0) ? 1 : 0;
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForSpellCastStart() fixup: " +
+			"(" + iteration_count + ", " + iteration_time + ")");
+
+	for (count_1 = 0; count_1 < iteration_count; count_1 += increment) {
+		this_mode = me.mode;
+/*
+		if ((this_mode == D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) ||
+			me.getState(D2JSP_STATE_SKILLDELAY)) {
+*/
+		if (this_mode == D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) {
+			wait_mode = this_mode;
+			break;
+		}
+		delay(iteration_time);
+	}
+
+//if (count_1 == D2JSP_SKILL_DefaultSpellCastStartCount)
+if (count_1 > 100)
+	print("*** D2JSP_SKILL_WaitForSpellCastStart() count = " + count_1);
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForSpellCastStart() exit : " +
+			"(" + iteration_count + ", " + iteration_time + ") = " + wait_mode +
+			" / actual iteration count = " + count_1);
+
+	return(wait_mode);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_WaitForSpellCastFinish(iteration_count, iteration_time)
+{
+	var wait_mode = -1;
+	var count_1   = 0;
+	var log_obj   = D2JSP_UTIL_LOG_GetLastLog();
+	var increment;
+	var this_mode;
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForSpellCastFinish() entry: " +
+			"(" + iteration_count + ", " + iteration_time + ")");
+
+	if ((!arguments.length) || (iteration_count == 0))
+		iteration_count = D2JSP_SKILL_DefaultSpellCastFinishCount;
+
+	if ((arguments.length < 2) || (iteration_time < 1))
+		iteration_time = D2JSP_SKILL_DefaultSpellCastFinishTime;
+
+	increment = (iteration_count > 0) ? 1 : 0;
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForSpellCastFinish() fixup: " +
+			"(" + iteration_count + ", " + iteration_time + ")");
+
+	for (count_1 = 0; count_1 < iteration_count; count_1 += increment) {
+		this_mode = me.mode;
+/*
+		if ((this_mode != D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) &&
+			(!me.getState(D2JSP_STATE_SKILLDELAY))) {
+*/
+		if (this_mode != D2JSP_MODE_PLAYER_CASTING_SPELL_SKILL) {
+			wait_mode = this_mode;
+			break;
+		}
+		delay(iteration_time);
+	}
+
+if (count_1 == D2JSP_SKILL_DefaultSpellCastFinishCount)
+	print("*** D2JSP_SKILL_WaitForSpellCastFinish() count = " + count_1);
+
+	if (log_obj && (log_obj.getLevelFile() <= D2JSP_UTIL_LOG_Level_MINUTIAE))
+		log_obj.logMinutiae("D2JSP_SKILL_WaitForSpellCastFinish() exit : " +
+			"(" + iteration_count + ", " + iteration_time + ") = " + wait_mode +
+			" / actual iteration count = " + count_1);
+
+	return(wait_mode);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_CanTeleport()
+{
+	return(((me.classid == D2JSP_CLASS_ID_SORCERESS) &&
+		me.getSkill(D2JSP_SKILL_TELEPORT, 0)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_CanTelekinesis()
+{
+	return(((me.classid == D2JSP_CLASS_ID_SORCERESS) &&
+		me.getSkill(D2JSP_SKILL_TELEKINESIS, 0)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_CanTeleportHere()
+{
+	return((D2JSP_SKILL_CanTeleport() && (!D2JSP_AREA_IsTown())) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_SKILL_CanTelekinesisHere()
+{
+	return(D2JSP_SKILL_CanTelekinesis());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Skills_d2l) == "undefined") {
+
+if (false) {
+function main()
+{
+	print("SF = " + me.getSkill("Static Field") +  " = " +
+		D2JSP_SKILL_GetRadiusStaticFieldInYards() + " = " +
+		D2JSP_SKILL_GetRadiusStaticField());
+}
+} // if (false) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

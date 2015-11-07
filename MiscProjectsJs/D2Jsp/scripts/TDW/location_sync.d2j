@@ -1,0 +1,41 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+
+function main()
+{
+	var last_area = -1;
+
+	print("...waiting " + (3000 / 1000) +
+		" seconds for game load to complete...");
+	delay(3000);
+
+	TDW_MOVE_COMPAT_TownMove(me.act, "waypoint");
+
+	D2JSP_SKILL_SetAndUseSkill("Energy Shield", 0)
+
+	D2JSP_SKILL_SetAndUseSkill("Shiver Armor", 0);
+
+	TDW_MOVE_WaypointUse(D2JSP_AREA_ARCANE_SANCTUARY);
+
+	if (me.area != D2JSP_AREA_ARCANE_SANCTUARY) {
+		print("Unable to get to " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_ARCANE_SANCTUARY));
+	}
+
+	D2JSP_SKILL_SetAndUseSkill("Thunderstorm", 0);
+
+	while(1) {
+		D2JSP_UTIL_BNET_OverheadSafe(me.area + ": " + me.x + ", " + me.y);
+			delay(500);
+	}
+
+	print("Stopping");
+}
+
+

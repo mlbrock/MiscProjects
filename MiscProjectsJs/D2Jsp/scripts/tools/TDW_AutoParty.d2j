@@ -1,0 +1,111 @@
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PARTY_PlayerName    = null;
+var TDW_PARTY_MaxTimeMS     = 30000;
+var TDW_PARTY_TryIntervalMS = 1000;
+var TDW_PARTY_ExpiryTime    = (new Date()).valueOf() + TDW_PARTY_MaxTimeMS;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	TDW_AUTOPARTY_Start();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_AUTOPARTY_Start(player_name, max_time, try_interval)
+{
+	TDW_PARTY_PlayerName    = (TDW_BASIC_GEN_TypeOfStringNotEmpty(player_name)) ?
+		player_name : null;
+	TDW_PARTY_MaxTimeMS     = (TDW_BASIC_GEN_TypeOfUInt(max_time) &&
+		(max_time > 0)) ? max_time : 30000;
+	TDW_PARTY_TryIntervalMS = (TDW_BASIC_GEN_TypeOfUInt(try_interval) &&
+		(try_interval > 0)) ? Math.min(try_interval, max_time) : 1000;
+	TDW_PARTY_TryIntervalMS = Math.min(try_interval, max_time);
+	TDW_PARTY_ExpiryTime    = (new Date()).valueOf() + TDW_PARTY_MaxTimeMS;
+
+	while ((TDW_PARTY_PlayerName != null) &&
+		(TDW_PARTY_ExpiryTime > (new Date()))) {
+		var tmp_expiry_time = (new Date()).valueOf() + TDW_PARTY_TryIntervalMS;
+		while ((TDW_PARTY_PlayerName != null) &&
+			(tmp_expiry_time > (new Date())))
+			delay(50);
+		if (TDW_PARTY_PlayerName != null) {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj && (!D2JSP_COMM_IsInMyParty(player_name))) {
+				clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+				TDW_PARTY_PlayerName = null;
+			}
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	var party_player_name = TDW_PARTY_PlayerName;
+
+	// If the player goes hostile, we cancel the pending party invitation.
+	if (arguments[0].match(/^\S+ has expressed hostility towards you.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name == party_player_name)
+			TDW_PARTY_PlayerName = null;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var party_player_name = TDW_PARTY_PlayerName;
+
+	// If the player whom we want to party sends us an invitation first,
+	// we accept it and cancel our pending party invitation.
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name == party_player_name)
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+				TDW_PARTY_PlayerName = null;
+			}
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var party_player_name = TDW_PARTY_PlayerName;
+
+	// If the player whom we want to party leaves the game or times-out, we
+	//	cancel the pending party invitation.
+	if (arguments[0].match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name == party_player_name)
+			TDW_PARTY_PlayerName = null;
+	}
+	else if (arguments[0].match(/^\S+ dropped due to timeout\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name == party_player_name)
+			TDW_PARTY_PlayerName = null;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function inputlineHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

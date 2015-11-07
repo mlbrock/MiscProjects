@@ -1,0 +1,105 @@
+var D2JSP_ITEM_CLICK_BUTTON_LEFT        = 0;
+
+var D2JSP_MODE_ITEM_ON_CURSOR						=   4;
+var D2JSP_MODE_ITEM_IN_INVENTORY					= 100;
+
+var TEST_ItemList       = ["hp5", "mp5"];
+//var TEST_ItemCode  = "mp5";
+var TEST_LoopCount      = 16;
+var TEST_IterationCount =  0;
+
+function main()
+{
+	var file_name = "output/____FeatureTest.025.CursorPickupTest.d2j.txt";
+	var file_handle;
+
+	if ((file_handle = fileOpen(file_name, 1)) == null) {
+		print("***** ERROR: Unable to open file '" + file_name + "' for writing.");
+		print("STOPPING SCRIPT");
+		stop();
+	}
+
+	while (true) {
+		var item_code = TEST_ItemList[TEST_IterationCount++ % 2];
+print(item_code);
+		var this_obj  = GetUnit_FromInv(item_code);
+		if (this_obj) {
+			var src_x = this_obj.x;
+			var src_y = this_obj.y;
+			clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, this_obj);
+			for (var count_2 = 0; count_2 < TEST_LoopCount; count_2++) {
+				delay(50);
+				this_obj = GetUnit_FromCursor();
+				if (this_obj && (this_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR))
+					break;
+				delay(250);
+				this_obj = GetUnit_FromCursor();
+				if (this_obj && (this_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR))
+					break;
+			}
+			if (!this_obj) {
+				print("***** ERROR: NO ITEM FOUND ON CURSOR!!!");
+				break;
+			}
+			if (this_obj.mode != D2JSP_MODE_ITEM_ON_CURSOR) {
+				print("***** ERROR: ITEM NOT ON CURSOR!!! (mode = " +
+					this_obj.mode + ", code = " + this_obj.code + ")");
+				break;
+			}
+			// //////////////////////////////
+/*
+			clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, src_x, src_y, 0);
+			for (var count_2 = 0; count_2 < TEST_LoopCount; count_2++) {
+				delay(50);
+				this_obj = GetUnit_FromCursor(item_code);
+				if (!this_obj)
+					break;
+				delay(250);
+				this_obj = GetUnit_FromCursor(item_code);
+				if (!this_obj)
+					break;
+			}
+			if (this_obj) {
+				if (this_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR) {
+					print("***** ERROR: ITEM STILL ON CURSOR!!!");
+					break;
+				}
+			}
+*/
+		}
+		else {
+			print("No Super Healing potions found in inventory!!!");
+			break;
+		}
+	}
+
+	file_handle.close();
+
+	print("End of script.");
+}
+
+function GetUnit_FromInv(item_code)
+{
+//	GetAllUnits();
+
+	return(getUnit(4, item_code, D2JSP_MODE_ITEM_IN_INVENTORY));
+}
+
+function GetUnit_FromCursor(item_code)
+{
+//	GetAllUnits();
+
+	return(getUnit(4, item_code, D2JSP_MODE_ITEM_ON_CURSOR));
+}
+
+function GetAllUnits()
+{
+	var this_obj = getUnit(4);
+
+	if (this_obj) {
+		do {
+			;
+		} while (this_obj && this_obj.getNext());
+	}
+}
+

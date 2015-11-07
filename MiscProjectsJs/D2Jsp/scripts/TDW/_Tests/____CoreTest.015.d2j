@@ -1,0 +1,30 @@
+function main()
+{
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+	print("Ready");
+
+	WriteItemList(me.name, "aqv");
+
+	print("Stopping");
+	stop();
+}
+
+function WriteItemList(parent_name, item_code)
+{
+	var this_item;
+	var this_parent;
+
+	this_item  = getUnit(4, item_code);
+	if (this_item) {
+		do {
+ 			this_parent = this_item.getParent();
+			if (this_parent &&
+				(this_parent.name.toLowerCase() == parent_name.toLowerCase()))
+				print(">>> " + this_item.fname + ", [" +
+					this_item.x + ", " + this_item.y + "]");
+		} while (this_item && this_item.getNext(item_code));
+	}
+}
+
+

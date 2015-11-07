@@ -1,0 +1,68 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Required include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("BMpwnIt.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var cycle_count = 1000;
+	var isf_cfg     = new Array();
+	var item_list   = new Array();
+	var error_list  = new Array();
+	var eval_index  = ISF_COMPILED_DATA_EVAL;
+	var return_code;
+	var count_1;
+	var count_2;
+	var count_3;
+	var this_code;
+	var start_time;
+	var end_time;
+	var __PISF_item_obj__;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+	print("Loading an ISF configuration file...");
+	if (!(return_code =
+		ISF_LoadConfigFromFile("settings/Test/bmitems.ini.ISF_CONVERSION.txt",
+		ISF_PARSE_FLAG_CONTINUE_ON_ERROR, error_list, isf_cfg))) {
+		print("...done");
+		print("Entries to be run: " +
+			isf_cfg[ISF_COMPILED_DATA_SPEC_LIST].length);
+		print("Cycles to be run : " + cycle_count);
+		__PISF_item_obj__ = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+		start_time = new Date();
+		for (count_1 = 0; count_1 < cycle_count; count_1++) {
+			for (count_2 = 0; count_2 < isf_cfg[eval_index].length; count_2++) {
+				for (this_code in isf_cfg[eval_index][count_2]) {
+					for (count_3 = 0; count_3 <
+						isf_cfg[eval_index][count_2][this_code].length; count_3++)
+						eval(isf_cfg[eval_index][count_2][this_code][count_3][1])
+				}
+			}
+		}
+		end_time = new Date();
+		print("eval() total time all cycles: " +
+			(end_time.getTime() - start_time.getTime()) / 1000);
+		print("eval() mean time per entry  : " +
+			(((end_time.getTime() - start_time.getTime()) /
+			isf_cfg[ISF_COMPILED_DATA_SPEC_LIST].length) / cycle_count) / 1000);
+	}
+	else {
+		print("Errors occurred:");
+		print("------ ---------");
+		while (error_list.length)
+			print(">>>" + error_list.shift());
+	}
+	print("==============================================================");
+
+}
+
+

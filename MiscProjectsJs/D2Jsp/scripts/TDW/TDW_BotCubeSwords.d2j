@@ -1,0 +1,262 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotLib.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+const TDW_CS_ExitSleepMS = 3000;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["teleport.step.size.max"]           = 120;
+TDW_BOT_ConfigureList["teleport.step.fudge.final"]        = 3;
+TDW_BOT_ConfigureList["mysnagit.gold.minimum"]            = 2000;
+TDW_BOT_ConfigureList["teleport.step.size"]               = 41;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_CS_ISF_SwordsGood   = [
+	"Type sword : Class > elite : Quality = magic : Item min damage percent > 200 : Item faster attack rate > 40"
+];
+
+var TDW_CS_ISF_SwordsSubPar = [
+	"Type sword : Class > elite : Quality = magic : Item min damage percent < 199",
+	"Type sword : Class > elite : Quality = magic : Item faster attack rate < 39"
+];
+
+var TDW_CS_ISF_Gems         = [
+	"Chipped Amethyst",
+	"Chipped Topaz",
+	"Chipped Sapphire",
+	"Chipped Emerald",
+	"Chipped Ruby",
+	"Chipped Diamond",
+	"Chipped Skull"
+];
+
+var TDW_CS_ISF_Cfg_All          = null;
+var TDW_CS_ISF_Cfg_SwordsGood   = null;
+var TDW_CS_ISF_Cfg_SwordsSubPar = null;
+
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_CS_ClearAreaList    = [
+	D2JSP_AREA_COLD_PLAINS,
+	D2JSP_AREA_STONY_FIELD,
+	D2JSP_AREA_DARK_WOOD,
+	D2JSP_AREA_BLACK_MARSH,
+	D2JSP_AREA_TAMOE_HIGHLAND,
+	D2JSP_AREA_DEN_OF_EVIL,
+	D2JSP_AREA_CAVE_LEVEL_1,
+	D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_1,
+	D2JSP_AREA_HOLE_LEVEL_1,
+	D2JSP_AREA_PIT_LEVEL_1,
+	D2JSP_AREA_CAVE_LEVEL_2,
+	D2JSP_AREA_UNDERGROUND_PASSAGE_LEVEL_2,
+	D2JSP_AREA_HOLE_LEVEL_2,
+	D2JSP_AREA_PIT_LEVEL_2
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	TDW_CS_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CS_Start(config_list)
+{
+	var error_list = new Array();
+	var time_start;
+	var time_end;
+	var error_msg_string;
+
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/TDW_CubeSword." + me.realm +
+		"." + me.account + "." + me.name + ".log", "TDW_CubeSword");
+
+	print("The Cube Sword Bot is running");
+
+//TDW_BOT_Log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+//TDW_BOT_Log.syncModeOn();
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	time_start = new Date();
+	TDW_BOT_Log.logInfo("-----> Beginning Cube Sword run", time_start);
+
+	TDW_BOT_CTX_ContextCreate(TDW_BOT_ConfigureList, config_list,
+		"Cube Sword Bot Configuration", TDW_BOT_Log);
+
+	TDW_BOT_SKILL_SpellFixUp();
+
+	TDW_BOT_Log.logInfo("Creating a merged ISF configuration (from '" +
+		TDW_BOT_ContextList["isf.configuration.file"] +
+		"' and an internal chipped gems ISF specification) ...");
+	if (!(TDW_CS_ISF_Cfg_All =
+		ISF_CreateTriple(TDW_BOT_ContextList["isf.configuration.file"],
+		TDW_CS_ISF_Gems, 0, error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to create a ISF configuration from '" +
+			TDW_BOT_ContextList["isf.configuration.file"] + "' and an internal " +
+			"chipped gems ISF specification ... exiting");
+	}
+	TDW_ISF_Cfg = TDW_CS_ISF_Cfg_All.isf_cfg_merged;
+	print("...done");
+
+	TDW_BOT_Log.logInfo("Creating an ISF for desirable elite swords resulting " +
+		"from cubing...");
+	if (!(TDW_CS_ISF_Cfg_SwordsGood = ISF_Create(TDW_CS_ISF_SwordsGood, 0,
+		error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to create a ISF for desirable elite " +
+			"resulting from cubing ... exiting");
+	}
+	print("...done");
+
+	TDW_BOT_Log.logInfo("Creating an ISF for sub-par elite swords to be " +
+		"cubed...");
+	if (!(TDW_CS_ISF_Cfg_SwordsSubPar = ISF_Create(TDW_CS_ISF_SwordsSubPar, 0,
+		error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to create a ISF for sub-par elite " +
+			"swords to be cubed ... exiting");
+	}
+	print("...done");
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_NONE |
+		((TDW_BOT_ContextList["mercernary.needed"]) ?
+		TDW_BOT_MOVE_TOWN_FLAG_MERC_NEEDED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+		((TDW_BOT_ContextList["mercernary.wanted"]) ?
+		TDW_BOT_MOVE_TOWN_FLAG_MERC_WANTED : TDW_BOT_MOVE_TOWN_FLAG_NONE),
+		TDW_ISF_Cfg))
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+
+	if (D2JSP_NPC_GetMercIsLiving()) {
+		TDW_BOT_Log.logInfo("A mercenary by the name of " +
+			D2JSP_NPC_GetMercName() + " has been located.");
+		TDW_BOT_ContextList["mercernary.name"] = D2JSP_NPC_GetMercName();
+	}
+
+	if (!D2JSP_ITEM_CONT_FindSpace(1, 1, D2JSP_ITEM_CONT_BuildMapList()))
+		TDW_BOT_SUPP_DoExitWithMsg("No space in any container.");
+
+	if (!D2JSP_ITEM_HasHoradricCube())
+		TDW_BOT_Log.logInfo("You don't have a Horadric Cube so I'll just " +
+			"collect chips an' stuff.");
+
+	me.randommove    = true;
+	me.quitonhostile = true;
+	me.chickenhp     = me.hp / 4;
+	me.chickenmp     = me.mp / 4;
+
+	me.showcast      = (TDW_BOT_ContextList["operation.d2jsp.me.showcast"]) ?
+		1 : 0;
+
+	var this_obj  = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+
+if (this_obj) {
+	do {
+		TDW_BOT_Log.logInfo("TEST: [" + D2JSP_ITEM_ItemToFullName(this_obj));
+	} while (this_obj && this_obj.getNext());
+}
+
+/*
+var sispec_list = ISF_EvalLocalItems(TDW_ISF_Cfg);
+while (sispec_list.length) {
+	TDW_BOT_Log.logInfo("ISF_EvalLocalItems: " +
+		sispec_list[0].fixedFName + " = " + sispec_list[0].fullNameColor);
+	TDW_BOT_Log.logInfo("               : PICKUP : " +
+		((!sispec_list[0]._eval_pickup[0]) ? "NO" :
+		TDW_ISF_Cfg.getSpecString(sispec_list[0]._eval_pickup[1])));
+	TDW_BOT_Log.logInfo("               : ID     : " +
+		((!sispec_list[0]._eval_id[0]) ? "NO" :
+		TDW_ISF_Cfg.getSpecString(sispec_list[0]._eval_id[1])));
+	TDW_BOT_Log.logInfo("               : KEEP   : " +
+		((!sispec_list[0]._eval_keep[0]) ? "NO" :
+		TDW_ISF_Cfg.getSpecString(sispec_list[0]._eval_pickup[1])));
+	sispec_list.shift();
+}
+*/
+///*
+var sispec_list = ISF_EvalLocalItems(TDW_ISF_Cfg);
+while (sispec_list.length) {
+	TDW_BOT_Log.logInfo("ISF_EvalLocalItems: " +
+		sispec_list[0].fixedFName + " = " + sispec_list[0].fullNameColor);
+	TDW_BOT_Log.logInfo("               : PICKUP : " +
+		((!sispec_list[0]._flag_pickup) ? "NO" :
+		TDW_ISF_Cfg.getSpecString(sispec_list[0]._eval_pickup[1])));
+	TDW_BOT_Log.logInfo("               : ID     : " +
+		((!sispec_list[0]._flag_id) ? "NO" :
+		TDW_ISF_Cfg.getSpecString(sispec_list[0]._eval_id[1])));
+	TDW_BOT_Log.logInfo("               : KEEP   : " +
+		((sispec_list[0]._flag_keep == -1) ? "UNKNOWN" :
+		((!sispec_list[0]._flag_keep) ? "NO" :
+		TDW_ISF_Cfg.getSpecString(sispec_list[0]._eval_pickup[1]))));
+	sispec_list.shift();
+}
+//*/
+print("STOPPING");
+stop();
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_BOTLIB_ClearArea(TDW_CS_ClearAreaList, null, null,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT);
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_FORCE_ISF, TDW_ISF_Cfg))
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+
+	time_end = new Date();
+	TDW_BOT_Log.logInfo("-----> Ending Cube Sword run (" +
+		((time_end.getTime() - time_start.getTime()) / 1000.0) + " seconds)",
+		time_end);
+
+	print("Script completed normally.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

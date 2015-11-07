@@ -1,0 +1,711 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Object Management Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Objects.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Support for specialized object management.
+//
+// Revison History : 2002-12-11 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Objects_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Objects_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_OBJ_TYPE_PLAYER  = 0;
+var D2JSP_OBJ_TYPE_NPC     = 1;
+var D2JSP_OBJ_TYPE_OBJECT  = 2;
+var D2JSP_OBJ_TYPE_MISSILE = 3;
+var D2JSP_OBJ_TYPE_ITEM    = 4;
+var D2JSP_OBJ_TYPE_TILE    = 5;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_OBJ_ITERATION_COUNT = 0;
+var D2JSP_OBJ_ACTION_COUNT    = 1;
+var D2JSP_OBJ_LAST_OBJECT     = 2;
+var D2JSP_OBJ_CALLBACK_DATA   = 3;
+var D2JSP_OBJ_RETURN_DATA     = 4;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_UNIT_PLAYER_PendingPartyWatchFlag       = false;
+var D2JSP_UNIT_PLAYER_PendingPartyList            = new Array();
+var D2JSP_UNIT_PLAYER_InviteRequestList           =
+	[ "invitation", "invite", "accept", "party", "pp" ];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UNIT_PLAYER_CheckInviteRequest(player_name, msg_text)
+{
+//print("D2JSP_UNIT_PLAYER_CheckInviteRequest() = [" + player_name + ", " + msg_text + "]");
+/*
+print("D2JSP_UNIT_PLAYER_CheckInviteRequest() = [" + player_name + ", " + msg_text + "]");
+	for (var count_1 = 0; count_1 < D2JSP_UNIT_PLAYER_InviteRequestList.length;
+		count_1++) {
+		if (msg_text.toLowerCase().
+			indexOf(D2JSP_UNIT_PLAYER_InviteRequestList[count_1]) > -1) {
+			D2JSP_UNIT_PLAYER_AddPendingPartyList(player_name);
+print("DID [" + player_name + "]");
+			break;
+		}
+	}
+*/
+	D2JSP_UNIT_PLAYER_DoPendingPartyList();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UNIT_PLAYER_FindPlayerByPartyInfo(player_name)
+{
+//	var party_obj = getParty(me.gid);
+	var party_obj = getParty();
+
+	if (party_obj) {
+		do {
+			if (party_obj.name == player_name)
+				return(party_obj);
+		} while (party_obj && party_obj.getNext());
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UNIT_PLAYER_AddPendingPartyList(player_name)
+{
+	if (player_name) {
+		D2JSP_UNIT_PLAYER_PendingPartyList[player_name] = new Date();
+		D2JSP_UNIT_PLAYER_DoPendingPartyList();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UNIT_PLAYER_RemovePendingPartyList(player_name)
+{
+	if (player_name) {
+		delete D2JSP_UNIT_PLAYER_PendingPartyList[player_name];
+		D2JSP_UNIT_PLAYER_DoPendingPartyList();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UNIT_PLAYER_DoPendingPartyList()
+{
+	var pending_list = D2JSP_UTIL_GEN_ArrayHashedKeysToIndexedShallow(
+								D2JSP_UNIT_PLAYER_PendingPartyList);
+
+//print("********** LIST = " + pending_list.length + " = [" + pending_list + "]");
+
+	if (pending_list.length) {
+		var ui_menu_status = D2JSP_COMM_GetUIMenuStatusList();
+		if ((!(ui_menu_status.length)) || ((ui_menu_status.length == 1) &&
+			(ui_menu_status[0] == D2JSP_UTIL_UI_PARTY))) {
+			var player_obj = D2JSP_UNIT_PLAYER_FindPlayerByPartyInfo(me.name);
+//print("player_obj = " + player_obj.name + ", id = " + player_obj.partyid);
+			if (player_obj != null) {
+				var player_me_partyid = player_obj.partyid;
+				var count_1;
+				for (count_1 = 0; count_1 < pending_list.length; count_1++) {
+					var player_name = pending_list[count_1];
+					var time_diff   = new Date() -
+						D2JSP_UNIT_PLAYER_PendingPartyList[player_name];
+					player_obj = D2JSP_UNIT_PLAYER_FindPlayerByPartyInfo(player_name);
+//print("player_obj = " + player_obj.name + ", id = " + player_obj.partyid);
+					if (player_obj != null) {
+//						if (player_obj.partyid != player_me_partyid) {
+						if (player_obj.partyid == 65535) {
+							clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+							D2JSP_UTIL_LOG_GetALog().logInfo("Offered a party " +
+								"invitation to player " + player_name + ".");
+						}
+						delete D2JSP_UNIT_PLAYER_PendingPartyList[player_name];
+					}
+					// If more than 60 seconds have passed the player is timed-out...
+					else if (time_diff > 60000) {
+						D2JSP_UTIL_LOG_GetALog().logWarning("More than 60 seconds " +
+							"have passed since the player game join message for " +
+							player_name + " was received without finding a player " +
+							"object --- player has probably timed-out.");
+						delete D2JSP_UNIT_PLAYER_PendingPartyList[player_name];
+					}
+				}
+			}
+		}
+		else
+			print("***** CAN'T INVITE, " + ui_menu_status.length +
+				"UI menus active ( = [" + ui_menu_status + "])");
+//print("**********Did 'D2JSP_UNIT_PLAYER_DoPendingPartyList()'");
+//		self.setTimeout('D2JSP_UNIT_PLAYER_DoPendingPartyList()', 5000);
+//		eval("delay(5000); D2JSP_UNIT_PLAYER_DoPendingPartyList();");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_IterateItem(callback_data, filter_func, action_func,
+	item_name, item_mode)
+{
+	var iteration_count = 0;
+	var action_count    = 0;
+	var return_data     = null;
+	var this_obj;
+
+	this_obj = (arguments.length < 4) ? getUnit(D2JSP_UTIL_GETUNIT_ITEM) :
+		(arguments.length < 5) ? getUnit(D2JSP_UTIL_GETUNIT_ITEM, item_name) :
+		getUnit(D2JSP_UTIL_GETUNIT_ITEM, item_name, item_mode);
+
+	while (this_obj) {
+		iteration_count++;
+		if (D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data,
+			filter_func)) {
+			action_count++;
+			if (return_data = D2JSP_OBJ_ApplyAction_Primitive(this_obj,
+				callback_data, action_func))
+				break;
+		}
+		if (!((arguments.length < 4) ? this_obj.getNext() :
+			(arguments.length < 5) ? this_obj.getNext(item_name) :
+			this_obj.getNext(item_name, item_mode)))
+			break;
+	};
+
+	return([iteration_count, action_count, this_obj, callback_data, return_data]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_IterateMissile(callback_data, filter_func, action_func,
+	item_name)
+{
+	var iteration_count = 0;
+	var action_count    = 0;
+	var return_data     = null;
+	var this_obj;
+
+	this_obj = (arguments.length < 4) ? getUnit(D2JSP_OBJ_TYPE_MISSILE) :
+		getUnit(D2JSP_OBJ_TYPE_MISSILE, item_name);
+
+	while (this_obj) {
+		iteration_count++;
+		if (D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data,
+			filter_func)) {
+			action_count++;
+			if (return_data = D2JSP_OBJ_ApplyAction_Primitive(this_obj,
+				callback_data, action_func))
+				break;
+		}
+		if (!((arguments.length < 4) ? this_obj.getNext() :
+			this_obj.getNext(item_name)))
+			break;
+	};
+
+	return([iteration_count, action_count, this_obj, callback_data, return_data]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_IterateNPC(callback_data, filter_func, action_func,
+	item_name, item_mode)
+{
+	var iteration_count = 0;
+	var action_count    = 0;
+	var return_data     = null;
+	var this_obj;
+
+	this_obj = (arguments.length < 4) ? getUnit(D2JSP_OBJ_TYPE_NPC) :
+		(arguments.length < 5) ? getUnit(D2JSP_OBJ_TYPE_NPC, item_name) :
+		getUnit(D2JSP_OBJ_TYPE_NPC, item_name, item_mode);
+
+	while (this_obj) {
+		iteration_count++;
+		if (D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data,
+			filter_func)) {
+			action_count++;
+			if (return_data = D2JSP_OBJ_ApplyAction_Primitive(this_obj,
+				callback_data, action_func))
+				break;
+		}
+		if (!((arguments.length < 4) ? this_obj.getNext() :
+			(arguments.length < 5) ? this_obj.getNext(item_name) :
+			this_obj.getNext(item_name, item_mode)))
+			break;
+	};
+
+	return([iteration_count, action_count, this_obj, callback_data, return_data]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_IterateObject(callback_data, filter_func, action_func,
+	item_name, item_mode)
+{
+	var iteration_count = 0;
+	var action_count    = 0;
+	var return_data     = null;
+	var this_obj;
+
+	this_obj = (arguments.length < 4) ? getUnit(D2JSP_OBJ_TYPE_OBJECT) :
+		(arguments.length < 5) ? getUnit(D2JSP_OBJ_TYPE_OBJECT, item_name) :
+		getUnit(D2JSP_OBJ_TYPE_OBJECT, item_name, item_mode);
+
+	while (this_obj) {
+		iteration_count++;
+		if (D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data,
+			filter_func)) {
+			action_count++;
+			if (return_data = D2JSP_OBJ_ApplyAction_Primitive(this_obj,
+				callback_data, action_func))
+				break;
+		}
+		if (!((arguments.length < 4) ? this_obj.getNext() :
+			(arguments.length < 5) ? this_obj.getNext(item_name) :
+			this_obj.getNext(item_name, item_mode)))
+			break;
+	};
+
+	return([iteration_count, action_count, this_obj, callback_data, return_data]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_IteratePlayer(callback_data, filter_func, action_func,
+	item_name, item_mode)
+{
+	var iteration_count = 0;
+	var action_count    = 0;
+	var return_data     = null;
+	var this_obj;
+
+	this_obj = (arguments.length < 4) ? getUnit(D2JSP_OBJ_TYPE_PLAYER) :
+		(arguments.length < 5) ? getUnit(D2JSP_OBJ_TYPE_PLAYER, item_name) :
+		getUnit(D2JSP_OBJ_TYPE_PLAYER, item_name, item_mode);
+
+	while (this_obj) {
+		iteration_count++;
+		if (D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data,
+			filter_func)) {
+			action_count++;
+			if (return_data = D2JSP_OBJ_ApplyAction_Primitive(this_obj,
+				callback_data, action_func))
+				break;
+		}
+		if (!((arguments.length < 4) ? this_obj.getNext() :
+			(arguments.length < 5) ? this_obj.getNext(item_name) :
+			this_obj.getNext(item_name, item_mode)))
+			break;
+	};
+
+	return([iteration_count, action_count, this_obj, callback_data, return_data]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_IterateRoom(callback_data, filter_func, action_func)
+{
+	var iteration_count = 0;
+	var action_count    = 0;
+	var return_data     = null;
+	var this_obj;
+
+	this_obj = getRoom();
+
+	while (this_obj) {
+		iteration_count++;
+		if (D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data,
+			filter_func)) {
+			action_count++;
+			if (return_data = D2JSP_OBJ_ApplyAction_Primitive(this_obj,
+				callback_data, action_func))
+				break;
+		}
+		if (!(this_obj.getNext()))
+			break;
+	};
+
+	return([iteration_count, action_count, this_obj, callback_data, return_data]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_IterateTile(callback_data, filter_func, action_func)
+{
+	var iteration_count = 0;
+	var action_count    = 0;
+	var return_data     = null;
+	var this_obj;
+
+	this_obj = getUnit(D2JSP_OBJ_TYPE_TILE);
+
+	while (this_obj) {
+		iteration_count++;
+		if (D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data,
+			filter_func)) {
+			action_count++;
+			if (return_data = D2JSP_OBJ_ApplyAction_Primitive(this_obj,
+				callback_data, action_func))
+				break;
+		}
+		if (!(this_obj.getNext()))
+			break;
+	};
+
+	return([iteration_count, action_count, this_obj, callback_data, return_data]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ApplyFilter_Primitive(this_obj, callback_data, filter_func)
+{
+	return((filter_func == null) || ((typeof(filter_func) == "function") &&
+		filter_func(this_obj, callback_data)) ||
+		((typeof(filter_func) == "string") && eval(filter_func)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ApplyAction_Primitive(this_obj, callback_data, action_func)
+{
+	return((typeof(action_func) == "function") ?
+		action_func(this_obj, callback_data) :
+		((typeof(action_func) == "string") ? eval(action_func) : null));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterList_Primitive(filter_data, callback_data)
+{
+	var count_1;
+
+	if (typeof(callback_data) == "string")
+		return((D2JSP_UTIL_FORMAT_LowerCase(filter_data + "") ==
+			D2JSP_UTIL_FORMAT_LowerCase(callback_data)) ? true : false);
+	else if (typeof(callback_data) == "number")
+		return(((filter_data + 0) == callback_data) ? true : false);
+	else if ((typeof(callback_data) == "object") && callback_data.length) {
+		if (typeof(filter_data) == "string") {
+			for (count_1 = 0; count_1 < callback_data.length; count_1++) {
+				if (D2JSP_UTIL_FORMAT_LowerCase(filter_data) ==
+					D2JSP_UTIL_FORMAT_LowerCase(callback_data[count_1]))
+					return(true);
+			}
+		}
+		else {
+			for (count_1 = 0; count_1 < callback_data.length; count_1++) {
+				if (filter_data == callback_data[count_1])
+					return(true);
+			}
+		}
+	}
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ActionContinue(this_obj, callback_data, return_data)
+{
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ActionStop(this_obj, callback_data, return_data)
+{
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// For debugging.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ActionPrintName(this_obj, callback_data, return_data)
+{
+	print(this_obj.name);
+
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ActionInteractUnset(this_obj, callback_data, return_data)
+{
+	this_obj.interact();
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ActionInteractSet1(this_obj, callback_data, return_data)
+{
+	this_obj.interact(1);
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ActionInteractSet2(this_obj, callback_data, return_data)
+{
+	this_obj.interact(2);
+
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_ActionPurchase(this_obj, callback_data, return_data)
+{
+	return(D2JSP_OBJ_ActionInteractUnset(this_obj, callback_data, return_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterTrue(this_obj, callback_data)
+{
+	return(true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterFalse(this_obj, callback_data)
+{
+	return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterAccount(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.account, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterArea(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.area, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterClassid(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.classid, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterCode(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.code, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterFName(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(D2JSP_ITEM_GetItemFName(this_obj),
+		callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterHasParentFalse(this_obj, callback_data)
+{
+	return((!this_obj.getParent()) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterHasParentTrue(this_obj, callback_data)
+{
+	return((this_obj.getParent()) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterIsMyBelt(this_obj, callback_data)
+{
+	return((D2JSP_OBJ_FilterParentMe(this_obj, callback_data) &&
+		(D2JSP_ITEM_GetItemType(this_obj) == D2JSP_ITEMTYPE_BELT) &&
+		(this_obj.itemloc == D2JSP_BODYLOC_BELT)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterIsInMyBelt(this_obj, callback_data)
+{
+	return((D2JSP_OBJ_FilterParentMe(this_obj, callback_data) &&
+		(this_obj.mode == D2JSP_MODE_ITEM_IN_BELT)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterIsInRoom(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(
+		D2JSP_ROOM_GetCurrentRoomNumber(this_obj), callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterItemLoc(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.itemloc, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterItemType(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(D2JSP_ITEM_GetItemType(this_obj),
+		callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterMode(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.mode, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterName(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.name, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterParent(this_obj, callback_data)
+{
+	var obj_parent = this_obj.getParent();
+
+	return((!obj_parent) ? false :
+		D2JSP_OBJ_FilterList_Primitive(obj_parent.name, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterParentMe(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterParent(this_obj, me.name));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterRoomNumber(this_obj, callback_data)
+{
+	return(D2JSP_OBJ_FilterList_Primitive(this_obj.number, callback_data));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_OBJ_FilterRoomCorrectTomb(this_obj, callback_data)
+{
+	return((this_obj.correcttomb) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Objects_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+function main()
+{
+	var results_data;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+	results_data = D2JSP_OBJ_IterateItem(me.name, D2JSP_OBJ_FilterParent);
+	print("Items owned by me: " + results_data[1]);
+
+	results_data = D2JSP_OBJ_IterateItem("Folcwald", D2JSP_OBJ_FilterParent);
+	print("Items owned by my mercenary: " + results_data[1]);
+
+	results_data = D2JSP_OBJ_IterateItem([me.name, "Folcwald"],
+		D2JSP_OBJ_FilterParent);
+	print("Items owned by me or my mercenary: " + results_data[1]);
+
+	results_data = D2JSP_OBJ_IterateNPC(null,
+		"this_obj.getStat(D2JSP_STAT_LIGHTRESIST);",
+		"print(this_obj.name+\"=\"+this_obj.getStat(D2JSP_STAT_LIGHTRESIST)); 0");
+	print("NPCs with some lightning resistance: " + results_data[1]);
+
+	results_data = D2JSP_OBJ_IterateItem(["cm1", "cm2", "cm3"],
+		D2JSP_OBJ_FilterCode);
+	print("Charms located in the game: " + results_data[1]);
+
+	results_data = D2JSP_OBJ_IterateItem(["yps", "vps", "wms", "hp1", "mp1",
+		"hp2", "mp2", "hp3", "mp3", "hp4", "mp4", "hp5", "mp5", "rvs", "rvl"],
+		D2JSP_OBJ_FilterCode);
+	print("Potions located in the game: " + results_data[1]);
+
+	results_data = D2JSP_OBJ_IterateItem(["yps", "vps", "wms", "hp1", "mp1",
+		"hp2", "mp2", "hp3", "mp3", "hp4", "mp4", "hp5", "mp5", "rvs", "rvl"],
+		"((this_obj.getParent() && (this_obj.getParent().name == me.name) && "+
+		"D2JSP_OBJ_FilterCode(this_obj, callback_data)) ? true : false)");
+	print("Potions belonging to me: " + results_data[1]);
+
+	results_data = D2JSP_OBJ_IteratePlayer(null,
+		"(this_obj.classid == 1)");
+	print("Sorceresses in the game: " + results_data[1]);
+
+if (0) {
+//	Energy Shield state query doesn't ever return TRUE...
+	results_data = D2JSP_OBJ_IteratePlayer(null,
+		"this_obj.getState(D2JSP_STATE_ENERGYSHIELD)");
+	print("Sorceresses using Energy Shield at present: " + results_data[1]);
+}
+
+	results_data = D2JSP_OBJ_IteratePlayer(null,
+		"(this_obj.getState(D2JSP_STATE_CHILLINGARMOR) || "+
+		"this_obj.getState(D2JSP_STATE_SHIVERARMOR) || " +
+		"this_obj.getState(D2JSP_STATE_FROZENARMOR)) ? true : false");
+	print("Sorceresses using a cold armor at present: " + results_data[1]);
+
+	print("Done!");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+

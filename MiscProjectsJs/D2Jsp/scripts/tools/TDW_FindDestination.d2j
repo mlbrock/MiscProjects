@@ -1,0 +1,234 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Rooms.d2l");
+includeonce("vec_coord.d2l");
+
+var D2JSP_UTIL_ScreenSize = [
+	[640, 480],
+	[640, 480],	// Whatever...
+	[800, 600]
+];
+
+var TDW_FD_ScreenSizeBounds = [
+	[D2JSP_UTIL_ScreenSize[0][0] - 20, D2JSP_UTIL_ScreenSize[0][1] - 20],
+	[D2JSP_UTIL_ScreenSize[1][0] - 20, D2JSP_UTIL_ScreenSize[1][1] - 20],
+	[D2JSP_UTIL_ScreenSize[2][0] - 20, D2JSP_UTIL_ScreenSize[2][1] - 20]
+];
+
+var TDW_FD_Map = new Array(D2JSP_AREA_COUNT);
+TDW_FD_Map[D2JSP_AREA_CATACOMBS_LEVEL_2] = [
+	[TDW_FD_RoomUnit,	[291, 292, 293, 294], "The stairwell",						D2JSP_UTIL_GETUNIT_TILE, 		-1],
+	[TDW_FD_AreaRoom, [291, 292, 293, 294], "The stairwell to Catacombs 3",	-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_CATACOMBS_LEVEL_3] = [
+	[TDW_FD_RoomUnit,	[291, 292, 293, 294], "The stairwell",						D2JSP_UTIL_GETUNIT_TILE, 		-1],
+	[TDW_FD_AreaRoom, [291, 292, 293, 294], "The stairwell to Catacombs 4",	-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_A2_SEWERS_LEVEL_2] = [
+	[TDW_FD_RoomUnit,	[337, 338, 339, 340], "The stairwell",						D2JSP_UTIL_GETUNIT_TILE, 		-1],
+	[TDW_FD_AreaRoom, [337, 338, 339, 340], "The stairwell to Sewers 3",		-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_A2_SEWERS_LEVEL_3] = [
+	[TDW_FD_RoomUnit,	[341, 342, 343, 344], "Radament",							D2JSP_UTIL_GETUNIT_NPC, 		"Radament"],
+	[TDW_FD_AreaRoom, [341, 342, 343, 344], "Radament's Lair",					-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_2] = [
+	[TDW_FD_RoomUnit,	[448, 449, 450, 451], "The stairwell",												D2JSP_UTIL_GETUNIT_TILE, 		-1],
+	[TDW_FD_AreaRoom, [448, 449, 450, 451], "The stairwell to Halls of the Dead Level 3",		-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_HALLS_OF_THE_DEAD_LEVEL_3] = [
+	[TDW_FD_RoomUnit,	[456, 457, 458, 459],	"Bloodwitch the Wild",									D2JSP_UTIL_GETUNIT_NPC, 		"Bloodwitch the Wild"],
+	[TDW_FD_AreaRoom, [456, 457, 458, 459],	"The Horadric Cube room",								-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_FAR_OASIS] = [
+	[TDW_FD_RoomUnit,	390,							"Entrance to the Maggot Lair",						D2JSP_UTIL_GETUNIT_TILE, 		-1],
+	[TDW_FD_AreaRoom, 390, 							"The entrance to the Maggot Lair level 1",		-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_MAGGOT_LAIR_LEVEL_1] = [
+	[TDW_FD_RoomUnit,	[501, 502, 503, 504],	"The stairwell",											D2JSP_UTIL_GETUNIT_NPC, 		"Bloodwitch the Wild"],
+	[TDW_FD_AreaRoom, [501, 502, 503, 504],	"The stairwell to Maggot Lair level 2",			-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_MAGGOT_LAIR_LEVEL_2] = [
+	[TDW_FD_RoomUnit,	[501, 502, 503, 504],	"The stairwell",											D2JSP_UTIL_GETUNIT_NPC, 		"Bloodwitch the Wild"],
+	[TDW_FD_AreaRoom, [501, 502, 503, 504],	"The stairwell to Maggot Lair level 3",			-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_MAGGOT_LAIR_LEVEL_3] = [
+	[TDW_FD_RoomUnit,	509,							"Coldworm the Burrower",								D2JSP_UTIL_GETUNIT_NPC, 		"Coldworm the Burrower"],
+	[TDW_FD_AreaRoom, 509,							"Coldworm the Burrower's Lair",						-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_VALLEY_OF_SNAKES] = [
+	[TDW_FD_RoomUnit,	389,							"Entrance to the Claw Viper Temple",				D2JSP_UTIL_GETUNIT_TILE, 		-1],
+	[TDW_FD_AreaRoom, 389, 							"The entrance to the Claw Viper Temple level 1",-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_1] = [
+	[TDW_FD_RoomUnit,	[448, 449, 450, 451],	"The stairwell",											D2JSP_UTIL_GETUNIT_NPC, 		"Bloodwitch the Wild"],
+	[TDW_FD_AreaRoom, [448, 449, 450, 451],	"The stairwell to Claw Viper Temple level 2",	-1,									""],
+];
+TDW_FD_Map[D2JSP_AREA_CLAW_VIPER_TEMPLE_LEVEL_2] = [
+	[TDW_FD_RoomUnit,	480,							"Tainted Sun Altar",										D2JSP_UTIL_GETUNIT_OBJECT, 	"taintedsunaltar"],
+	[TDW_FD_RoomUnit,	480,							"Fangskin",													D2JSP_UTIL_GETUNIT_NPC, 		"Fangskin"],
+];
+TDW_FD_Map[D2JSP_AREA_ARCANE_SANCTUARY]  = [
+	[TDW_FD_RoomUnit,	[525, 526, 527, 528],	"Horazon's Journal",										D2JSP_UTIL_GETUNIT_OBJECT, 	"Tome"],
+	[TDW_FD_AreaRoom,	[525, 526, 527, 528],	"The Summoner",											-1,									""]
+];
+TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB1]  = [
+	[TDW_FD_RoomUnit,	[460, 461, 462, 463],	"Entrance to Duriel's Lair",							D2JSP_UTIL_GETUNIT_OBJECT,		"Duriel's Lair"],
+	[TDW_FD_RoomUnit,	[460, 461, 462, 463],	"The Orifice",												D2JSP_UTIL_GETUNIT_OBJECT,		"orifice"],
+	[TDW_FD_AreaRoom,	[460, 461, 462, 463],	"The Orifice Room",										-1,									""]
+];
+TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB2]  = TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB1];
+TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB3]  = TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB1];
+TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB4]  = TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB1];
+TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB5]  = TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB1];
+TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB6]  = TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB1];
+TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB7]  = TDW_FD_Map[D2JSP_AREA_TAL_RASHAS_TOMB1];
+TDW_FD_Map[D2JSP_AREA_CRYSTALIZED_CAVERN_LEVEL_1]  = [
+	[TDW_FD_RoomUnit,	[1026, 1027, 1028, 1029],	"The stairwell",										D2JSP_UTIL_GETUNIT_TILE,		-1],
+	[TDW_FD_AreaRoom,	[1026, 1027, 1028, 1029],	"The stairwell to the Frozen River",			-1,									""]
+];
+TDW_FD_Map[D2JSP_AREA_RIVER_OF_FLAME]  = [
+	[TDW_FD_RoomUnit,	[853, 854],						"The Hell Forge",										D2JSP_UTIL_GETUNIT_OBJECT,		"Hellforge"],
+	[TDW_FD_AreaRoom,	[853, 854],						"The Hell Forge",										-1,									""]
+];
+
+TDW_FD_Map[1] = [[TDW_FD_NPC, "Akara", "Akara"]];
+
+function main()
+{
+	var last_act  = -1;
+	var last_area = -1;
+	var last_room = -1;
+	var last_x    = -1;
+	var last_y    = -1;
+	var room_obj;
+	var room_bounds;
+
+	var scr   = getScreenHook();
+	scr.x     = 0;
+	scr.y     = 0;
+	scr.text  = " ";
+	scr.font  = 5;
+	scr.color = D2JSP_UTIL_COLOR_BASE_RED;
+
+	delay(1000);
+
+	while(1) {
+		last_area       = me.area;
+		var last_room   = -1;
+		var last_action = null;
+		var action;
+		if ((action = TDW_FD_FindAction()) != null) {
+			var coords = action[0](action);
+			if (coords != null) {
+//print(action[2] + " can be found at location [" + coords[0] + ", " + coords[1] + "].");
+				var iterations = 1;
+				last_room = D2JSP_ROOM_GetCoordsBoundary();
+				scr.text  = "*";
+				scr.color = D2JSP_UTIL_COLOR_BASE_RED;
+//print("ME,ROOM=[" + me.x + ", " + me.y + "] ---> [" + last_room + "]");
+				while ((me.area == last_area) &&
+					(me.x >= last_room[0]) && (me.y >= last_room[1]) &&
+					(me.x <  last_room[2]) && (me.y <  last_room[2])) {
+					var pos = TDW_FD_GameToScreen(coords[0], coords[1]);
+					scr.x = pos.x;
+					scr.y = pos.y;
+					if (!(iterations++ % 5))
+						scr.color = (scr.color == D2JSP_UTIL_COLOR_BASE_RED) ?
+							D2JSP_UTIL_COLOR_BASE_GREEN : D2JSP_UTIL_COLOR_BASE_RED;
+					delay(100);
+				}
+				last_room = -1;
+//print("MOVED OUT OF ROOM");
+				scr.text = " ";
+				D2JSP_UTIL_BNET_OverheadSafe("");
+			}
+		}
+		delay(100);
+	}
+}
+
+function TDW_FD_FindAction()
+{
+	while (!me.area)
+		;
+
+	if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(TDW_FD_Map[me.area])) {
+		var count_1;
+		for (count_1 = 0; count_1 < TDW_FD_Map[me.area].length; count_1++) {
+			if (TDW_FD_Map[me.area][count_1][0](TDW_FD_Map[me.area][count_1]))
+				return(TDW_FD_Map[me.area][count_1]);
+		}
+//print("Stopping");
+//stop();
+	}
+
+	return(null);
+}
+
+function TDW_FD_AreaRoom(arg_spec)
+{
+	var result = D2JSP_ROOM_IsRoomInArea(arg_spec[1]);
+
+	if (result != null) {
+		var middle = D2JSP_ROOM_GetCoordsMiddle(result);
+//		print(arg_spec[2] + " can be found in room number " + result.number +
+//			" at location [" + middle[0] + ", " + middle[1] + "].");
+		return([middle[0], middle[1]]);
+	}
+	else
+		return(null);
+}
+
+function TDW_FD_RoomUnit(arg_spec)
+{
+	var room_number = D2JSP_ROOM_IsInRoom(me, arg_spec[1]);
+
+	if (room_number) {
+		var result;
+		if ((arg_spec[3] == D2JSP_UTIL_GETUNIT_TILE) && (arg_spec[4] == -1))
+			result = D2JSP_AREA_GetAreaTransitTile();
+		else
+			result = getUnit(arg_spec[3], arg_spec[4]);
+		if (result != null)
+			return([result.x, result.y]);
+	}
+	else
+		return(null);
+}
+
+function TDW_FD_NPC(arg_spec)
+{
+	var result = getUnit(D2JSP_UTIL_GETUNIT_NPC, arg_spec[1]);
+
+	if (result != null) {
+//		print(arg_spec[2] + " can be found at location [" + result.x + ", " +
+//			result.y + "].");
+		return([result.x, result.y]);
+	}
+	else
+		return(null);
+}
+
+// Courtesy Scav's vector coordinate library.
+// Scav RIP, 2003
+function TDW_FD_GameToScreen(target_x, target_y)
+{
+	var my_vec = new vector(-(target_x - me.x), target_y - me.y);
+	var res    = TDW_FD_ScreenSizeBounds[me.screensize];
+	var out_x;
+	var out_y;
+
+	my_vec.rotate(135);
+
+	out_x = 400 + Math.round(my_vec.x * 22);
+	out_y = 300 - Math.round(my_vec.y * 12);
+
+	out_x = (out_x < 20) ? 20 : (out_x > res[0]) ? res[0] : out_x;
+	out_y = (out_y < 20) ? 20 : (out_y > res[1]) ? res[1] : out_y;
+
+	return new coord(out_x, out_y);
+}
+
+

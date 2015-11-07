@@ -1,0 +1,25 @@
+	TDW_BOT_ConfigureList["skill.attack.local"]               = new Array();
+	TDW_BOT_ConfigureList["skill.precast"]                    = ["Energy Shield", "Shiver Armor", "Thunder Storm"];
+	TDW_BOT_ConfigureList["mysnagit.pickup"]                  = false;
+	TDW_BOT_ConfigureList["mysnagit.gold.minimum"]            = 1000;
+	TDW_BOT_ConfigureList["chicken.me.hp"]                    = 40;
+	TDW_BOT_ConfigureList["chicken.me.mp"]                    = 20;
+	TDW_BOT_ConfigureList["town.heal.me.hp"]                  = 50;
+	TDW_BOT_ConfigureList["town.heal.me.mp"]                  = 30;
+	TDW_BOT_ConfigureList["mana.regen.percentage"]            = 1;
+//	TDW_BOT_ConfigureList["operation.log.configuration"]          = false;
+//	TDW_BOT_ConfigureList["operation.log.special.npc.stats"]      = false;  
+//	TDW_BOT_ConfigureList["operation.log.special.npc.cluster"]    = false;  
+	TDW_BOT_ConfigureList["operation.public.speech"]              = false;
+//	TDW_BOT_ConfigureList["isf.configuration.file"]           = "settings/ISF.njaguar.cfg";
+
+	TDW_BOT_ConfigureList["town.heal.mercenary.hp"]           = 0;
+	TDW_BOT_ConfigureList["chicken.mercenary.hp"]             = 25;
+	TDW_BOT_ConfigureList["town.revive.mercenary"]            = false;
+	TDW_BOT_ConfigureList["mercernary.needed"]                = false;
+
+	TDW_BOT_ConfigureList["tdw.bot.pindleskin.kill.minions"]      = true;
+	TDW_BOT_ConfigureList["tdw.bot.pindleskin.kill.minions.pre"]  = true;  
+	TDW_BOT_ConfigureList["tdw.bot.pindleskin.kill.minions.post"] = false;
+//	TDW_BOT_ConfigureList["tdw.bot.pindleskin.walk.to.pindleskin"] = true;
+

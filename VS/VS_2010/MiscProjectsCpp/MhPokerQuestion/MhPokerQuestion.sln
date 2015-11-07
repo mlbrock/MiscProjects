@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MhPokerQuestion", "MhPokerQuestion\MhPokerQuestion.vcxproj", "{D7E6F26D-9903-4E45-BFC4-299C6F7E85E3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epis_01", "Epis_01\Epis_01.vcxproj", "{72DC3553-B34F-450C-BB02-72FA987BBD4F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epis_03", "Epis_03\Epis_03.vcxproj", "{DBBC1B0F-4271-4D48-B7A4-F3EFB5F202AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +17,14 @@ Global
 		{D7E6F26D-9903-4E45-BFC4-299C6F7E85E3}.Debug|Win32.Build.0 = Debug|Win32
 		{D7E6F26D-9903-4E45-BFC4-299C6F7E85E3}.Release|Win32.ActiveCfg = Release|Win32
 		{D7E6F26D-9903-4E45-BFC4-299C6F7E85E3}.Release|Win32.Build.0 = Release|Win32
+		{72DC3553-B34F-450C-BB02-72FA987BBD4F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{72DC3553-B34F-450C-BB02-72FA987BBD4F}.Debug|Win32.Build.0 = Debug|Win32
+		{72DC3553-B34F-450C-BB02-72FA987BBD4F}.Release|Win32.ActiveCfg = Release|Win32
+		{72DC3553-B34F-450C-BB02-72FA987BBD4F}.Release|Win32.Build.0 = Release|Win32
+		{DBBC1B0F-4271-4D48-B7A4-F3EFB5F202AB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DBBC1B0F-4271-4D48-B7A4-F3EFB5F202AB}.Debug|Win32.Build.0 = Debug|Win32
+		{DBBC1B0F-4271-4D48-B7A4-F3EFB5F202AB}.Release|Win32.ActiveCfg = Release|Win32
+		{DBBC1B0F-4271-4D48-B7A4-F3EFB5F202AB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

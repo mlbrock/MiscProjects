@@ -1,0 +1,165 @@
+/*
+	___CoreTest.020.d2j
+
+	Symptoms    :
+
+		copyUnit(<some-room-object>); dies immediately.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			31.Final Release Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+
+var D2JSP_ROOMSTAT_NSIZEGAMEY = 12;
+
+function main()
+{
+	print("Waiting 1 second for game load completion...");
+	delay(1000);
+	print("Ready.");
+
+	var c  = 0;
+	var st = new Date();
+	var et;
+	var r  = getRoom();
+	if (r) {
+		do {
+			c++;
+			r.getCollision();
+		} while (r && r.getNext());
+	}
+	et=new Date();
+	print("Done Test  0: " + c + " rooms in "+ ((et - st) / 1000) + " seconds (" +
+		((et - st) / c / 1000).toFixed(3) + " mean)");
+
+	var c  = 0;
+	var st = new Date();
+	var et;
+	var r  = getRoom();
+	if (r) {
+		do {
+			c++;
+			r.getCollision();
+			r.getStat(0);
+		} while (r && r.getNext());
+	}
+	et=new Date();
+	print("Done Test  1: " + c + " rooms in "+ ((et - st) / 1000) + " seconds (" +
+		((et - st) / c / 1000).toFixed(3) + " mean)");
+
+	var c  = 0;
+	var st = new Date();
+	var et;
+	var r  = getRoom();
+	if (r) {
+		do {
+			c++;
+			r.getCollision();
+			r.getStat(0);
+			r.getStat(1);
+		} while (r && r.getNext());
+	}
+	et=new Date();
+	print("Done Test  2: " + c + " rooms in "+ ((et - st) / 1000) + " seconds (" +
+		((et - st) / c / 1000).toFixed(3) + " mean)");
+
+	var c  = 0;
+	var st = new Date();
+	var et;
+	var r  = getRoom();
+	if (r) {
+		do {
+			c++;
+			r.getCollision();
+			r.getStat(0);
+			r.getStat(1);
+			r.getStat(2);
+		} while (r && r.getNext());
+	}
+	et=new Date();
+	print("Done Test  3: " + c + " rooms in "+ ((et - st) / 1000) + " seconds (" +
+		((et - st) / c / 1000).toFixed(3) + " mean)");
+
+	var c  = 0;
+	var st = new Date();
+	var et;
+	var r  = getRoom();
+	if (r) {
+		do {
+			c++;
+			r.getCollision();
+			r.getStat(0);
+			r.getStat(1);
+			r.getStat(2);
+			r.getStat(3);
+			r.getStat(4);
+			r.getStat(5);
+			r.getStat(6);
+			r.getStat(7);
+			r.getStat(8);
+		} while (r && r.getNext());
+	}
+	et=new Date();
+	print("Done Test  8: " + c + " rooms in "+ ((et - st) / 1000) + " seconds (" +
+		((et - st) / c / 1000).toFixed(3) + " mean)");
+
+	var c  = 0;
+	var st = new Date();
+	var et;
+	var r  = getRoom();
+	if (r) {
+		do {
+			c++;
+			r.getCollision();
+			r.getStat(0);
+			r.getStat(1);
+			r.getStat(2);
+			r.getStat(3);
+			r.getStat(4);
+			r.getStat(5);
+			r.getStat(6);
+			r.getStat(7);
+			r.getStat(8);
+			r.getStat(9);
+		} while (r && r.getNext());
+	}
+	et=new Date();
+	print("Done Test  9: " + c + " rooms in "+ ((et - st) / 1000) + " seconds (" +
+		((et - st) / c / 1000).toFixed(3) + " mean)");
+
+	var c  = 0;
+	var st = new Date();
+	var et;
+	var r  = getRoom();
+	if (r) {
+		do {
+			c++;
+			r.getCollision();
+			r.getStat(0);
+			r.getStat(1);
+			r.getStat(2);
+			r.getStat(3);
+			r.getStat(4);
+			r.getStat(5);
+			r.getStat(6);
+			r.getStat(7);
+			r.getStat(8);
+			r.getStat(9);
+			r.getStat(10);
+			r.getStat(11);
+			r.getStat(12);
+			r.getStat(13);
+			r.getStat(14);
+			r.getStat(15);
+			r.getStat(16);
+		} while (r && r.getNext());
+	}
+	et=new Date();
+	print("Done Test 16: " + c + " rooms in "+ ((et - st) / 1000) + " seconds (" +
+		((et - st) / c / 1000).toFixed(3) + " mean)");
+
+	print("Stopping script");
+	stop();
+}
+
+

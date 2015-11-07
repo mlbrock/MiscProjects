@@ -1,0 +1,545 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Base Stats Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_BaseStats.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion base stat constants.
+//
+// Revison History : 2003-01-20 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_BaseStats_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_BaseStats_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant base stat values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_BASESTAT_ALTERNATE_GFX           =   0;
+var D2JSP_BASESTAT_WEAPON_CLASS            =   1;
+var D2JSP_BASESTAT_TWO_HANDED_WEAPON_CLASS =   2;
+var D2JSP_BASESTAT_BASESTAT_3              =   3;
+var D2JSP_BASESTAT_MIN_AC                  =   4;
+var D2JSP_BASESTAT_MAX_AC                  =   5;
+var D2JSP_BASESTAT_BASE_GAMBLE_COST        =   6;
+var D2JSP_BASESTAT_BASE_ATTACK_SPEED       =   7;
+var D2JSP_BASESTAT_DURABILITY_WARNING      =   8;
+var D2JSP_BASESTAT_BASE_COST               =   9;
+var D2JSP_BASESTAT_BASESTAT_10             =  10;
+var D2JSP_BASESTAT_BASESTAT_11             =  11;
+var D2JSP_BASESTAT_BASESTAT_12             =  12;
+var D2JSP_BASESTAT_BASESTAT_13             =  13;
+var D2JSP_BASESTAT_BASESTAT_14             =  14;
+var D2JSP_BASESTAT_VERSION                 =  15;
+var D2JSP_BASESTAT_BASESTAT_16             =  16;
+var D2JSP_BASESTAT_BASESTAT_17             =  17;
+var D2JSP_BASESTAT_BASESTAT_18             =  18;
+var D2JSP_BASESTAT_BASESTAT_19             =  19;
+var D2JSP_BASESTAT_BASESTAT_20             =  20;
+var D2JSP_BASESTAT_ITEM_RARITY             =  21;
+var D2JSP_BASESTAT_BASE_ITEM_LEVEL         =  22;
+var D2JSP_BASESTAT_MIN_DMG                 =  23;
+var D2JSP_BASESTAT_MAX_DMG                 =  24;
+var D2JSP_BASESTAT_BASESTAT_25             =  25;
+var D2JSP_BASESTAT_BASESTAT_26             =  26;
+var D2JSP_BASESTAT_MIN_TWO_HAND_DMG        =  27;
+var D2JSP_BASESTAT_MAX_TWO_HAND_DMG        =  28;
+var D2JSP_BASESTAT_ATTACK_RANGE            =  29;
+var D2JSP_BASESTAT_STR_BONUS               =  30;
+var D2JSP_BASESTAT_DEX_BONUS               =  31;
+var D2JSP_BASESTAT_STR_REQ                 =  32;
+var D2JSP_BASESTAT_DEX_REQ                 =  33;
+var D2JSP_BASESTAT_BASESTAT_34             =  34;
+var D2JSP_BASESTAT_SIZE_X                  =  35;
+var D2JSP_BASESTAT_SIZE_Y                  =  36;
+var D2JSP_BASESTAT_BASE_BLOCK              =  37;
+var D2JSP_BASESTAT_BASE_DURABILITY         =  38;
+var D2JSP_BASESTAT_BASESTAT_39             =  39;
+var D2JSP_BASESTAT_BASESTAT_40             =  40;
+var D2JSP_BASESTAT_COMPONENT               =  41;
+var D2JSP_BASESTAT_BASESTAT_42             =  42;
+var D2JSP_BASESTAT_BASESTAT_43             =  43;
+var D2JSP_BASESTAT_BASESTAT_44             =  44;
+var D2JSP_BASESTAT_BASESTAT_45             =  45;
+var D2JSP_BASESTAT_BASESTAT_46             =  46;
+var D2JSP_BASESTAT_BASESTAT_47             =  47;
+var D2JSP_BASESTAT_TWO_HANDED              =  48;
+var D2JSP_BASESTAT_BASESTAT_49             =  49;
+var D2JSP_BASESTAT_TYPE                    =  50;
+var D2JSP_BASESTAT_BASESTAT_51             =  51;
+var D2JSP_BASESTAT_BASESTAT_52             =  52;
+var D2JSP_BASESTAT_SOUND_ID                =  53;
+var D2JSP_BASESTAT_BASESTAT_54             =  54;
+var D2JSP_BASESTAT_QUEST                   =  55;
+var D2JSP_BASESTAT_BASESTAT_56             =  56;
+var D2JSP_BASESTAT_TRANS_TABLE             =  57;
+var D2JSP_BASESTAT_BASESTAT_58             =  58;
+var D2JSP_BASESTAT_LIGHT_RADIUS            =  59;
+var D2JSP_BASESTAT_BASESTAT_60             =  60;
+var D2JSP_BASESTAT_BASESTAT_61             =  61;
+var D2JSP_BASESTAT_BASESTAT_62             =  62;
+var D2JSP_BASESTAT_BASESTAT_63             =  63;
+var D2JSP_BASESTAT_BASESTAT_64             =  64;
+var D2JSP_BASESTAT_DURATION_WARNING_WEP    =  65;
+var D2JSP_BASESTAT_BASESTAT_66             =  66;
+var D2JSP_BASESTAT_BASESTAT_67             =  67;
+var D2JSP_BASESTAT_MAX_SOCKETS             =  68;
+var D2JSP_BASESTAT_BASESTAT_69             =  69;
+var D2JSP_BASESTAT_BASESTAT_70             =  70;
+var D2JSP_BASESTAT_BASESTAT_71             =  71;
+var D2JSP_BASESTAT_BASESTAT_72             =  72;
+var D2JSP_BASESTAT_BASESTAT_73             =  73;
+var D2JSP_BASESTAT_BASESTAT_74             =  74;
+var D2JSP_BASESTAT_BASE_LEVEL_REQ          =  75;
+var D2JSP_BASESTAT_MAGIC_LVL               =  76;
+var D2JSP_BASESTAT_TRANSFORM               =  77;
+var D2JSP_BASESTAT_INV_TRANS               =  78;
+var D2JSP_BASESTAT_BASESTAT_79             =  79;
+var D2JSP_BASESTAT_BASESTAT_80             =  80;
+var D2JSP_BASESTAT_BASESTAT_81             =  81;
+var D2JSP_BASESTAT_BASESTAT_82             =  82;
+var D2JSP_BASESTAT_BASESTAT_83             =  83;
+var D2JSP_BASESTAT_BASESTAT_84             =  84;
+var D2JSP_BASESTAT_BASESTAT_85             =  85;
+var D2JSP_BASESTAT_BASESTAT_86             =  86;
+var D2JSP_BASESTAT_BASESTAT_87             =  87;
+var D2JSP_BASESTAT_BASESTAT_88             =  88;
+var D2JSP_BASESTAT_BASESTAT_89             =  89;
+var D2JSP_BASESTAT_BASESTAT_90             =  90;
+var D2JSP_BASESTAT_BASESTAT_91             =  91;
+var D2JSP_BASESTAT_BASESTAT_92             =  92;
+var D2JSP_BASESTAT_BASESTAT_93             =  93;
+var D2JSP_BASESTAT_BASESTAT_94             =  94;
+var D2JSP_BASESTAT_BASESTAT_95             =  95;
+var D2JSP_BASESTAT_BASESTAT_96             =  96;
+var D2JSP_BASESTAT_BASESTAT_97             =  97;
+var D2JSP_BASESTAT_BASESTAT_98             =  98;
+var D2JSP_BASESTAT_BASESTAT_99             =  99;
+var D2JSP_BASESTAT_BASESTAT_100            = 100;
+var D2JSP_BASESTAT_BASESTAT_101            = 101;
+var D2JSP_BASESTAT_BASESTAT_102            = 102;
+var D2JSP_BASESTAT_BASESTAT_103            = 103;
+var D2JSP_BASESTAT_BASESTAT_104            = 104;
+var D2JSP_BASESTAT_BASESTAT_105            = 105;
+var D2JSP_BASESTAT_BASESTAT_106            = 106;
+var D2JSP_BASESTAT_BASESTAT_107            = 107;
+var D2JSP_BASESTAT_BASESTAT_108            = 108;
+var D2JSP_BASESTAT_BASESTAT_109            = 109;
+var D2JSP_BASESTAT_BASESTAT_110            = 110;
+var D2JSP_BASESTAT_BASESTAT_111            = 111;
+var D2JSP_BASESTAT_BASESTAT_112            = 112;
+var D2JSP_BASESTAT_BASESTAT_113            = 113;
+var D2JSP_BASESTAT_BASESTAT_114            = 114;
+var D2JSP_BASESTAT_BASESTAT_115            = 115;
+var D2JSP_BASESTAT_BASESTAT_116            = 116;
+var D2JSP_BASESTAT_BASESTAT_117            = 117;
+var D2JSP_BASESTAT_BASESTAT_118            = 118;
+var D2JSP_BASESTAT_BASESTAT_119            = 119;
+var D2JSP_BASESTAT_BASESTAT_120            = 120;
+var D2JSP_BASESTAT_BASESTAT_121            = 121;
+var D2JSP_BASESTAT_BASESTAT_122            = 122;
+var D2JSP_BASESTAT_BASESTAT_123            = 123;
+var D2JSP_BASESTAT_BASESTAT_124            = 124;
+var D2JSP_BASESTAT_BASESTAT_125            = 125;
+var D2JSP_BASESTAT_BASESTAT_126            = 126;
+var D2JSP_BASESTAT_BASESTAT_127            = 127;
+var D2JSP_BASESTAT_BASESTAT_128            = 128;
+var D2JSP_BASESTAT_BASESTAT_129            = 129;
+var D2JSP_BASESTAT_BASESTAT_130            = 130;
+var D2JSP_BASESTAT_BASESTAT_131            = 131;
+var D2JSP_BASESTAT_BASESTAT_132            = 132;
+var D2JSP_BASESTAT_BASESTAT_133            = 133;
+var D2JSP_BASESTAT_BASESTAT_134            = 134;
+var D2JSP_BASESTAT_BASESTAT_135            = 135;
+var D2JSP_BASESTAT_BASESTAT_136            = 136;
+var D2JSP_BASESTAT_BASESTAT_137            = 137;
+var D2JSP_BASESTAT_BASESTAT_138            = 138;
+var D2JSP_BASESTAT_BASESTAT_139            = 139;
+var D2JSP_BASESTAT_BASESTAT_140            = 140;
+var D2JSP_BASESTAT_BASESTAT_141            = 141;
+var D2JSP_BASESTAT_BASESTAT_142            = 142;
+var D2JSP_BASESTAT_BASESTAT_143            = 143;
+var D2JSP_BASESTAT_BASESTAT_144            = 144;
+var D2JSP_BASESTAT_BASESTAT_145            = 145;
+var D2JSP_BASESTAT_BASESTAT_146            = 146;
+var D2JSP_BASESTAT_BASESTAT_147            = 147;
+var D2JSP_BASESTAT_BASESTAT_148            = 148;
+var D2JSP_BASESTAT_BASESTAT_149            = 149;
+var D2JSP_BASESTAT_BASESTAT_150            = 150;
+var D2JSP_BASESTAT_BASESTAT_151            = 151;
+var D2JSP_BASESTAT_BASESTAT_152            = 152;
+var D2JSP_BASESTAT_BASESTAT_153            = 153;
+var D2JSP_BASESTAT_BASESTAT_154            = 154;
+var D2JSP_BASESTAT_BASESTAT_155            = 155;
+var D2JSP_BASESTAT_BASESTAT_156            = 156;
+var D2JSP_BASESTAT_BASESTAT_157            = 157;
+var D2JSP_BASESTAT_BASESTAT_158            = 158;
+var D2JSP_BASESTAT_BASESTAT_159            = 159;
+var D2JSP_BASESTAT_BASESTAT_160            = 160;
+var D2JSP_BASESTAT_BASESTAT_161            = 161;
+var D2JSP_BASESTAT_BASESTAT_162            = 162;
+var D2JSP_BASESTAT_BASESTAT_163            = 163;
+var D2JSP_BASESTAT_BASESTAT_164            = 164;
+var D2JSP_BASESTAT_BASESTAT_165            = 165;
+var D2JSP_BASESTAT_BASESTAT_166            = 166;
+var D2JSP_BASESTAT_BASESTAT_167            = 167;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_BASESTAT_MINIMUM = D2JSP_BASESTAT_ALTERNATE_GFX;
+var D2JSP_BASESTAT_MAXIMUM = D2JSP_BASESTAT_BASESTAT_167;
+var D2JSP_BASESTAT_COUNT   = (D2JSP_BASESTAT_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps base stat numbers to names.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_BASESTAT_StatNameList = new Array(D2JSP_BASESTAT_COUNT);
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_ALTERNATE_GFX]           = "Alternate Gfx";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_WEAPON_CLASS]            = "Weapon Class";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_TWO_HANDED_WEAPON_CLASS] = "Two Handed Weapon Class";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_3]              = "BaseStat 3";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MIN_AC]                  = "Mininum AC";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MAX_AC]                  = "Maximum AC";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASE_GAMBLE_COST]        = "Base Gamble Cost";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASE_ATTACK_SPEED]       = "Base Attack Speed";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_DURABILITY_WARNING]      = "Durability Warning";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASE_COST]               = "Base Cost";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_10]             = "BaseStat 10";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_11]             = "BaseStat 11";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_12]             = "BaseStat 12";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_13]             = "BaseStat 13";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_14]             = "BaseStat 14";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_VERSION]                 = "Version";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_16]             = "BaseStat 16";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_17]             = "BaseStat 17";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_18]             = "BaseStat 18";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_19]             = "BaseStat 19";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_20]             = "BaseStat 20";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_ITEM_RARITY]             = "Item Rarity";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASE_ITEM_LEVEL]         = "Base Item Level";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MIN_DMG]                 = "Minimum Damage";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MAX_DMG]                 = "Maximum Damage";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_25]             = "BaseStat 25";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_26]             = "BaseStat 26";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MIN_TWO_HAND_DMG]        = "Mininum Two Handed Damage";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MAX_TWO_HAND_DMG]        = "Maximum Two Handed Damage";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_ATTACK_RANGE]            = "Attack Range";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_STR_BONUS]               = "Strength Bonus";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_DEX_BONUS]               = "Dexterity Bonus";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_STR_REQ]                 = "Strength Requirement";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_DEX_REQ]                 = "Dexterity Requirement";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_34]             = "BaseStat 34";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_SIZE_X]                  = "Size X";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_SIZE_Y]                  = "Size Y";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASE_BLOCK]              = "Base Block";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASE_DURABILITY]         = "Base Durability";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_39]             = "BaseStat 39";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_40]             = "BaseStat 40";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_COMPONENT]               = "Component";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_42]             = "BaseStat 42";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_43]             = "BaseStat 43";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_44]             = "BaseStat 44";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_45]             = "BaseStat 45";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_46]             = "BaseStat 46";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_47]             = "BaseStat 47";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_TWO_HANDED]              = "Two Handed";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_49]             = "BaseStat 49";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_TYPE]                    = "Type";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_51]             = "BaseStat 51";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_52]             = "BaseStat 52";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_SOUND_ID]                = "Sound Id";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_54]             = "BaseStat 54";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_QUEST]                   = "Quest";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_56]             = "BaseStat 56";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_TRANS_TABLE]             = "Trans Table";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_58]             = "BaseStat 58";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_LIGHT_RADIUS]            = "Light Radius";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_60]             = "BaseStat 60";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_61]             = "BaseStat 61";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_62]             = "BaseStat 62";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_63]             = "BaseStat 63";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_64]             = "BaseStat 64";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_DURATION_WARNING_WEP]    = "Duration Warning Wep";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_66]             = "BaseStat 66";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_67]             = "BaseStat 67";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MAX_SOCKETS]             = "Maximum Sockets";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_69]             = "BaseStat 69";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_70]             = "BaseStat 70";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_71]             = "BaseStat 71";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_72]             = "BaseStat 72";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_73]             = "BaseStat 73";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_74]             = "BaseStat 74";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASE_LEVEL_REQ]          = "Base Level Requirement";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_MAGIC_LVL]               = "Magic Level";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_TRANSFORM]               = "Transform";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_INV_TRANS]               = "Inv Trans";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_79]             = "BaseStat 79";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_80]             = "BaseStat 80";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_81]             = "BaseStat 81";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_82]             = "BaseStat 82";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_83]             = "BaseStat 83";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_84]             = "BaseStat 84";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_85]             = "BaseStat 85";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_86]             = "BaseStat 86";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_87]             = "BaseStat 87";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_88]             = "BaseStat 88";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_89]             = "BaseStat 89";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_90]             = "BaseStat 90";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_91]             = "BaseStat 91";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_92]             = "BaseStat 92";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_93]             = "BaseStat 93";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_94]             = "BaseStat 94";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_95]             = "BaseStat 95";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_96]             = "BaseStat 96";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_97]             = "BaseStat 97";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_98]             = "BaseStat 98";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_99]             = "BaseStat 99";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_100]            = "BaseStat 100";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_101]            = "BaseStat 101";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_102]            = "BaseStat 102";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_103]            = "BaseStat 103";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_104]            = "BaseStat 104";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_105]            = "BaseStat 105";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_106]            = "BaseStat 106";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_107]            = "BaseStat 107";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_108]            = "BaseStat 108";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_109]            = "BaseStat 109";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_110]            = "BaseStat 110";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_111]            = "BaseStat 111";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_112]            = "BaseStat 112";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_113]            = "BaseStat 113";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_114]            = "BaseStat 114";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_115]            = "BaseStat 115";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_116]            = "BaseStat 116";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_117]            = "BaseStat 117";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_118]            = "BaseStat 118";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_119]            = "BaseStat 119";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_120]            = "BaseStat 120";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_121]            = "BaseStat 121";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_122]            = "BaseStat 122";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_123]            = "BaseStat 123";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_124]            = "BaseStat 124";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_125]            = "BaseStat 125";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_126]            = "BaseStat 126";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_127]            = "BaseStat 127";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_128]            = "BaseStat 128";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_129]            = "BaseStat 129";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_130]            = "BaseStat 130";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_131]            = "BaseStat 131";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_132]            = "BaseStat 132";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_133]            = "BaseStat 133";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_134]            = "BaseStat 134";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_135]            = "BaseStat 135";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_136]            = "BaseStat 136";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_137]            = "BaseStat 137";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_138]            = "BaseStat 138";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_139]            = "BaseStat 139";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_140]            = "BaseStat 140";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_141]            = "BaseStat 141";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_142]            = "BaseStat 142";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_143]            = "BaseStat 143";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_144]            = "BaseStat 144";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_145]            = "BaseStat 145";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_146]            = "BaseStat 146";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_147]            = "BaseStat 147";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_148]            = "BaseStat 148";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_149]            = "BaseStat 149";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_150]            = "BaseStat 150";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_151]            = "BaseStat 151";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_152]            = "BaseStat 152";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_153]            = "BaseStat 153";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_154]            = "BaseStat 154";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_155]            = "BaseStat 155";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_156]            = "BaseStat 156";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_157]            = "BaseStat 157";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_158]            = "BaseStat 158";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_159]            = "BaseStat 159";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_160]            = "BaseStat 160";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_161]            = "BaseStat 161";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_162]            = "BaseStat 162";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_163]            = "BaseStat 163";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_164]            = "BaseStat 164";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_165]            = "BaseStat 165";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_166]            = "BaseStat 166";
+D2JSP_BASESTAT_StatNameList[D2JSP_BASESTAT_BASESTAT_167]            = "BaseStat 167";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_BASESTAT_NameToStatList = new Array();
+for (var count_1 = 0; count_1 < D2JSP_BASESTAT_StatNameList.length; count_1++)
+	D2JSP_BASESTAT_NameToStatList[D2JSP_BASESTAT_StatNameList[count_1].
+		toLowerCase()] = count_1;
+D2JSP_BASESTAT_NameToStatList["min ac"]                  = D2JSP_BASESTAT_MIN_AC;
+D2JSP_BASESTAT_NameToStatList["max ac"]                  = D2JSP_BASESTAT_MAX_AC;
+D2JSP_BASESTAT_NameToStatList["min dmg"]                 = D2JSP_BASESTAT_MIN_DMG;
+D2JSP_BASESTAT_NameToStatList["minimum dmg"]             = D2JSP_BASESTAT_MIN_DMG;
+D2JSP_BASESTAT_NameToStatList["min damage"]              = D2JSP_BASESTAT_MIN_DMG;
+D2JSP_BASESTAT_NameToStatList["max dmg"]                 = D2JSP_BASESTAT_MAX_DMG;
+D2JSP_BASESTAT_NameToStatList["maximum dmg"]             = D2JSP_BASESTAT_MAX_DMG;
+D2JSP_BASESTAT_NameToStatList["max damage"]              = D2JSP_BASESTAT_MAX_DMG;
+
+D2JSP_BASESTAT_NameToStatList["min two hand dmg"]        = D2JSP_BASESTAT_MIN_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["minimum two hand dmg"]    = D2JSP_BASESTAT_MIN_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["min two handed dmg"]      = D2JSP_BASESTAT_MIN_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["min two hand damage"]     = D2JSP_BASESTAT_MIN_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["minimum two handed dmg"]  = D2JSP_BASESTAT_MIN_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["minimum two hand damage"] = D2JSP_BASESTAT_MIN_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["min two handed damage"]   = D2JSP_BASESTAT_MIN_TWO_HAND_DMG;
+
+D2JSP_BASESTAT_NameToStatList["max two hand dmg"]        = D2JSP_BASESTAT_MAX_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["maximum two hand dmg"]    = D2JSP_BASESTAT_MAX_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["max two handed dmg"]      = D2JSP_BASESTAT_MAX_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["max two hand damage"]     = D2JSP_BASESTAT_MAX_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["maximum two handed dmg"]  = D2JSP_BASESTAT_MAX_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["maximum two hand damage"] = D2JSP_BASESTAT_MAX_TWO_HAND_DMG;
+D2JSP_BASESTAT_NameToStatList["max two handed damage"]   = D2JSP_BASESTAT_MAX_TWO_HAND_DMG;
+
+D2JSP_BASESTAT_NameToStatList["str bonus"]               = D2JSP_BASESTAT_STR_BONUS;
+D2JSP_BASESTAT_NameToStatList["dex bonus"]               = D2JSP_BASESTAT_DEX_BONUS;
+
+D2JSP_BASESTAT_NameToStatList["str req"]                 = D2JSP_BASESTAT_STR_REQ;
+D2JSP_BASESTAT_NameToStatList["str require"]             = D2JSP_BASESTAT_STR_REQ;
+D2JSP_BASESTAT_NameToStatList["str required"]            = D2JSP_BASESTAT_STR_REQ;
+D2JSP_BASESTAT_NameToStatList["str requirement"]         = D2JSP_BASESTAT_STR_REQ;
+D2JSP_BASESTAT_NameToStatList["strength req"]            = D2JSP_BASESTAT_STR_REQ;
+D2JSP_BASESTAT_NameToStatList["strength require"]        = D2JSP_BASESTAT_STR_REQ;
+D2JSP_BASESTAT_NameToStatList["strength required"]       = D2JSP_BASESTAT_STR_REQ;
+
+D2JSP_BASESTAT_NameToStatList["dex req"]                 = D2JSP_BASESTAT_DEX_REQ;
+D2JSP_BASESTAT_NameToStatList["dex require"]             = D2JSP_BASESTAT_DEX_REQ;
+D2JSP_BASESTAT_NameToStatList["dex required"]            = D2JSP_BASESTAT_DEX_REQ;
+D2JSP_BASESTAT_NameToStatList["dex requirement"]         = D2JSP_BASESTAT_DEX_REQ;
+D2JSP_BASESTAT_NameToStatList["dexterity req"]           = D2JSP_BASESTAT_DEX_REQ;
+D2JSP_BASESTAT_NameToStatList["dexterity require"]       = D2JSP_BASESTAT_DEX_REQ;
+D2JSP_BASESTAT_NameToStatList["dexterity required"]      = D2JSP_BASESTAT_DEX_REQ;
+
+D2JSP_BASESTAT_NameToStatList["x size"]                  = D2JSP_BASESTAT_SIZE_X;
+D2JSP_BASESTAT_NameToStatList["y size"]                  = D2JSP_BASESTAT_SIZE_Y;
+D2JSP_BASESTAT_NameToStatList["base dura"]               = D2JSP_BASESTAT_BASE_DURABILITY;
+D2JSP_BASESTAT_NameToStatList["max sockets"]             = D2JSP_BASESTAT_MAX_SOCKETS;
+D2JSP_BASESTAT_NameToStatList["base level req"]          = D2JSP_BASESTAT_BASE_LEVEL_REQ;
+D2JSP_BASESTAT_NameToStatList["base level require"]      = D2JSP_BASESTAT_BASE_LEVEL_REQ;
+D2JSP_BASESTAT_NameToStatList["base level required"]     = D2JSP_BASESTAT_BASE_LEVEL_REQ;
+D2JSP_BASESTAT_NameToStatList["base level requirement"]  = D2JSP_BASESTAT_BASE_LEVEL_REQ;
+D2JSP_BASESTAT_NameToStatList["magic lvl"]               = D2JSP_BASESTAT_MAGIC_LVL;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BASESTAT_IsValid(stat_number)
+{
+	return(((stat_number >= D2JSP_BASESTAT_MINIMUM) &&
+		(stat_number <= D2JSP_BASESTAT_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BASESTAT_StatToName(stat_number)
+{
+	return((D2JSP_BASESTAT_IsValid(stat_number)) ?
+		D2JSP_BASESTAT_StatNameList[stat_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BASESTAT_NameToStat(stat_name)
+{
+	return((typeof(D2JSP_BASESTAT_NameToStatList[stat_name.toLowerCase()]) ==
+		"number") ? D2JSP_BASESTAT_NameToStatList[stat_name.toLowerCase()] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BASESTAT_ParseToNumber(in_stat)
+{
+	var tmp_number;
+	var tmp_data;
+
+	in_stat  = D2JSP_UTIL_FORMAT_Trim(in_stat + "");
+	tmp_data = in_stat;
+	tmp_data = tmp_data.replace(/^\s+|\s+$/g, "");
+	tmp_data = tmp_data.replace(/\s+/g, "_");
+	tmp_data = tmp_data.replace(/^[^A-Za-z_]|[^A-Za-z0-9_]/g, "");
+	tmp_data = (tmp_data != "") ? tmp_data : "\"\"";
+
+	if (D2JSP_UTIL_FORMAT_IsDigit(in_stat)) {
+		tmp_number = parseInt(in_stat, 10);
+		return((D2JSP_BASESTAT_IsValid(tmp_number)) ? tmp_number : -1);
+	}
+	else if (eval("((typeof(D2JSP_BASESTAT_" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval("D2JSP_BASESTAT_" + tmp_data.toUpperCase()));
+	else if (eval("((typeof(" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval(tmp_data.toUpperCase()));
+	else
+		return(D2JSP_BASESTAT_NameToStat(in_stat));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BASESTAT_ParseToName(in_stat)
+{
+	var tmp_number = D2JSP_BASESTAT_ParseToNumber(in_stat);
+
+	return(D2JSP_BASESTAT_StatToName(tmp_number));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_BaseStats_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output/RegressionTest._D2JSP_BaseStats.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_BaseStats.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+	if (file_handle) {
+		for (count_1 = 0; count_1 < D2JSP_BASESTAT_StatNameList.length; count_1++)
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_BASESTAT_StatNameList[count_1]);
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+
+// ////////////////////////////////////////////////////////////////////////////
+

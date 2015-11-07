@@ -1,0 +1,275 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Required include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/ISF.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("BMpwnIt.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+//	ISF_TEST_LoadBMItems("settings\\snagit.ini");
+	ISF_TEST_LoadBMItems("settings\\snagit.Europe.ini", true);
+//	ISF_TEST_LoadBMItems("settings\\snagit.USEast.ini", true);
+//	ISF_TEST_LoadBMItems("settings\\bmitems.ini", true);
+
+	ISF_TEST_LoadBMItems("settings\\Test\\bmitems.ini", true);
+	ISF_TEST_LoadBMItems("settings\\Test\\BMShopIt.ini", true);
+	ISF_TEST_LoadBMItems("settings\\Test\\snagit.ini", true);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_TEST_LoadBMItems(bmitems_file_name, show_xlates_flag)
+{
+	var return_code    = 0;
+	var file_handle    = null;
+	var error_count    = 0;
+	var qspec_list     = new Array();
+	var isf_cfg        = new Array();
+	var error_list     = new Array();
+	var warning_list   = new Array();
+	var isf_error_list = new Array();
+	var line_list      = new Array();
+	var this_ispec;
+	var this_spec;
+	var error_text;
+	var convert_file_name;
+	var results_file_name;
+
+	convert_file_name = bmitems_file_name + ".ISF_CONVERSION.txt";
+	results_file_name = bmitems_file_name + ".ISF_RESULTS.txt";
+
+	INI = new Array();						// Clear out old entries.
+
+	print("Loading INI file '" + bmitems_file_name + "'...");
+	ipLoadFile(bmitems_file_name);
+
+	if ((!INI) || (!INI.length)) {
+		print("ERROR: INI array not loaded by 'ipLoadFile()'!!!");
+		return(-1);
+	}
+
+	line_list.push("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+	line_list.push("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+	line_list.push("; Data parsed from file '" + bmitems_file_name +
+		"' on " + (new Date()));
+	line_list.push("");
+	line_list.push("; ipLoadFile() had " + INI.length + " entries.");
+	line_list.push("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+	line_list.push("");
+
+	// Skip the first section, as that's for configuration...
+	for (count_1 = 1; count_1 < INI.length; count_1++) {
+		line_list.push("; " + INI[count_1][0]);
+		this_ispec = "";
+		qspec_list = new Array();
+		for (count_2 = 1; count_2 < INI[count_1].length; count_2++) {
+			INI[count_1][count_2][1].replace(/^"+|"+$/g, "");
+			INI[count_1][count_2][2].replace(/^"+|"+$/g, "");
+			if (INI[count_1][count_2][1].toLowerCase() == "show")
+				;									// Not supported (or needed).
+			else if ((INI[count_1][count_2][1].toLowerCase() == "item") ||
+				(INI[count_1][count_2][1].toLowerCase() == "code")) {
+				this_ispec = INI[count_1][count_2][2];
+				if (this_ispec.match(/^\d+$/))
+					this_ispec = "Type " + D2JSP_ITEMTYPE_TypeToName(
+						parseInt(this_ispec, 10));
+			}
+			else if ((INI[count_1][count_2][1].toLowerCase() == "qual") ||
+				(INI[count_1][count_2][1].toLowerCase() == "level"))
+				qspec_list.push("Quality " + INI[count_1][count_2][0] + " " +
+					D2JSP_ITEM_QualityParseToName(INI[count_1][count_2][2]));
+			else if (INI[count_1][count_2][1].toLowerCase() == "classlevel")
+				qspec_list.push("Item Class " + INI[count_1][count_2][0] + " " +
+					D2JSP_ITEM_ItemClassParseToName(INI[count_1][count_2][2]));
+			else if (INI[count_1][count_2][1].toLowerCase() == "hassockets")
+				qspec_list.push("HasSockets = true");
+			else if (INI[count_1][count_2][1].toLowerCase() == "identified")
+				qspec_list.push("IsIdentified = true");
+			else if (INI[count_1][count_2][1].toLowerCase() == "isethereal")
+				qspec_list.push("IsEthereal = true");
+			else if ((INI[count_1][count_2][1].toLowerCase() == "description") ||
+				(INI[count_1][count_2][1].toLowerCase() == "iditem") ||
+				(INI[count_1][count_2][1].toLowerCase() == "pickup"))
+				warning_list.push("WARNING: " + INI[count_1][0] + " --- The '" +
+					INI[count_1][count_2][1] + "' qualifier was ignored.");
+			else {
+				if (!D2JSP_UTIL_FORMAT_IsInteger(INI[count_1][count_2][2])) {
+					error_text = "ERROR  : " + INI[count_1][0] + " --- " +
+						"stat value '" + INI[count_1][count_2][2] + "' is invalid " +
+						"--- expected an integral value.";
+					line_list.push("; ***** " + error_text);
+					error_list.push(error_text);
+				}
+				else
+					qspec_list.push(D2JSP_STAT_StatToName(parseInt(
+						INI[count_1][count_2][1], 10)) + " " +
+						INI[count_1][count_2][0] + " " + INI[count_1][count_2][2]);
+			}
+		}
+		if (this_ispec == "") {
+			warning_list.push("WARNING: " + INI[count_1][0] +
+				" --- No item specified.");
+			line_list.push("; ***** WARNING No item specified.");
+		}
+		else {
+			this_spec = this_ispec + ((qspec_list.length) ? " : " : "") +
+				qspec_list.join(" : ");
+			if (!ISF_LoadConfigFromList([this_spec], ISF_PARSE_FLAG_NONE,
+				isf_error_list, isf_cfg)) {
+				if (show_xlates_flag)
+					line_list = line_list.concat(ISF_TEST_EmitConfig(isf_cfg));
+				line_list.push(this_spec);
+			}
+			else {
+				line_list.push("; ***** ERROR: " + isf_error_list[0]);
+				error_list.push("ERROR  : " + INI[count_1][0] + " --- " +
+					isf_error_list[0]);
+			}
+		}
+		line_list.push("");
+	}
+
+	if (warning_list.length || error_list.length)
+		print("NOTE: " + warning_list.length + " warnings and " +
+			error_list.length + " errors were found in file '" +
+			bmitems_file_name + "'.");
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Write warnings and errors as comments to the converted file...
+	// //////////////////////////////////////////////////////////////////////
+	if (!(file_handle = fileOpen(convert_file_name, 1))) {
+		print("ERROR: Couldn't open '" + convert_file_name + "' for writing!!!");
+		return(-1);
+	}
+	for (count_1 = 0; count_1 < line_list.length; count_1++)
+		file_handle.writeLine(line_list[count_1]);
+	file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+	if (warning_list.length) {
+		file_handle.writeLine("");
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		file_handle.writeLine("; Warnings");
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		while (warning_list.length)
+			file_handle.writeLine("; " + warning_list.shift());
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		file_handle.writeLine("");
+	}
+	if (error_list.length) {
+		file_handle.writeLine("");
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		file_handle.writeLine("; Errors");
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		while (error_list.length)
+			file_handle.writeLine(">>>" + error_list.shift());
+		file_handle.writeLine("; " + D2JSP_UTIL_FORMAT_RJust("", 78, ";"));
+		file_handle.writeLine("");
+	}
+//	ISF_TEST_EmitConfig(isf_cfg, file_handle);
+	file_handle.close();
+	print("Wrote converted file to '" + convert_file_name + "'");
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// Open the results file...
+	// //////////////////////////////////////////////////////////////////////
+	if (!(file_handle = fileOpen(results_file_name, 1))) {
+		print("ERROR: Couldn't open '" + results_file_name + "' for writing!!!");
+		return(-1);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	error_list = new Array();
+
+	if (!(return_code = ISF_LoadConfigFromList(line_list,
+		ISF_PARSE_FLAG_CONTINUE_ON_ERROR, error_list, isf_cfg))) {
+		print(D2JSP_UTIL_COLOR_GOLD2 + "Number of items which matched the " +
+			"converted '" + bmitems_file_name + "' configuration: " +
+			ISF_TEST_EvalStuff(isf_cfg, file_handle));
+	}
+	else {
+		print("Errors occurred:");
+		print("------ ---------");
+		while (error_list.length)
+			print(">>>" + error_list.shift());
+	}
+
+	print("==============================================================");
+
+	file_handle.close();
+
+	return(0);		
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_TEST_EvalStuff(isf_cfg, file_handle)
+{
+	var out_count = 0;
+	var this_item = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+
+	if (this_item) {
+		do {
+			if (ISF_EvalItemForKeep(isf_cfg, this_item, 0)) {
+				file_handle.writeLine(this_item.code + " = " +
+					D2JSP_ITEM_GetItemFName(this_item));
+				out_count++;
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	return(out_count);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_TEST_EmitConfig(isf_cfg)
+{
+	var out_list = new Array();
+
+	out_list = ISF_TEST_EmitConfigBasic(ISF_COMPILED_DATA_PICKUP,
+		isf_cfg);
+
+	return(out_list.concat(ISF_TEST_EmitConfigBasic(
+		ISF_COMPILED_DATA_EVAL, isf_cfg)));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ISF_TEST_EmitConfigBasic(eval_index, isf_cfg)
+{
+	var out_list = new Array();
+	var this_code;
+	var this_prior;
+	var count_1;
+
+	for (this_prior = 0; this_prior < isf_cfg[eval_index].length; this_prior++) {
+		for (this_code in isf_cfg[eval_index][this_prior]) {
+			for (count_1 = 0;
+				count_1 < isf_cfg[eval_index][this_prior][this_code].length;
+				count_1++) {
+				out_list.push("; " + ((eval_index == ISF_COMPILED_DATA_EVAL) ?
+					"EVALUATE: " : "PICKUP  : ") + this_prior + "\t" + this_code +
+					"\t" + count_1 + "\t" + 
+					isf_cfg[eval_index][this_prior][this_code][count_1][1]);
+			}
+		}
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

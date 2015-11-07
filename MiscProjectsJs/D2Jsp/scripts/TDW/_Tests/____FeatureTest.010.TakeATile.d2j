@@ -1,0 +1,54 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_Move.d2l");
+
+function main()
+{
+	me.overhead(" ");
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	while (true) {
+		var message;
+		while (true) {
+			var tmp_tile_obj = getUnit(D2JSP_UTIL_GETUNIT_TILE);
+			var tile_obj     = null;
+			if (!tmp_tile_obj)
+				message = "Please move near a warp unit.";
+			else {
+				do {
+					if (tmp_tile_obj.area == me.area) {
+						tile_obj = tmp_tile_obj;
+						break;
+					}
+				} while (tmp_tile_obj && tmp_tile_obj.getNext());
+				if (tile_obj != null) {
+					if (myDist(tile_obj.x, tile_obj.y) > 15) {
+						message = "Please move even nearer warp unit " +
+							tile_obj.classid;
+					}
+					else {
+						while (myDist(tile_obj.x, tile_obj.y) > 7) {
+							me.move(tile_obj.x, tile_obj.y);
+							delay(100);
+							break;
+						}
+						break;
+					}
+				}
+			}
+			me.overhead(message);
+			delay(500);
+		}
+		var start_area = me.area;
+		print("About to take a warp unit...");
+		var return_code = TDW_MOVE_TakeUnitToArea(tile_obj, true, 3, 50);
+		print("TDW_MOVE_TakeUnitToArea() returned " + return_code);
+		print("Old area = " + start_area + ", new area = " + me.area);
+		delay(1000);
+	}
+}
+
+

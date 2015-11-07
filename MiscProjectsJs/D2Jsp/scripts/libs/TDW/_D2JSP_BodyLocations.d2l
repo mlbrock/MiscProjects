@@ -1,0 +1,140 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Player Body Locations Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_BodyLocations.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion player body location
+//                   constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_BodyLocations_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_BodyLocations_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant area values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_BODYLOC_NONE       = 0;
+var D2JSP_BODYLOC_HEAD       = 1;
+var D2JSP_BODYLOC_NECK       = 2;
+var D2JSP_BODYLOC_TORSO      = 3;
+var D2JSP_BODYLOC_RIGHT_ARM  = 4;
+var D2JSP_BODYLOC_LEFT_ARM   = 5;
+var D2JSP_BODYLOC_RIGHT_RING = 6;
+var D2JSP_BODYLOC_LEFT_RING  = 7;
+var D2JSP_BODYLOC_BELT       = 8;
+var D2JSP_BODYLOC_FEET       = 9;
+var D2JSP_BODYLOC_GLOVES     = 10;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_BODYLOC_MINIMUM = D2JSP_BODYLOC_NONE;
+var D2JSP_BODYLOC_MAXIMUM = D2JSP_BODYLOC_GLOVES;
+var D2JSP_BODYLOC_COUNT   = (D2JSP_BODYLOC_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps body locations numbers to names.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_BODYLOC_NameList = new Array(D2JSP_BODYLOC_COUNT);
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_NONE]       = "none";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_HEAD]       = "head";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_NECK]       = "neck";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_TORSO]      = "torso";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_RIGHT_ARM]  = "right arm";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_LEFT_ARM]   = "left arm";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_RIGHT_RING] = "right ring";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_LEFT_RING]  = "left ring";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_BELT]       = "belt";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_FEET]       = "feet";
+D2JSP_BODYLOC_NameList[D2JSP_BODYLOC_GLOVES]     = "gloves";
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BODYLOC_IsValid(body_loc_number)
+{
+	return(((body_loc_number >= D2JSP_BODYLOC_MINIMUM) &&
+		(body_loc_number <= D2JSP_BODYLOC_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BODYLOC_BodyLocToName(body_loc_number)
+{
+	return((D2JSP_BODYLOC_IsValid(body_loc_number)) ?
+		D2JSP_BODYLOC_NameList[body_loc_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_BodyLocations_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output\\RegressionTest._D2JSP_BodyLocations.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_BodyLocationss.d2l' regression test output file " +
+		"to '" + file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	if (file_handle) {
+		D2JSP_BODYLOC_TEST_WriteSep(file_handle);
+		D2JSP_BODYLOC_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Complete Body Locations List");
+		D2JSP_BODYLOC_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < D2JSP_BODYLOC_NameList.length; count_1++)
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_BODYLOC_BodyLocToName(count_1));
+		D2JSP_BODYLOC_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_BODYLOC_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+

@@ -1,0 +1,240 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	// Override configuration entries with 'config_list'.
+
+	TDW_BOT_PKBS_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PKBS_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_PKBS_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_PKBS_Run();
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+print("STOPPING");
+stop();
+
+	TDW_BOT_PKBS_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PKBS_Init(config_list)
+{
+	return(TDW_BOT_Init("TDW_BotPKBySorc", null, config_list,
+		TDW_BOT_INIT_FLAG_ISF_NONE));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PKBS_Run()
+{
+	var area_list        = new Array(D2JSP_AREA_COUNT);
+	var this_act         = me.act - 1;
+	var access_strategy  = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+	var inited_area_list = TDW_PATH_GetInitedAreas();
+
+	if (!TDW_MOVE_WaypointAccessDataDoneFlag) {
+		TDW_MOVE_GetMyWayPointAccess();
+		access_strategy.wp_access =
+			D2JSP_UTIL_GEN_CloneObject(TDW_MOVE_WaypointAccessData);
+	}
+
+	for (var count_1 = 0; count_1 < D2JSP_AREA_WaypointObjList.length;
+		count_1++) {
+		if (me.act != (this_act + 1)) {
+			TDW_MOVE_WaypointUseInTown(D2JSP_WayPoints[this_act][0]);
+			if (me.act != (this_act + 1)) {
+				TDW_MOVE_COMPAT_TownMove(this_act + 1, "waypoint");
+				if (me.act != (this_act + 1)) {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_ERROR, "Unable to get to Act " +
+						(this_act + 1) + ".");
+					return(-1);
+				}
+			}
+		}
+		for (var count_2 = 1;
+			count_2 < D2JSP_AREA_WaypointObjList[this_act].length; count_2++) {
+			var waypoint_obj = D2JSP_AREA_WaypointObjList[this_act][count_2];
+			if (D2JSP_AREA_HasWaypointAccess(waypoint_obj.area,
+				access_strategy.wp_access)) {
+				var coord_list;
+				if (parseFloat(me.version) >= 0.3501) {
+					var wp_list = D2JSP_ROOM_GetPresetListForArea(waypoint_obj.area,
+						D2JSP_UTIL_GETUNIT_OBJECT, waypoint_obj.unit_id_spec,
+						waypoint_obj.room_spec, true);
+					coord_list = (!wp_list.length) ? (new Array()) :
+						[[wp_list[0].area_x, wp_list[0].area_y]];
+				}
+				else {
+					TDW_PATH_CreateArea(waypoint_obj.area);
+					coord_list = TDW_PATH_MapGlobal.area_list[waypoint_obj.area].
+						getPresetCoordsList(waypoint_obj.room_spec,
+						D2JSP_UTIL_GETUNIT_OBJECT, waypoint_obj.unit_id_spec, true);
+					TDW_PATH_FreeInitedAreas(inited_area_list, TDW_BOT_Log);
+				}
+				if (coord_list.length == 1)
+					area_list[waypoint_obj.area] = coord_list[0];
+			}
+		}
+		this_act = (this_act + 1) % 5;
+		delay(1000);
+	}
+
+	TDW_BOT_AttackNPCSpec = new TDW_BOT_ATTACK_SpecialNPCSpec();
+
+	while (true) {
+		while (D2JSP_COMM_GetMyPartyPlayerCount() < 2) {
+			D2JSP_UTIL_BNET_OverheadSafe("Waiting for party...");
+			delay(500);
+		}
+		while (D2JSP_COMM_GetMyPartyPlayerCount() > 1) {
+			D2JSP_UTIL_BNET_OverheadSafe("Waiting for victim...");
+			var did_pk     = false;
+//			var party_obj  = getParty(me.gid);
+			var party_obj  = getParty();
+			var my_partyid = party_obj.partyid;
+			if (party_obj) {
+				do {
+					if ((party_obj.partyid == my_partyid) &&
+						(my_partyid != 65535) && (party_obj.name != me.name) &&
+						(area_list[party_obj.area] != null) &&
+						(Dist(party_obj.x, party_obj.y, area_list[party_obj.area][0],
+						area_list[party_obj.area][1]) <= 25)) {
+						if (D2JSP_AREA_GetAct(party_obj.area) != me.area)
+							TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(party_obj.area),
+								"waypoint");
+						var player_obj = D2JSP_COMM_GetPlayerByName(party_obj.name);
+						if (player_obj &&
+							(D2JSP_AREA_GetAct(party_obj.area) == me.area) &&
+							(Dist(party_obj.x, party_obj.y,
+							area_list[party_obj.area][0],
+							area_list[party_obj.area][1]) <= 25)) {
+							target = [party_obj.name, party_obj.area,
+								[party_obj.x, party_obj.y]];
+							access_strategy.callback_func(access_strategy,
+								TDW_PATH_ASCB_MSG_STATUS, D2JSP_UTIL_COLOR_RED +
+								"Victim is " + target[0] + ".");
+							D2JSP_UTIL_BNET_OverheadSafe(D2JSP_UTIL_COLOR_RED +
+								"Victim is " + target[0] + ".");
+							clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_HOSTILE_TOGGLE);
+							TDW_MOVE_WaypointUseInTown(target[1]);
+							TDW_BOT_MOVE_TeleportToDestination(target[2],
+								TDW_BOT_ATTACK_NPC_FLAG_NONE);
+							TDW_BOT_AttackNPCSpec.addPlayer(target[0]);
+							TDW_BOT_MOVE_RecoverInTown(false);
+							clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_HOSTILE_TOGGLE);
+							TDW_BOT_AttackNPCSpec = new TDW_BOT_ATTACK_SpecialNPCSpec();
+							did_pk                = true;
+							break;
+						}
+					}
+				} while (party_obj && party_obj.getNext());
+			}
+			delay(100);
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_PKBS_Finish()
+{
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			;
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (arguments[0].
+		match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+	else if (arguments[0].match(/^\S+ dropped due to timeout\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+

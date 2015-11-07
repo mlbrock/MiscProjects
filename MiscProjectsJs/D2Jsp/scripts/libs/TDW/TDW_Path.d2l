@@ -1,0 +1,2042 @@
+var TDW_PATH_UseTDWAStar = true;
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Pathing Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Path.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains TDW light-weight pathing functionality.
+//
+// Revison History : 2003-02-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_Path_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_Path_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Rooms.d2l");
+includeonce("vec_coord.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_MAP_BUILD_FLAG_NONE            = 0x0000;
+var TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK = 0x0001;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_Act1FireCoords = null;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// constructor for Vertex objects
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_Vertex() {
+	this.NumAdjacencies  = 0;
+	this.Adjacent        = new Array;
+	this.AdjacencyWeight = new Array;
+	this.Previous        = 0;
+	this.Cost            = 0;
+	this.push            = TDW_PATH_Vertex_push;
+
+	function TDW_PATH_Vertex_push(neighbor, Cost) {
+		this.Adjacent[this.NumAdjacencies]        = neighbor;
+		this.AdjacencyWeight[this.NumAdjacencies] = Cost;
+		this.NumAdjacencies++;
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_AreaExit(direction_delta, exit_coord)
+{
+	this.direction_delta = direction_delta;
+	this.exit_coord      = D2JSP_UTIL_GEN_CloneObject(exit_coord);
+
+	this.toString        = TDW_PATH_AreaExit_toString;
+
+	function TDW_PATH_AreaExit_toString() {
+		return(this.direction_delta + ": [" + this.exit_coord + "]");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Definition of the map data object...
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_Map()
+{
+	// Object data...
+	this.area_list                   = new Array(D2JSP_AREA_COUNT);
+	this.exit_list                   = new Array(D2JSP_AREA_COUNT);
+	this.points_list                 = new Array(D2JSP_AREA_COUNT);
+	this.build_flags                 = new Array(D2JSP_AREA_COUNT);
+		// Never deleted --- always available cached.
+	this.bounds_list                 = new Array(D2JSP_AREA_COUNT);
+
+	// Basic object methods...
+	this.isAreaCreated               = TDW_PATH_Map_isAreaCreated;
+	this.isPathDataBuilt             = TDW_PATH_Map_isPathDataBuilt;
+	this.createArea                  = TDW_PATH_Map_createArea;
+	this.clearArea                   = TDW_PATH_Map_clearArea;
+	this.clearAreaInfo               = TDW_PATH_Map_clearAreaInfo;
+	this.clearAreaCollisionInfo      = TDW_PATH_Map_clearAreaCollisionInfo;
+	this.clearAreaPresetUnitInfo     = TDW_PATH_Map_clearAreaPresetUnitInfo;
+	this.getAreaCoords               = TDW_PATH_Map_getAreaCoords;
+	this.isInAreaXY                  = TDW_PATH_Map_isInAreaXY;
+	this.isInAreaPair                = TDW_PATH_Map_isInAreaPair;
+	this.isInAreaObject              = TDW_PATH_Map_isInAreaObject;
+	this.getAreaData                 = TDW_PATH_Map_getAreaData;
+
+	// Wrappers to the underlying area methods...
+	this.findRoomByNumber            = TDW_PATH_Map_findRoomByNumber;
+	this.findRoomByNumberList        = TDW_PATH_Map_findRoomByNumberList;
+	this.findRoomByNumberSpec        = TDW_PATH_Map_findRoomByNumberSpec;
+	this.findRoomByXY                = TDW_PATH_Map_findRoomByXY;
+	this.findRoomByBaseXY            = TDW_PATH_Map_findRoomByBaseXY;
+	this.findRoomByXYPair            = TDW_PATH_Map_findRoomByXYPair;
+	this.findRoomByObject            = TDW_PATH_Map_findRoomByObject;
+
+	this.getMetaCoordsByXY           = TDW_PATH_Map_getMetaCoordsByXY;
+	this.getMetaCoordsByBaseXY       = TDW_PATH_Map_getMetaCoordsByBaseXY;
+	this.getMetaCoordsByXYPair       = TDW_PATH_Map_getMetaCoordsByXYPair;
+	this.getMetaCoordsByObject       = TDW_PATH_Map_getMetaCoordsByObject;
+
+	this.getRoomXYHash               = TDW_PATH_Map_getRoomXYHash;
+
+	this.createCollisionInfo         = TDW_PATH_Map_createCollisionInfo;
+	
+	this.getAccessibleEdge           = TDW_PATH_Map_getAccessibleEdge;
+	this.getAccessibleEdgeMinX       = TDW_PATH_Map_getAccessibleEdgeMinX;
+	this.getAccessibleEdgeMinY       = TDW_PATH_Map_getAccessibleEdgeMinY;
+	this.getAccessibleEdgeMaxX       = TDW_PATH_Map_getAccessibleEdgeMaxX;
+	this.getAccessibleEdgeMaxY       = TDW_PATH_Map_getAccessibleEdgeMaxY;
+	this.getAccessibleEdgeList       = TDW_PATH_Map_getAccessibleEdgeList;
+
+	this.getAccessibleEdgeSimple     = TDW_PATH_Map_getAccessibleEdgeSimple;
+	this.getAccessibleEdgeMinXSimple = TDW_PATH_Map_getAccessibleEdgeMinXSimple;
+	this.getAccessibleEdgeMinYSimple = TDW_PATH_Map_getAccessibleEdgeMinYSimple;
+	this.getAccessibleEdgeMaxXSimple = TDW_PATH_Map_getAccessibleEdgeMaxXSimple;
+	this.getAccessibleEdgeMaxYSimple = TDW_PATH_Map_getAccessibleEdgeMaxYSimple;
+	this.getAccessibleEdgeListSimple = TDW_PATH_Map_getAccessibleEdgeListSimple;
+
+	this.getCenterList               = TDW_PATH_Map_getCenterList;
+	this.getCenterAccessibleList     = TDW_PATH_Map_getCenterAccessibleList;
+
+	this.getPresetList               = TDW_PATH_Map_getPresetList;
+	this.getPresetCoordsList         = TDW_PATH_Map_getPresetCoordsList;
+
+	this.getAdjacentRoomsByNumber    = TDW_PATH_Map_getAdjacentRoomsByNumber;
+	this.getAdjacentRoomsByXY        = TDW_PATH_Map_getAdjacentRoomsByXY;
+	this.getAdjacentRoomsByBaseXY    = TDW_PATH_Map_getAdjacentRoomsByBaseXY;
+	this.getAdjacentRoomsByXYPair    = TDW_PATH_Map_getAdjacentRoomsByXYPair;
+	this.getAdjacentRoomsByObject    = TDW_PATH_Map_getAdjacentRoomsByObject;
+	this.getAdjacentRooms            = TDW_PATH_Map_getAdjacentRooms;
+
+	this.determineCommonEdge         = TDW_PATH_Map_determineCommonEdge;
+	this.getAreaExit                 = TDW_PATH_Map_getAreaExit;
+
+	this.getStringList               = TDW_PATH_Map_getStringList;
+	this.getStringValueList          = TDW_PATH_Map_getStringValueList;
+	this.getMultiStringList          = TDW_PATH_Map_getMultiStringList;
+
+	// Pathing methods...
+	// Derived from Scav. Who got from Syadasti. And he from Dijkstra...
+	this.buildMap                    = TDW_PATH_Map_buildMap;
+	this.findPath                    = TDW_PATH_Map_findPath;
+	this.doDijkstra                  = TDW_PATH_Map_doDijkstra;
+	this.createPath                  = TDW_PATH_Map_createPath;
+
+	function TDW_PATH_Map_isAreaCreated(in_area) {
+		in_area = (in_area != null) ? in_area : me.area;
+
+		return((D2JSP_AREA_IsValidInGame(in_area) &&
+			(this.area_list[in_area] != null)) ? true : false);
+	}
+
+	function TDW_PATH_Map_isPathDataBuilt(in_area) {
+		in_area = (in_area != null) ? in_area : me.area;
+
+		return((D2JSP_AREA_IsValidInGame(in_area) &&
+			(this.points_list[in_area] != null)) ? true : false);
+	}
+
+	function TDW_PATH_Map_createArea(in_area, force_flag) {
+		in_area = (in_area != null) ? in_area : me.area;
+
+		if (D2JSP_AREA_IsValidInGame(in_area) &&
+			(D2JSP_AREA_GetAct(in_area) == me.act)) {
+			if ((this.area_list[in_area] == null) || force_flag) {
+				this.area_list[in_area]     = new D2JSP_RoomList(in_area);
+				this.exit_list[in_area]     = new Array();
+				this.points_list[in_area]   = null;
+				this.build_flags[in_area]   = null;
+			}
+		}
+	}
+
+	function TDW_PATH_Map_clearArea(in_area) {
+		in_area = (in_area != null) ? in_area : me.area;
+
+		if (D2JSP_AREA_IsValidInGame(in_area)) {
+			this.area_list[in_area]     = null;
+			this.points_list[in_area]   = null;
+			this.build_flags[in_area]   = null;
+			runGC();
+		}
+	}
+
+	function TDW_PATH_Map_clearAreaInfo(in_area) {
+		this.clearAreaCollisionInfo(in_area);
+		this.clearAreaPresetUnitInfo(in_area);
+	}
+
+	function TDW_PATH_Map_clearAreaCollisionInfo(in_area) {
+		if (D2JSP_AREA_IsValidInGame(in_area) &&
+			(this.area_list[in_area] != null))
+			this.area_list[in_area].clearCollisionInfo();
+	}
+
+	function TDW_PATH_Map_clearAreaPresetUnitInfo(in_area) {
+		if (D2JSP_AREA_IsValidInGame(in_area) &&
+			(this.area_list[in_area] != null))
+			this.area_list[in_area].clearPresetUnitInfo();
+	}
+
+	function TDW_PATH_Map_getAreaCoords(in_area) {
+		in_area = (in_area != null) ? in_area : me.area;
+
+		if (D2JSP_AREA_IsValidInGame(in_area)) {
+			if (this.area_list[in_area] != null)
+				return(this.area_list[in_area].getAreaCoords());
+			else if (D2JSP_AREA_GetAct(in_area) == me.act)
+				return(D2JSP_AREA_GetAreaCoords(in_area));
+/*
+			else if (D2JSP_AREA_GetAct(in_area) == me.act) {
+				var room_obj = getRoom(in_area);
+				if (room_obj) {
+					var x_1 = room_obj.levelx;
+					var y_1 = room_obj.levely;
+					var x_2 = 0;
+					var y_2 = 0;
+					do {
+						var coll_table = room_obj.getCollision();
+						x_2 = Math.max(x_2, (room_obj.x * 5) + (coll_table[0].length - 1));
+						y_2 = Math.max(y_2, (room_obj.y * 5) + (coll_table.length - 1));
+					} while (room_obj && room_obj.getNext(in_area));
+					return([x_1, y_1, x_2, y_2]);
+				}
+			}
+*/
+		}
+
+		return(null);
+	}
+
+	function TDW_PATH_Map_isInAreaXY(in_area, in_x, in_y) {
+/*
+		if (this.area_list[in_area] != null)
+			return(D2JSP_AREA_IsInAreaXYWithCoords(
+				this.area_list[in_area].getAreaCoords(), in_x, in_y));
+		else
+			return(D2JSP_AREA_IsInAreaXY(in_area, in_x, in_y));
+*/
+		if (this.area_list[in_area] != null)
+			return(D2JSP_AREA_IsInAreaXYWithCoords(
+				this.area_list[in_area].getAreaCoords(), in_x, in_y));
+		else if (this.bounds_list[in_area])
+			return(D2JSP_AREA_IsInAreaXYWithCoords(this.bounds_list[in_area],
+				in_x, in_y));
+		else {
+			this.bounds_list[in_area] = D2JSP_AREA_GetAreaCoords(in_area)
+			return(D2JSP_AREA_IsInAreaXYWithCoords(this.bounds_list[in_area],
+				in_x, in_y));
+		}
+	}
+
+	function TDW_PATH_Map_isInAreaPair(in_area, in_pair) {
+		return(this.isInAreaXY(in_area, in_pair[0], in_pair[1]));
+	}
+
+	function TDW_PATH_Map_isInAreaObject(in_area, in_object) {
+		return(this.isInAreaXY(in_area, in_object.x, in_object.y));
+	}
+
+	function TDW_PATH_Map_getAreaData(in_area) {
+		var out_area_data = null;
+
+		in_area = (in_area != null) ? in_area : me.area;
+
+		if (D2JSP_AREA_IsValidInGame(in_area)) {
+			if ((this.area_list[in_area] == null) &&
+				(D2JSP_AREA_GetAct(in_area) == me.act))
+				this.createArea(in_area);
+			out_area_data = this.area_list[in_area];
+		}
+
+		return(out_area_data);
+	}
+
+	function TDW_PATH_Map_findRoomByNumber(room_number) {
+		this.createArea();
+		return(this.area_list[me.area].findRoomByNumber(room_number));
+	}
+	function TDW_PATH_Map_findRoomByNumberList(room_number) {
+		this.createArea();
+		return(this.area_list[me.area].findRoomByNumberList(room_number));
+	}
+	function TDW_PATH_Map_findRoomByNumberSpec(room_spec) {
+		this.createArea();
+		return(this.area_list[me.area].findRoomByNumberSpec(room_spec));
+	}
+	function TDW_PATH_Map_findRoomByXY(in_x, in_y) {
+		this.createArea();
+		return(this.area_list[me.area].findRoomByXY(in_x, in_y));
+	}
+	function TDW_PATH_Map_findRoomByBaseXY(in_x, in_y) {
+		return(this.area_list[me.area].findRoomByBaseXY(in_x, in_y));
+	}
+
+	function TDW_PATH_Map_findRoomByXYPair(in_x_y_pair) {
+		this.createArea();
+		return(this.area_list[me.area].findRoomByXYPair(in_x_y_pair));
+	}
+	function TDW_PATH_Map_findRoomByObject(in_object) {
+		this.createArea();
+		return(this.area_list[me.area].findRoomByObject(in_object));
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function TDW_PATH_Map_getMetaCoordsByXY(in_x, in_y) {
+		this.createArea();
+		return(this.area_list[me.area].getMetaCoordsByXY(in_x, in_y));
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function TDW_PATH_Map_getMetaCoordsByBaseXY(in_x, in_y) {
+		this.createArea();
+		return(this.area_list[me.area].getMetaCoordsByBaseXY(in_x, in_y));
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function TDW_PATH_Map_getMetaCoordsByXYPair(in_x_y_pair) {
+		this.createArea();
+		return(this.area_list[me.area].getMetaCoordsByXYPair(in_x_y_pair));
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function TDW_PATH_Map_getMetaCoordsByObject(in_object) {
+		this.createArea();
+		return(this.area_list[me.area].getMetaCoordsByObject(in_object));
+	}
+
+	function TDW_PATH_Map_getRoomXYHash(in_area) {
+		in_area = (in_area != null) ? in_area : me.area;
+
+		if (!this.isAreaCreated(in_area))
+			this.createArea(in_area);
+
+		return((this.isAreaCreated(in_area)) ?
+			this.area_list[me.area].getRoomXYHash() : null);
+	}
+
+	function TDW_PATH_Map_getAccessibleEdge(edge, collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].getAccessibleEdge(edge, collision_mask));
+	}
+
+	function TDW_PATH_Map_createCollisionInfo(in_area) {
+		in_area = (in_area != null) ? in_area : me.area;
+		if (D2JSP_AREA_IsValidInGame(in_area)) {
+			this.createArea(in_area);
+			this.area_list[in_area].createCollisionInfo();
+		}
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMinX(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].getAccessibleEdgeMinX(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMinY(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].getAccessibleEdgeMinY(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMaxX(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].getAccessibleEdgeMaxX(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMaxY(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].getAccessibleEdgeMaxY(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeList(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].getAccessibleEdgeList(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeSimple(edge, collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].
+			getAccessibleEdgeSimple(edge, collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMinXSimple(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].
+			getAccessibleEdgeMinXSimple(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMinYSimple(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].
+			getAccessibleEdgeMinYSimple(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMaxXSimple(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].
+			getAccessibleEdgeMaxXSimple(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeMaxYSimple(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].
+			getAccessibleEdgeMaxYSimple(collision_mask));
+	}
+
+	function TDW_PATH_Map_getAccessibleEdgeListSimple(collision_mask) {
+		this.createArea();
+		return(this.area_list[me.area].getAccessibleEdgeListSimple(collision_mask));
+	}
+
+	function TDW_PATH_Map_getCenterList(room_spec) {
+		this.createArea();
+		return(this.area_list[me.area].getCenterList(room_spec));
+	}
+
+	function TDW_PATH_Map_getCenterAccessibleList(collision_mask, room_spec) {
+		this.createArea();
+		return(this.area_list[me.area].getCenterAccessibleList(collision_mask,
+			room_spec));
+	}
+
+	function TDW_PATH_Map_getPresetList(room_spec, unit_type, unit_classid,
+		first_only_flag) {
+		this.createArea();
+		return(this.area_list[me.area].getPresetList(room_spec, unit_type,
+			unit_classid, first_only_flag));
+	}
+
+	function TDW_PATH_Map_getPresetCoordsList(room_spec, unit_type,
+		unit_classid, first_only_flag) {
+		this.createArea();
+		return(this.area_list[me.area].getPresetCoordsList(room_spec, unit_type,
+			unit_classid, first_only_flag));
+	}
+
+	function TDW_PATH_Map_getAdjacentRoomsByNumber(room_number, adjacency) {
+		this.createArea();
+		return(this.area_list[me.area].getAdjacentRoomsByNumber(room_number,
+			adjacency));
+	}
+
+	function TDW_PATH_Map_getAdjacentRoomsByXY(in_x, in_y, adjacency) {
+		this.createArea();
+		return(this.area_list[me.area].getAdjacentRoomsByXY(in_x, in_y,
+			adjacency));
+	}
+
+	function TDW_PATH_Map_getAdjacentRoomsByBaseXY(in_x, in_y, adjacency) {
+		this.createArea();
+		return(this.area_list[me.area].getAdjacentRoomsByBaseXY(in_x, in_y,
+			adjacency));
+	}
+
+	function TDW_PATH_Map_getAdjacentRoomsByXYPair(in_x_y_pair, adjacency) {
+		this.createArea();
+		return(this.area_list[me.area].getAdjacentRoomsByXYPair(in_x_y_pair,
+			adjacency));
+	}
+
+	function TDW_PATH_Map_getAdjacentRoomsByObject(in_object, adjacency) {
+		this.createArea();
+		return(this.area_list[me.area].getAdjacentRoomsByObject(in_object,
+			adjacency));
+	}
+
+	function TDW_PATH_Map_getAdjacentRooms(my_room, adjacency) {
+		this.createArea();
+		return(this.area_list[me.area].getAdjacentRooms(my_room, adjacency));
+	}
+
+	function TDW_PATH_Map_determineCommonEdge(src_area, dst_area) {
+		if ((src_area != dst_area) && D2JSP_AREA_IsValidInGame(src_area) &&
+			D2JSP_AREA_IsValidInGame(dst_area) &&
+			(D2JSP_AREA_GetAct(src_area) == D2JSP_AREA_GetAct(dst_area))) {
+			if (((this.area_list[src_area] == null) ||
+				(this.area_list[dst_area] == null)) &&
+				(D2JSP_AREA_GetAct(src_area) != me.act))
+				return(null);
+			if (this.area_list[src_area] == null)
+				this.createArea(src_area);
+			if (this.area_list[dst_area] == null)
+				this.createArea(dst_area);
+//			if (this.exit_list[src_area][dst_area + ""] != null)
+//				return(this.exit_list[src_area][dst_area + ""].direction_delta);
+//			runGC();
+			if ((this.exit_list[src_area][dst_area + ""] != null) &&
+				(src_area != D2JSP_AREA_INNER_CLOISTER) &&
+				(dst_area != D2JSP_AREA_INNER_CLOISTER) &&
+				(src_area != D2JSP_AREA_CATHEDRAL) &&
+				(dst_area != D2JSP_AREA_CATHEDRAL))
+				return(this.exit_list[src_area][dst_area + ""].direction_delta);
+			if ((this.area_list[src_area].y_1 - 1) == this.area_list[dst_area].y_2)
+				return(D2JSP_ROOM_EDGE_MIN_X);
+			if ((this.area_list[src_area].x_1 - 1) == this.area_list[dst_area].x_2)
+				return(D2JSP_ROOM_EDGE_MIN_Y);
+			if ((this.area_list[src_area].y_2 + 1) == this.area_list[dst_area].y_1)
+				return(D2JSP_ROOM_EDGE_MAX_X);
+			if ((this.area_list[src_area].x_2 + 1) == this.area_list[dst_area].x_1)
+				return(D2JSP_ROOM_EDGE_MAX_Y);
+		}
+
+		return(null);
+	}
+
+	function TDW_PATH_Map_getAreaExit(src_area, dst_area) {
+		if ((src_area != dst_area) && D2JSP_AREA_IsValidInGame(src_area) &&
+			D2JSP_AREA_IsValidInGame(dst_area) &&
+			(D2JSP_AREA_GetAct(src_area) == D2JSP_AREA_GetAct(dst_area))) {
+			if (((this.area_list[src_area] == null) ||
+				(this.area_list[dst_area] == null)) &&
+				(D2JSP_AREA_GetAct(src_area) != me.act))
+				return(null);
+			if (this.area_list[src_area] == null)
+				this.createArea(src_area);
+			if (this.area_list[dst_area] == null)
+				this.createArea(dst_area);
+			if (this.exit_list[src_area][dst_area + ""] != null)
+				return(D2JSP_UTIL_GEN_CloneObject(
+					this.exit_list[src_area][dst_area + ""]));
+			var common_edge = this.determineCommonEdge(src_area, dst_area);
+			if (common_edge != null) {
+				var edge_list_1 = this.area_list[src_area].
+					getAccessibleEdgeSimple(common_edge);
+				var edge_list_2 = this.area_list[dst_area].
+					getAccessibleEdge((common_edge + 2) % 4);
+				var dir_deltas  = D2JSP_ROOM_GetDirectionDeltas();
+				for (var count_1 = 0; count_1 < edge_list_1.length; count_1++) {
+					var other_coord = [
+						edge_list_1[count_1][0] + dir_deltas[common_edge][0],
+						edge_list_1[count_1][1] + dir_deltas[common_edge][1]]
+					for (var count_2 = 0; count_2 < edge_list_2.length; count_2++) {
+						if ((edge_list_2[count_2][0] == other_coord[0]) &&
+							 (edge_list_2[count_2][1] == other_coord[1])) {
+							this.exit_list[src_area][dst_area + ""] =
+								new TDW_PATH_AreaExit(common_edge,
+								edge_list_1[count_1]);
+							this.exit_list[dst_area][src_area + ""] =
+								new TDW_PATH_AreaExit((common_edge + 2) % 4,
+								edge_list_2[count_2]);
+							return(D2JSP_UTIL_GEN_CloneObject(
+								this.exit_list[src_area][dst_area + ""]));
+						}
+					}
+				}
+			}
+		}
+
+		return(null);
+	}
+
+	function TDW_PATH_Map_getStringList(collision_mask, coll_true, coll_false) {
+		this.createArea();
+		return(this.area_list[me.area].getStringList(collision_mask, coll_true,
+			coll_false));
+	}
+
+	function TDW_PATH_Map_getStringValueList(radix, separator) {
+		this.createArea();
+		return(this.area_list[me.area].getStringValueList(radix, separator));
+	}
+
+	function TDW_PATH_Map_getMultiStringList(area_list, collision_mask,
+		coll_true, coll_false) {
+		area_list = D2JSP_UTIL_GEN_ExpandArgs(area_list);
+
+		if (!area_list.length)
+			return(this.getStringList(collision_mask, coll_true, coll_false));
+
+		var x_1 = Number.MAX_VALUE;
+		var y_1 = Number.MAX_VALUE;
+		var x_2 = Number.MIN_VALUE;
+		var y_2 = Number.MIN_VALUE;
+
+		for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+			if ((!D2JSP_AREA_IsValidInGame(area_list[count_1])) ||
+				(D2JSP_AREA_GetAct(area_list[count_1]) != me.act))
+				return(out_list);
+			this.createArea(area_list[count_1]);
+			x_1 = Math.min(x_1, this.area_list[area_list[count_1]].x_1);
+			y_1 = Math.min(y_1, this.area_list[area_list[count_1]].y_1);
+			x_2 = Math.max(x_2, this.area_list[area_list[count_1]].x_2);
+			y_2 = Math.max(y_2, this.area_list[area_list[count_1]].y_2);
+		}
+
+		var rows = (y_2 - y_1) + 1;
+		var cols = (x_2 - x_1) + 1;
+
+		var out_list  = new Array(rows);
+		var tmp_array = new Array(cols);
+		for (var count_1 = 0; count_1 < rows; count_1++)
+			out_list[count_1] = tmp_array.join("#");
+
+		for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+			var this_true = (!D2JSP_UTIL_GEN_TypeOfString(coll_true))  ?
+				(count_1 + "") : coll_true.charAt(0);
+			var area_row  = this.area_list[area_list[count_1]].y_1 - y_1;
+			var area_col  = this.area_list[area_list[count_1]].x_1 - x_1;
+			var str_list  = this.area_list[area_list[count_1]].
+				getStringList(collision_mask, this_true, coll_false);
+			for (var count_2 = 0; count_2 < str_list.length; count_2++)
+				out_list[area_row + count_2] =
+					out_list[area_row + count_2].substr(0, area_col) +
+					str_list[count_2] +
+					out_list[area_row + count_2].
+					substr(area_col + str_list[count_2].length);
+		}
+
+		return(out_list);
+	}
+
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_PATH_Map_buildMap(in_area, build_flags) {
+
+		if (!D2JSP_AREA_IsValidInGame(in_area))
+			return(-1);
+
+		this.createArea(in_area);
+
+if (TDW_PATH_UseTDWAStar)
+	return(0);
+
+		if (this.area_list[in_area] == null)
+			return(-1);
+
+		if ((this.points_list[in_area] == null) ||
+			((!(build_flags & TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK)) &&
+			(this.build_flags[in_area] & TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK))){
+/*
+TDW_BOT_Log.logInfo("********** BUILDING MAP INFO ********** (area = " + in_area +
+	", current list = " + ((this.points_list[in_area] == null) ? "NULL" : "POPULATED") +
+	", build flags = " + build_flags + ", old build flags = " + this.build_flags[in_area] + ")");
+*/
+			this.points_list[in_area]    = new Array();
+			this.build_flags[in_area]    = build_flags;
+			this.points_list[in_area][0] = new coord();
+			this.points_list[in_area][1] = new coord();
+			for (var count_1 = 0;
+				count_1 < this.area_list[in_area].room_list.length; count_1++) {
+				var my_room      = this.area_list[in_area].room_list[count_1];
+				var center_coord = null;
+				if (build_flags & TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK)
+					center_coord = my_room.getCenterSmart();
+				else
+					center_coord = my_room.getCenterAccessible();
+				if (center_coord != null) {
+					var index = this.points_list[in_area].length;
+					this.points_list[in_area][index] =
+						new coord(center_coord[0], center_coord[1]);
+					this.points_list[in_area][index].data = my_room.number;
+				}
+			}
+			runGC();
+		}
+
+		return(0);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// targetx = The desired X location
+	// targety = The desired Y location
+	// maxsep  = max separation between vertices, divided by sqrt(2)
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_PATH_Map_findPath(targetx, targety, maxsep, build_flags) {
+		var v = new Array;
+
+		maxsep = (maxsep > 0) ? maxsep : 5;
+
+		this.buildMap(me.area, build_flags);
+
+		for (var i = 0; i < this.points_list[me.area].length; i++)
+			v[i] = new TDW_PATH_Vertex();
+		
+		this.points_list[me.area][0].set(me);
+		this.points_list[me.area][1].set(targetx, targety);
+	
+		// Create the graph
+		for (var i = 0; i < this.points_list[me.area].length; i++) {
+			for (var j = 0; j < this.points_list[me.area].length; j++) {
+				if (i != j) {
+					var d = this.points_list[me.area][i].
+						dist2(this.points_list[me.area][j]);
+					if (d <= 2 * maxsep * maxsep)
+						v[i].push(j, Math.sqrt(d)); 
+				} 
+			}
+		}
+	
+		this.doDijkstra(v, this.points_list[me.area].length, 0);
+	
+		var path = new Array();
+		if (!this.createPath(v, 0, 1, path))
+			return null;
+	
+		return path;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_PATH_Map_doDijkstra(v, size, source) {
+		var _Sy_Path_Max = 256;
+		var _INFINITY    = 32767;
+		var Cost         = new Array;
+		var done         = new Array;
+		var to_do        = size;
+
+		for (i = 0; i < size; i++) {
+			v[i].Cost = Cost[i] = _INFINITY;
+			v[i].Previous = -1;
+			done[i] = 0;
+		}
+
+		Cost[source] = 0;
+
+		while (to_do) {
+			var iMin;
+			for (var i = 0; i < size; i++) {
+				if (!done[i]) {
+					iMin=i;
+					break;
+				}
+			}
+			for (var i = iMin + 1; i < size; i++) {
+				if (!done[i] && Cost[i] < Cost[iMin]) {
+					iMin = i;
+				}
+			}
+			done[iMin] = 1;
+			to_do--;
+			for (var i = 0; i < v[iMin].NumAdjacencies; i++) {
+				if (Cost[iMin] + v[iMin].AdjacencyWeight[i] <
+					Cost[v[iMin].Adjacent[i]]) {
+					v[v[iMin].Adjacent[i]].Previous = iMin;
+					v[v[iMin].Adjacent[i]].Cost     = Cost[v[iMin].Adjacent[i]] =
+						Cost[iMin] + v[iMin].AdjacencyWeight[i];
+				}
+			}
+		}
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	// //////////////////////////////////////////////////////////////////////
+	function TDW_PATH_Map_createPath(v, source, dest, path) {	
+		if (source == dest) {
+			var index = path.length;
+			path[index] = new coord(this.points_list[me.area][dest]);
+			path[index].data = this.points_list[me.area][dest].data;
+			return true;
+		}
+		else {
+			if (v[dest].Previous != -1) {
+				this.createPath(v, source, v[dest].Previous, path);
+				var index = path.length;
+				path[index] = new coord(this.points_list[me.area][dest]);
+				path[index].data = this.points_list[me.area][dest].data;
+			}
+			else {
+//				print("ÿc1TDW_PATH_Map_createPath: Unable to build path");
+				return false;
+			} 
+		}
+		return true;
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Globally-available map data...
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_MapGlobal = new TDW_PATH_Map();
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_IsPathDataBuilt(in_area)
+{
+	return(TDW_PATH_MapGlobal.isPathDataBuilt(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_IsAreaCreated(in_area)
+{
+	return(TDW_PATH_MapGlobal.isAreaCreated(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_CreateArea(in_area, force_flag)
+{
+	return(TDW_PATH_MapGlobal.createArea(in_area, force_flag));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ClearArea(in_area)
+{
+	return(TDW_PATH_MapGlobal.clearArea(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ClearAreaInfo(in_area)
+{
+	return(TDW_PATH_MapGlobal.clearAreaInfo(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ClearAreaCollisionInfo(in_area)
+{
+	return(TDW_PATH_MapGlobal.clearAreaCollisionInfo(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ClearAreaPresetUnitInfo(in_area)
+{
+	return(TDW_PATH_MapGlobal.clearAreaPresetUnitInfo(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAreaCoords(in_area)
+{
+	return(TDW_PATH_MapGlobal.getAreaCoords(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_IsInAreaXY(in_area, in_x, in_y)
+{
+	return(TDW_PATH_MapGlobal.isInAreaXY(in_area, in_x, in_y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_IsInAreaPair(in_area, in_pair)
+{
+	return(TDW_PATH_MapGlobal.isInAreaPair(in_area, in_pair));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_IsInAreaObject(in_area, in_object)
+{
+	return(TDW_PATH_MapGlobal.isInAreaObject(in_area, in_object));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAreaData(in_area)
+{
+	return(TDW_PATH_MapGlobal.getAreaData(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_BuildMap(in_area, build_flags)
+{
+	return(TDW_PATH_MapGlobal.buildMap(in_area, build_flags));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindPath(targetx, targety, maxsep, build_flags)
+{
+	return(TDW_PATH_MapGlobal.findPath(targetx, targety, maxsep, build_flags));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindRoomByNumber(room_number)
+{
+	return(TDW_PATH_MapGlobal.findRoomByNumber(room_number));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindRoomByNumberList(room_number)
+{
+	return(TDW_PATH_MapGlobal.findRoomByNumberList(room_number));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindRoomByNumberSpec(room_spec)
+{
+	return(TDW_PATH_MapGlobal.findRoomByNumberSpec(room_spec));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindRoomByXY(in_x, in_y)
+{
+	return(TDW_PATH_MapGlobal.findRoomByXY(in_x, in_y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindRoomByBaseXY(in_x, in_y)
+{
+	return(TDW_PATH_MapGlobal.findRoomByBaseXY(in_x, in_y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindRoomByXYPair(in_x_y_pair)
+{
+	return(TDW_PATH_MapGlobal.findRoomByXYPair(in_x_y_pair));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FindRoomByObject(in_object)
+{
+	return(TDW_PATH_MapGlobal.findRoomByObject(in_object));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Meta-map coords returned by Y, X (that is: row, col). In order to use them
+//	to reference the meta-map, use [row][col].
+function TDW_PATH_GetMetaCoordsByXY(in_x, in_y)
+{
+	return(TDW_PATH_MapGlobal.getMetaCoordsByXY(in_x, in_y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Meta-map coords returned by Y, X (that is: row, col). In order to use them
+//	to reference the meta-map, use [row][col].
+function TDW_PATH_GetMetaCoordsByBaseXY(in_x, in_y)
+{
+	return(TDW_PATH_MapGlobal.getMetaCoordsByBaseXY(in_x, in_y));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Meta-map coords returned by Y, X (that is: row, col). In order to use them
+//	to reference the meta-map, use [row][col].
+function TDW_PATH_GetMetaCoordsByXYPair(in_x_y_pair)
+{
+	return(TDW_PATH_MapGlobal.getMetaCoordsByXYPair(in_x_y_pair));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// Meta-map coords returned by Y, X (that is: row, col). In order to use them
+//	to reference the meta-map, use [row][col].
+function TDW_PATH_GetMetaCoordsByObject(in_object)
+{
+	return(TDW_PATH_MapGlobal.getMetaCoordsByObject(in_object));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetRoomXYHash(in_area)
+{
+	return(TDW_PATH_MapGlobal.getRoomXYHash(in_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_CreateCollisionInfo(in_area)
+{
+	TDW_PATH_MapGlobal.createCollisionInfo(in_area);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdge(edge, collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdge(edge, collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMinX(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMinX(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMinY(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMinY(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMaxX(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMaxX(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMaxY(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMaxY(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeList(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeList(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeSimple(edge, collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeSimple(edge, collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMinXSimple(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMinXSimple(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMinYSimple(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMinYSimple(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMaxXSimple(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMaxXSimple(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeMaxYSimple(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeMaxYSimple(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAccessibleEdgeListSimple(collision_mask)
+{
+	return(TDW_PATH_MapGlobal.getAccessibleEdgeListSimple(collision_mask));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetCenterList(room_spec)
+{
+	return(TDW_PATH_MapGlobal.getCenterList(room_spec));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetCenterAccessibleList(collision_mask, room_spec)
+{
+	return(TDW_PATH_MapGlobal.getCenterAccessibleList(collision_mask, room_spec));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetPresetList(room_spec, unit_type, unit_classid,
+	first_only_flag)
+{
+	return(TDW_PATH_MapGlobal.getPresetList(room_spec, unit_type, unit_classid,
+		first_only_flag));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetPresetCoordsList(room_spec, unit_type, unit_classid,
+	first_only_flag)
+{
+	return(TDW_PATH_MapGlobal.getPresetCoordsList(room_spec, unit_type,
+		unit_classid, first_only_flag));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAdjacentRoomsByNumber(room_number, adjacency)
+{
+	return(TDW_PATH_MapGlobal.getAdjacentRoomsByNumber(room_number, adjacency));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAdjacentRoomsByXY(in_x, in_y, adjacency)
+{
+	return(TDW_PATH_MapGlobal.getAdjacentRoomsByXY(in_x, in_y, adjacency));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAdjacentRoomsByBaseXY(in_x, in_y, adjacency)
+{
+	return(TDW_PATH_MapGlobal.getAdjacentRoomsByBaseXY(in_x, in_y, adjacency));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAdjacentRoomsByXYPair(in_x_y_pair, adjacency)
+{
+	return(TDW_PATH_MapGlobal.getAdjacentRoomsByXYPair(in_x_y_pair, adjacency));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAdjacentRoomsByObject(in_object, adjacency)
+{
+	return(TDW_PATH_MapGlobal.getAdjacentRoomsByObject(in_object, adjacency));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAdjacentRooms(my_room, adjacency)
+{
+	return(TDW_PATH_MapGlobal.getAdjacentRooms(my_room, adjacency));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_DetermineCommonEdge(src_area, dst_area)
+{
+	return(TDW_PATH_MapGlobal.determineCommonEdge(src_area, dst_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAreaExit(src_area, dst_area)
+{
+	return(TDW_PATH_MapGlobal.getAreaExit(src_area, dst_area));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetStringList(collision_mask, coll_true, coll_false)
+{
+	return(TDW_PATH_MapGlobal.getStringList(collision_mask, coll_true,
+		coll_false));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetStringValueList(radix, separator)
+{
+	return(TDW_PATH_MapGlobal.getStringValueList(radix, separator));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetMultiStringList(area_list, collision_mask, coll_true,
+	coll_false)
+{
+	return(TDW_PATH_MapGlobal.getMultiStringList(area_list, collision_mask,
+		coll_true, coll_false));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetInitedAreas()
+{
+	var area_list = new Array(D2JSP_AREA_COUNT);
+
+	for (var count_1 = 0; count_1 < area_list.length; count_1++)
+		area_list[count_1] = (TDW_PATH_MapGlobal.area_list[count_1]) ?
+			true : false;
+
+	return(area_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_FreeInitedAreas(area_list, log_obj)
+{
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		if ((!area_list[count_1]) && TDW_PATH_MapGlobal.area_list[count_1] &&
+			(!D2JSP_AREA_IsTown(count_1)) &&
+			(count_1 != D2JSP_AREA_SPIDER_FOREST) &&
+			(count_1 != D2JSP_AREA_GREAT_MARSH) &&
+			(count_1 != D2JSP_AREA_FLAYER_JUNGLE)) {
+			if (log_obj instanceof D2JSP_UTIL_Log)
+				log_obj.logInfo("Freeing path information for area " +
+					count_1 + " (" + D2JSP_AREA_AreaToName(count_1) + ").");
+			TDW_PATH_ClearArea(count_1);
+		}
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetAreaCoverageList()
+{
+	var preset_list  = TDW_PATH_GetPresetList();
+	var room_xy_hash = TDW_PATH_GetRoomXYHash();
+
+	for (var count_1 = 0; count_1 < preset_list.length; count_1++)
+		delete room_xy_hash[preset_list[count_1].room_base_x + "|" +
+			preset_list[count_1].room_base_y];
+
+	for (var this_prop in room_xy_hash) {
+		if ((!room_xy_hash[this_prop].isExcluded()) &&
+			(!D2JSP_ROOM_IsBorderIgnoreRoom(room_xy_hash[this_prop].number))) {
+			var fake_preset_unit         = new Array();
+			fake_preset_unit.type        = -1;
+			fake_preset_unit.id          = -1;
+			fake_preset_unit.room_number = room_xy_hash[this_prop].number;
+			fake_preset_unit.x           = room_xy_hash[this_prop].x;
+			fake_preset_unit.y           = room_xy_hash[this_prop].y;
+			fake_preset_unit.room_base_x = room_xy_hash[this_prop].x;
+			fake_preset_unit.room_base_y = room_xy_hash[this_prop].y;
+			fake_preset_unit.area_x      = room_xy_hash[this_prop].x_1;
+			fake_preset_unit.area_y      = room_xy_hash[this_prop].y_1;
+			fake_preset_unit.other       = room_xy_hash[this_prop];
+			preset_list.push(fake_preset_unit);
+		}
+	}
+
+	return(preset_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ProgressivePathSortPresetUnit(in_path_list, in_origin)
+{
+/*
+	var out_path_list = new Array();
+	var tmp_path_list = D2JSP_UTIL_GEN_CloneObject(in_path_list);
+	var curr_origin;
+
+	in_origin   = (in_origin != null) ? in_origin : [me.x, me.y];
+	curr_origin = in_origin;
+
+	while (tmp_path_list.length) {
+		var nearest_coord_index = -1;
+		var nearest_coord       = Number.MAX_VALUE;
+		var this_distance;
+		var count_1;
+		for (count_1 = 0; count_1 < tmp_path_list.length; count_1++) {
+//			this_distance =
+//				(Dist(in_origin[0], in_origin[1],
+//				 tmp_path_list[count_1].area_x, tmp_path_list[count_1].area_y) +
+//				 Dist(curr_origin[0], curr_origin[1],
+//				 tmp_path_list[count_1].area_x, tmp_path_list[count_1].area_y)) / 2;
+			this_distance = Dist(in_origin[0], in_origin[1],
+				 tmp_path_list[count_1].area_x, tmp_path_list[count_1].area_y);
+			if ((this_distance < nearest_coord) || (!count_1)) {
+				nearest_coord       = this_distance;
+				nearest_coord_index = count_1;
+			}
+		}
+		curr_origin = tmp_path_list[nearest_coord_index];
+		out_path_list.push(tmp_path_list[nearest_coord_index]);
+		tmp_path_list.splice(nearest_coord_index, 1);
+	}
+
+	return(out_path_list);
+*/
+/*
+	var out_path_list = new Array();
+	var tmp_path_list = new Array();
+	var curr_origin;
+
+	in_origin   = (in_origin != null) ? in_origin : [me.x, me.y];
+	curr_origin = in_origin;
+
+	while (tmp_path_list.length) {
+		var nearest_coord_index = -1;
+		var nearest_coord       = Number.MAX_VALUE;
+		var this_distance;
+		var count_1;
+		for (count_1 = 0; count_1 < tmp_path_list.length; count_1++) {
+//			this_distance =
+//				(Dist(in_origin[0], in_origin[1],
+//				 tmp_path_list[count_1].area_x, tmp_path_list[count_1].area_y) +
+//				 Dist(curr_origin[0], curr_origin[1],
+//				 tmp_path_list[count_1].area_x, tmp_path_list[count_1].area_y)) / 2;
+			this_distance = Dist(in_origin[0], in_origin[1],
+				 tmp_path_list[count_1].area_x, tmp_path_list[count_1].area_y);
+			if ((this_distance < nearest_coord) || (!count_1)) {
+				nearest_coord       = this_distance;
+				nearest_coord_index = count_1;
+			}
+		}
+		curr_origin = tmp_path_list[nearest_coord_index];
+		out_path_list.push(tmp_path_list[nearest_coord_index]);
+		tmp_path_list.splice(nearest_coord_index, 1);
+	}
+
+	in_path_list = out_path_list;
+
+	return(out_path_list);
+*/
+	var tmp_path_list = new Array(in_path_list.length);
+	var out_path_list = new Array(in_path_list.length);
+	var curr_origin;
+
+	in_origin   = (in_origin != null) ? in_origin : [me.x, me.y];
+	curr_origin = in_origin;
+
+	for (count_1 = 0; count_1 < tmp_path_list.length; count_1++) {
+		var this_distance = Dist(in_origin[0], in_origin[1],
+			 in_path_list[count_1].area_x, in_path_list[count_1].area_y);
+		tmp_path_list[count_1] = [this_distance, count_1];
+	}
+
+	tmp_path_list.sort(D2JSP_UTIL_GEN_CompareDistanceElements);
+		
+	for (count_1 = 0; count_1 < tmp_path_list.length; count_1++)
+		out_path_list[count_1] = in_path_list[tmp_path_list[count_1][1]];
+
+	return(out_path_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_GetNearestCoordPresetUnit(in_path_list, in_origin, tolerance)
+{
+	var nearest_coord_index = -1;
+	var nearest_coord       = Number.MAX_VALUE;
+	var this_distance;
+	var count_1;
+
+	in_origin = (in_origin != null) ? in_origin : [me.x, me.y];
+	tolerance = (D2JSP_UTIL_GEN_TypeOfNumber(tolerance) && (tolerance > 0)) ?
+		(tolerance * tolerance) :  null;	// Because we use distance ^ 2;
+
+	for (count_1 = 0; count_1 < in_path_list.length; count_1++) {
+		if (((this_distance = Dist2(in_origin[0], in_origin[1],
+			in_path_list[count_1].area_x, in_path_list[count_1].area_y)) <
+			nearest_coord) || (!count_1)) {
+			nearest_coord       = this_distance;
+			nearest_coord_index = count_1;
+			if (tolerance && (this_distance <= tolerance))
+				break;
+		}
+	}
+
+	return(nearest_coord_index);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_PopNearestCoordPresetUnit(in_path_list, in_origin, tolerance)
+{
+	if (in_path_list.length) {
+		var nearest_coord_index =
+			TDW_PATH_GetNearestCoordPresetUnit(in_path_list, in_origin, tolerance);
+		var nearest_unit        = in_path_list[nearest_coord_index];
+		in_path_list.splice(nearest_coord_index, 1);
+		return(nearest_unit);
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_UTIL_GetAct1Area1_Fire()
+{
+	if (me.area == D2JSP_AREA_ROGUE_ENCAMPMENT) {
+		if (!TDW_PATH_Act1FireCoords) {
+			var target_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, 39);
+			if (!target_obj) {						// If not null, Scav can find it.
+				var coords_list = TDW_PATH_GetPresetCoordsList(null,
+					D2JSP_UTIL_GETUNIT_OBJECT, 39);
+				if (coords_list && coords_list.length)
+					TDW_PATH_Act1FireCoords = [coords_list[0].area_x,
+						coords_list[0].area_y];
+			}
+			else
+				TDW_PATH_Act1FireCoords = [target_obj.x, target_obj.y];
+		}
+	}
+
+	return(D2JSP_UTIL_GEN_CloneObject(TDW_PATH_Act1FireCoords));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+//delay(1);
+runGC();
+//delay(1);
+
+} // if (typeof(TDW_INCLUDE_GUARD_Path_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+includeonce("TDW/TDW_Move.d2l");
+function main() {
+	var longest_name = 0;
+	var count_1;
+	var count_2;
+	var file_name = "output/RegressionTest.TDW_Path.d2l.txt";
+	var file_handle;
+
+//print("Common edge 1: " + TDW_PATH_DetermineCommonEdge(D2JSP_AREA_INNER_CLOISTER, D2JSP_AREA_CATHEDRAL));
+//print("Common edge 1: " + TDW_PATH_DetermineCommonEdge(D2JSP_AREA_CATHEDRAL, D2JSP_AREA_INNER_CLOISTER));
+//print("STOPPING");
+//stop();
+
+//print("Common edge 1: " + TDW_PATH_DetermineCommonEdge(D2JSP_AREA_LOST_CITY, D2JSP_AREA_VALLEY_OF_SNAKES));
+//print("Common edge 1: " + TDW_PATH_DetermineCommonEdge(D2JSP_AREA_VALLEY_OF_SNAKES, D2JSP_AREA_LOST_CITY));
+//print("STOPPING");
+//stop();
+
+/*
+print("IS IN AREA ME A: " + TDW_PATH_IsInAreaXY(me.area, me.x, me.y));
+print("STOPPING");
+stop();
+*/
+
+TDW_PATH_ASTAR_Test();
+print("STOPPING");
+stop();
+
+	print("Writing 'TDW_Path.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	while (me.area != D2JSP_AREA_LOST_CITY) {
+		D2JSP_UTIL_BNET_OverheadSafe("Go to " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_LOST_CITY));
+		delay(500);
+	}
+
+	print("PRE-LOADING AREA EXITS STARTED");
+	TDW_PATH_GetAreaExit(D2JSP_AREA_LOST_CITY, D2JSP_AREA_FAR_OASIS);
+	TDW_PATH_GetAreaExit(D2JSP_AREA_LOST_CITY, D2JSP_AREA_VALLEY_OF_SNAKES);
+	print("PRE-LOADING AREA EXITS COMPLETED");
+
+	print("USING PRE-LOADING AREA EXITS STARTED");
+	file_handle.writeLine("===================================================");
+	file_handle.writeLine("Area Exit " + D2JSP_AREA_LOST_CITY + " ---> " +
+		D2JSP_AREA_FAR_OASIS + " = " +
+		TDW_PATH_GetAreaExit(D2JSP_AREA_LOST_CITY, D2JSP_AREA_FAR_OASIS));
+	file_handle.writeLine("Area Exit " + D2JSP_AREA_LOST_CITY + " ---> " +
+		D2JSP_AREA_VALLEY_OF_SNAKES + " = " +
+		TDW_PATH_GetAreaExit(D2JSP_AREA_LOST_CITY, D2JSP_AREA_VALLEY_OF_SNAKES));
+	file_handle.writeLine("===================================================");
+	file_handle.writeLine("Area Exit " + D2JSP_AREA_FAR_OASIS + " ---> " +
+		D2JSP_AREA_LOST_CITY + " = " +
+		TDW_PATH_GetAreaExit(D2JSP_AREA_FAR_OASIS, D2JSP_AREA_LOST_CITY));
+	file_handle.writeLine("===================================================");
+	file_handle.writeLine("Area Exit " + D2JSP_AREA_VALLEY_OF_SNAKES + " ---> " +
+		D2JSP_AREA_LOST_CITY + " = " +
+		TDW_PATH_GetAreaExit(D2JSP_AREA_VALLEY_OF_SNAKES, D2JSP_AREA_LOST_CITY));
+	file_handle.writeLine("===================================================");
+	print("USING PRE-LOADING AREA EXITS COMPLETED");
+
+//	TDW_PATH_MapGlobal.createArea();
+
+	if (file_handle) {
+		TDW_PATH_TEST_WriteSep(file_handle);
+		TDW_PATH_TEST_WriteSep(file_handle);
+		file_handle.writeLine("// Complete Area Map List");
+		TDW_PATH_TEST_WriteSep(file_handle);
+		for (count_1 = 0; count_1 < TDW_PATH_MapGlobal.area_list.length;
+			count_1++) {
+			if (TDW_PATH_MapGlobal.area_list[count_1] != null) {
+				file_handle.writeLine(count_1 + "\t" +
+					D2JSP_AREA_AreaToName(count_1));
+				file_handle.writeLine("------------------------------------------");
+				var map_list =
+					TDW_PATH_MapGlobal.area_list[count_1].getStringList();
+//					TDW_PATH_MapGlobal.area_list[count_1].getStringList(0x01);
+				while (map_list.length)
+					file_handle.writeLine(map_list.shift());
+				TDW_PATH_TEST_WriteSep(file_handle);
+				file_handle.writeLine("");
+			}
+		}
+		TDW_PATH_TEST_WriteSep(file_handle);
+		TDW_PATH_TEST_WriteSep(file_handle);
+		file_handle.writeLine("");
+
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_PATH_ASTAR_NodeHead_1 = [
+	D2JSP_UTIL_FORMAT_LJust("This Node", 1 + 4 + 1 + 1 + 3 + 2 + 3 + 1 + 1),
+	D2JSP_UTIL_FORMAT_LJust("Parent Node", 1 + 4 + 1 + 1 + 3 + 2 + 3 + 1 + 1),
+	D2JSP_UTIL_FORMAT_RJust("F-Score", 7),
+	D2JSP_UTIL_FORMAT_RJust("G-Score", 7),
+	D2JSP_UTIL_FORMAT_RJust("H-Score", 7)
+];
+var TDW_PATH_ASTAR_NodeHead_2 = new Array(TDW_PATH_ASTAR_NodeHead_1.length);
+var TDW_PATH_ASTAR_NodeHead_3 = new Array(TDW_PATH_ASTAR_NodeHead_1.length);
+for (var count_1 = 0; count_1 < TDW_PATH_ASTAR_NodeHead_1.length; count_1++) {
+	TDW_PATH_ASTAR_NodeHead_2[count_1] =
+		D2JSP_UTIL_FORMAT_LJust("", TDW_PATH_ASTAR_NodeHead_1[count_1].length,
+		"=");
+	TDW_PATH_ASTAR_NodeHead_3[count_1] = 
+		D2JSP_UTIL_FORMAT_LJust("", TDW_PATH_ASTAR_NodeHead_1[count_1].length,
+		"-");
+}	
+var TDW_PATH_ASTAR_NodeText_1 = TDW_PATH_ASTAR_NodeHead_1.join(" ");
+var TDW_PATH_ASTAR_NodeText_2 = TDW_PATH_ASTAR_NodeHead_2.join(" ");
+var TDW_PATH_ASTAR_NodeText_3 = TDW_PATH_ASTAR_NodeHead_3.join(" ");
+var TDW_PATH_ASTAR_NodeText_0 = D2JSP_UTIL_FORMAT_LJust("",
+	TDW_PATH_ASTAR_NodeText_1.length, "^");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_Node(room_obj, target_room_obj, parent_node, is_diagonal)
+{
+	this.room_obj     = room_obj;
+	this.parent_node  = parent_node;
+	this.h_cost       = Math.abs(room_obj.room_row - target_room_obj.room_row) +
+								Math.abs(room_obj.room_col - target_room_obj.room_col);
+
+	this.calcGCost    = function(parent_node, is_diagonal) {
+		return((!parent_node) ? 0 :
+			(parent_node.g_cost + ((is_diagonal) ? 14 : 10)));
+	}
+
+	this.g_cost       = this.calcGCost(parent_node, is_diagonal);
+	this.f_cost       = this.g_cost + this.h_cost;
+
+	this.changeParent = function(new_parent_node, is_diagonal) {
+		this.parent_node = new_parent_node;
+		this.g_cost      = this.calcGCost(parent_node, is_diagonal);
+		this.f_cost      = this.g_cost + this.h_cost;
+	}
+
+	this.calcFCost    = function(parent_node, is_diagonal) {
+		return(this.calcGCost(parent_node, is_diagonal) + this.h_cost);
+	}
+
+	this.toText       = function() {
+		return("[" +
+			this.toStringRoom() + "] [" +
+			((this.parent_node) ? this.parent_node.toStringRoom() :
+			D2JSP_UTIL_FORMAT_Center("N/A", 4 + 1 + 1 + 3 + 2 + 3 + 1, " ")) +
+			"]" +
+			" " + D2JSP_UTIL_FORMAT_RJust(this.f_cost, 7) + 
+			" " + D2JSP_UTIL_FORMAT_RJust(this.g_cost, 7) + 
+			" " + D2JSP_UTIL_FORMAT_RJust(this.h_cost, 7));
+	}
+
+	this.toStringRoom = function() {
+		return(D2JSP_UTIL_FORMAT_RJust(this.room_obj.number, 4) + ":[" +
+			D2JSP_UTIL_FORMAT_RJust(this.room_obj.room_row, 3) + ", " +
+			D2JSP_UTIL_FORMAT_RJust(this.room_obj.room_col, 3) + "]");
+	}
+
+	this.toString     = function() {
+		return("TDW_PATH_ASTAR_Node(): [" +
+			this.toStringRoom() + "], parent = [" +
+			((this.parent_node) ? this.parent_node.toStringRoom() :
+			D2JSP_UTIL_FORMAT_Center("N/A", 4 + 1 + 1 + 3 + 2 + 3 + 1, " ")) +
+			"]" +
+			", f-score = " + D2JSP_UTIL_FORMAT_RJust(this.f_cost, 6) + 
+			", g-score = " + D2JSP_UTIL_FORMAT_RJust(this.g_cost, 6) + 
+			", h-score = " + D2JSP_UTIL_FORMAT_RJust(this.h_cost, 6));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_OpenList()
+{
+	this.open_count       = 0;
+	this.open_list        = new Array();
+	this.node_key_list    = new Array();
+
+	this.getCount         = function() {
+		return(this.open_count);
+	}
+
+	this.addNode          = function(new_node) {
+		if (!(new_node.f_cost in this.open_list))
+			this.open_list[new_node.f_cost] = new Array();
+		this.open_list[new_node.f_cost].push(new_node);
+		this.node_key_list[new_node.room_obj.room_row + "|" +
+			new_node.room_obj.room_col] = [new_node, new_node.f_cost,
+				this.open_list[new_node.f_cost].length - 1];
+		this.open_count++;
+	}
+
+	this.findNode         = function(room_obj) {
+		return(this.node_key_list[room_obj.room_row + "|" + room_obj.room_col])
+	}
+
+	this.removeNode       = function(open_list_index, element_index) {
+		if (this.open_list[open_list_index] &&
+			(this.open_list[open_list_index].length > element_index)) {
+			this.open_list[open_list_index].splice(element_index, 1);
+			this.open_count--;
+		}
+	}
+
+	this.findLowestFScore = function() {
+		for (var count_1 = 0; count_1 < this.open_list.length; count_1++) {
+			if (this.open_list[count_1] && this.open_list[count_1].length)
+//				return([this.open_list[count_1][0], count_1, 0]);
+				return([this.open_list[count_1][this.open_list[count_1].length - 1],
+					count_1, this.open_list[count_1].length - 1]);
+		}
+		return(null);
+	}
+
+	this.toLog            = function(log_obj) {
+		var out_list = this.toTextList();
+		D2JSP_UTIL_LOG_SelectALog(log_obj).logInfoQuiet(out_list);
+	}
+
+	this.toTextList       = function() {
+		var out_list = new Array();
+		out_list.push(TDW_PATH_ASTAR_NodeText_0);
+		out_list.push("Open List");
+		out_list.push(TDW_PATH_ASTAR_NodeText_2);
+		out_list.push(TDW_PATH_ASTAR_NodeText_1);
+		out_list.push(TDW_PATH_ASTAR_NodeText_3);
+		for (var count_1 = 0; count_1 < this.open_list.length; count_1++) {
+			if (this.open_list[count_1] && this.open_list[count_1].length) {
+				for (var count_2 = 0; count_2 < this.open_list[count_1].length;
+					count_2++)
+					out_list.push(this.open_list[count_1][count_2].toText());
+			}
+		}
+		out_list.push(TDW_PATH_ASTAR_NodeText_2);
+		return(out_list);
+	}
+
+	this.toString         = function() {
+		return("TDW_PATH_ASTAR_OpenList(): node count = " + this.open_count);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_ClosedList()
+{
+	this.node_key_list    = new Array();
+
+	this.addNode          = function(new_node) {
+		this.node_key_list[new_node.room_obj.room_row + "|" +
+			new_node.room_obj.room_col] = new_node;
+	}
+
+	this.findNode         = function(room_obj) {
+		return(this.node_key_list[room_obj.room_row + "|" + room_obj.room_col])
+	}
+
+	this.toLog            = function(log_obj) {
+		var out_list = this.toTextList();
+		D2JSP_UTIL_LOG_SelectALog(log_obj).logInfoQuiet(out_list);
+	}
+
+	this.toTextList       = function() {
+		var out_list = new Array();
+		out_list.push(TDW_PATH_ASTAR_NodeText_0);
+		out_list.push("Closed List");
+		out_list.push(TDW_PATH_ASTAR_NodeText_2);
+		out_list.push(TDW_PATH_ASTAR_NodeText_1);
+		out_list.push(TDW_PATH_ASTAR_NodeText_3);
+		for (var this_prop in this.node_key_list)
+			out_list.push(this.node_key_list[this_prop].toText());
+		out_list.push(TDW_PATH_ASTAR_NodeText_2);
+		return(out_list);
+	}
+
+	this.toString         = function() {
+		return("TDW_PATH_ASTAR_ClosedList(): node count = " +
+			D2JSP_UTIL_GEN_CountHashElements(this.node_key_list));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_Path(area, start_coord, end_coord, build_flags,
+	node_list, time_init, time_pathing, time_final, time_total)
+{
+	this.area         = area;
+	this.start_coord  = start_coord;
+	this.end_coord    = end_coord;
+	this.build_flags  = build_flags;
+	this.node_list    = node_list;
+	this.time_init    = time_init;
+	this.time_pathing = time_pathing;
+	this.time_final   = time_final;
+	this.time_total   = time_total;
+
+	this.toPairList   = function() {
+		var out_list = new Array(this.node_list.length);
+		for (var count_1 = 0; count_1 < this.node_list.length; count_1++)
+			out_list[count_1] = [this.node_list[count_1].x,
+				this.node_list[count_1].y];
+		return(out_list);
+	}
+
+	this.toLog            = function(log_obj) {
+		var out_list = this.toTextList();
+		D2JSP_UTIL_LOG_SelectALog(log_obj).logInfoQuiet(out_list);
+	}
+
+	this.toTextList       = function() {
+		var out_list = new Array();
+		out_list.push(TDW_PATH_ASTAR_NodeText_0);
+		out_list.push("TDW A* Pathing");
+		out_list.push("Area             : " +
+			D2JSP_UTIL_FORMAT_RJust(this.area, 3) + " (" +
+			D2JSP_AREA_AreaToName(this.area) + ")");
+		out_list.push("Start Coordinate : [" + this.start_coord + "]");
+		out_list.push("End Coordinate   : [" + this.end_coord + "]");
+		out_list.push("Build Flags      : 0x" + this.build_flags.toString(16));
+		out_list.push("Time Initializing: " +
+			D2JSP_UTIL_FORMAT_RJust((this.time_init / 1000).toFixed(3), 8));
+		out_list.push("Time Pathing     : " +
+			D2JSP_UTIL_FORMAT_RJust((this.time_pathing / 1000).toFixed(3), 8));
+		out_list.push("Time Finalizing  : " +
+			D2JSP_UTIL_FORMAT_RJust((this.time_final / 1000).toFixed(3), 8));
+		out_list.push("Time Total       : " +
+			D2JSP_UTIL_FORMAT_RJust((this.time_total / 1000).toFixed(3), 8));
+		out_list.push(TDW_PATH_ASTAR_NodeText_2);
+		out_list.push(TDW_PATH_ASTAR_NodeText_1);
+		out_list.push(TDW_PATH_ASTAR_NodeText_3);
+		for (var count_1 = 0; count_1 < this.node_list.length; count_1++)
+			out_list.push(this.node_list[count_1].toText());
+		out_list.push(TDW_PATH_ASTAR_NodeText_2);
+		return(out_list);
+	}
+
+	this.toString         = function() {
+		return("TDW_PATH_ASTAR_Path(): node count = " +
+			D2JSP_UTIL_GEN_CountHashElements(this.node_list));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_PATH_MAP_BUILD_FLAG_NO_DIAGONAL = 0x8000;
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_FindPath(in_area, start_coord, end_coord, build_flags)
+{
+	var start_time_1 = getTickCount();
+	var start_time_2 = start_time_1;
+	var end_time;
+	var time_init;
+	var time_pathing;
+	var time_final;
+	var time_total;
+
+	in_area = (in_area != null) ? in_area : me.area;
+
+	if (!D2JSP_AREA_IsValidInGame(in_area))
+		return(null);
+
+	if (start_coord == null)
+		start_coord = [me.x, me.y];
+
+	if ((!D2JSP_UTIL_GEN_TypeOfCoord(start_coord)) ||
+		(!D2JSP_UTIL_GEN_TypeOfCoord(end_coord)))
+		return(null);
+
+	TDW_PATH_CreateArea(in_area);
+	if (!TDW_PATH_IsAreaCreated(in_area))
+		return(null);
+
+	var area_ref = TDW_PATH_MapGlobal.area_list[in_area];
+
+	var start_meta_map = area_ref.getMetaCoordsByXYPair(start_coord);
+	if (!start_meta_map)
+		return(null);
+
+	var end_meta_map = area_ref.getMetaCoordsByXYPair(end_coord);
+	if (!end_meta_map)
+		return(null);
+
+	// //////////////////////////////////////////////////////////////////////
+	// Resolve the start and end points to rooms within the area...
+	var start_room_obj = area_ref.meta_map[start_meta_map[0]][start_meta_map[1]];
+	var end_room_obj   = area_ref.meta_map[end_meta_map[0]][end_meta_map[1]];
+	// //////////////////////////////////////////////////////////////////////
+
+/*
+	// //////////////////////////////////////////////////////////////////////
+	// Ensure that the start room actually has a place for the player...
+	if (!start_room_obj.getCenterAccessible())
+		return(null);
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	// Ensure that the end room actually has a place for the player...
+	if (!end_room_obj.getCenterAccessible())
+		return(null);
+	// //////////////////////////////////////////////////////////////////////
+*/
+
+	// //////////////////////////////////////////////////////////////////////
+	//	Special case handling for start and end points in the same room.
+	if ((start_meta_map[0] == end_meta_map[0]) &&
+		(start_meta_map[1] == end_meta_map[1])) {
+		end_time     = getTickCount();
+		time_init    = end_time - start_time_2;
+		time_pathing = end_time - start_time_2;
+		var target_node = new TDW_PATH_ASTAR_Node(start_room_obj, end_room_obj,
+			null, false);
+		start_time_2 = end_time;
+		time_final   = end_time - start_time_2;
+		time_total   = end_time - start_time_1;
+		return(new TDW_PATH_ASTAR_Path(in_area, start_coord, end_coord,
+			build_flags, [target_node], time_init, time_pathing, time_final,
+			time_total));
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	var open_list      = new TDW_PATH_ASTAR_OpenList();
+	var closed_list    = new TDW_PATH_ASTAR_ClosedList();
+
+	var target_node    = null;
+
+	end_time           = getTickCount();
+	time_init          = end_time - start_time_2;
+	start_time_2       = end_time;
+
+	open_list.addNode(new TDW_PATH_ASTAR_Node(start_room_obj, end_room_obj,
+		null, false));
+
+	while (open_list.getCount()) {
+		var current_node   = open_list.findLowestFScore();
+		var adjacent_rooms = area_ref.getAdjacentRooms(current_node[0].room_obj);
+		open_list.removeNode(current_node[1], current_node[2]);
+		closed_list.addNode(current_node[0]);
+		for (var count_1 = 0; count_1 < adjacent_rooms.length; count_1++) {
+			if (!closed_list.findNode(adjacent_rooms[count_1])) {
+				if (!adjacent_rooms[count_1].is_pathable)
+					continue;
+				var is_diagonal = ((current_node[0].room_obj.room_row !=
+					adjacent_rooms[count_1].room_row) &&
+					(current_node[0].room_obj.room_col !=
+					adjacent_rooms[count_1].room_col)) ? true : false;
+				if (is_diagonal && (build_flags & TDW_PATH_MAP_BUILD_FLAG_NO_DIAGONAL))
+					continue;
+				var adjacent_open = open_list.findNode(adjacent_rooms[count_1]);
+				if (!adjacent_open) {
+					if ((end_meta_map[0] == adjacent_rooms[count_1].room_row) &&
+						(end_meta_map[1] == adjacent_rooms[count_1].room_col)) {
+						target_node = new TDW_PATH_ASTAR_Node(adjacent_rooms[count_1],
+							end_room_obj, current_node[0], is_diagonal);
+						break;
+					}
+					var room_center =
+						(build_flags & TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK) ?
+						adjacent_rooms[count_1].getCenterSmart() :
+						adjacent_rooms[count_1].getCenterAccessible();
+					if (room_center) {
+						var new_node = new TDW_PATH_ASTAR_Node(adjacent_rooms[count_1],
+							end_room_obj, current_node[0], is_diagonal);
+						open_list.addNode(new_node);
+					}
+				}
+				else if (adjacent_open[0].calcGCost(current_node[0], is_diagonal) <
+					adjacent_open[0].g_cost) {
+					open_list.removeNode(adjacent_open[1], adjacent_open[2]);
+					adjacent_open[0].changeParent(current_node[0], is_diagonal);
+					open_list.addNode(adjacent_open[0]);
+				}
+			}
+		}
+		if (target_node)
+			break;
+	}
+
+	if (!target_node)
+		return(null);
+
+	end_time     = getTickCount();
+	time_pathing = end_time - start_time_2;
+	start_time_2 = end_time;
+
+	var node_list = new Array();
+	while (target_node) {
+		node_list.push(target_node);
+		target_node = target_node.parent_node;
+	}
+
+	end_time   = getTickCount();
+	time_final = end_time - start_time_2;
+	time_total = end_time - start_time_1;
+
+	return(new TDW_PATH_ASTAR_Path(in_area, start_coord, end_coord, build_flags,
+		node_list.reverse(), time_init, time_pathing, time_final, time_total));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_Test()
+{
+	var log_obj = new D2JSP_UTIL_Log("output/RegressionTest.TDW_Path.ASTAR.log");
+
+//	TDW_PATH_ASTAR_TestShenk(log_obj);
+	TDW_PATH_ASTAR_TestArcane(log_obj);
+
+	log_obj.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_TestCore(area, src_coords, dst_coords, log_obj)
+{
+	var astar_path  = TDW_PATH_ASTAR_FindPath(area, src_coords, dst_coords,
+		TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK | TDW_PATH_MAP_BUILD_FLAG_NO_DIAGONAL);
+
+	log_obj.logInfo("TDW_PATH_ASTAR_FindPath() total time   = " +
+		(astar_path.time_total / 1000).toFixed(3));
+	log_obj.logInfo("TDW_PATH_ASTAR_FindPath() return value = [" + astar_path + "]");
+
+	log_obj.emitSep();
+	astar_path.toLog(log_obj);
+	log_obj.emitSep();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_TestArcane(log_obj)
+{
+	if (me.area != D2JSP_AREA_ARCANE_SANCTUARY)
+		TDW_MOVE_WaypointUse(D2JSP_AREA_ARCANE_SANCTUARY);
+
+	if ((me.area != D2JSP_AREA_ARCANE_SANCTUARY) ||
+		(!getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "waypoint"))) {
+		log_obj.logError("Must be near " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_ARCANE_SANCTUARY) +
+			" waypoint to run this test.");
+		return(-1);
+	}
+
+	var summoner_room = D2JSP_ROOM_IsRoomInArea([525, 526, 527, 528]);
+	if (!summoner_room) {
+		log_obj.logError("Unable to locate The Summoner's room within " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_ARCANE_SANCTUARY) + ".");
+		return(-1);
+	}
+
+	TDW_PATH_CreateArea(D2JSP_AREA_ARCANE_SANCTUARY);
+
+	TDW_PATH_ASTAR_TestCore(D2JSP_AREA_ARCANE_SANCTUARY, null,
+		[summoner_room.x * 5, summoner_room.y * 5], log_obj);
+
+	TDW_PATH_ASTAR_TestCore(D2JSP_AREA_ARCANE_SANCTUARY,
+		[me.x, me.y], [me.x + 10, me.y + 10], log_obj);
+
+	TDW_MOVE_ReturnToTown();
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PATH_ASTAR_TestShenk(log_obj)
+{
+	var TDW_BOT_PATH_BloodyShenkLocation    = [3906, 5115];
+
+	if (me.area != D2JSP_AREA_BLOODY_FOOTHILLS)
+		TDW_MOVE_WaypointUse(D2JSP_AREA_BLOODY_FOOTHILLS);
+
+	if ((me.area != D2JSP_AREA_BLOODY_FOOTHILLS) ||
+		(!getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "gate"))) {
+		log_obj.logError("Must be near " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_BLOODY_FOOTHILLS) +
+			" gate to run this test.");
+		return(-1);
+	}
+
+	TDW_PATH_CreateArea(D2JSP_AREA_BLOODY_FOOTHILLS);
+
+	TDW_PATH_ASTAR_TestCore(D2JSP_AREA_BLOODY_FOOTHILLS, null,
+		TDW_BOT_PATH_BloodyShenkLocation, log_obj);
+
+	TDW_MOVE_ReturnToTown();
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

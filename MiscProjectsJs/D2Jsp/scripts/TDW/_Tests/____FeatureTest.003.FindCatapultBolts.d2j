@@ -1,0 +1,35 @@
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+
+var NPC_Hash = new Array();
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	while (true) {
+		var npc_count = 0;
+		var this_npc  = getUnit(D2JSP_UTIL_GETUNIT_NPC);
+		if (this_npc) {
+			do {
+				if ((this_npc.name == "Catapult") &&
+					(Dist(me.x, me.y, this_npc.x, this_npc.y) < 20)) {
+					print("Found a " + this_npc.name + ".");
+					load("MLB/MLB_DataDump.d2j");
+					delay(10000);
+					print("Data dump done.");
+					print("Stopping");
+					stop();
+				}
+			} while (this_npc && this_npc.getNext());
+		}
+		me.overhead("Looking for NPCs");
+		delay(500);
+	}
+}
+
+

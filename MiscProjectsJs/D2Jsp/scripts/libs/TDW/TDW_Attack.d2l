@@ -1,0 +1,563 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Attack Lib Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Attack.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Specialized bot library.
+//
+// Revison History : 2003-09-02 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_Attack_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_Attack_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Skills.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_ATTACK_One(skill_id)
+{
+	this.__BASECLASS__TDW_ATTACK_One__ = D2JSP_SKILL_Core;
+	this.__BASECLASS__TDW_ATTACK_One__(skill_id);
+
+	this.level            = me.getSkill(this.use_name);
+	this.element_dmg_list = new Array(D2JSP_UTIL_DAMAGE_COUNT);
+
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++)
+		this.element_dmg_list[count_1] =
+			(this.element_dmg == count_1) ? this.level : 0;
+}
+TDW_ATTACK_One.prototype = new D2JSP_SKILL_Core;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_ATTACK_GetInfoForClassid(in_classid)
+{
+	var out_list = new Array();
+
+	in_classid = (arguments.length) ? in_classid : me.classid;
+
+	if ((in_classid >= 0) && (in_classid < 7)) {
+		for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+			count_1++) {
+			if (((count_1 >= D2JSP_SKILL_PlayerClassIndices[in_classid][0]) &&
+				(count_1 <= D2JSP_SKILL_PlayerClassIndices[in_classid][1])) ||
+				((count_1 >= D2JSP_SKILL_PlayerClassIndices[7][0]) &&
+				(count_1 <= D2JSP_SKILL_PlayerClassIndices[7][1]))) {
+				var skill_info = new TDW_ATTACK_One(count_1);
+				if (((skill_info.classid == in_classid) ||
+					(skill_info.classid & 255)) && (!skill_info.monster_only))
+					out_list.push(skill_info);
+			}
+		}
+	}
+
+	return(out_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_ATTACK_GetAttackList()
+{
+	var attack_skill_list = new Array(D2JSP_UTIL_DAMAGE_COUNT);
+	var skill_info_list   = TDW_ATTACK_GetInfoForClassid(me.classid);
+
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++)
+		attack_skill_list[count_1] = new Array();
+
+	for (var count_1 = 0; count_1 < skill_info_list.length; count_1++) {
+		var this_skill = skill_info_list[count_1];
+		if (((this_skill.classid == me.classid) || (this_skill.classid == 255)) &&
+			this_skill.is_attack && (this_skill.element_dmg >= 0) &&
+			(this_skill.element_dmg < D2JSP_UTIL_DAMAGE_COUNT)) {
+			if ((this_skill.level = me.getSkill(this_skill.use_name)) > 0)
+				attack_skill_list[this_skill.element_dmg].push(this_skill);
+		}
+	}
+
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+		attack_skill_list[count_1].sort(D2JSP_SKILL_Core_CompareByLevel);
+		attack_skill_list[count_1].reverse();
+	}
+
+	return(attack_skill_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_ATTACK_Attack_EXCLUDE_DEFAULT_ATTACK = 0x00000001;
+var TDW_ATTACK_Attack_EXCLUDE_STATIC_FIELD   = 0x00000002;
+var TDW_ATTACK_Attack_EXCLUDE_BLAZE          = 0x00000004;
+var TDW_ATTACK_Attack_EXCLUDE_WARCRY         = 0x00000008;
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_ATTACK_Attack()
+{
+	this.attack_list              = TDW_ATTACK_GetAttackList();
+	this.attack_spec              = new Array();
+	this.no_select_time           = "";
+
+	this.removeAttack             = TDW_ATTACK_Attack_removeAttack;
+	this.findAttack               = TDW_ATTACK_Attack_findAttack;
+	this.performAttack            = TDW_ATTACK_Attack_performAttack;
+	this.performAttackBasic       = TDW_ATTACK_Attack_performAttackBasic;
+	this.selectAttack             = TDW_ATTACK_Attack_selectAttack;
+	this.selectAttackBasic        = TDW_ATTACK_Attack_selectAttackBasic;
+	this.performAttackElement     = TDW_ATTACK_Attack_performAttackElement;
+	this.selectAttackElement      = TDW_ATTACK_Attack_selectAttackElement;
+	this.selectAttackElementBasic = TDW_ATTACK_Attack_selectAttackElementBasic;
+	this.getAttackList            = TDW_ATTACK_Attack_getAttackList;
+	this.getAttackListBasic       = TDW_ATTACK_Attack_getAttackListBasic;
+	this.orderAttackList          = TDW_ATTACK_Attack_orderAttackList;
+	this.checkForAttack           = TDW_ATTACK_Attack_checkForAttack;
+	this.toString                 = TDW_ATTACK_Attack_toString;
+	this.toStringList             = TDW_ATTACK_Attack_toStringList;
+	this.analyzeAttack            = TDW_ATTACK_Attack_analyzeAttack;
+	this.getResists               = TDW_ATTACK_Attack_getResists;
+	this.adjustResists            = TDW_ATTACK_Attack_adjustResists;
+
+	var index_ib = null;
+	var index_gs = null;
+	for (var count_1 = 0; count_1 < this.attack_list.length; count_1++) {
+		for (var count_2 = 0; count_2 < this.attack_list[count_1].length;
+			count_2++) {
+			if (this.attack_list[count_1][count_2].id != D2JSP_SKILL_STATIC_FIELD &&
+				this.attack_list[count_1][count_2].id != D2JSP_SKILL_THUNDER_STORM) {
+				var this_dmg =
+					new D2JSP_SKILL_Damage(this.attack_list[count_1][count_2]);
+				if (this_dmg.damage_use) {
+					this.attack_spec.push([0, this.attack_list[count_1][count_2],
+						this_dmg]);
+					if (this.attack_list[count_1][count_2].id ==
+						D2JSP_SKILL_ICE_BLAST)
+						index_ib = [count_1, count_2, this.attack_spec.length - 1];
+					else if (this.attack_list[count_1][count_2].id ==
+						D2JSP_SKILL_GLACIAL_SPIKE)
+						index_gs = [count_1, count_2, this.attack_spec.length - 1];
+				}
+			}
+		}
+	}
+
+	// Applies a simple heuristic to the determination of most damaging cold
+	// skills:
+	//		If Ice Blast and Glacial Spike have the same skill level, then
+	//		Glacial Spike damage is set to the Ice Blast damage + 1. This
+	//		ensures that take the splash damage of Glacial Spike into account.
+	if (index_ib && index_gs &&
+		(this.attack_spec[index_ib[2]][2].damage_use >=
+		this.attack_spec[index_gs[2]][2].damage_use)) {
+		var level_diff = this.attack_list[index_ib[0]][index_ib[1]].level -
+			this.attack_list[index_gs[0]][index_gs[1]].level;
+/*
+		if ((level_diff >= -2) && (level_diff <= 2))
+			this.attack_spec[index_gs[2]][2].damage_use =
+				this.attack_spec[index_ib[2]][2].damage_use + 1;
+*/
+		if ((level_diff >= -2) && (level_diff <= 2))
+			this.attack_spec[index_ib[2]][2].damage_use =
+				this.attack_spec[index_gs[2]][2].damage_use - 1;
+	}
+
+	function TDW_ATTACK_Attack_removeAttack(skill_id) {
+		if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(skill_id)) {
+			var return_code = false;
+			for (count_1 = 0; count_1 < skill_id.length; count_1++) {
+				if (this.removeAttack(skill_id[count_1]) == true)
+					return_code = true;
+			}
+			return(return_code);
+		}
+
+		for (var count_1 = 0; count_1 < this.attack_spec.length; count_1++) {
+			if ((D2JSP_UTIL_GEN_TypeOfNumber(skill_id) &&
+				(this.attack_spec[count_1][1].id == skill_id)) ||
+				(D2JSP_UTIL_GEN_TypeOfString(skill_id) &&
+				(this.attack_spec[count_1][1].name_local_lc ==
+				skill_id.toLowerCase()))) {
+				this.attack_spec.splice(count_1, 1);
+				return(true);
+			}
+		}
+		return(false);
+	}
+
+	// Locates and returns an attack by skill id or skill name.
+	function TDW_ATTACK_Attack_findAttack(skill_id) {
+		for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+			for (var count_2 = 0; count_2 < this.attack_list[count_1].length;
+				count_2++) {
+				if ((D2JSP_UTIL_GEN_TypeOfNumber(skill_id) &&
+					(this.attack_list[count_1][count_2].id == skill_id)) ||
+					(D2JSP_UTIL_GEN_TypeOfString(skill_id) &&
+					(this.attack_list[count_1][count_2].name_local_lc ==
+					skill_id.toLowerCase())))
+					return(this.attack_list[count_1][count_2]);
+			}
+		}
+		return(null);
+	}
+
+	// Selects an appropriate attack for an enemy and performs it.
+	function TDW_ATTACK_Attack_performAttack(target, min_level, flags) {
+		var resists  = this.getResists(target);
+		var coords   = (target instanceof TDW_BOT_ATTACK_Cluster) ?
+			 target.coord[TDW_BOT_ATTACK_CLUSTER_MEAN] : [target.x, target.y];
+		var distance = myDist(coords[0], coords[1]);
+		var attack   = this.selectAttack(resists, distance, min_level, flags);
+
+		if (attack)
+			this.performAttackBasic(attack, target);
+/*
+		else
+			TDW_BOT_Log.logInfo("No attack could be selected for " +
+				((target instanceof TDW_BOT_ATTACK_Cluster) ? "cluster " : "npc ") +
+				" (resists = [" + resists + "], distance = " + distance + ") ---> "+
+				" no select time list = [" + this.no_select_time + "].");
+*/
+
+		return(attack);
+	}
+
+	// Basic attack performance logic.
+	function TDW_ATTACK_Attack_performAttackBasic(attack, target) {
+		var skill_hand = (attack.hand_both) ? 1 : 0;
+
+		if (attack.radial)
+			D2JSP_SKILL_SetAndUseSkillBasic(false, attack.use_name, skill_hand);
+		else if (target instanceof TDW_BOT_ATTACK_Cluster)
+			D2JSP_SKILL_SetAndUseSkillBasic(false, attack.use_name, skill_hand,
+				target.coord[TDW_BOT_ATTACK_CLUSTER_MEAN][0],
+				target.coord[TDW_BOT_ATTACK_CLUSTER_MEAN][1]);
+		else										// Assume an NPC.
+			D2JSP_SKILL_SetAndUseSkillBasic(false, attack.use_name, skill_hand,
+				target);
+
+		delay(10);
+	}
+
+	// Selects an attack for use against an enemy.
+	function TDW_ATTACK_Attack_selectAttack(resists, distance, min_level, flags) {
+		return(this.selectAttackBasic(this.orderAttackList(resists, distance,
+			min_level, flags)));
+	}
+
+	// Basic attack selection logic.
+	function TDW_ATTACK_Attack_selectAttackBasic(attack_list) {
+		for (var count_1 = 0; count_1 < attack_list.length; count_1++) {
+			if (D2JSP_SKILL_CheckTimedSkillCast(attack_list[count_1].id))
+				return(attack_list[count_1]);
+		}
+	}
+
+	// Selects an appropriate elemental attack for an enemy and performs it.
+	function TDW_ATTACK_Attack_performAttackElement(element, target, min_level,
+		flags) {
+		var resists  = this.getResists(target);
+		var coords   = (target instanceof TDW_BOT_ATTACK_Cluster) ?
+			 target.coord[TDW_BOT_ATTACK_CLUSTER_MEAN] : [target.x, target.y];
+		var distance = myDist(coords[0], coords[1]);
+		var attack   = this.selectAttackElement(element, resists, distance,
+			min_level, flags);
+
+		if (attack)
+			this.performAttackBasic(attack, target);
+//		else
+//			TDW_BOT_Log.logInfo("No attack could be selected for " +
+//				((target instanceof TDW_BOT_ATTACK_Cluster) ? "cluster " : "npc ") +
+//				" (resists = [" + resists + "], distance = " + distance + ") ---> "+
+//				" no select time list = [" + this.no_select_time + "].");
+
+		return(attack);
+	}
+
+	// Selects a particular elemental attack for use against an enemy.
+	function TDW_ATTACK_Attack_selectAttackElement(element, resists, distance,
+		min_level, flags) {
+		return(this.selectAttackElementBasic(element,
+			this.orderAttackList(resists, distance, min_level, flags)));
+	}
+
+	// Basic attack selection logic for a particular element.
+	function TDW_ATTACK_Attack_selectAttackElementBasic(element, attack_list) {
+		for (var count_1 = 0; count_1 < attack_list.length; count_1++) {
+			if ((attack_list[count_1].element_type == element) &&
+				D2JSP_SKILL_CheckTimedSkillCast(attack_list[count_1].id))
+				return(attack_list[count_1]);
+		}
+
+this.no_select_time = "";
+for (var count_1 = 0; count_1 < attack_list.length; count_1++)
+	this.no_select_time += ((this.no_select_time == "") ? "" : ", ") +
+		attack_list[count_1].name + " = " + attack_list[count_1].distance;
+
+		return(null);
+	}
+
+	function TDW_ATTACK_Attack_getAttackList(target, min_level, flags) {
+		var resists  = this.getResists(target);
+		var coords   = (target instanceof TDW_BOT_ATTACK_Cluster) ?
+			 target.coord[TDW_BOT_ATTACK_CLUSTER_MEAN] : [target.x, target.y];
+		var distance = myDist(coords[0], coords[1]);
+
+		return(this.orderAttackList(resists, distance, min_level, flags));
+	}
+
+	function TDW_ATTACK_Attack_getAttackListBasic(target, min_level, flags) {
+		var resists  = this.getResists(target);
+		var coords   = (target instanceof TDW_BOT_ATTACK_Cluster) ?
+			 target.coord[TDW_BOT_ATTACK_CLUSTER_MEAN] : [target.x, target.y];
+
+		return(this.orderAttackList(resists, 1, min_level, flags));
+	}
+
+	// Orders the list of attacks by damage to an enemy.
+	function TDW_ATTACK_Attack_orderAttackList(resists, distance, min_level,
+		flags) {
+/*
+for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++)
+	resists[count_1] += (count_1 != D2JSP_UTIL_DAMAGE_MAGIC) ?
+		resists[D2JSP_UTIL_DAMAGE_MAGIC] : 0;
+*/
+
+		for (var count_1 = 0; count_1 < this.attack_spec.length; count_1++) {
+			var this_element = this.attack_spec[count_1][1].element_dmg;
+			if ((this_element != null) &&
+				(this.attack_spec[count_1][1].distance >= distance)) {
+				this_dmg = this.attack_spec[count_1][2].damage_use;
+				this.attack_spec[count_1][0] = (resists[this_element] >= 100) ? 0 :
+					(this.attack_spec[count_1][2].damage_use +
+					(((0 - resists[this_element]) / 100) *
+					this.attack_spec[count_1][2].damage_use));
+			}
+			else
+				this.attack_spec[count_1][0] = 0;
+		}
+		this.attack_spec.sort(TDW_ATTACK_Attack_compareAttackSpec);
+		this.attack_spec.reverse();
+
+		var attack_list = new Array();
+
+		for (var count_1 = 0; count_1 < this.attack_spec.length; count_1++) {
+			if (!this.attack_spec[count_1][0])
+				break;
+			attack_list.push(this.attack_spec[count_1][1]);
+		}
+
+		return(attack_list);
+	}
+
+	// Selects an appropriate attack for an enemy and performs it.
+	function TDW_ATTACK_Attack_checkForAttack(target, distance, min_level,
+		flags) {
+		var resists = this.getResists(target);
+		if (!D2JSP_UTIL_GEN_TypeOfUInt(distance)) {
+			var coords = (target instanceof TDW_BOT_ATTACK_Cluster) ?
+				 target.coord[TDW_BOT_ATTACK_CLUSTER_MEAN] : [target.x, target.y];
+			distance   = myDist(coords[0], coords[1]);
+		}
+		return(this.selectAttack(resists, distance, min_level, flags));
+	}
+
+	// Our friend...
+	function TDW_ATTACK_Attack_toString() {
+		var out_string = "";
+		for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+			out_string += "[" + D2JSP_UTIL_DAMAGE_BaseElementList[count_1] + ":";
+			for (var count_2 = 0; count_2 < this.attack_list[count_1].length;
+				count_2++)
+				out_string += ((count_2) ? ", " : "") +
+					this.attack_list[count_1][count_2].level + "=" +
+					this.attack_list[count_1][count_2].name;
+			out_string += "]";
+		}
+		return(out_string);
+	}
+
+	// For logging and debugging.
+	function TDW_ATTACK_Attack_toStringList() {
+		var out_list = new Array();
+		for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+			for (var count_2 = 0; count_2 < this.attack_list[count_1].length;
+				count_2++)
+				out_list.push(D2JSP_UTIL_FORMAT_LJust(
+					D2JSP_UTIL_DAMAGE_BaseElementList[count_1], 10) + ": " +
+					D2JSP_UTIL_FORMAT_RJust(this.attack_list[count_1][count_2].
+					level, 3) + ": " + this.attack_list[count_1][count_2].name);
+		}
+		return(out_list);
+	}
+
+	// Describes the considerations used in selection of an attack.
+	// Note: The in_resists parameter should be the enemy resistances BEFORE
+	//			application of of Cold Mastery.
+	function TDW_ATTACK_Attack_analyzeAttack(in_resists, distance, min_level,
+		flags) {
+		var resists  = this.adjustResists(in_resists);
+		var out_list = new Array();
+
+		out_list.push("======================================================");
+		out_list.push("Enemy Distance: " + distance);
+		out_list.push("");
+		for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+			var tmp_string = D2JSP_UTIL_FORMAT_RJust(resists[count_1], 5) +
+				"% Enemy " + D2JSP_UTIL_DAMAGE_BaseElementList[count_1] +
+				" Resistance";
+			if ((count_1 == D2JSP_UTIL_DAMAGE_COLD) &&
+				me.getSkill(D2JSP_SKILL_COLD_MASTERY, 0) &&
+				(in_resists[D2JSP_UTIL_DAMAGE_COLD] < 100))
+				tmp_string += " (originally " + in_resists[D2JSP_UTIL_DAMAGE_COLD] +
+					"% and adjusted after application of level " +
+					me.getSkill(D2JSP_SKILL_COLD_MASTERY, 0) + " " +
+					D2JSP_SKILL_SkillList[D2JSP_SKILL_COLD_MASTERY] +
+					", which reduces cold resistance by up to " +
+					D2JSP_SKILL_GetColdMasteryPercent() + "%)";
+			out_list.push(tmp_string);
+		}
+		out_list.push("------------------------------------------------------");
+		this.orderAttackList(resists, distance, min_level, flags);
+		for (var count_1 = 0; count_1 < this.attack_spec.length; count_1++)
+			out_list.push(D2JSP_UTIL_FORMAT_RJust(
+				this.attack_spec[count_1][0].toFixed(2), 9) +
+				" nomimal damage using " +
+				this.attack_spec[count_1][2].toStringFormatted());
+		out_list.push("------------------------------------------------------");
+		var attack = this.selectAttack(resists, distance, min_level, flags);
+		if (attack != null)
+			out_list.push("Attack selected = " + attack.name);
+		else
+			out_list.push("No attack could be selected.");
+		out_list.push("======================================================");
+
+		return(out_list);
+	}
+
+	function TDW_ATTACK_Attack_getResists(target) {
+		var resists      =
+			this.adjustResists((target instanceof TDW_BOT_ATTACK_Cluster) ?
+			target.getResistList() : D2JSP_STAT_RESIST_GetResistsForUnit(target));
+		var cold_mastery = D2JSP_SKILL_GetColdMasteryPercent();
+		if (cold_mastery && (resists[D2JSP_UTIL_DAMAGE_COLD] < 100))
+			resists[D2JSP_UTIL_DAMAGE_COLD] = Math.max(-100,
+				resists[D2JSP_UTIL_DAMAGE_COLD] - cold_mastery);
+		return(resists);
+	}
+
+	function TDW_ATTACK_Attack_adjustResists(resists) {
+		var cold_mastery = D2JSP_SKILL_GetColdMasteryPercent();
+		var cold_resist  = resists[D2JSP_UTIL_DAMAGE_COLD];
+		if (cold_mastery && (cold_resist < 100))
+			cold_resist = Math.max(-100, cold_resist - cold_mastery);
+		return([resists[D2JSP_UTIL_DAMAGE_PHYSICAL],
+			resists[D2JSP_UTIL_DAMAGE_FIRE], resists[D2JSP_UTIL_DAMAGE_LIGHT],
+			resists[D2JSP_UTIL_DAMAGE_MAGIC], cold_resist,
+			resists[D2JSP_UTIL_DAMAGE_POISON]]);
+	}
+
+}
+// ----------------------------------------------------------------------------
+function TDW_ATTACK_Attack_compareAttackSpec(item_1, item_2)
+{
+	return(item_1[0] - item_2[0]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_Attack_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var file_name = "output/RegressionTest.TDW_Attack.d2l.txt";
+
+	var my_log = new D2JSP_UTIL_Log(file_name, "SkillAttackUsage", null,
+		null, null, true);
+
+	print("Writing 'TDW_Attack.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+/*
+	// Emit the complete list of all skills.
+	var skill_info_list = new Array();
+	for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 <= D2JSP_SKILL_MAXIMUM;
+		count_1++)
+		skill_info_list.push(new D2JSP_SKILL_Core(count_1));
+
+	my_log.logInfo(skill_info_list[0].toStringListHeader())
+	my_log.logInfo(skill_info_list[0].toStringListTrailer())
+	for (var count_1 = 0; count_1 < skill_info_list.length; count_1++)
+		my_log.logInfo(skill_info_list[count_1].toStringListItem());
+	my_log.logInfo(skill_info_list[0].toStringListTrailer())
+*/
+
+/*
+	// Emit attacks available to this character.
+	var attack_skill_list = D2JSP_SKILL_GetAttacksForMe();
+	for (var count_1 = 0; count_1 < D2JSP_UTIL_DAMAGE_COUNT; count_1++) {
+		while (attack_skill_list[count_1].length) {
+			my_log.logInfo(D2JSP_UTIL_FORMAT_LJust(
+				D2JSP_UTIL_DAMAGE_BaseElementList[count_1], 10) + ": " +
+				D2JSP_UTIL_FORMAT_RJust(attack_skill_list[count_1][0].level, 3) +
+				": " + attack_skill_list[count_1][0].name);
+			attack_skill_list[count_1].shift();
+		}
+	}
+*/
+
+	var my_attacks = new TDW_ATTACK_Attack();
+
+	my_log.logInfo(my_attacks.toStringList());
+
+	my_log.logInfo(my_attacks.analyzeAttack([-5, 0, 5, 50, 95, 100], 10, 1, null));
+
+	my_log.logInfo("Removal of attack Chain Lightning and Lightning = " +
+		my_attacks.removeAttack(["Chain Lightning", "Lightning"]));
+
+	my_log.logInfo(my_attacks.analyzeAttack([-5, 0, 5, 50, 95, 100], 10, 1, null));
+
+var iter_count = 10000;
+var start_time = new Date();
+for (var count_1 = 0; count_1 < iter_count; count_1++)
+	my_attacks.selectAttack([-5, 0, 5, 50, 95, 100], 10, 1, null);
+var total_time = (new Date()) - start_time;
+my_log.logInfo("********** 10000 Iteration Stress Test Done In Total=" +
+	(total_time / 1000).toFixed(3) +
+	", Mean=" + (total_time / iter_count / 1000).toFixed(3));
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

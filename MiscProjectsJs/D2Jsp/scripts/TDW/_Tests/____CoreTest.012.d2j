@@ -1,0 +1,72 @@
+/*
+	___CoreTest.012.d2j
+
+	Symptoms    :
+
+		The elite weapon 'Ogre Axe' (code 7o7) is picked up but not identified
+		(just stashed). This is being done both by SnagIt/BMItems and by my ISF,
+		which are to entirely different code bases --- they share NO common code.
+
+		Problem seems to manifest itself as follows:
+
+			1) Ogre Axes are picked up by code 707 because they qualify as
+				elite weapons. The idea is that such weapons will be identified
+				at some other point in the bot cycle to determine if they are
+				Cruel (or have some other interesting modifier).
+
+				Note that the pickup is by item code only. Item class should be
+				implied by the code.
+
+			2) At the identification stage of the bot cycle, the code looks for
+				items to be processed. Ogre Axes in the inventory which are
+				not identified would be candidates, except for the fact that
+				their item class is undefined. So they're just stashed.
+
+		Why does this happen? I think the answer is as follows:
+
+		The MPQ entry for item code '7o7' ('Ogre Axe') has the following norm,
+		ultra, and uber codes: 'bar', '9b7', and '7b7'. It's own code ('7o7',
+		which I've confirmed in-game) is not included in the list. Adding to the
+		confusion is the fact that '7b7' is actually the item code for 'Champion
+		Axe'.
+
+		It seems likely that the in-game/in-core determination of item class is
+		performed by comparison of the item code against the norm, ultra, and
+		uber codes. If the MPQ data is used for this comparison, it will
+		never match for Ogre Axes.
+
+		So the problem is most likely the result of SnagIt (and, in my case, ISF)
+		picking up Ogre Axes (because they're elite weapons as specified in the
+		INI), but they aren't being matched by a BMItems.ini (ISF) entry when it
+		comes time to ID stuff because it's item class is not elite.
+
+		To test with this script, you'll need an Ogre Axe of course...
+
+	Tested under :
+		D2 Loader for
+			28a Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	var this_item;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready");
+
+	this_item = getUnit(4);
+	if (this_item) {
+		do {
+			if (this_item.code == "7o7") {
+				print("Item Name: " + this_item.name);
+				print("Item Code: " + this_item.code);
+				print("Item Class: " + this_item.itemclass);
+				print("Quality: " + this_item.quality);
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	print("Script ending");
+}
+
+

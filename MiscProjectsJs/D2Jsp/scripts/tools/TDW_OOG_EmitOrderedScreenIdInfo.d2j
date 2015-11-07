@@ -1,0 +1,20 @@
+include("TDW/TDW_OOG_Utility.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var file_name   = "output/____TDW_OOG_OrderedScreenIdInfo.txt";
+	var file_handle = fileOpen(file_name, 1);
+
+	if (file_handle) {
+		print("Writing ordered screen id info to file '" + file_name + "'...");
+		TDW_OOG_DEBUG_EmitScreenIdInfo(file_handle);
+		file_handle.close();
+	}
+	else
+		print("ERROR: Unable to open file '" + file_name + "' for writing.");
+
+	print("Done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+

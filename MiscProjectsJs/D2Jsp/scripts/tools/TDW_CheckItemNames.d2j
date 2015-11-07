@@ -1,0 +1,62 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+
+var TDW_MP_FileHandle     = null;
+
+function main()
+{
+	var bad_count = 0;
+	var file_name;
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+
+	file_name = "output/TDW_CheckItemNames." + me.realm + "." + me.account +
+		"." + me.name + ".txt";
+
+	TDW_MP_FileHandle = fileOpen(file_name, 2);
+	if (TDW_MP_FileHandle) {
+		TDW_MP_FileHandle.writeLine("**********");
+		TDW_MP_FileHandle.writeLine("********** Run date: " + (new Date()));
+		var item_obj = getUnit(4);
+		if (item_obj) {
+			do {
+				bad_count += CheckItemName(item_obj);
+			} while (item_obj && item_obj.getNext());
+		}
+		print("Bad count = " + bad_count);
+	}
+	else
+		print("Unable to open TDW_CheckItemNames.d2j output file '" + file_name +
+			"' for writing.");
+
+	print("Done");
+	stop();
+}
+
+function CheckItemName(item_obj)
+{
+	var out_flag   = 0;
+	var out_string = "";
+	var count_1;
+	var char_code;
+
+	out_string = "Classid = " + item_obj.classid + ", item code = " +
+		item_obj.code + ": ";
+
+	for (count_1 = 0; count_1 < item_obj.name.length; count_1++) {
+		char_code = item_obj.name.charCodeAt(count_1);
+		if ((char_code < 32) || (char_code > 127)) {
+			out_string += "\n>>>[ASCII CODE " + char_code + "]\n>>>";
+			out_flag    = 1;
+		}
+		else
+			out_string += String.fromCharCode(char_code);
+	}
+
+	TDW_MP_FileHandle.writeLine(out_string);
+
+	return(out_flag);
+}
+

@@ -1,0 +1,1402 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Stats Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Stats.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion stat constants.
+//
+// Revison History : 2002-10-14 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// Notes           : The constants 'D2JSP_STATS_PROGRESSIVE_LIGHTNING' and
+//                   'D2JSP_STATS_PROGRESSIVE_TOHIT' have the same value
+//                   (323). This may be an error, but reflects accurately
+//                   their values in the MPQ file 'ItemStatCost.txt'.
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Stats_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Stats_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant stat values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STAT_STRENGTH                                             = 0;
+var D2JSP_STAT_ENERGY                                               = 1;
+var D2JSP_STAT_DEXTERITY                                            = 2;
+var D2JSP_STAT_VITALITY                                             = 3;
+var D2JSP_STAT_STATPTS                                              = 4;
+var D2JSP_STAT_NEWSKILLS                                            = 5;
+var D2JSP_STAT_HITPOINTS                                            = 6;
+var D2JSP_STAT_MAXHP                                                = 7;
+var D2JSP_STAT_MANA                                                 = 8;
+var D2JSP_STAT_MAXMANA                                              = 9;
+var D2JSP_STAT_STAMINA                                              = 10;
+var D2JSP_STAT_MAXSTAMINA                                           = 11;
+var D2JSP_STAT_LEVEL                                                = 12;
+var D2JSP_STAT_EXPERIENCE                                           = 13;
+var D2JSP_STAT_GOLD                                                 = 14;
+var D2JSP_STAT_GOLDBANK                                             = 15;
+var D2JSP_STAT_ITEM_ARMOR_PERCENT                                   = 16;
+var D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT                               = 17;
+var D2JSP_STAT_ITEM_MINDAMAGE_PERCENT                               = 18;
+var D2JSP_STAT_TOHIT                                                = 19;
+var D2JSP_STAT_TOBLOCK                                              = 20;
+var D2JSP_STAT_MINDAMAGE                                            = 21;
+var D2JSP_STAT_MAXDAMAGE                                            = 22;
+var D2JSP_STAT_SECONDARY_MINDAMAGE                                  = 23;
+var D2JSP_STAT_SECONDARY_MAXDAMAGE                                  = 24;
+var D2JSP_STAT_DAMAGEPERCENT                                        = 25;
+var D2JSP_STAT_MANARECOVERY                                         = 26;
+var D2JSP_STAT_MANARECOVERYBONUS                                    = 27;
+var D2JSP_STAT_STAMINARECOVERYBONUS                                 = 28;
+var D2JSP_STAT_LASTEXP                                              = 29;
+var D2JSP_STAT_NEXTEXP                                              = 30;
+var D2JSP_STAT_ARMORCLASS                                           = 31;
+var D2JSP_STAT_ARMORCLASS_VS_MISSILE                                = 32;
+var D2JSP_STAT_ARMORCLASS_VS_HTH                                    = 33;
+var D2JSP_STAT_NORMAL_DAMAGE_REDUCTION                              = 34;
+var D2JSP_STAT_MAGIC_DAMAGE_REDUCTION                               = 35;
+var D2JSP_STAT_DAMAGERESIST                                         = 36;
+var D2JSP_STAT_MAGICRESIST                                          = 37;
+var D2JSP_STAT_MAXMAGICRESIST                                       = 38;
+var D2JSP_STAT_FIRERESIST                                           = 39;
+var D2JSP_STAT_MAXFIRERESIST                                        = 40;
+var D2JSP_STAT_LIGHTRESIST                                          = 41;
+var D2JSP_STAT_MAXLIGHTRESIST                                       = 42;
+var D2JSP_STAT_COLDRESIST                                           = 43;
+var D2JSP_STAT_MAXCOLDRESIST                                        = 44;
+var D2JSP_STAT_POISONRESIST                                         = 45;
+var D2JSP_STAT_MAXPOISONRESIST                                      = 46;
+var D2JSP_STAT_DAMAGEAURA                                           = 47;
+var D2JSP_STAT_FIREMINDAM                                           = 48;
+var D2JSP_STAT_FIREMAXDAM                                           = 49;
+var D2JSP_STAT_LIGHTMINDAM                                          = 50;
+var D2JSP_STAT_LIGHTMAXDAM                                          = 51;
+var D2JSP_STAT_MAGICMINDAM                                          = 52;
+var D2JSP_STAT_MAGICMAXDAM                                          = 53;
+var D2JSP_STAT_COLDMINDAM                                           = 54;
+var D2JSP_STAT_COLDMAXDAM                                           = 55;
+var D2JSP_STAT_COLDLENGTH                                           = 56;
+var D2JSP_STAT_POISONMINDAM                                         = 57;
+var D2JSP_STAT_POISONMAXDAM                                         = 58;
+var D2JSP_STAT_POISONLENGTH                                         = 59;
+var D2JSP_STAT_LIFEDRAINMINDAM                                      = 60;
+var D2JSP_STAT_LIFEDRAINMAXDAM                                      = 61;
+var D2JSP_STAT_MANADRAINMINDAM                                      = 62;
+var D2JSP_STAT_MANADRAINMAXDAM                                      = 63;
+var D2JSP_STAT_STAMDRAINMINDAM                                      = 64;
+var D2JSP_STAT_STAMDRAINMAXDAM                                      = 65;
+var D2JSP_STAT_STUNLENGTH                                           = 66;
+var D2JSP_STAT_VELOCITYPERCENT                                      = 67;
+var D2JSP_STAT_ATTACKRATE                                           = 68;
+var D2JSP_STAT_OTHER_ANIMRATE                                       = 69;
+var D2JSP_STAT_QUANTITY                                             = 70;
+var D2JSP_STAT_VALUE                                                = 71;
+var D2JSP_STAT_DURABILITY                                           = 72;
+var D2JSP_STAT_MAXDURABILITY                                        = 73;
+var D2JSP_STAT_HPREGEN                                              = 74;
+var D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT                           = 75;
+var D2JSP_STAT_ITEM_MAXHP_PERCENT                                   = 76;
+var D2JSP_STAT_ITEM_MAXMANA_PERCENT                                 = 77;
+var D2JSP_STAT_ITEM_ATTACKERTAKESDAMAGE                             = 78;
+var D2JSP_STAT_ITEM_GOLDBONUS                                       = 79;
+var D2JSP_STAT_ITEM_MAGICBONUS                                      = 80;
+var D2JSP_STAT_ITEM_KNOCKBACK                                       = 81;
+var D2JSP_STAT_ITEM_TIMEDURATION                                    = 82;
+var D2JSP_STAT_ITEM_ADDAMASKILLPOINTS                               = 83;
+var D2JSP_STAT_ITEM_ADDPALSKILLPOINTS                               = 84;
+var D2JSP_STAT_ITEM_ADDNECSKILLPOINTS                               = 85;
+var D2JSP_STAT_ITEM_ADDSORSKILLPOINTS                               = 86;
+var D2JSP_STAT_ITEM_ADDBARSKILLPOINTS                               = 87;
+var D2JSP_STAT_ITEM_DOUBLEHERBDURATION                              = 88;
+var D2JSP_STAT_ITEM_LIGHTRADIUS                                     = 89;
+var D2JSP_STAT_ITEM_LIGHTCOLOR                                      = 90;
+var D2JSP_STAT_ITEM_REQ_PERCENT                                     = 91;
+var D2JSP_STAT_ITEM_FASTATTACKRATE                                  = 92;
+var D2JSP_STAT_ITEM_FASTERATTACKRATE                                = 93;
+var D2JSP_STAT_ITEM_FASTESTATTACKRATE                               = 94;
+var D2JSP_STAT_ITEM_FASTMOVEVELOCITY                                = 95;
+var D2JSP_STAT_ITEM_FASTERMOVEVELOCITY                              = 96;
+var D2JSP_STAT_ITEM_FASTESTMOVEVELOCITY                             = 97;
+var D2JSP_STAT_ITEM_FASTGETHITRATE                                  = 98;
+var D2JSP_STAT_ITEM_FASTERGETHITRATE                                = 99;
+var D2JSP_STAT_ITEM_FASTESTGETHITRATE                               = 100;
+var D2JSP_STAT_ITEM_FASTBLOCKRATE                                   = 101;
+var D2JSP_STAT_ITEM_FASTERBLOCKRATE                                 = 102;
+var D2JSP_STAT_ITEM_FASTESTBLOCKRATE                                = 103;
+var D2JSP_STAT_ITEM_FASTCASTRATE                                    = 104;
+var D2JSP_STAT_ITEM_FASTERCASTRATE                                  = 105;
+var D2JSP_STAT_ITEM_FASTESTCASTRATE                                 = 106;
+var D2JSP_STAT_ITEM_SINGLESKILL1                                    = 107;
+var D2JSP_STAT_ITEM_SINGLESKILL2                                    = 108;
+var D2JSP_STAT_ITEM_SINGLESKILL3                                    = 109;
+var D2JSP_STAT_ITEM_POISONLENGTHRESIST                              = 110;
+var D2JSP_STAT_ITEM_NORMALDAMAGE                                    = 111;
+var D2JSP_STAT_ITEM_HOWL                                            = 112;
+var D2JSP_STAT_ITEM_STUPIDITY                                       = 113;
+var D2JSP_STAT_ITEM_DAMAGETOMANA                                    = 114;
+var D2JSP_STAT_ITEM_IGNORETARGETAC                                  = 115;
+var D2JSP_STAT_ITEM_FRACTIONALTARGETAC                              = 116;
+var D2JSP_STAT_ITEM_PREVENTHEAL                                     = 117;
+var D2JSP_STAT_ITEM_HALFFREEZEDURATION                              = 118;
+var D2JSP_STAT_ITEM_TOHIT_PERCENT                                   = 119;
+var D2JSP_STAT_ITEM_DAMAGETARGETAC                                  = 120;
+var D2JSP_STAT_ITEM_DEMONDAMAGE_PERCENT                             = 121;
+var D2JSP_STAT_ITEM_UNDEADDAMAGE_PERCENT                            = 122;
+var D2JSP_STAT_ITEM_DEMON_TOHIT                                     = 123;
+var D2JSP_STAT_ITEM_UNDEAD_TOHIT                                    = 124;
+var D2JSP_STAT_ITEM_THROWABLE                                       = 125;
+var D2JSP_STAT_ITEM_FIRESKILL                                       = 126;
+var D2JSP_STAT_ITEM_ALLSKILLS                                       = 127;
+var D2JSP_STAT_ITEM_ATTACKERTAKESLIGHTDAMAGE                        = 128;
+var D2JSP_STAT_IRONMAIDEN_LEVEL                                     = 129;
+var D2JSP_STAT_LIFETAP_LEVEL                                        = 130;
+var D2JSP_STAT_THORNS_LEVEL                                         = 131;
+var D2JSP_STAT_BONEARMOR                                            = 132;
+var D2JSP_STAT_BONEARMORMAX                                         = 133;
+var D2JSP_STAT_ITEM_FREEZE                                          = 134;
+var D2JSP_STAT_ITEM_OPENWOUNDS                                      = 135;
+var D2JSP_STAT_ITEM_CRUSHINGBLOW                                    = 136;
+var D2JSP_STAT_ITEM_KICKDAMAGE                                      = 137;
+var D2JSP_STAT_ITEM_MANAAFTERKILL                                   = 138;
+var D2JSP_STAT_ITEM_HEALAFTERDEMONKILL                              = 139;
+var D2JSP_STAT_ITEM_EXTRABLOOD                                      = 140;
+var D2JSP_STAT_ITEM_DEADLYSTRIKE                                    = 141;
+var D2JSP_STAT_ITEM_ABSORBFIRE_PERCENT                              = 142;
+var D2JSP_STAT_ITEM_ABSORBFIRE                                      = 143;
+var D2JSP_STAT_ITEM_ABSORBLIGHT_PERCENT                             = 144;
+var D2JSP_STAT_ITEM_ABSORBLIGHT                                     = 145;
+var D2JSP_STAT_ITEM_ABSORBMAGIC_PERCENT                             = 146;
+var D2JSP_STAT_ITEM_ABSORBMAGIC                                     = 147;
+var D2JSP_STAT_ITEM_ABSORBCOLD_PERCENT                              = 148;
+var D2JSP_STAT_ITEM_ABSORBCOLD                                      = 149;
+var D2JSP_STAT_ITEM_SLOW                                            = 150;
+var D2JSP_STAT_ITEM_BLESSEDAIM                                      = 151;
+if (parseFloat(me.version) < 0.3518)
+	var D2JSP_STAT_ITEM_DEFIANCE                                        = 152;
+else
+	var D2JSP_STAT_ITEM_INDESTRUCTIBLE                                  = 152;
+var D2JSP_STAT_ITEM_CANNOTBEFROZEN                                  = 153;
+var D2JSP_STAT_ITEM_STAMINADRAINPCT                                 = 154;
+var D2JSP_STAT_ITEM_REANIMATE                                       = 155;
+var D2JSP_STAT_ITEM_PIERCE                                          = 156;
+var D2JSP_STAT_ITEM_MAGICARROW                                      = 157;
+var D2JSP_STAT_ITEM_EXPLOSIVEARROW                                  = 158;
+var D2JSP_STAT_ITEM_THROW_MINDAMAGE                                 = 159;
+var D2JSP_STAT_ITEM_THROW_MAXDAMAGE                                 = 160;
+var D2JSP_STAT_SKILL_HANDOFATHENA                                   = 161;
+var D2JSP_STAT_SKILL_STAMINAPERCENT                                 = 162;
+var D2JSP_STAT_SKILL_PASSIVE_STAMINAPERCENT                         = 163;
+var D2JSP_STAT_SKILL_CONCENTRATION                                  = 164;
+var D2JSP_STAT_SKILL_ENCHANT                                        = 165;
+var D2JSP_STAT_SKILL_PIERCE                                         = 166;
+var D2JSP_STAT_SKILL_CONVICTION                                     = 167;
+var D2JSP_STAT_SKILL_CHILLINGARMOR                                  = 168;
+var D2JSP_STAT_SKILL_FRENZY                                         = 169;
+var D2JSP_STAT_SKILL_DECREPIFY                                      = 170;
+var D2JSP_STAT_SKILL_ARMOR_PERCENT                                  = 171;
+var D2JSP_STAT_ALIGNMENT                                            = 172;
+var D2JSP_STAT_TARGET0                                              = 173;
+var D2JSP_STAT_TARGET1                                              = 174;
+var D2JSP_STAT_GOLDLOST                                             = 175;
+var D2JSP_STAT_CONVERSION_LEVEL                                     = 176;
+var D2JSP_STAT_CONVERSION_MAXHP                                     = 177;
+var D2JSP_STAT_UNIT_DOOVERLAY                                       = 178;
+var D2JSP_STAT_ITEM_ADDDRUSKILLPOINTS                               = 179;
+var D2JSP_STAT_ITEM_ADDASSSKILLPOINTS                               = 180;
+var D2JSP_STAT_ITEM_ADDSKILL_SINGLE4                                = 181;
+var D2JSP_STAT_ITEM_ADDSKILL_SINGLE5                                = 182;
+var D2JSP_STAT_ITEM_ADDSKILL_SINGLE6                                = 183;
+var D2JSP_STAT_ITEM_ADDSKILL_SINGLE7                                = 184;
+var D2JSP_STAT_ITEM_ADDSKILL_SINGLE8                                = 185;
+var D2JSP_STAT_ITEM_ADDSKILL_SINGLE9                                = 186;
+var D2JSP_STAT_ITEM_ADDSKILL_SINGLE10                               = 187;
+var D2JSP_STAT_ITEM_ADDSKILL_TAB1                                   = 188;
+var D2JSP_STAT_ITEM_ADDSKILL_TAB2                                   = 189;
+var D2JSP_STAT_ITEM_ADDSKILL_TAB3                                   = 190;
+var D2JSP_STAT_ITEM_ADDSKILL_TAB4                                   = 191;
+var D2JSP_STAT_ITEM_ADDSKILL_TAB5                                   = 192;
+var D2JSP_STAT_ITEM_ADDSKILL_TAB6                                   = 193;
+var D2JSP_STAT_ITEM_NUMSOCKETS                                      = 194;
+var D2JSP_STAT_ITEM_SKILLONATTACK1                                  = 195;
+var D2JSP_STAT_ITEM_SKILLONATTACK2                                  = 196;
+var D2JSP_STAT_ITEM_SKILLONATTACK3                                  = 197;
+var D2JSP_STAT_ITEM_SKILLONHIT1                                     = 198;
+var D2JSP_STAT_ITEM_SKILLONHIT2                                     = 199;
+var D2JSP_STAT_ITEM_SKILLONHIT3                                     = 200;
+var D2JSP_STAT_ITEM_SKILLONGETHIT1                                  = 201;
+var D2JSP_STAT_ITEM_SKILLONGETHIT2                                  = 202;
+var D2JSP_STAT_ITEM_SKILLONGETHIT3                                  = 203;
+var D2JSP_STAT_ITEM_CHARGED_SKILL0                                  = 204;
+var D2JSP_STAT_ITEM_CHARGED_SKILL1                                  = 205;
+var D2JSP_STAT_ITEM_CHARGED_SKILL2                                  = 206;
+var D2JSP_STAT_ITEM_CHARGED_SKILL3                                  = 207;
+var D2JSP_STAT_ITEM_CHARGED_SKILL4                                  = 208;
+var D2JSP_STAT_ITEM_CHARGED_SKILL5                                  = 209;
+var D2JSP_STAT_ITEM_CHARGED_SKILL6                                  = 210;
+var D2JSP_STAT_ITEM_CHARGED_SKILL7                                  = 211;
+var D2JSP_STAT_ITEM_CHARGED_SKILL8                                  = 212;
+var D2JSP_STAT_ITEM_CHARGED_SKILL9                                  = 213;
+var D2JSP_STAT_ITEM_ARMOR_PERLEVEL                                  = 214;
+var D2JSP_STAT_ITEM_ARMORPERCENT_PERLEVEL                           = 215;
+var D2JSP_STAT_ITEM_HP_PERLEVEL                                     = 216;
+var D2JSP_STAT_ITEM_MANA_PERLEVEL                                   = 217;
+var D2JSP_STAT_ITEM_MAXDAMAGE_PERLEVEL                              = 218;
+var D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL                      = 219;
+var D2JSP_STAT_ITEM_STRENGTH_PERLEVEL                               = 220;
+var D2JSP_STAT_ITEM_DEXTERITY_PERLEVEL                              = 221;
+var D2JSP_STAT_ITEM_ENERGY_PERLEVEL                                 = 222;
+var D2JSP_STAT_ITEM_VITALITY_PERLEVEL                               = 223;
+var D2JSP_STAT_ITEM_TOHIT_PERLEVEL                                  = 224;
+var D2JSP_STAT_ITEM_TOHITPERCENT_PERLEVEL                           = 225;
+var D2JSP_STAT_ITEM_COLD_DAMAGEMAX_PERLEVEL                         = 226;
+var D2JSP_STAT_ITEM_FIRE_DAMAGEMAX_PERLEVEL                         = 227;
+var D2JSP_STAT_ITEM_LTNG_DAMAGEMAX_PERLEVEL                         = 228;
+var D2JSP_STAT_ITEM_POIS_DAMAGEMAX_PERLEVEL                         = 229;
+var D2JSP_STAT_ITEM_RESIST_COLD_PERLEVEL                            = 230;
+var D2JSP_STAT_ITEM_RESIST_FIRE_PERLEVEL                            = 231;
+var D2JSP_STAT_ITEM_RESIST_LTNG_PERLEVEL                            = 232;
+var D2JSP_STAT_ITEM_RESIST_POIS_PERLEVEL                            = 233;
+var D2JSP_STAT_ITEM_ABSORB_COLD_PERLEVEL                            = 234;
+var D2JSP_STAT_ITEM_ABSORB_FIRE_PERLEVEL                            = 235;
+var D2JSP_STAT_ITEM_ABSORB_LTNG_PERLEVEL                            = 236;
+var D2JSP_STAT_ITEM_ABSORB_POIS_PERLEVEL                            = 237;
+var D2JSP_STAT_ITEM_THORNS_PERLEVEL                                 = 238;
+var D2JSP_STAT_ITEM_FIND_GOLD_PERLEVEL                              = 239;
+var D2JSP_STAT_ITEM_FIND_MAGIC_PERLEVEL                             = 240;
+var D2JSP_STAT_ITEM_REGENSTAMINA_PERLEVEL                           = 241;
+var D2JSP_STAT_ITEM_STAMINA_PERLEVEL                                = 242;
+var D2JSP_STAT_ITEM_DAMAGE_DEMON_PERLEVEL                           = 243;
+var D2JSP_STAT_ITEM_DAMAGE_UNDEAD_PERLEVEL                          = 244;
+var D2JSP_STAT_ITEM_TOHIT_DEMON_PERLEVEL                            = 245;
+var D2JSP_STAT_ITEM_TOHIT_UNDEAD_PERLEVEL                           = 246;
+var D2JSP_STAT_ITEM_CRUSHINGBLOW_PERLEVEL                           = 247;
+var D2JSP_STAT_ITEM_OPENWOUNDS_PERLEVEL                             = 248;
+var D2JSP_STAT_ITEM_KICK_DAMAGE_PERLEVEL                            = 249;
+var D2JSP_STAT_ITEM_DEADLYSTRIKE_PERLEVEL                           = 250;
+var D2JSP_STAT_ITEM_FIND_GEMS_PERLEVEL                              = 251;
+var D2JSP_STAT_ITEM_REPLENISH_DURABILITY                            = 252;
+var D2JSP_STAT_ITEM_REPLENISH_QUANTITY                              = 253;
+var D2JSP_STAT_ITEM_EXTRA_STACK                                     = 254;
+var D2JSP_STAT_ITEM_FIND_ITEM                                       = 255;
+var D2JSP_STAT_ITEM_SLASH_DAMAGE                                    = 256;
+var D2JSP_STAT_ITEM_SLASH_DAMAGE_PERCENT                            = 257;
+var D2JSP_STAT_ITEM_CRUSH_DAMAGE                                    = 258;
+var D2JSP_STAT_ITEM_CRUSH_DAMAGE_PERCENT                            = 259;
+var D2JSP_STAT_ITEM_THRUST_DAMAGE                                   = 260;
+var D2JSP_STAT_ITEM_THRUST_DAMAGE_PERCENT                           = 261;
+var D2JSP_STAT_ITEM_ABSORB_SLASH                                    = 262;
+var D2JSP_STAT_ITEM_ABSORB_CRUSH                                    = 263;
+var D2JSP_STAT_ITEM_ABSORB_THRUST                                   = 264;
+var D2JSP_STAT_ITEM_ABSORB_SLASH_PERCENT                            = 265;
+var D2JSP_STAT_ITEM_ABSORB_CRUSH_PERCENT                            = 266;
+var D2JSP_STAT_ITEM_ABSORB_THRUST_PERCENT                           = 267;
+var D2JSP_STAT_ITEM_ARMOR_BYTIME                                    = 268;
+var D2JSP_STAT_ITEM_ARMORPERCENT_BYTIME                             = 269;
+var D2JSP_STAT_ITEM_HP_BYTIME                                       = 270;
+var D2JSP_STAT_ITEM_MANA_BYTIME                                     = 271;
+var D2JSP_STAT_ITEM_MAXDAMAGE_BYTIME                                = 272;
+var D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT_BYTIME                        = 273;
+var D2JSP_STAT_ITEM_STRENGTH_BYTIME                                 = 274;
+var D2JSP_STAT_ITEM_DEXTERITY_BYTIME                                = 275;
+var D2JSP_STAT_ITEM_ENERGY_BYTIME                                   = 276;
+var D2JSP_STAT_ITEM_VITALITY_BYTIME                                 = 277;
+var D2JSP_STAT_ITEM_TOHIT_BYTIME                                    = 278;
+var D2JSP_STAT_ITEM_TOHITPERCENT_BYTIME                             = 279;
+var D2JSP_STAT_ITEM_COLD_DAMAGEMAX_BYTIME                           = 280;
+var D2JSP_STAT_ITEM_FIRE_DAMAGEMAX_BYTIME                           = 281;
+var D2JSP_STAT_ITEM_LTNG_DAMAGEMAX_BYTIME                           = 282;
+var D2JSP_STAT_ITEM_POIS_DAMAGEMAX_BYTIME                           = 283;
+var D2JSP_STAT_ITEM_RESIST_COLD_BYTIME                              = 284;
+var D2JSP_STAT_ITEM_RESIST_FIRE_BYTIME                              = 285;
+var D2JSP_STAT_ITEM_RESIST_LTNG_BYTIME                              = 286;
+var D2JSP_STAT_ITEM_RESIST_POIS_BYTIME                              = 287;
+var D2JSP_STAT_ITEM_ABSORB_COLD_BYTIME                              = 288;
+var D2JSP_STAT_ITEM_ABSORB_FIRE_BYTIME                              = 289;
+var D2JSP_STAT_ITEM_ABSORB_LTNG_BYTIME                              = 290;
+var D2JSP_STAT_ITEM_ABSORB_POIS_BYTIME                              = 291;
+var D2JSP_STAT_ITEM_FIND_GOLD_BYTIME                                = 292;
+var D2JSP_STAT_ITEM_FIND_MAGIC_BYTIME                               = 293;
+var D2JSP_STAT_ITEM_REGENSTAMINA_BYTIME                             = 294;
+var D2JSP_STAT_ITEM_STAMINA_BYTIME                                  = 295;
+var D2JSP_STAT_ITEM_DAMAGE_DEMON_BYTIME                             = 296;
+var D2JSP_STAT_ITEM_DAMAGE_UNDEAD_BYTIME                            = 297;
+var D2JSP_STAT_ITEM_TOHIT_DEMON_BYTIME                              = 298;
+var D2JSP_STAT_ITEM_TOHIT_UNDEAD_BYTIME                             = 299;
+var D2JSP_STAT_ITEM_CRUSHINGBLOW_BYTIME                             = 300;
+var D2JSP_STAT_ITEM_OPENWOUNDS_BYTIME                               = 301;
+var D2JSP_STAT_ITEM_KICK_DAMAGE_BYTIME                              = 302;
+var D2JSP_STAT_ITEM_DEADLYSTRIKE_BYTIME                             = 303;
+var D2JSP_STAT_ITEM_FIND_GEMS_BYTIME                                = 304;
+var D2JSP_STAT_ITEM_PIERCE_COLD                                     = 305;
+var D2JSP_STAT_ITEM_PIERCE_FIRE                                     = 306;
+var D2JSP_STAT_ITEM_PIERCE_LTNG                                     = 307;
+var D2JSP_STAT_ITEM_PIERCE_POIS                                     = 308;
+var D2JSP_STAT_ITEM_DAMAGE_VS_MONSTER                               = 309;
+var D2JSP_STAT_ITEM_DAMAGE_PERCENT_VS_MONSTER                       = 310;
+var D2JSP_STAT_ITEM_TOHIT_VS_MONSTER                                = 311;
+var D2JSP_STAT_ITEM_TOHIT_PERCENT_VS_MONSTER                        = 312;
+var D2JSP_STAT_ITEM_AC_VS_MONSTER                                   = 313;
+var D2JSP_STAT_ITEM_AC_PERCENT_VS_MONSTER                           = 314;
+var D2JSP_STAT_FIRELENGTH                                           = 315;
+var D2JSP_STAT_BURNINGMIN                                           = 316;
+var D2JSP_STAT_BURNINGMAX                                           = 317;
+var D2JSP_STAT_PROGRESSIVE_DAMAGE                                   = 318;
+var D2JSP_STAT_PROGRESSIVE_STEAL                                    = 319;
+var D2JSP_STAT_PROGRESSIVE_OTHER                                    = 320;
+var D2JSP_STAT_PROGRESSIVE_FIRE                                     = 321;
+var D2JSP_STAT_PROGRESSIVE_COLD                                     = 322;
+var D2JSP_STAT_PROGRESSIVE_LIGHTNING                                = 323;
+var D2JSP_STAT_ITEM_EXTRA_CHARGES                                   = 324;
+if (parseFloat(me.version) < 0.3518) {
+	var D2JSP_STAT_PROGRESSIVE_TOHIT                                 = 323;
+
+	var D2JSP_STAT_LAST_MPQ_STAT                                     = 324;
+}
+else {
+	var D2JSP_STAT_PROGRESSIVE_TOHIT                                 = 325;
+	var D2JSP_STAT_POISON_COUNT                                      = 326;
+	var D2JSP_STAT_DAMAGE_FRAMERATE                                  = 327;
+	var D2JSP_STAT_PIERCE_IDX                                        = 328;
+	var D2JSP_STAT_PASSIVE_FIRE_MASTERY                              = 329;
+	var D2JSP_STAT_PASSIVE_LTNG_MASTERY                              = 330;
+	var D2JSP_STAT_PASSIVE_COLD_MASTERY                              = 331;
+	var D2JSP_STAT_PASSIVE_POIS_MASTERY                              = 332;
+	var D2JSP_STAT_PASSIVE_FIRE_PIERCE                               = 333;
+	var D2JSP_STAT_PASSIVE_LTNG_PIERCE                               = 334;
+	var D2JSP_STAT_PASSIVE_COLD_PIERCE                               = 335;
+	var D2JSP_STAT_PASSIVE_POIS_PIERCE                               = 336;
+	var D2JSP_STAT_PASSIVE_CRITICAL_STRIKE                           = 337;
+	var D2JSP_STAT_PASSIVE_DODGE                                     = 338;
+	var D2JSP_STAT_PASSIVE_AVOID                                     = 339;
+	var D2JSP_STAT_PASSIVE_EVADE                                     = 340;
+	var D2JSP_STAT_PASSIVE_WARMTH                                    = 341;
+	var D2JSP_STAT_PASSIVE_MASTERY_MELEE_TH                          = 342;
+	var D2JSP_STAT_PASSIVE_MASTERY_MELEE_DMG                         = 343;
+	var D2JSP_STAT_PASSIVE_MASTERY_MELEE_CRIT                        = 344;
+	var D2JSP_STAT_PASSIVE_MASTERY_THROW_TH                          = 345;
+	var D2JSP_STAT_PASSIVE_MASTERY_THROW_DMG                         = 346;
+	var D2JSP_STAT_PASSIVE_MASTERY_THROW_CRIT                        = 347;
+	var D2JSP_STAT_PASSIVE_WEAPONBLOCK                               = 348;
+	var D2JSP_STAT_PASSIVE_SUMMON_RESIST                             = 349;
+	var D2JSP_STAT_MODIFIERLIST_SKILL                                = 350;
+	var D2JSP_STAT_MODIFIERLIST_LEVEL                                = 351;
+	var D2JSP_STAT_LAST_SENT_HP_PCT                                  = 352;
+	var D2JSP_STAT_SOURCE_UNIT_TYPE                                  = 353;
+	var D2JSP_STAT_SOURCE_UNIT_ID                                    = 354;
+	var D2JSP_STAT_SHORTPARAM1                                       = 355;
+	var D2JSP_STAT_QUESTITEMDIFFICULTY                               = 356;
+	var D2JSP_STAT_PASSIVE_MAG_MASTERY                               = 357;
+	var D2JSP_STAT_PASSIVE_MAG_PIERCE                                = 358;
+
+	var D2JSP_STAT_LAST_MPQ_STAT                                     = 358;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STAT_MINIMUM = D2JSP_STAT_STRENGTH;
+var D2JSP_STAT_MAXIMUM = D2JSP_STAT_LAST_MPQ_STAT;
+var D2JSP_STAT_COUNT   = (D2JSP_STAT_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STAT_ValidList = new Array();
+for (var count_1 = D2JSP_STAT_MINIMUM; count_1 <= D2JSP_STAT_MAXIMUM;
+	count_1++)
+	D2JSP_STAT_ValidList.push(count_1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps stat numbers to names.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STAT_StatNameList = new Array(D2JSP_STAT_COUNT);
+D2JSP_STAT_StatNameList[D2JSP_STAT_STRENGTH]                        = "Strength";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ENERGY]                          = "Energy";
+D2JSP_STAT_StatNameList[D2JSP_STAT_DEXTERITY]                       = "Dexterity";
+D2JSP_STAT_StatNameList[D2JSP_STAT_VITALITY]                        = "Vitality";
+D2JSP_STAT_StatNameList[D2JSP_STAT_STATPTS]                         = "Stat points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_NEWSKILLS]                       = "New skills";
+D2JSP_STAT_StatNameList[D2JSP_STAT_HITPOINTS]                       = "Hit points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXHP]                           = "Max hit points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MANA]                            = "Mana";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXMANA]                         = "Max mana";
+D2JSP_STAT_StatNameList[D2JSP_STAT_STAMINA]                         = "Stamina";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXSTAMINA]                      = "Max stamina";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LEVEL]                           = "Level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_EXPERIENCE]                      = "Experience";
+D2JSP_STAT_StatNameList[D2JSP_STAT_GOLD]                            = "Gold";
+D2JSP_STAT_StatNameList[D2JSP_STAT_GOLDBANK]                        = "Gold bank";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ARMOR_PERCENT]              = "Item armor percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT]          = "Item max damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MINDAMAGE_PERCENT]          = "Item min damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_TOHIT]                           = "To hit";
+D2JSP_STAT_StatNameList[D2JSP_STAT_TOBLOCK]                         = "To block";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MINDAMAGE]                       = "Min damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXDAMAGE]                       = "Max damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SECONDARY_MINDAMAGE]             = "Secondary min damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SECONDARY_MAXDAMAGE]             = "Secondary max damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_DAMAGEPERCENT]                   = "Damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MANARECOVERY]                    = "Mana recovery";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MANARECOVERYBONUS]               = "Mana recovery bonus";
+D2JSP_STAT_StatNameList[D2JSP_STAT_STAMINARECOVERYBONUS]            = "Stamina recovery bonus";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LASTEXP]                         = "Last exp";
+D2JSP_STAT_StatNameList[D2JSP_STAT_NEXTEXP]                         = "Next exp";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ARMORCLASS]                      = "Armor class";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ARMORCLASS_VS_MISSILE]           = "Armor class vs missile";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ARMORCLASS_VS_HTH]               = "Armor class vs hth";
+D2JSP_STAT_StatNameList[D2JSP_STAT_NORMAL_DAMAGE_REDUCTION]         = "Normal damage reduction";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAGIC_DAMAGE_REDUCTION]          = "Magic damage reduction";
+D2JSP_STAT_StatNameList[D2JSP_STAT_DAMAGERESIST]                    = "Damage resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAGICRESIST]                     = "Magic resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXMAGICRESIST]                  = "Max magic resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_FIRERESIST]                      = "Fire resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXFIRERESIST]                   = "Max fire resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LIGHTRESIST]                     = "Light resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXLIGHTRESIST]                  = "Max light resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_COLDRESIST]                      = "Cold resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXCOLDRESIST]                   = "Max cold resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_POISONRESIST]                    = "Poison resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXPOISONRESIST]                 = "Max poison resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_DAMAGEAURA]                      = "Damage aura";
+D2JSP_STAT_StatNameList[D2JSP_STAT_FIREMINDAM]                      = "Fire min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_FIREMAXDAM]                      = "Fire max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LIGHTMINDAM]                     = "Light min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LIGHTMAXDAM]                     = "Light max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAGICMINDAM]                     = "Magic min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAGICMAXDAM]                     = "Magic max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_COLDMINDAM]                      = "Cold min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_COLDMAXDAM]                      = "Cold max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_COLDLENGTH]                      = "Cold length";
+D2JSP_STAT_StatNameList[D2JSP_STAT_POISONMINDAM]                    = "Poison min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_POISONMAXDAM]                    = "Poison max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_POISONLENGTH]                    = "Poison length";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LIFEDRAINMINDAM]                 = "Life drain min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LIFEDRAINMAXDAM]                 = "Life drain max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MANADRAINMINDAM]                 = "Mana drain min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MANADRAINMAXDAM]                 = "Mana drain max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_STAMDRAINMINDAM]                 = "Stamina drain min dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_STAMDRAINMAXDAM]                 = "Stamina drain max dam";
+D2JSP_STAT_StatNameList[D2JSP_STAT_STUNLENGTH]                      = "Stun length";
+D2JSP_STAT_StatNameList[D2JSP_STAT_VELOCITYPERCENT]                 = "Velocity percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ATTACKRATE]                      = "Attack rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_OTHER_ANIMRATE]                  = "Other anim rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_QUANTITY]                        = "Quantity";
+D2JSP_STAT_StatNameList[D2JSP_STAT_VALUE]                           = "Value";
+D2JSP_STAT_StatNameList[D2JSP_STAT_DURABILITY]                      = "Durability";
+D2JSP_STAT_StatNameList[D2JSP_STAT_MAXDURABILITY]                   = "Max durability";
+D2JSP_STAT_StatNameList[D2JSP_STAT_HPREGEN]                         = "Hp regen";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT]      = "Item max durability percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXHP_PERCENT]              = "Item max hp percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXMANA_PERCENT]            = "Item max mana percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ATTACKERTAKESDAMAGE]        = "Item attacker takes damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_GOLDBONUS]                  = "Item gold bonus";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAGICBONUS]                 = "Item magic bonus";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_KNOCKBACK]                  = "Item knock back";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TIMEDURATION]               = "Item time duration";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDAMASKILLPOINTS]          = "Item add amazon skill points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDPALSKILLPOINTS]          = "Item add paladin skill points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDNECSKILLPOINTS]          = "Item add necromancer skill points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSORSKILLPOINTS]          = "Item add sorceress skill points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDBARSKILLPOINTS]          = "Item add barbarian skill points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DOUBLEHERBDURATION]         = "Item double herb duration";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_LIGHTRADIUS]                = "Item light radius";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_LIGHTCOLOR]                 = "Item light color";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_REQ_PERCENT]                = "Item req percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTATTACKRATE]             = "Item fast attack rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTERATTACKRATE]           = "Item faster attack rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTESTATTACKRATE]          = "Item fastest attack rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTMOVEVELOCITY]           = "Item fast move velocity";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTERMOVEVELOCITY]         = "Item faster move velocity";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTESTMOVEVELOCITY]        = "Item fastest move velocity";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTGETHITRATE]             = "Item fast get hit rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTERGETHITRATE]           = "Item faster get hit rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTESTGETHITRATE]          = "Item fastest get hit rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTBLOCKRATE]              = "Item fast block rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTERBLOCKRATE]            = "Item faster block rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTESTBLOCKRATE]           = "Item fastest block rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTCASTRATE]               = "Item fast cast rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTERCASTRATE]             = "Item faster cast rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FASTESTCASTRATE]            = "Item fastest cast rate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SINGLESKILL1]               = "Item single skill 1";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SINGLESKILL2]               = "Item single skill 2";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SINGLESKILL3]               = "Item single skill 3";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_POISONLENGTHRESIST]         = "Item poison length resist";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_NORMALDAMAGE]               = "Item normal damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_HOWL]                       = "Item howl";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_STUPIDITY]                  = "Item stupidity";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGETOMANA]               = "Item damage to mana";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_IGNORETARGETAC]             = "Item ignore target ac";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FRACTIONALTARGETAC]         = "Item fractional target ac";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_PREVENTHEAL]                = "Item prevent heal";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_HALFFREEZEDURATION]         = "Item half freeze duration";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_PERCENT]              = "Item to hit percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGETARGETAC]             = "Item damage target ac";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEMONDAMAGE_PERCENT]        = "Item demon damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_UNDEADDAMAGE_PERCENT]       = "Item undead damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEMON_TOHIT]                = "Item demon to hit";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_UNDEAD_TOHIT]               = "Item undead to hit";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_THROWABLE]                  = "Item throwable";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIRESKILL]                  = "Item fire skill";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ALLSKILLS]                  = "Item all skills";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ATTACKERTAKESLIGHTDAMAGE]   = "Item attacker takes light damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_IRONMAIDEN_LEVEL]                = "Iron maiden level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_LIFETAP_LEVEL]                   = "Life tap level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_THORNS_LEVEL]                    = "Thorns level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_BONEARMOR]                       = "Bone armor";
+D2JSP_STAT_StatNameList[D2JSP_STAT_BONEARMORMAX]                    = "Bone armor max";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FREEZE]                     = "Item freeze";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_OPENWOUNDS]                 = "Item open wounds";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CRUSHINGBLOW]               = "Item crushing blow";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_KICKDAMAGE]                 = "Item kick damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MANAAFTERKILL]              = "Item mana after kill";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_HEALAFTERDEMONKILL]         = "Item heal after demon kill";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_EXTRABLOOD]                 = "Item extra blood";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEADLYSTRIKE]               = "Item deadly strike";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBFIRE_PERCENT]         = "Item absorb fire percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBFIRE]                 = "Item absorb fire";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBLIGHT_PERCENT]        = "Item absorb light percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBLIGHT]                = "Item absorb light";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBMAGIC_PERCENT]        = "Item absorb magic percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBMAGIC]                = "Item absorb magic";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBCOLD_PERCENT]         = "Item absorb cold percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORBCOLD]                 = "Item absorb cold";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SLOW]                       = "Item slow";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_BLESSEDAIM]                 = "Item blessed aim";
+if (parseFloat(me.version) < 0.3518)
+	D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEFIANCE]                = "Item defiance";
+else
+	D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_INDESTRUCTIBLE]          = "Item indestructible";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CANNOTBEFROZEN]             = "Item cannot be frozen";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_STAMINADRAINPCT]            = "Item stamina drain pct";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_REANIMATE]                  = "Item reanimate";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_PIERCE]                     = "Item pierce";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAGICARROW]                 = "Item magic arrow";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_EXPLOSIVEARROW]             = "Item explosive arrow";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_THROW_MINDAMAGE]            = "Item throw min damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_THROW_MAXDAMAGE]            = "Item throw max damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_HANDOFATHENA]              = "Skill hand of Athena";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_STAMINAPERCENT]            = "Skill stamina percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_PASSIVE_STAMINAPERCENT]    = "Skill passive stamina percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_CONCENTRATION]             = "Skill concentration";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_ENCHANT]                   = "Skill enchant";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_PIERCE]                    = "Skill pierce";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_CONVICTION]                = "Skill conviction";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_CHILLINGARMOR]             = "Skill chilling armor";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_FRENZY]                    = "Skill frenzy";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_DECREPIFY]                 = "Skill decertify";
+D2JSP_STAT_StatNameList[D2JSP_STAT_SKILL_ARMOR_PERCENT]             = "Skill armor percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ALIGNMENT]                       = "Alignment";
+D2JSP_STAT_StatNameList[D2JSP_STAT_TARGET0]                         = "Target 0";
+D2JSP_STAT_StatNameList[D2JSP_STAT_TARGET1]                         = "Target 1";
+D2JSP_STAT_StatNameList[D2JSP_STAT_GOLDLOST]                        = "Gold lost";
+D2JSP_STAT_StatNameList[D2JSP_STAT_CONVERSION_LEVEL]                = "Conversion level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_CONVERSION_MAXHP]                = "Conversion max hit points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_UNIT_DOOVERLAY]                  = "Unit do overlay";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDDRUSKILLPOINTS]          = "Item add druid skill points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDASSSKILLPOINTS]          = "Item add assassin skill points";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_SINGLE4]           = "Item add skill single 4";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_SINGLE5]           = "Item add skill single 5";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_SINGLE6]           = "Item add skill single 6";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_SINGLE7]           = "Item add skill single 7";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_SINGLE8]           = "Item add skill single 8";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_SINGLE9]           = "Item add skill single 9";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_SINGLE10]          = "Item add skill single 10";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_TAB1]              = "Item add skill tab 1";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_TAB2]              = "Item add skill tab 2";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_TAB3]              = "Item add skill tab 3";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_TAB4]              = "Item add skill tab 4";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_TAB5]              = "Item add skill tab 5";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ADDSKILL_TAB6]              = "Item add skill tab 6";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_NUMSOCKETS]                 = "Item num sockets";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONATTACK1]             = "Item skill on attack 1";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONATTACK2]             = "Item skill on attack 2";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONATTACK3]             = "Item skill on attack 3";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONHIT1]                = "Item skill on hit 1";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONHIT2]                = "Item skill on hit 2";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONHIT3]                = "Item skill on hit 3";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONGETHIT1]             = "Item skill on get hit 1";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONGETHIT2]             = "Item skill on get hit 2";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SKILLONGETHIT3]             = "Item skill on get hit 3";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL0]             = "Item charged skill 0";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL1]             = "Item charged skill 1";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL2]             = "Item charged skill 2";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL3]             = "Item charged skill 3";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL4]             = "Item charged skill 4";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL5]             = "Item charged skill 5";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL6]             = "Item charged skill 6";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL7]             = "Item charged skill 7";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL8]             = "Item charged skill 8";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CHARGED_SKILL9]             = "Item charged skill 9";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ARMOR_PERLEVEL]             = "Item armor per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ARMORPERCENT_PERLEVEL]      = "Item armor percent per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_HP_PERLEVEL]                = "Item hp per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MANA_PERLEVEL]              = "Item mana per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXDAMAGE_PERLEVEL]         = "Item max damage per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL] = "Item max damage percent per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_STRENGTH_PERLEVEL]          = "Item strength per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEXTERITY_PERLEVEL]         = "Item dexterity per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ENERGY_PERLEVEL]            = "Item energy per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_VITALITY_PERLEVEL]          = "Item vitality per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_PERLEVEL]             = "Item to hit per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHITPERCENT_PERLEVEL]      = "Item to hit percent per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_COLD_DAMAGEMAX_PERLEVEL]    = "Item cold damage max per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIRE_DAMAGEMAX_PERLEVEL]    = "Item fire damage max per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_LTNG_DAMAGEMAX_PERLEVEL]    = "Item light damage max per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_POIS_DAMAGEMAX_PERLEVEL]    = "Item poison damage max per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_COLD_PERLEVEL]       = "Item resist cold per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_FIRE_PERLEVEL]       = "Item resist fire per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_LTNG_PERLEVEL]       = "Item resist light per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_POIS_PERLEVEL]       = "Item resist poison per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_COLD_PERLEVEL]       = "Item absorb cold per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_FIRE_PERLEVEL]       = "Item absorb fire per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_LTNG_PERLEVEL]       = "Item absorb light per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_POIS_PERLEVEL]       = "Item absorb poison per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_THORNS_PERLEVEL]            = "Item thorns per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIND_GOLD_PERLEVEL]         = "Item find gold per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIND_MAGIC_PERLEVEL]        = "Item find magic per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_REGENSTAMINA_PERLEVEL]      = "Item regen stamina per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_STAMINA_PERLEVEL]           = "Item stamina per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGE_DEMON_PERLEVEL]      = "Item damage demon per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGE_UNDEAD_PERLEVEL]     = "Item damage undead per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_DEMON_PERLEVEL]       = "Item to hit demon per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_UNDEAD_PERLEVEL]      = "Item to hit undead per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CRUSHINGBLOW_PERLEVEL]      = "Item crushing blow per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_OPENWOUNDS_PERLEVEL]        = "Item open wounds per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_KICK_DAMAGE_PERLEVEL]       = "Item kick damage per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEADLYSTRIKE_PERLEVEL]      = "Item deadly strike per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIND_GEMS_PERLEVEL]         = "Item find gems per level";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_REPLENISH_DURABILITY]       = "Item replenish durability";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_REPLENISH_QUANTITY]         = "Item replenish quantity";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_EXTRA_STACK]                = "Item extra stack";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIND_ITEM]                  = "Item find item";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SLASH_DAMAGE]               = "Item slash damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_SLASH_DAMAGE_PERCENT]       = "Item slash damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CRUSH_DAMAGE]               = "Item crush damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CRUSH_DAMAGE_PERCENT]       = "Item crush damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_THRUST_DAMAGE]              = "Item thrust damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_THRUST_DAMAGE_PERCENT]      = "Item thrust damage percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_SLASH]               = "Item absorb slash";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_CRUSH]               = "Item absorb crush";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_THRUST]              = "Item absorb thrust";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_SLASH_PERCENT]       = "Item absorb slash percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_CRUSH_PERCENT]       = "Item absorb crush percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_THRUST_PERCENT]      = "Item absorb thrust percent";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ARMOR_BYTIME]               = "Item armor by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ARMORPERCENT_BYTIME]        = "Item armor percent by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_HP_BYTIME]                  = "Item hp by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MANA_BYTIME]                = "Item mana by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXDAMAGE_BYTIME]           = "Item max damage by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT_BYTIME]   = "Item max damage percent by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_STRENGTH_BYTIME]            = "Item strength by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEXTERITY_BYTIME]           = "Item dexterity by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ENERGY_BYTIME]              = "Item energy by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_VITALITY_BYTIME]            = "Item vitality by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_BYTIME]               = "Item to hit by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHITPERCENT_BYTIME]        = "Item to hit percent by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_COLD_DAMAGEMAX_BYTIME]      = "Item cold damage max by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIRE_DAMAGEMAX_BYTIME]      = "Item fire damage max by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_LTNG_DAMAGEMAX_BYTIME]      = "Item light damage max by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_POIS_DAMAGEMAX_BYTIME]      = "Item poison damage max by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_COLD_BYTIME]         = "Item resist cold by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_FIRE_BYTIME]         = "Item resist fire by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_LTNG_BYTIME]         = "Item resist light by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_RESIST_POIS_BYTIME]         = "Item resist poison by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_COLD_BYTIME]         = "Item absorb cold by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_FIRE_BYTIME]         = "Item absorb fire by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_LTNG_BYTIME]         = "Item absorb light by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_ABSORB_POIS_BYTIME]         = "Item absorb poison by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIND_GOLD_BYTIME]           = "Item find gold by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIND_MAGIC_BYTIME]          = "Item find magic by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_REGENSTAMINA_BYTIME]        = "Item regen stamina by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_STAMINA_BYTIME]             = "Item stamina by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGE_DEMON_BYTIME]        = "Item damage demon by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGE_UNDEAD_BYTIME]       = "Item damage undead by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_DEMON_BYTIME]         = "Item to hit demon by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_UNDEAD_BYTIME]        = "Item to hit undead by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_CRUSHINGBLOW_BYTIME]        = "Item crushing blow by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_OPENWOUNDS_BYTIME]          = "Item open wounds by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_KICK_DAMAGE_BYTIME]         = "Item kick damage by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DEADLYSTRIKE_BYTIME]        = "Item deadly strike by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_FIND_GEMS_BYTIME]           = "Item find gems by time";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_PIERCE_COLD]                = "Item pierce cold";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_PIERCE_FIRE]                = "Item pierce fire";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_PIERCE_LTNG]                = "Item pierce light";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_PIERCE_POIS]                = "Item pierce poison";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGE_VS_MONSTER]          = "Item damage vs monster";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_DAMAGE_PERCENT_VS_MONSTER]  = "Item damage percent vs monster";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_VS_MONSTER]           = "Item to hit vs monster";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_TOHIT_PERCENT_VS_MONSTER]   = "Item to hit percent vs monster";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_AC_VS_MONSTER]              = "Item ac vs monster";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_AC_PERCENT_VS_MONSTER]      = "Item ac percent vs monster";
+D2JSP_STAT_StatNameList[D2JSP_STAT_FIRELENGTH]                      = "Fire length";
+D2JSP_STAT_StatNameList[D2JSP_STAT_BURNINGMIN]                      = "Burning min";
+D2JSP_STAT_StatNameList[D2JSP_STAT_BURNINGMAX]                      = "Burning max";
+D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_DAMAGE]              = "Progressive damage";
+D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_STEAL]               = "Progressive steal";
+D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_OTHER]               = "Progressive other";
+D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_FIRE]                = "Progressive fire";
+D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_COLD]                = "Progressive cold";
+D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_LIGHTNING]           = "Progressive lightning";
+D2JSP_STAT_StatNameList[D2JSP_STAT_ITEM_EXTRA_CHARGES]              = "Item extra charges";
+//D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_TOHIT]               = "Progressive to hit";
+if (parseFloat(me.version) >= 0.3518) {
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PROGRESSIVE_TOHIT]            = "Progressive to hit";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_POISON_COUNT]                 = "Poison count";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_DAMAGE_FRAMERATE]             = "Damage framerate";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PIERCE_IDX]                   = "Pierce idx";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_FIRE_MASTERY]         = "Passive fire mastery";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_LTNG_MASTERY]         = "Passive lightning mastery";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_COLD_MASTERY]         = "Passive cold mastery";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_POIS_MASTERY]         = "Passive poison mastery";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_FIRE_PIERCE]          = "Passive fire pierce";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_LTNG_PIERCE]          = "Passive lightning pierce";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_COLD_PIERCE]          = "Passive cold pierce";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_POIS_PIERCE]          = "Passive poison pierce";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_CRITICAL_STRIKE]      = "Passive critical strike";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_DODGE]                = "Passive dodge";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_AVOID]                = "Passive avoid";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_EVADE]                = "Passive evade";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_WARMTH]               = "Passive warmth";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MASTERY_MELEE_TH]     = "Passive mastery melee th";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MASTERY_MELEE_DMG]    = "Passive mastery melee dmg";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MASTERY_MELEE_CRIT]   = "Passive mastery melee crit";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MASTERY_THROW_TH]     = "Passive mastery throw th";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MASTERY_THROW_DMG]    = "Passive mastery throw dmg";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MASTERY_THROW_CRIT]   = "Passive mastery throw crit";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_WEAPONBLOCK]          = "Passive weaponblock";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_SUMMON_RESIST]        = "Passive summon resist";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_MODIFIERLIST_SKILL]           = "Modifierlist skill";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_MODIFIERLIST_LEVEL]           = "Modifierlist level";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_LAST_SENT_HP_PCT]             = "Last sent hp pct";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_SOURCE_UNIT_TYPE]             = "Source unit type";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_SOURCE_UNIT_ID]               = "Source unit id";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_SHORTPARAM1]                  = "Shortparam1";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_QUESTITEMDIFFICULTY]          = "Quest item difficulty";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MAG_MASTERY]          = "Qassive mag mastery";
+	D2JSP_STAT_StatNameList[D2JSP_STAT_PASSIVE_MAG_PIERCE]           = "Passive mag pierce";
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STAT_NameToStatList = new Array();
+D2JSP_STAT_NameToStatList["strength"]                          = D2JSP_STAT_STRENGTH;
+D2JSP_STAT_NameToStatList["str"]                               = D2JSP_STAT_STRENGTH;
+D2JSP_STAT_NameToStatList["energy"]                            = D2JSP_STAT_ENERGY;
+D2JSP_STAT_NameToStatList["eng"]                               = D2JSP_STAT_ENERGY;
+D2JSP_STAT_NameToStatList["nrg"]                               = D2JSP_STAT_ENERGY;
+D2JSP_STAT_NameToStatList["dexterity"]                         = D2JSP_STAT_DEXTERITY;
+D2JSP_STAT_NameToStatList["dex"]                               = D2JSP_STAT_DEXTERITY;
+D2JSP_STAT_NameToStatList["vitality"]                          = D2JSP_STAT_VITALITY;
+D2JSP_STAT_NameToStatList["vit"]                               = D2JSP_STAT_VITALITY;
+D2JSP_STAT_NameToStatList["stat points"]                       = D2JSP_STAT_STATPTS;
+D2JSP_STAT_NameToStatList["new skills"]                        = D2JSP_STAT_NEWSKILLS;
+D2JSP_STAT_NameToStatList["hit points"]                        = D2JSP_STAT_HITPOINTS;
+D2JSP_STAT_NameToStatList["max hit points"]                    = D2JSP_STAT_MAXHP;
+D2JSP_STAT_NameToStatList["mana"]                              = D2JSP_STAT_MANA;
+D2JSP_STAT_NameToStatList["max mana"]                          = D2JSP_STAT_MAXMANA;
+D2JSP_STAT_NameToStatList["stamina"]                           = D2JSP_STAT_STAMINA;
+D2JSP_STAT_NameToStatList["max stamina"]                       = D2JSP_STAT_MAXSTAMINA;
+D2JSP_STAT_NameToStatList["level"]                             = D2JSP_STAT_LEVEL;
+D2JSP_STAT_NameToStatList["experience"]                        = D2JSP_STAT_EXPERIENCE;
+D2JSP_STAT_NameToStatList["exp"]                               = D2JSP_STAT_EXPERIENCE;
+D2JSP_STAT_NameToStatList["gold"]                              = D2JSP_STAT_GOLD;
+D2JSP_STAT_NameToStatList["gold bank"]                         = D2JSP_STAT_GOLDBANK;
+D2JSP_STAT_NameToStatList["gold stash"]                        = D2JSP_STAT_GOLDBANK;
+D2JSP_STAT_NameToStatList["item armor percent"]                = D2JSP_STAT_ITEM_ARMOR_PERCENT;
+D2JSP_STAT_NameToStatList["item max damage percent"]           = D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT;
+D2JSP_STAT_NameToStatList["item min damage percent"]           = D2JSP_STAT_ITEM_MINDAMAGE_PERCENT;
+D2JSP_STAT_NameToStatList["to hit"]                            = D2JSP_STAT_TOHIT;
+D2JSP_STAT_NameToStatList["to block"]                          = D2JSP_STAT_TOBLOCK;
+D2JSP_STAT_NameToStatList["min damage"]                        = D2JSP_STAT_MINDAMAGE;
+D2JSP_STAT_NameToStatList["max damage"]                        = D2JSP_STAT_MAXDAMAGE;
+D2JSP_STAT_NameToStatList["secondary min damage"]              = D2JSP_STAT_SECONDARY_MINDAMAGE;
+D2JSP_STAT_NameToStatList["secondary max damage"]              = D2JSP_STAT_SECONDARY_MAXDAMAGE;
+D2JSP_STAT_NameToStatList["damage percent"]                    = D2JSP_STAT_DAMAGEPERCENT;
+D2JSP_STAT_NameToStatList["mana recovery"]                     = D2JSP_STAT_MANARECOVERY;
+D2JSP_STAT_NameToStatList["mana recovery bonus"]               = D2JSP_STAT_MANARECOVERYBONUS;
+D2JSP_STAT_NameToStatList["stamina recovery bonus"]            = D2JSP_STAT_STAMINARECOVERYBONUS;
+D2JSP_STAT_NameToStatList["last exp"]                          = D2JSP_STAT_LASTEXP;
+D2JSP_STAT_NameToStatList["last experience"]                   = D2JSP_STAT_LASTEXP;
+D2JSP_STAT_NameToStatList["next exp"]                          = D2JSP_STAT_NEXTEXP;
+D2JSP_STAT_NameToStatList["next experience"]                   = D2JSP_STAT_NEXTEXP;
+D2JSP_STAT_NameToStatList["armor class"]                       = D2JSP_STAT_ARMORCLASS;
+D2JSP_STAT_NameToStatList["armor class vs missile"]            = D2JSP_STAT_ARMORCLASS_VS_MISSILE;
+D2JSP_STAT_NameToStatList["armor class versus missile"]        = D2JSP_STAT_ARMORCLASS_VS_MISSILE;
+D2JSP_STAT_NameToStatList["armor class vs hth"]                = D2JSP_STAT_ARMORCLASS_VS_HTH;
+D2JSP_STAT_NameToStatList["armor class versus hth"]            = D2JSP_STAT_ARMORCLASS_VS_HTH;
+D2JSP_STAT_NameToStatList["normal damage reduction"]           = D2JSP_STAT_NORMAL_DAMAGE_REDUCTION;
+D2JSP_STAT_NameToStatList["magic damage reduction"]            = D2JSP_STAT_MAGIC_DAMAGE_REDUCTION;
+D2JSP_STAT_NameToStatList["damage resist"]                     = D2JSP_STAT_DAMAGERESIST;
+D2JSP_STAT_NameToStatList["magic resist"]                      = D2JSP_STAT_MAGICRESIST;
+D2JSP_STAT_NameToStatList["max magic resist"]                  = D2JSP_STAT_MAXMAGICRESIST;
+D2JSP_STAT_NameToStatList["fire resist"]                       = D2JSP_STAT_FIRERESIST;
+D2JSP_STAT_NameToStatList["max fire resist"]                   = D2JSP_STAT_MAXFIRERESIST;
+D2JSP_STAT_NameToStatList["light resist"]                      = D2JSP_STAT_LIGHTRESIST;
+D2JSP_STAT_NameToStatList["max light resist"]                  = D2JSP_STAT_MAXLIGHTRESIST;
+D2JSP_STAT_NameToStatList["cold resist"]                       = D2JSP_STAT_COLDRESIST;
+D2JSP_STAT_NameToStatList["max cold resist"]                   = D2JSP_STAT_MAXCOLDRESIST;
+D2JSP_STAT_NameToStatList["poison resist"]                     = D2JSP_STAT_POISONRESIST;
+D2JSP_STAT_NameToStatList["max poison resist"]                 = D2JSP_STAT_MAXPOISONRESIST;
+D2JSP_STAT_NameToStatList["damage aura"]                       = D2JSP_STAT_DAMAGEAURA;
+D2JSP_STAT_NameToStatList["fire min dam"]                      = D2JSP_STAT_FIREMINDAM;
+D2JSP_STAT_NameToStatList["fire max dam"]                      = D2JSP_STAT_FIREMAXDAM;
+D2JSP_STAT_NameToStatList["light min dam"]                     = D2JSP_STAT_LIGHTMINDAM;
+D2JSP_STAT_NameToStatList["light max dam"]                     = D2JSP_STAT_LIGHTMAXDAM;
+D2JSP_STAT_NameToStatList["magic min dam"]                     = D2JSP_STAT_MAGICMINDAM;
+D2JSP_STAT_NameToStatList["magic max dam"]                     = D2JSP_STAT_MAGICMAXDAM;
+D2JSP_STAT_NameToStatList["cold min dam"]                      = D2JSP_STAT_COLDMINDAM;
+D2JSP_STAT_NameToStatList["cold max dam"]                      = D2JSP_STAT_COLDMAXDAM;
+D2JSP_STAT_NameToStatList["cold length"]                       = D2JSP_STAT_COLDLENGTH;
+D2JSP_STAT_NameToStatList["poison min dam"]                    = D2JSP_STAT_POISONMINDAM;
+D2JSP_STAT_NameToStatList["poison max dam"]                    = D2JSP_STAT_POISONMAXDAM;
+D2JSP_STAT_NameToStatList["poison length"]                     = D2JSP_STAT_POISONLENGTH;
+D2JSP_STAT_NameToStatList["life drain min dam"]                = D2JSP_STAT_LIFEDRAINMINDAM;
+D2JSP_STAT_NameToStatList["life drain max dam"]                = D2JSP_STAT_LIFEDRAINMAXDAM;
+D2JSP_STAT_NameToStatList["mana drain min dam"]                = D2JSP_STAT_MANADRAINMINDAM;
+D2JSP_STAT_NameToStatList["mana drain max dam"]                = D2JSP_STAT_MANADRAINMAXDAM;
+D2JSP_STAT_NameToStatList["stamina drain min dam"]             = D2JSP_STAT_STAMDRAINMINDAM;
+D2JSP_STAT_NameToStatList["stamina drain max dam"]             = D2JSP_STAT_STAMDRAINMAXDAM;
+D2JSP_STAT_NameToStatList["stun length"]                       = D2JSP_STAT_STUNLENGTH;
+D2JSP_STAT_NameToStatList["velocity percent"]                  = D2JSP_STAT_VELOCITYPERCENT;
+D2JSP_STAT_NameToStatList["attack rate"]                       = D2JSP_STAT_ATTACKRATE;
+D2JSP_STAT_NameToStatList["other anim rate"]                   = D2JSP_STAT_OTHER_ANIMRATE;
+D2JSP_STAT_NameToStatList["quantity"]                          = D2JSP_STAT_QUANTITY;
+D2JSP_STAT_NameToStatList["value"]                             = D2JSP_STAT_VALUE;
+D2JSP_STAT_NameToStatList["durability"]                        = D2JSP_STAT_DURABILITY;
+D2JSP_STAT_NameToStatList["max durability"]                    = D2JSP_STAT_MAXDURABILITY;
+D2JSP_STAT_NameToStatList["hp regen"]                          = D2JSP_STAT_HPREGEN;
+D2JSP_STAT_NameToStatList["item max durability percent"]       = D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT;
+D2JSP_STAT_NameToStatList["increase maximum durability percent"]   = D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT;
+D2JSP_STAT_NameToStatList["increase max durability percent"]   = D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT;
+D2JSP_STAT_NameToStatList["increase maximum durability"]       = D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT;
+D2JSP_STAT_NameToStatList["increase max durability"]           = D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT;
+D2JSP_STAT_NameToStatList["item max hp percent"]               = D2JSP_STAT_ITEM_MAXHP_PERCENT;
+D2JSP_STAT_NameToStatList["item max mana percent"]             = D2JSP_STAT_ITEM_MAXMANA_PERCENT;
+D2JSP_STAT_NameToStatList["item attacker takes damage"]        = D2JSP_STAT_ITEM_ATTACKERTAKESDAMAGE;
+D2JSP_STAT_NameToStatList["item gold bonus"]                   = D2JSP_STAT_ITEM_GOLDBONUS;
+D2JSP_STAT_NameToStatList["item magic bonus"]                  = D2JSP_STAT_ITEM_MAGICBONUS;
+D2JSP_STAT_NameToStatList["item knock back"]                   = D2JSP_STAT_ITEM_KNOCKBACK;
+D2JSP_STAT_NameToStatList["item time duration"]                = D2JSP_STAT_ITEM_TIMEDURATION;
+D2JSP_STAT_NameToStatList["item add amazon skill points"]      = D2JSP_STAT_ITEM_ADDAMASKILLPOINTS;
+D2JSP_STAT_NameToStatList["item add paladin skill points"]     = D2JSP_STAT_ITEM_ADDPALSKILLPOINTS;
+D2JSP_STAT_NameToStatList["item add necromancer skill points"] = D2JSP_STAT_ITEM_ADDNECSKILLPOINTS;
+D2JSP_STAT_NameToStatList["item add sorceress skill points"]   = D2JSP_STAT_ITEM_ADDSORSKILLPOINTS;
+D2JSP_STAT_NameToStatList["item add barbarian skill points"]   = D2JSP_STAT_ITEM_ADDBARSKILLPOINTS;
+D2JSP_STAT_NameToStatList["item double herb duration"]         = D2JSP_STAT_ITEM_DOUBLEHERBDURATION;
+D2JSP_STAT_NameToStatList["item light radius"]                 = D2JSP_STAT_ITEM_LIGHTRADIUS;
+D2JSP_STAT_NameToStatList["item light color"]                  = D2JSP_STAT_ITEM_LIGHTCOLOR;
+D2JSP_STAT_NameToStatList["item req percent"]                  = D2JSP_STAT_ITEM_REQ_PERCENT;
+D2JSP_STAT_NameToStatList["item fast attack rate"]             = D2JSP_STAT_ITEM_FASTATTACKRATE;
+D2JSP_STAT_NameToStatList["item faster attack rate"]           = D2JSP_STAT_ITEM_FASTERATTACKRATE;
+D2JSP_STAT_NameToStatList["item fastest attack rate"]          = D2JSP_STAT_ITEM_FASTESTATTACKRATE;
+D2JSP_STAT_NameToStatList["item fast move velocity"]           = D2JSP_STAT_ITEM_FASTMOVEVELOCITY;
+D2JSP_STAT_NameToStatList["item faster move velocity"]         = D2JSP_STAT_ITEM_FASTERMOVEVELOCITY;
+D2JSP_STAT_NameToStatList["item fastest move velocity"]        = D2JSP_STAT_ITEM_FASTESTMOVEVELOCITY;
+D2JSP_STAT_NameToStatList["item fast get hit rate"]            = D2JSP_STAT_ITEM_FASTGETHITRATE;
+D2JSP_STAT_NameToStatList["item faster get hit rate"]          = D2JSP_STAT_ITEM_FASTERGETHITRATE;
+D2JSP_STAT_NameToStatList["item fastest get hit rate"]         = D2JSP_STAT_ITEM_FASTESTGETHITRATE;
+D2JSP_STAT_NameToStatList["item fast block rate"]              = D2JSP_STAT_ITEM_FASTBLOCKRATE;
+D2JSP_STAT_NameToStatList["item faster block rate"]            = D2JSP_STAT_ITEM_FASTERBLOCKRATE;
+D2JSP_STAT_NameToStatList["item fastest block rate"]           = D2JSP_STAT_ITEM_FASTESTBLOCKRATE;
+D2JSP_STAT_NameToStatList["item fast cast rate"]               = D2JSP_STAT_ITEM_FASTCASTRATE;
+D2JSP_STAT_NameToStatList["item faster cast rate"]             = D2JSP_STAT_ITEM_FASTERCASTRATE;
+D2JSP_STAT_NameToStatList["item fastest cast rate"]            = D2JSP_STAT_ITEM_FASTESTCASTRATE;
+D2JSP_STAT_NameToStatList["item single skill 1"]               = D2JSP_STAT_ITEM_SINGLESKILL1;
+D2JSP_STAT_NameToStatList["item single skill 2"]               = D2JSP_STAT_ITEM_SINGLESKILL2;
+D2JSP_STAT_NameToStatList["item single skill 3"]               = D2JSP_STAT_ITEM_SINGLESKILL3;
+D2JSP_STAT_NameToStatList["item poison length resist"]         = D2JSP_STAT_ITEM_POISONLENGTHRESIST;
+D2JSP_STAT_NameToStatList["item normal damage"]                = D2JSP_STAT_ITEM_NORMALDAMAGE;
+D2JSP_STAT_NameToStatList["item howl"]                         = D2JSP_STAT_ITEM_HOWL;
+D2JSP_STAT_NameToStatList["item stupidity"]                    = D2JSP_STAT_ITEM_STUPIDITY;
+D2JSP_STAT_NameToStatList["item damage to mana"]               = D2JSP_STAT_ITEM_DAMAGETOMANA;
+D2JSP_STAT_NameToStatList["item ignore target ac"]             = D2JSP_STAT_ITEM_IGNORETARGETAC;
+D2JSP_STAT_NameToStatList["item fractional target ac"]         = D2JSP_STAT_ITEM_FRACTIONALTARGETAC;
+D2JSP_STAT_NameToStatList["item prevent heal"]                 = D2JSP_STAT_ITEM_PREVENTHEAL;
+D2JSP_STAT_NameToStatList["item half freeze duration"]         = D2JSP_STAT_ITEM_HALFFREEZEDURATION;
+D2JSP_STAT_NameToStatList["item to hit percent"]               = D2JSP_STAT_ITEM_TOHIT_PERCENT;
+D2JSP_STAT_NameToStatList["item damage target ac"]             = D2JSP_STAT_ITEM_DAMAGETARGETAC;
+D2JSP_STAT_NameToStatList["item demon damage percent"]         = D2JSP_STAT_ITEM_DEMONDAMAGE_PERCENT;
+D2JSP_STAT_NameToStatList["item undead damage percent"]        = D2JSP_STAT_ITEM_UNDEADDAMAGE_PERCENT;
+D2JSP_STAT_NameToStatList["item demon to hit"]                 = D2JSP_STAT_ITEM_DEMON_TOHIT;
+D2JSP_STAT_NameToStatList["item undead to hit"]                = D2JSP_STAT_ITEM_UNDEAD_TOHIT;
+D2JSP_STAT_NameToStatList["item throwable"]                    = D2JSP_STAT_ITEM_THROWABLE;
+D2JSP_STAT_NameToStatList["item fire skill"]                   = D2JSP_STAT_ITEM_FIRESKILL;
+D2JSP_STAT_NameToStatList["item all skills"]                   = D2JSP_STAT_ITEM_ALLSKILLS;
+D2JSP_STAT_NameToStatList["item attacker takes light damage"]  = D2JSP_STAT_ITEM_ATTACKERTAKESLIGHTDAMAGE;
+D2JSP_STAT_NameToStatList["iron maiden level"]                 = D2JSP_STAT_IRONMAIDEN_LEVEL;
+D2JSP_STAT_NameToStatList["life tap level"]                    = D2JSP_STAT_LIFETAP_LEVEL;
+D2JSP_STAT_NameToStatList["thorns level"]                      = D2JSP_STAT_THORNS_LEVEL;
+D2JSP_STAT_NameToStatList["bone armor"]                        = D2JSP_STAT_BONEARMOR;
+D2JSP_STAT_NameToStatList["bone armor max"]                    = D2JSP_STAT_BONEARMORMAX;
+D2JSP_STAT_NameToStatList["item freeze"]                       = D2JSP_STAT_ITEM_FREEZE;
+D2JSP_STAT_NameToStatList["item open wounds"]                  = D2JSP_STAT_ITEM_OPENWOUNDS;
+D2JSP_STAT_NameToStatList["item crushing blow"]                = D2JSP_STAT_ITEM_CRUSHINGBLOW;
+D2JSP_STAT_NameToStatList["item kick damage"]                  = D2JSP_STAT_ITEM_KICKDAMAGE;
+D2JSP_STAT_NameToStatList["item mana after kill"]              = D2JSP_STAT_ITEM_MANAAFTERKILL;
+D2JSP_STAT_NameToStatList["item heal after demon kill"]        = D2JSP_STAT_ITEM_HEALAFTERDEMONKILL;
+D2JSP_STAT_NameToStatList["item extra blood"]                  = D2JSP_STAT_ITEM_EXTRABLOOD;
+D2JSP_STAT_NameToStatList["item deadly strike"]                = D2JSP_STAT_ITEM_DEADLYSTRIKE;
+D2JSP_STAT_NameToStatList["item absorb fire percent"]          = D2JSP_STAT_ITEM_ABSORBFIRE_PERCENT;
+D2JSP_STAT_NameToStatList["item absorb fire"]                  = D2JSP_STAT_ITEM_ABSORBFIRE;
+D2JSP_STAT_NameToStatList["item absorb light percent"]         = D2JSP_STAT_ITEM_ABSORBLIGHT_PERCENT;
+D2JSP_STAT_NameToStatList["item absorb light"]                 = D2JSP_STAT_ITEM_ABSORBLIGHT;
+D2JSP_STAT_NameToStatList["item absorb magic percent"]         = D2JSP_STAT_ITEM_ABSORBMAGIC_PERCENT;
+D2JSP_STAT_NameToStatList["item absorb magic"]                 = D2JSP_STAT_ITEM_ABSORBMAGIC;
+D2JSP_STAT_NameToStatList["item absorb cold percent"]          = D2JSP_STAT_ITEM_ABSORBCOLD_PERCENT;
+D2JSP_STAT_NameToStatList["item absorb cold"]                  = D2JSP_STAT_ITEM_ABSORBCOLD;
+D2JSP_STAT_NameToStatList["item slow"]                         = D2JSP_STAT_ITEM_SLOW;
+D2JSP_STAT_NameToStatList["item blessed aim"]                  = D2JSP_STAT_ITEM_BLESSEDAIM;
+if (parseFloat(me.version) < 0.3518)
+	D2JSP_STAT_NameToStatList["item defiance"]                     = D2JSP_STAT_ITEM_DEFIANCE;
+else {
+	D2JSP_STAT_NameToStatList["item indestructible"]               = D2JSP_STAT_ITEM_INDESTRUCTIBLE;
+	D2JSP_STAT_NameToStatList["indestructible"]                    = D2JSP_STAT_ITEM_INDESTRUCTIBLE;
+}
+D2JSP_STAT_NameToStatList["item cannot be frozen"]             = D2JSP_STAT_ITEM_CANNOTBEFROZEN;
+D2JSP_STAT_NameToStatList["item stamina drain pct"]            = D2JSP_STAT_ITEM_STAMINADRAINPCT;
+D2JSP_STAT_NameToStatList["item reanimate"]                    = D2JSP_STAT_ITEM_REANIMATE;
+D2JSP_STAT_NameToStatList["item pierce"]                       = D2JSP_STAT_ITEM_PIERCE;
+D2JSP_STAT_NameToStatList["item magic arrow"]                  = D2JSP_STAT_ITEM_MAGICARROW;
+D2JSP_STAT_NameToStatList["item explosive arrow"]              = D2JSP_STAT_ITEM_EXPLOSIVEARROW;
+D2JSP_STAT_NameToStatList["item throw min damage"]             = D2JSP_STAT_ITEM_THROW_MINDAMAGE;
+D2JSP_STAT_NameToStatList["item throw max damage"]             = D2JSP_STAT_ITEM_THROW_MAXDAMAGE;
+D2JSP_STAT_NameToStatList["skill hand of athena"]              = D2JSP_STAT_SKILL_HANDOFATHENA;
+D2JSP_STAT_NameToStatList["skill stamina percent"]             = D2JSP_STAT_SKILL_STAMINAPERCENT;
+D2JSP_STAT_NameToStatList["skill passive stamina percent"]     = D2JSP_STAT_SKILL_PASSIVE_STAMINAPERCENT;
+D2JSP_STAT_NameToStatList["skill concentration"]               = D2JSP_STAT_SKILL_CONCENTRATION;
+D2JSP_STAT_NameToStatList["skill enchant"]                     = D2JSP_STAT_SKILL_ENCHANT;
+D2JSP_STAT_NameToStatList["skill pierce"]                      = D2JSP_STAT_SKILL_PIERCE;
+D2JSP_STAT_NameToStatList["skill conviction"]                  = D2JSP_STAT_SKILL_CONVICTION;
+D2JSP_STAT_NameToStatList["skill chilling armor"]              = D2JSP_STAT_SKILL_CHILLINGARMOR;
+D2JSP_STAT_NameToStatList["skill frenzy"]                      = D2JSP_STAT_SKILL_FRENZY;
+D2JSP_STAT_NameToStatList["skill decertify"]                   = D2JSP_STAT_SKILL_DECREPIFY;
+D2JSP_STAT_NameToStatList["skill armor percent"]               = D2JSP_STAT_SKILL_ARMOR_PERCENT;
+D2JSP_STAT_NameToStatList["alignment"]                         = D2JSP_STAT_ALIGNMENT;
+D2JSP_STAT_NameToStatList["target 0"]                          = D2JSP_STAT_TARGET0;
+D2JSP_STAT_NameToStatList["target 1"]                          = D2JSP_STAT_TARGET1;
+D2JSP_STAT_NameToStatList["gold lost"]                         = D2JSP_STAT_GOLDLOST;
+D2JSP_STAT_NameToStatList["conversion level"]                  = D2JSP_STAT_CONVERSION_LEVEL;
+D2JSP_STAT_NameToStatList["conversion max hit points"]         = D2JSP_STAT_CONVERSION_MAXHP;
+D2JSP_STAT_NameToStatList["unit do overlay"]                   = D2JSP_STAT_UNIT_DOOVERLAY;
+D2JSP_STAT_NameToStatList["item add druid skill points"]       = D2JSP_STAT_ITEM_ADDDRUSKILLPOINTS;
+D2JSP_STAT_NameToStatList["item add assassin skill points"]    = D2JSP_STAT_ITEM_ADDASSSKILLPOINTS;
+D2JSP_STAT_NameToStatList["item add skill single 4"]           = D2JSP_STAT_ITEM_ADDSKILL_SINGLE4;
+D2JSP_STAT_NameToStatList["item add skill single 5"]           = D2JSP_STAT_ITEM_ADDSKILL_SINGLE5;
+D2JSP_STAT_NameToStatList["item add skill single 6"]           = D2JSP_STAT_ITEM_ADDSKILL_SINGLE6;
+D2JSP_STAT_NameToStatList["item add skill single 7"]           = D2JSP_STAT_ITEM_ADDSKILL_SINGLE7;
+D2JSP_STAT_NameToStatList["item add skill single 8"]           = D2JSP_STAT_ITEM_ADDSKILL_SINGLE8;
+D2JSP_STAT_NameToStatList["item add skill single 9"]           = D2JSP_STAT_ITEM_ADDSKILL_SINGLE9;
+D2JSP_STAT_NameToStatList["item add skill single 10"]          = D2JSP_STAT_ITEM_ADDSKILL_SINGLE10;
+D2JSP_STAT_NameToStatList["item add skill tab 1"]              = D2JSP_STAT_ITEM_ADDSKILL_TAB1;
+D2JSP_STAT_NameToStatList["item add skill tab 2"]              = D2JSP_STAT_ITEM_ADDSKILL_TAB2;
+D2JSP_STAT_NameToStatList["item add skill tab 3"]              = D2JSP_STAT_ITEM_ADDSKILL_TAB3;
+D2JSP_STAT_NameToStatList["item add skill tab 4"]              = D2JSP_STAT_ITEM_ADDSKILL_TAB4;
+D2JSP_STAT_NameToStatList["item add skill tab 5"]              = D2JSP_STAT_ITEM_ADDSKILL_TAB5;
+D2JSP_STAT_NameToStatList["item add skill tab 6"]              = D2JSP_STAT_ITEM_ADDSKILL_TAB6;
+D2JSP_STAT_NameToStatList["item num sockets"]                  = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["item number sockets"]               = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["item number of sockets"]            = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["num sockets"]                       = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["number sockets"]                    = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["number of sockets"]                 = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["sockets"]                           = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["socket"]                            = D2JSP_STAT_ITEM_NUMSOCKETS;
+D2JSP_STAT_NameToStatList["item skill on attack 1"]            = D2JSP_STAT_ITEM_SKILLONATTACK1;
+D2JSP_STAT_NameToStatList["item skill on attack 2"]            = D2JSP_STAT_ITEM_SKILLONATTACK2;
+D2JSP_STAT_NameToStatList["item skill on attack 3"]            = D2JSP_STAT_ITEM_SKILLONATTACK3;
+D2JSP_STAT_NameToStatList["item skill on hit 1"]               = D2JSP_STAT_ITEM_SKILLONHIT1;
+D2JSP_STAT_NameToStatList["item skill on hit 2"]               = D2JSP_STAT_ITEM_SKILLONHIT2;
+D2JSP_STAT_NameToStatList["item skill on hit 3"]               = D2JSP_STAT_ITEM_SKILLONHIT3;
+D2JSP_STAT_NameToStatList["item skill on get hit 1"]           = D2JSP_STAT_ITEM_SKILLONGETHIT1;
+D2JSP_STAT_NameToStatList["item skill on get hit 2"]           = D2JSP_STAT_ITEM_SKILLONGETHIT2;
+D2JSP_STAT_NameToStatList["item skill on get hit 3"]           = D2JSP_STAT_ITEM_SKILLONGETHIT3;
+D2JSP_STAT_NameToStatList["item charged skill 0"]              = D2JSP_STAT_ITEM_CHARGED_SKILL0;
+D2JSP_STAT_NameToStatList["item charged skill 1"]              = D2JSP_STAT_ITEM_CHARGED_SKILL1;
+D2JSP_STAT_NameToStatList["item charged skill 2"]              = D2JSP_STAT_ITEM_CHARGED_SKILL2;
+D2JSP_STAT_NameToStatList["item charged skill 3"]              = D2JSP_STAT_ITEM_CHARGED_SKILL3;
+D2JSP_STAT_NameToStatList["item charged skill 4"]              = D2JSP_STAT_ITEM_CHARGED_SKILL4;
+D2JSP_STAT_NameToStatList["item charged skill 5"]              = D2JSP_STAT_ITEM_CHARGED_SKILL5;
+D2JSP_STAT_NameToStatList["item charged skill 6"]              = D2JSP_STAT_ITEM_CHARGED_SKILL6;
+D2JSP_STAT_NameToStatList["item charged skill 7"]              = D2JSP_STAT_ITEM_CHARGED_SKILL7;
+D2JSP_STAT_NameToStatList["item charged skill 8"]              = D2JSP_STAT_ITEM_CHARGED_SKILL8;
+D2JSP_STAT_NameToStatList["item charged skill 9"]              = D2JSP_STAT_ITEM_CHARGED_SKILL9;
+D2JSP_STAT_NameToStatList["item armor per level"]              = D2JSP_STAT_ITEM_ARMOR_PERLEVEL;
+D2JSP_STAT_NameToStatList["item armor percent per level"]      = D2JSP_STAT_ITEM_ARMORPERCENT_PERLEVEL;
+D2JSP_STAT_NameToStatList["item hp per level"]                 = D2JSP_STAT_ITEM_HP_PERLEVEL;
+D2JSP_STAT_NameToStatList["item mana per level"]               = D2JSP_STAT_ITEM_MANA_PERLEVEL;
+D2JSP_STAT_NameToStatList["item max damage per level"]         = D2JSP_STAT_ITEM_MAXDAMAGE_PERLEVEL;
+D2JSP_STAT_NameToStatList["item max damage percent per level"] = D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT_PERLEVEL;
+D2JSP_STAT_NameToStatList["item strength per level"]           = D2JSP_STAT_ITEM_STRENGTH_PERLEVEL;
+D2JSP_STAT_NameToStatList["item dexterity per level"]          = D2JSP_STAT_ITEM_DEXTERITY_PERLEVEL;
+D2JSP_STAT_NameToStatList["item energy per level"]             = D2JSP_STAT_ITEM_ENERGY_PERLEVEL;
+D2JSP_STAT_NameToStatList["item vitality per level"]           = D2JSP_STAT_ITEM_VITALITY_PERLEVEL;
+D2JSP_STAT_NameToStatList["item to hit per level"]             = D2JSP_STAT_ITEM_TOHIT_PERLEVEL;
+D2JSP_STAT_NameToStatList["item to hit percent per level"]     = D2JSP_STAT_ITEM_TOHITPERCENT_PERLEVEL;
+D2JSP_STAT_NameToStatList["item cold damage max per level"]    = D2JSP_STAT_ITEM_COLD_DAMAGEMAX_PERLEVEL;
+D2JSP_STAT_NameToStatList["item fire damage max per level"]    = D2JSP_STAT_ITEM_FIRE_DAMAGEMAX_PERLEVEL;
+D2JSP_STAT_NameToStatList["item light damage max per level"]   = D2JSP_STAT_ITEM_LTNG_DAMAGEMAX_PERLEVEL;
+D2JSP_STAT_NameToStatList["item poison damage max per level"]  = D2JSP_STAT_ITEM_POIS_DAMAGEMAX_PERLEVEL;
+D2JSP_STAT_NameToStatList["item resist cold per level"]        = D2JSP_STAT_ITEM_RESIST_COLD_PERLEVEL;
+D2JSP_STAT_NameToStatList["item resist fire per level"]        = D2JSP_STAT_ITEM_RESIST_FIRE_PERLEVEL;
+D2JSP_STAT_NameToStatList["item resist light per level"]       = D2JSP_STAT_ITEM_RESIST_LTNG_PERLEVEL;
+D2JSP_STAT_NameToStatList["item resist poison per level"]      = D2JSP_STAT_ITEM_RESIST_POIS_PERLEVEL;
+D2JSP_STAT_NameToStatList["item absorb cold per level"]        = D2JSP_STAT_ITEM_ABSORB_COLD_PERLEVEL;
+D2JSP_STAT_NameToStatList["item absorb fire per level"]        = D2JSP_STAT_ITEM_ABSORB_FIRE_PERLEVEL;
+D2JSP_STAT_NameToStatList["item absorb light per level"]       = D2JSP_STAT_ITEM_ABSORB_LTNG_PERLEVEL;
+D2JSP_STAT_NameToStatList["item absorb poison per level"]      = D2JSP_STAT_ITEM_ABSORB_POIS_PERLEVEL;
+D2JSP_STAT_NameToStatList["item thorns per level"]             = D2JSP_STAT_ITEM_THORNS_PERLEVEL;
+D2JSP_STAT_NameToStatList["item find gold per level"]          = D2JSP_STAT_ITEM_FIND_GOLD_PERLEVEL;
+D2JSP_STAT_NameToStatList["item find magic per level"]         = D2JSP_STAT_ITEM_FIND_MAGIC_PERLEVEL;
+D2JSP_STAT_NameToStatList["item regen stamina per level"]      = D2JSP_STAT_ITEM_REGENSTAMINA_PERLEVEL;
+D2JSP_STAT_NameToStatList["item stamina per level"]            = D2JSP_STAT_ITEM_STAMINA_PERLEVEL;
+D2JSP_STAT_NameToStatList["item damage demon per level"]       = D2JSP_STAT_ITEM_DAMAGE_DEMON_PERLEVEL;
+D2JSP_STAT_NameToStatList["item damage undead per level"]      = D2JSP_STAT_ITEM_DAMAGE_UNDEAD_PERLEVEL;
+D2JSP_STAT_NameToStatList["item to hit demon per level"]       = D2JSP_STAT_ITEM_TOHIT_DEMON_PERLEVEL;
+D2JSP_STAT_NameToStatList["item to hit undead per level"]      = D2JSP_STAT_ITEM_TOHIT_UNDEAD_PERLEVEL;
+D2JSP_STAT_NameToStatList["item crushing blow per level"]      = D2JSP_STAT_ITEM_CRUSHINGBLOW_PERLEVEL;
+D2JSP_STAT_NameToStatList["item open wounds per level"]        = D2JSP_STAT_ITEM_OPENWOUNDS_PERLEVEL;
+D2JSP_STAT_NameToStatList["item kick damage per level"]        = D2JSP_STAT_ITEM_KICK_DAMAGE_PERLEVEL;
+D2JSP_STAT_NameToStatList["item deadly strike per level"]      = D2JSP_STAT_ITEM_DEADLYSTRIKE_PERLEVEL;
+D2JSP_STAT_NameToStatList["item find gems per level"]          = D2JSP_STAT_ITEM_FIND_GEMS_PERLEVEL;
+D2JSP_STAT_NameToStatList["item replenish durability"]         = D2JSP_STAT_ITEM_REPLENISH_DURABILITY;
+D2JSP_STAT_NameToStatList["item replenish quantity"]           = D2JSP_STAT_ITEM_REPLENISH_QUANTITY;
+D2JSP_STAT_NameToStatList["item extra stack"]                  = D2JSP_STAT_ITEM_EXTRA_STACK;
+D2JSP_STAT_NameToStatList["item find item"]                    = D2JSP_STAT_ITEM_FIND_ITEM;
+D2JSP_STAT_NameToStatList["item slash damage"]                 = D2JSP_STAT_ITEM_SLASH_DAMAGE;
+D2JSP_STAT_NameToStatList["item slash damage percent"]         = D2JSP_STAT_ITEM_SLASH_DAMAGE_PERCENT;
+D2JSP_STAT_NameToStatList["item crush damage"]                 = D2JSP_STAT_ITEM_CRUSH_DAMAGE;
+D2JSP_STAT_NameToStatList["item crush damage percent"]         = D2JSP_STAT_ITEM_CRUSH_DAMAGE_PERCENT;
+D2JSP_STAT_NameToStatList["item thrust damage"]                = D2JSP_STAT_ITEM_THRUST_DAMAGE;
+D2JSP_STAT_NameToStatList["item thrust damage percent"]        = D2JSP_STAT_ITEM_THRUST_DAMAGE_PERCENT;
+D2JSP_STAT_NameToStatList["item absorb slash"]                 = D2JSP_STAT_ITEM_ABSORB_SLASH;
+D2JSP_STAT_NameToStatList["item absorb crush"]                 = D2JSP_STAT_ITEM_ABSORB_CRUSH;
+D2JSP_STAT_NameToStatList["item absorb thrust"]                = D2JSP_STAT_ITEM_ABSORB_THRUST;
+D2JSP_STAT_NameToStatList["item absorb slash percent"]         = D2JSP_STAT_ITEM_ABSORB_SLASH_PERCENT;
+D2JSP_STAT_NameToStatList["item absorb crush percent"]         = D2JSP_STAT_ITEM_ABSORB_CRUSH_PERCENT;
+D2JSP_STAT_NameToStatList["item absorb thrust percent"]        = D2JSP_STAT_ITEM_ABSORB_THRUST_PERCENT;
+D2JSP_STAT_NameToStatList["item armor by time"]                = D2JSP_STAT_ITEM_ARMOR_BYTIME;
+D2JSP_STAT_NameToStatList["item armor percent by time"]        = D2JSP_STAT_ITEM_ARMORPERCENT_BYTIME;
+D2JSP_STAT_NameToStatList["item hp by time"]                   = D2JSP_STAT_ITEM_HP_BYTIME;
+D2JSP_STAT_NameToStatList["item mana by time"]                 = D2JSP_STAT_ITEM_MANA_BYTIME;
+D2JSP_STAT_NameToStatList["item max damage by time"]           = D2JSP_STAT_ITEM_MAXDAMAGE_BYTIME;
+D2JSP_STAT_NameToStatList["item max damage percent by time"]   = D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT_BYTIME;
+D2JSP_STAT_NameToStatList["item strength by time"]             = D2JSP_STAT_ITEM_STRENGTH_BYTIME;
+D2JSP_STAT_NameToStatList["item dexterity by time"]            = D2JSP_STAT_ITEM_DEXTERITY_BYTIME;
+D2JSP_STAT_NameToStatList["item energy by time"]               = D2JSP_STAT_ITEM_ENERGY_BYTIME;
+D2JSP_STAT_NameToStatList["item vitality by time"]             = D2JSP_STAT_ITEM_VITALITY_BYTIME;
+D2JSP_STAT_NameToStatList["item to hit by time"]               = D2JSP_STAT_ITEM_TOHIT_BYTIME;
+D2JSP_STAT_NameToStatList["item to hit percent by time"]       = D2JSP_STAT_ITEM_TOHITPERCENT_BYTIME;
+D2JSP_STAT_NameToStatList["item cold damage max by time"]      = D2JSP_STAT_ITEM_COLD_DAMAGEMAX_BYTIME;
+D2JSP_STAT_NameToStatList["item fire damage max by time"]      = D2JSP_STAT_ITEM_FIRE_DAMAGEMAX_BYTIME;
+D2JSP_STAT_NameToStatList["item light damage max by time"]     = D2JSP_STAT_ITEM_LTNG_DAMAGEMAX_BYTIME;
+D2JSP_STAT_NameToStatList["item poison damage max by time"]    = D2JSP_STAT_ITEM_POIS_DAMAGEMAX_BYTIME;
+D2JSP_STAT_NameToStatList["item resist cold by time"]          = D2JSP_STAT_ITEM_RESIST_COLD_BYTIME;
+D2JSP_STAT_NameToStatList["item resist fire by time"]          = D2JSP_STAT_ITEM_RESIST_FIRE_BYTIME;
+D2JSP_STAT_NameToStatList["item resist light by time"]         = D2JSP_STAT_ITEM_RESIST_LTNG_BYTIME;
+D2JSP_STAT_NameToStatList["item resist poison by time"]        = D2JSP_STAT_ITEM_RESIST_POIS_BYTIME;
+D2JSP_STAT_NameToStatList["item absorb cold by time"]          = D2JSP_STAT_ITEM_ABSORB_COLD_BYTIME;
+D2JSP_STAT_NameToStatList["item absorb fire by time"]          = D2JSP_STAT_ITEM_ABSORB_FIRE_BYTIME;
+D2JSP_STAT_NameToStatList["item absorb light by time"]         = D2JSP_STAT_ITEM_ABSORB_LTNG_BYTIME;
+D2JSP_STAT_NameToStatList["item absorb poison by time"]        = D2JSP_STAT_ITEM_ABSORB_POIS_BYTIME;
+D2JSP_STAT_NameToStatList["item find gold by time"]            = D2JSP_STAT_ITEM_FIND_GOLD_BYTIME;
+D2JSP_STAT_NameToStatList["item find magic by time"]           = D2JSP_STAT_ITEM_FIND_MAGIC_BYTIME;
+D2JSP_STAT_NameToStatList["item regen stamina by time"]        = D2JSP_STAT_ITEM_REGENSTAMINA_BYTIME;
+D2JSP_STAT_NameToStatList["item stamina by time"]              = D2JSP_STAT_ITEM_STAMINA_BYTIME;
+D2JSP_STAT_NameToStatList["item damage demon by time"]         = D2JSP_STAT_ITEM_DAMAGE_DEMON_BYTIME;
+D2JSP_STAT_NameToStatList["item damage undead by time"]        = D2JSP_STAT_ITEM_DAMAGE_UNDEAD_BYTIME;
+D2JSP_STAT_NameToStatList["item to hit demon by time"]         = D2JSP_STAT_ITEM_TOHIT_DEMON_BYTIME;
+D2JSP_STAT_NameToStatList["item to hit undead by time"]        = D2JSP_STAT_ITEM_TOHIT_UNDEAD_BYTIME;
+D2JSP_STAT_NameToStatList["item crushing blow by time"]        = D2JSP_STAT_ITEM_CRUSHINGBLOW_BYTIME;
+D2JSP_STAT_NameToStatList["item open wounds by time"]          = D2JSP_STAT_ITEM_OPENWOUNDS_BYTIME;
+D2JSP_STAT_NameToStatList["item kick damage by time"]          = D2JSP_STAT_ITEM_KICK_DAMAGE_BYTIME;
+D2JSP_STAT_NameToStatList["item deadly strike by time"]        = D2JSP_STAT_ITEM_DEADLYSTRIKE_BYTIME;
+D2JSP_STAT_NameToStatList["item find gems by time"]            = D2JSP_STAT_ITEM_FIND_GEMS_BYTIME;
+D2JSP_STAT_NameToStatList["item pierce cold"]                  = D2JSP_STAT_ITEM_PIERCE_COLD;
+D2JSP_STAT_NameToStatList["item pierce fire"]                  = D2JSP_STAT_ITEM_PIERCE_FIRE;
+D2JSP_STAT_NameToStatList["item pierce light"]                 = D2JSP_STAT_ITEM_PIERCE_LTNG;
+D2JSP_STAT_NameToStatList["item pierce poison"]                = D2JSP_STAT_ITEM_PIERCE_POIS;
+D2JSP_STAT_NameToStatList["item damage vs monster"]            = D2JSP_STAT_ITEM_DAMAGE_VS_MONSTER;
+D2JSP_STAT_NameToStatList["item damage percent vs monster"]    = D2JSP_STAT_ITEM_DAMAGE_PERCENT_VS_MONSTER;
+D2JSP_STAT_NameToStatList["item to hit vs monster"]            = D2JSP_STAT_ITEM_TOHIT_VS_MONSTER;
+D2JSP_STAT_NameToStatList["item to hit percent vs monster"]    = D2JSP_STAT_ITEM_TOHIT_PERCENT_VS_MONSTER;
+D2JSP_STAT_NameToStatList["item ac vs monster"]                = D2JSP_STAT_ITEM_AC_VS_MONSTER;
+D2JSP_STAT_NameToStatList["item ac percent vs monster"]        = D2JSP_STAT_ITEM_AC_PERCENT_VS_MONSTER;
+D2JSP_STAT_NameToStatList["fire length"]                       = D2JSP_STAT_FIRELENGTH;
+D2JSP_STAT_NameToStatList["burning min"]                       = D2JSP_STAT_BURNINGMIN;
+D2JSP_STAT_NameToStatList["burning max"]                       = D2JSP_STAT_BURNINGMAX;
+D2JSP_STAT_NameToStatList["progressive damage"]                = D2JSP_STAT_PROGRESSIVE_DAMAGE;
+D2JSP_STAT_NameToStatList["progressive steal"]                 = D2JSP_STAT_PROGRESSIVE_STEAL;
+D2JSP_STAT_NameToStatList["progressive other"]                 = D2JSP_STAT_PROGRESSIVE_OTHER;
+D2JSP_STAT_NameToStatList["progressive fire"]                  = D2JSP_STAT_PROGRESSIVE_FIRE;
+D2JSP_STAT_NameToStatList["progressive cold"]                  = D2JSP_STAT_PROGRESSIVE_COLD;
+D2JSP_STAT_NameToStatList["progressive lightning"]             = D2JSP_STAT_PROGRESSIVE_LIGHTNING;
+D2JSP_STAT_NameToStatList["item extra charges"]                = D2JSP_STAT_ITEM_EXTRA_CHARGES;
+D2JSP_STAT_NameToStatList["progressive to hit"]                = D2JSP_STAT_PROGRESSIVE_TOHIT;
+if (parseFloat(me.version) >= 0.3518) {
+	D2JSP_STAT_NameToStatList["poison count"]                   = D2JSP_STAT_POISON_COUNT;
+	D2JSP_STAT_NameToStatList["damage framerate"]               = D2JSP_STAT_DAMAGE_FRAMERATE;
+	D2JSP_STAT_NameToStatList["pierce idx"]                     = D2JSP_STAT_PIERCE_IDX;
+	D2JSP_STAT_NameToStatList["passive fire mastery"]           = D2JSP_STAT_PASSIVE_FIRE_MASTERY;
+	D2JSP_STAT_NameToStatList["passive lightning mastery"]      = D2JSP_STAT_PASSIVE_LTNG_MASTERY;
+	D2JSP_STAT_NameToStatList["passive ltng mastery"]           = D2JSP_STAT_PASSIVE_LTNG_MASTERY;
+	D2JSP_STAT_NameToStatList["passive cold mastery"]           = D2JSP_STAT_PASSIVE_COLD_MASTERY;
+	D2JSP_STAT_NameToStatList["passive poison mastery"]         = D2JSP_STAT_PASSIVE_POIS_MASTERY;
+	D2JSP_STAT_NameToStatList["passive pois mastery"]           = D2JSP_STAT_PASSIVE_POIS_MASTERY;
+	D2JSP_STAT_NameToStatList["passive fire pierce"]            = D2JSP_STAT_PASSIVE_FIRE_PIERCE;
+	D2JSP_STAT_NameToStatList["passive lightning pierce"]       = D2JSP_STAT_PASSIVE_LTNG_PIERCE;
+	D2JSP_STAT_NameToStatList["passive ltng pierce"]            = D2JSP_STAT_PASSIVE_LTNG_PIERCE;
+	D2JSP_STAT_NameToStatList["passive cold pierce"]            = D2JSP_STAT_PASSIVE_COLD_PIERCE;
+	D2JSP_STAT_NameToStatList["passive poison pierce"]          = D2JSP_STAT_PASSIVE_POIS_PIERCE;
+	D2JSP_STAT_NameToStatList["passive pois pierce"]            = D2JSP_STAT_PASSIVE_POIS_PIERCE;
+	D2JSP_STAT_NameToStatList["passive critical strike"]        = D2JSP_STAT_PASSIVE_CRITICAL_STRIKE;
+	D2JSP_STAT_NameToStatList["passive dodge"]                  = D2JSP_STAT_PASSIVE_DODGE;
+	D2JSP_STAT_NameToStatList["passive avoid"]                  = D2JSP_STAT_PASSIVE_AVOID;
+	D2JSP_STAT_NameToStatList["passive evade"]                  = D2JSP_STAT_PASSIVE_EVADE;
+	D2JSP_STAT_NameToStatList["passive warmth"]                 = D2JSP_STAT_PASSIVE_WARMTH;
+	D2JSP_STAT_NameToStatList["passive mastery melee th"]       = D2JSP_STAT_PASSIVE_MASTERY_MELEE_TH;
+	D2JSP_STAT_NameToStatList["passive mastery melee dmg"]      = D2JSP_STAT_PASSIVE_MASTERY_MELEE_DMG;
+	D2JSP_STAT_NameToStatList["passive mastery melee crit"]     = D2JSP_STAT_PASSIVE_MASTERY_MELEE_CRIT;
+	D2JSP_STAT_NameToStatList["passive mastery throw th"]       = D2JSP_STAT_PASSIVE_MASTERY_THROW_TH;
+	D2JSP_STAT_NameToStatList["passive mastery throw dmg"]      = D2JSP_STAT_PASSIVE_MASTERY_THROW_DMG;
+	D2JSP_STAT_NameToStatList["passive mastery throw crit"]     = D2JSP_STAT_PASSIVE_MASTERY_THROW_CRIT;
+	D2JSP_STAT_NameToStatList["passive weaponblock"]            = D2JSP_STAT_PASSIVE_WEAPONBLOCK;
+	D2JSP_STAT_NameToStatList["passive summon resist"]          = D2JSP_STAT_PASSIVE_SUMMON_RESIST;
+	D2JSP_STAT_NameToStatList["modifierlist skill"]             = D2JSP_STAT_MODIFIERLIST_SKILL;
+	D2JSP_STAT_NameToStatList["modifierlist level"]             = D2JSP_STAT_MODIFIERLIST_LEVEL;
+	D2JSP_STAT_NameToStatList["last sent hp pct"]               = D2JSP_STAT_LAST_SENT_HP_PCT;
+	D2JSP_STAT_NameToStatList["source unit type"]               = D2JSP_STAT_SOURCE_UNIT_TYPE;
+	D2JSP_STAT_NameToStatList["source unit id"]                 = D2JSP_STAT_SOURCE_UNIT_ID;
+	D2JSP_STAT_NameToStatList["shortparam1"]                    = D2JSP_STAT_SHORTPARAM1;
+	D2JSP_STAT_NameToStatList["quest item difficulty"]          = D2JSP_STAT_QUESTITEMDIFFICULTY;
+	D2JSP_STAT_NameToStatList["quest item diff"]                = D2JSP_STAT_QUESTITEMDIFFICULTY;
+	D2JSP_STAT_NameToStatList["qassive mag mastery"]            = D2JSP_STAT_PASSIVE_MAG_MASTERY;
+	D2JSP_STAT_NameToStatList["passive mag pierce"]             = D2JSP_STAT_PASSIVE_MAG_PIERCE;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STAT_RESIST_LinkageList		= [
+	D2JSP_STAT_DAMAGERESIST,
+	D2JSP_STAT_FIRERESIST,
+	D2JSP_STAT_LIGHTRESIST,
+	D2JSP_STAT_MAGICRESIST,
+	D2JSP_STAT_COLDRESIST,
+	D2JSP_STAT_POISONRESIST
+];
+
+	// Maximum Physical Damage Reduction was 95% in version prior to 1.10, but
+	// is 50% in 1.10.
+if (parseFloat(me.version) < 0.3518) {
+	var D2JSP_STAT_RESIST_MAX_LinkageList	= [
+		-95,
+		D2JSP_STAT_MAXFIRERESIST,
+		D2JSP_STAT_MAXLIGHTRESIST,
+		D2JSP_STAT_MAXMAGICRESIST,
+		D2JSP_STAT_MAXCOLDRESIST,
+		D2JSP_STAT_MAXPOISONRESIST
+	];
+}
+else {
+	var D2JSP_STAT_RESIST_MAX_LinkageList	= [
+		-50,
+		D2JSP_STAT_MAXFIRERESIST,
+		D2JSP_STAT_MAXLIGHTRESIST,
+		D2JSP_STAT_MAXMAGICRESIST,
+		D2JSP_STAT_MAXCOLDRESIST,
+		D2JSP_STAT_MAXPOISONRESIST
+	];
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_STAT_ClassToStatSkills = [
+	D2JSP_STAT_ITEM_ADDAMASKILLPOINTS,
+	D2JSP_STAT_ITEM_ADDSORSKILLPOINTS,
+	D2JSP_STAT_ITEM_ADDNECSKILLPOINTS,
+	D2JSP_STAT_ITEM_ADDPALSKILLPOINTS,
+	D2JSP_STAT_ITEM_ADDBARSKILLPOINTS,
+	D2JSP_STAT_ITEM_ADDDRUSKILLPOINTS,
+	D2JSP_STAT_ITEM_ADDASSSKILLPOINTS
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+/*
+var D2JSP_STAT_StatExLookAside = new Array();
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_ITEM_ARMOR_PERCENT]         =  1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT]     = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_ITEM_MINDAMAGE_PERCENT]     = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_MINDAMAGE]                  = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_MAXDAMAGE]                  = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_SECONDARY_MINDAMAGE]        = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_SECONDARY_MAXDAMAGE]        = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_FIREMINDAM]                 = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_FIREMAXDAM]                 = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_LIGHTMINDAM]                = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_LIGHTMAXDAM]                = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_MAGICMINDAM]                = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_MAGICMAXDAM]                = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_COLDMINDAM]                 = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_COLDMAXDAM]                 = -1;
+//D2JSP_STAT_StatExLookAside[D2JSP_STAT_COLDLENGTH]                 = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_POISONMINDAM]               = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_POISONMAXDAM]               = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_POISONLENGTH]               = -1;
+D2JSP_STAT_StatExLookAside[D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT] =  1;
+*/
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STAT_Get(in_obj, stat_number)
+{
+	var stat_value = null;
+
+	if (D2JSP_STAT_IsValid(stat_number)) {
+		stat_value = in_obj.getStat(stat_number);
+		if (parseFloat(me.version) >= 0.3527) {
+			if (stat_number == D2JSP_STAT_ITEM_ARMOR_PERCENT)
+				stat_value = in_obj.getStatEx(stat_number);
+			else if (stat_number == D2JSP_STAT_ITEM_MAXDURABILITY_PERCENT)
+				stat_value = in_obj.getStatEx(stat_number);
+			// Don't want to check to see if it's a weapon...
+			else if (((stat_number == D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT) ||
+				(stat_number == D2JSP_STAT_ITEM_MINDAMAGE_PERCENT)) &&
+				(!stat_value))
+				stat_value = in_obj.getStatEx(stat_number);
+			else if ((stat_number == D2JSP_STAT_ITEM_ARMOR_PERCENT) &&
+				(!stat_value))
+				stat_value = in_obj.getStatEx(stat_number);
+		}
+	}
+
+	return(stat_value);	
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STAT_IsValid(stat_number)
+{
+	return(((stat_number >= D2JSP_STAT_MINIMUM) &&
+		(stat_number <= D2JSP_STAT_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STAT_IsName(stat_name)
+{
+	return((typeof(D2JSP_STAT_NameToStatList[stat_name.toLowerCase()]) !=
+		"undefined") ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STAT_StatToName(stat_number)
+{
+	return((D2JSP_STAT_IsValid(stat_number)) ?
+		D2JSP_STAT_StatNameList[stat_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STAT_NameToStat(stat_name)
+{
+	return((D2JSP_STAT_IsName(stat_name)) ?
+		D2JSP_STAT_NameToStatList[stat_name.toLowerCase()] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STAT_ParseToNumber(in_stat)
+{
+	var tmp_number;
+	var tmp_data;
+
+	in_stat  = D2JSP_UTIL_FORMAT_Trim(in_stat + "");
+	tmp_data = in_stat;
+	tmp_data = tmp_data.replace(/^\s+|\s+$/g, "");
+	tmp_data = tmp_data.replace(/\s+/g, "_");
+	tmp_data = tmp_data.replace(/^[^A-Za-z_]|[^A-Za-z0-9_]/g, "");
+	tmp_data = (tmp_data != "") ? tmp_data : "\"\"";
+
+	if (D2JSP_UTIL_FORMAT_IsDigit(in_stat)) {
+		tmp_number = parseInt(in_stat, 10);
+		return((D2JSP_STAT_IsValid(tmp_number)) ? tmp_number : -1);
+	}
+	else if (eval("((typeof(D2JSP_STAT_" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval("D2JSP_STAT_" + tmp_data.toUpperCase()));
+	else if (eval("((typeof(" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval(tmp_data.toUpperCase()));
+	else if (D2JSP_STAT_IsName(in_stat))
+		return(D2JSP_STAT_NameToStat(in_stat));
+
+	return(-1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_STAT_ParseToName(in_stat)
+{
+	var tmp_number = D2JSP_STAT_ParseToNumber(in_stat);
+
+	return((tmp_number != -1) ? D2JSP_STAT_StatToName(tmp_number) : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Stats_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output\\RegressionTest._D2JSP_Stats.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_Stats.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+	if (file_handle) {
+		for (count_1 = 0; count_1 < D2JSP_STAT_StatNameList.length; count_1++)
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_STAT_StatNameList[count_1]);
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+
+// ////////////////////////////////////////////////////////////////////////////
+

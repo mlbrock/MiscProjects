@@ -1,0 +1,59 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+var DELAY_MS = 1;
+var NPC_ID   = 438;
+//var NPC_ID = "Prowling Dead";
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/____FeatureTest.037." +
+		"ProwlingDeadWakeUpTime.d2j.log", "FeatureTest.037", null, null, null, true);
+
+	var s_t =getTickCount();
+	var e_t =0;
+
+	while (me.area != 121) {
+		if ((getTickCount() - s_t) > 500) {
+			me.overhead("Move into Nihlathak's Temple.");
+			s_t = getTickCount();
+		}
+		delay(DELAY_MS);
+	}
+
+	s_t = getTickCount();
+
+	me.overhead("Now in Nihlathak's Temple.");
+
+	var found_flag = false;
+
+	while (true) {
+		var n = getUnit(1, NPC_ID);
+		if (n) {
+			do {
+//				if (n.hp == 128) {
+				if ((n.mode != 0) && (n.mode != 12)) {
+					e_t = getTickCount();
+					print(n.name + ":" + n.classid + "=" + n.hp + " ---> " + n.mode);
+/*
+for (var this_prop in n)
+	my_log.logInfo(this_prop + " = " + n[this_prop]);
+*/
+					found_flag = true;
+					break;
+				}
+			} while (n && n.getNext(NPC_ID));
+		}
+		if (found_flag)
+			break;
+		delay(DELAY_MS);
+	}
+
+	print("TIME: "+ (e_t - s_t));
+load("TDW/MLB_DataDump.d2j");
+	print(n.name + ":" + n.classid + "=" + n.hp + " ---> " + n.mode);
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

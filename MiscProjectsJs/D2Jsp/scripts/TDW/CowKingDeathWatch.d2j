@@ -1,0 +1,208 @@
+var D2JSP_AREA_ROGUE_ENCAMPMENT  = 1;
+var D2JSP_AREA_COW_LEVEL         = 39;
+
+var D2JSP_AREA_HARROGATH         = 109;
+var D2JSP_AREA_NIHLATHAKS_TEMPLE = 121;
+
+var D2J_CKDW_GameIsResolved   = false;
+var D2J_CKDW_CheckLevelMS     = 500;
+var D2J_CKDW_CheckCowKingMS   = 250;
+var D2J_CKDW_CowKingObj       = undefined;
+var D2J_CKDW_CowKingFindCount = 0;
+
+var D2J_CKDW_CowKingName      = "The Cow King";
+var D2J_CKDW_CowKingArea      = D2JSP_AREA_COW_LEVEL;
+
+function main() {
+	var last_area   = -1;
+	var last_room_x = -1;
+	var last_room_y = -1;
+
+D2J_CKDW_CowKingName = "Pindleskin";
+D2J_CKDW_CowKingArea = D2JSP_AREA_NIHLATHAKS_TEMPLE;
+
+	delay(3000);
+
+DEBUG_ShowNPCs();
+//D2J_CKDW_BuildLevel();
+//DEBUG_SaveRoom()
+
+	while (D2J_CKDW_GameIsResolved == false) {
+		while (!D2J_CKDW_InCowLevel()) {
+		this_room = getRoom();
+if (me.area != last_area) {
+//if ((me.area != last_area) ||
+//	(this_room.x != last_room_x) || (this_room.y != last_room_y)) {
+D2J_CKDW_BuildLevel();
+	if ((last_area != -1) && (me.area != last_area)) {
+		print("Moved from area " + last_area + " to " + me.area + ".");
+	}
+	last_area   = me.area;
+	last_room_x = this_room.x;
+	last_room_y = this_room.y;
+//	DEBUG_ShowRoom();
+//	DEBUG_ShowNPCs();
+}
+			delay(D2J_CKDW_CheckLevelMS);
+		}
+		D2J_CKDW_DoCowLevel();
+	}
+}
+
+function D2J_CKDW_DoCowLevel() {
+
+	if (D2J_CKDW_FindCowKing2() == true) {
+		if ((D2J_CKDW_CowKingObj.mode == 0) || (D2J_CKDW_CowKingObj.mode == 12)) {
+			print(D2J_CKDW_CowKingName + " is dead.");
+			D2J_CKDW_GameIsResolved = true;
+		}
+		else {
+print("Found " + D2J_CKDW_CowKingName + ".");
+//DEBUG_SaveRoom();
+DEBUG_ShowRoom();
+			var gs_6 = -1;
+			var gs_7 = -1;
+			var u_hp = -1;
+			while (D2J_CKDW_InCowLevel()) {
+				if ((gs_6 != D2J_CKDW_CowKingObj.getStat(6)) ||
+					(gs_7 != D2J_CKDW_CowKingObj.getStat(7)) ||
+					(u_hp != D2J_CKDW_CowKingObj.gethp)) {
+					var gs_6 = D2J_CKDW_CowKingObj.getStat(6);
+					var gs_7 = D2J_CKDW_CowKingObj.getStat(7);
+					var u_hp = D2J_CKDW_CowKingObj.gethp;
+if ((!gs_6) && gs_7) {
+	print(D2J_CKDW_CowKingName + " is now dead.");
+//	D2J_CKDW_GameIsResolved = true;
+	return;
+}
+					print(D2J_CKDW_CowKingName + " Hit Point Status: " +
+						gs_6 + " | " + gs_7 + " | " + (gs_6 / gs_7) * 100 + "%");
+				}
+				delay(D2J_CKDW_CheckCowKingMS);
+			}
+		}
+	}
+}
+
+function D2J_CKDW_FindCowKing() {
+
+	if (typeof(D2J_CKDW_CowKingObj) != "undefined") {
+		return(true);
+	}
+	else {
+		D2J_CKDW_BuildLevel();
+		if (!D2J_CKDW_CowKingFindCount++) {
+			print("ÿc2Looking for " + D2J_CKDW_CowKingName + ".");
+		}
+		while ((typeof(D2J_CKDW_CowKingObj) == "undefined") &&
+			D2J_CKDW_InCowLevel()) {
+			D2J_CKDW_CowKingObj = getUnit(D2JSP_UTIL_GETUNIT_NPC,
+				D2J_CKDW_CowKingName);
+			if ((typeof(D2J_CKDW_CowKingObj) == "undefined") ||
+				(!D2J_CKDW_CowKingObj)) {
+				delay(D2J_CKDW_CheckCowKingMS);
+			}
+			else {
+print(D2J_CKDW_CowKingName + " object located.");
+				return(true);
+			}
+		}
+		return(false);
+	}
+}
+
+function D2J_CKDW_FindCowKing2() {
+	if (typeof(D2J_CKDW_CowKingObj) != "undefined") {
+		return(true);
+	}
+	else {
+		if (!D2J_CKDW_CowKingFindCount++) {
+			print("ÿc2Looking for " + D2J_CKDW_CowKingName + ".");
+DEBUG_ShowRoom();
+D2J_CKDW_BuildLevel();
+		}
+		while (D2J_CKDW_InCowLevel()) {
+			this_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC);
+			if ((typeof(this_obj) != "undefined") && this_obj) {
+				do {
+//print("Current object in search: " + this_obj.name + " (" + this_obj + ")");
+//delay(50);
+					if (this_obj.name == D2J_CKDW_CowKingName) {
+						print(D2J_CKDW_CowKingName + "object located.");
+						D2J_CKDW_CowKingObj = this_obj;
+						return(true);
+					}
+					delay(20);
+//					this_obj = this_obj.getNext();
+// CODE NOTE: Work-around --- getNext returns TRUE, not FALSE on end of list.
+if (this_obj == true) { return(false); }
+//				} while (D2J_CKDW_InCowLevel() && (typeof(this_obj) != "undefined"));
+				} while (D2J_CKDW_InCowLevel() && this_obj && this_obj.getNext());
+				delay(D2J_CKDW_CheckCowKingMS);
+			}
+		}
+		return(false);
+	}
+}
+
+function D2J_CKDW_InCowLevel() {
+	return(me.area == D2J_CKDW_CowKingArea);
+}
+
+function D2J_CKDW_BuildLevel() {
+	var this_room = getRoom();
+
+print("Building level...");
+	if (this_room)
+		do {
+		} while(this_room.getNext());
+	}
+}
+
+function DEBUG_SaveRoom() {
+	var this_room = getRoom();
+
+	if (this_room) {
+//		var file_handle = fileOpen("CKDW_RoomList.txt", 1);
+//		var file_handle;
+		file_handle = fileOpen("CKDW_RoomList.002.txt", 2);
+		if (!file_handle) {
+			print("ÿc1Failed to open file 'CKDW_RoomList.txt` for writing.");
+		}
+		else {
+print("Writing to file CKDW_RoomList.txt ...");
+			do {
+print("Room " + this_room.number);
+				file_handle.writeLine("Room " + this_room.number);
+			} while (this_room && this_room.getNext());
+			file_handle.close();
+		}
+	}
+}
+
+
+function DEBUG_ShowRoom() {
+	var tmp_room = getRoom();
+	var tmp_string = "ROOM PROPS: ";
+
+	for(var property in tmp_room) {
+		tmp_string += "{" + property + " = " + tmp_room[property] + "}";
+	}
+	print(tmp_string);
+}
+
+function DEBUG_ShowNPCs() {
+
+	var this_obj   = getUnit(D2JSP_UTIL_GETUNIT_NPC);
+	var tmp_string = "NPC LIST: ";
+
+	if ((typeof(this_obj) != "undefined") && this_obj) {
+		do {
+			tmp_string += "{" + this_obj.name + "}";
+// CODE NOTE: Work-around --- getNext returns TRUE, not FALSE on end of list.
+//if (this_obj == true) { break; }
+		} while (this_obj && this_obj.getNext());
+		print(tmp_string);
+	}
+}
+

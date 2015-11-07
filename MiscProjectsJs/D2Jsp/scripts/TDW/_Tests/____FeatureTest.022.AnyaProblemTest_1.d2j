@@ -1,0 +1,39 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+var TEST_Log = null;
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	TEST_Log = new D2JSP_UTIL_Log("output/" +
+		"____FeatureTest.022..AnyaProblemTest_1.d2j" + "." + me.realm +
+		"." + me.account + "." + me.name + ".log", "FeatureTest.022",
+		null, null, null, true);
+
+	TEST_Log.syncModeOn();
+
+	while (true) {
+		me.overhead("Capturing messages...");
+		delay(1000);
+	}
+
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	TEST_Log.logInfoQuiet("GAME MSG: " + arguments[0]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	TEST_Log.logInfoQuiet("KEY MSG : " + arguments[0]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

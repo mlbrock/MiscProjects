@@ -1,0 +1,357 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["teleport.step.size"]     = 15;
+TDW_BOT_ConfigureList["teleport.step.size.max"] = 120;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	config_list["chicken.mercenary.hp"]             = -1;
+	config_list["town.revive.mercenary"]            = false;
+	config_list["town.heal.mercenary.hp"]           = -1;
+	config_list["mercernary.needed"]                = false;
+	config_list["mercernary.wanted"]                = false;
+
+	config_list["skill.attack.local"]    = new Array();
+//	config_list["skill.attack.ranged"]   = ["Fire Wall", "Frozen Orb"];
+	config_list["skill.attack.ranged"]   = ["Meteor", "Frozen Orb"];
+//	config_list["skill.attack.ranged"]   = ["Fire Wall", "Fire Wall", "Fire Wall", "Fire Wall", "Frozen Orb"];
+//	config_list["skill.attack.ranged"]   = ["Hydra", "Hydra", "Hydra", "Hydra", "Frozen Orb"];
+
+	TDW_MB_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MB_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_BotMephistoMeteor", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_MB_KillMephisto();
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MB_KillMephisto()
+{
+	var mephisto_dead           = false;
+	var access_strategy         = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+	var TDW_MB_RedPortalClassId = 342;
+	var TDW_MB_RedPortalCoords  = [[17588, 8069], [17602, 8069]];
+	var TDW_MB_AvoidXMax        = 17583;
+	var TDW_MB_AvoidYMin        =  8037;
+	var TDW_MB_AvoidYMax        =  8107;
+	var TDW_MB_AvoidNPCList     = [
+		"Bremm Sparkfist",
+		"Wyand Voidbringer",
+		"Maffer Dragonhand",
+		"Undead Stygian Doll"
+	];
+	var TDW_MB_ToMephistoList   = [
+		[17581, 8070],
+//		[17563, 8070],
+		[17575, 8070],
+		[17515, 8063]
+	];
+
+	TDW_MOVE_COMPAT_TownMove("waypoint");
+
+	if (TDW_BOT_MOVE_WaypointOutbound(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2))
+		return(-1);
+
+	if (TDW_PATH_DoSourceList([D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3], me.area,
+		access_strategy))
+		return(-1);
+
+	if (!TDW_BOT_CHECK_PrecastChecks(30000)) {
+		TDW_BOT_Log.logError("Aborting run because precasts could not be " +
+			"completed.");
+		return(-1);
+	}
+
+	TDW_BOT_MOVE_TeleportToDestination(TDW_MB_ToMephistoList[0],
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	for (var count_1 = 0; count_1 < TDW_MB_AvoidNPCList.length; count_1++){
+		var this_npc = getUnit(D2JSP_UTIL_GETUNIT_NPC,
+			TDW_MB_AvoidNPCList[count_1]);
+		if (this_npc) {
+			do {
+				if ((this_npc.mode != D2JSP_MODE_NPC_DEATH) &&
+					(this_npc.mode != D2JSP_MODE_NPC_DEAD) && this_npc.hp &&
+					(this_npc.x <= TDW_MB_AvoidXMax) &&
+					(this_npc.y >= TDW_MB_AvoidYMin) &&
+					(this_npc.y <= TDW_MB_AvoidYMax))
+					TDW_BOT_CHECK_PerformChicken("NPC " + this_npc.name +
+						" was found on Mephisto's side of the Blood Moat.");
+			} while (this_npc && this_npc.getNext(TDW_MB_AvoidNPCList[count_1]));
+		}
+	}
+
+	var npc_obj = getUnit(D2JSP_UTIL_GETUNIT_NPC, "Mephisto");
+
+	if (!npc_obj) {
+		TDW_BOT_Log.logError("Unable to locate Mephisto.");
+		return(-1);
+	}
+
+	D2JSP_SKILL_SetAndUseSkill("Meteor", 0, npc_obj.x, npc_obj.y);
+	delay(1200);
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	D2JSP_SKILL_SetAndUseSkill("Fire Wall", 0, npc_obj.x, npc_obj.y);
+	delay(750);
+
+//	TDW_BOT_MOVE_TeleportToDestination(TDW_MB_ToMephistoList[1],
+//		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	var static_count = 0;
+/*
+	for (count_1 = 1; count_1 < 3; count_1++) {
+		D2JSP_SKILL_SetAndUseSkill("Static Field", 0);
+		TDW_BOT_CHECK_HealthChecks();
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	}
+*/
+
+/*
+	for (count_1 = 1; count_1 < 3; count_1++) {
+		D2JSP_SKILL_TeleportTo(npc_obj.x, npc_obj.y);
+		D2JSP_SKILL_SetAndUseSkill("Static Field", 0);
+		TDW_BOT_CHECK_HealthChecks();
+		D2JSP_SKILL_TeleportToPair(TDW_MB_ToMephistoList[0]);
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+		delay(1200);
+		D2JSP_SKILL_SetAndUseSkill("Meteor", 0, npc_obj.x, npc_obj.y);
+		static_count++;
+	}
+*/
+
+//	D2JSP_SKILL_TeleportTo(npc_obj.x, npc_obj.y);
+	while (npc_obj && npc_obj.hp && (npc_obj.mode != D2JSP_MODE_NPC_DEATH) &&
+		(npc_obj.mode != D2JSP_MODE_NPC_DEAD)) {
+		var this_distance = Dist(me.x, me.y, npc_obj.x, npc_obj.y);
+//		if ((static_count < 3) && ((me.getSkill("Static Field") * 3) <
+//			this_distance)) {
+		if ((static_count < 3) && (this_distance < 10)) {
+			D2JSP_SKILL_SetAndUseSkill("Static Field", 0);
+			static_count++;
+			D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+				((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+			TDW_BOT_CHECK_HealthChecks();
+		}
+//		else if (this_distance < 30)
+//			break;
+		D2JSP_SKILL_SetAndUseSkill("Meteor", 0, npc_obj.x, npc_obj.y);
+		TDW_BOT_CHECK_HealthChecks();
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+//break;
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Mephisto",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 1, 0, 6));
+
+	TDW_BOT_AttackNPCSpec.killAny();
+
+/*
+	var blaze_trap_min  = [[17577, 8064], [17575, 8075]];
+	
+	for (var count_1 = 0; count_1 < 5; count_1++) {
+		TDW_BOT_MOVE_TeleportToDestination(blaze_trap_min[0],
+			TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+		D2JSP_SKILL_SetAndUseSkill("Blaze", 0);
+		for (var count_2 = blaze_trap_min[0][0]; count_2 >= blaze_trap_min[1][0];
+			count_2--) {
+			D2JSP_UTIL_MoveTo(count_2, blaze_trap_min[1][1], 1);
+//print("MOVE " + count_1 + ", " + count_2 + ": [" + count_2 + ", " + blaze_trap_min[1][1] + "]");
+			delay(10);
+			D2JSP_UTIL_MoveTo(count_2, blaze_trap_min[0][1], 1);
+//print("MOVE " + count_1 + ", " + count_2 + ": [" + count_2 + ", " + blaze_trap_min[0][1] + "]");
+			delay(10);
+		}
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	D2JSP_SKILL_SetAndUseSkill("Fire Wall", 0, npc_obj.x, npc_obj.y);
+
+	TDW_BOT_MOVE_TeleportToDestination(TDW_MB_ToMephistoList[1],
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	D2JSP_SKILL_SetAndUseSkill("Static Field", 0);
+	for (count_1 = 1; count_1 < 3; count_1++) {
+		D2JSP_SKILL_UseSkill(0);
+		TDW_BOT_CHECK_HealthChecks();
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	}
+
+	TDW_BOT_MOVE_TeleportToDestination(TDW_MB_ToMephistoList[2],
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	D2JSP_UTIL_MoveToXYPair(TDW_MB_RedPortalCoords[0]);
+
+	while (npc_obj && npc_obj.hp && (npc_obj.mode != D2JSP_MODE_NPC_DEATH) &&
+		(npc_obj.mode != D2JSP_MODE_NPC_DEAD)) {
+		D2JSP_SKILL_SetAndUseSkill("Fire Wall", 0, npc_obj.x, npc_obj.y);
+		TDW_BOT_CHECK_HealthChecks();
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	}
+*/
+
+//print("STOPPING");
+//stop();
+
+/*
+	D2JSP_SKILL_SetAndUseSkill("Meteor", 0, npc_obj.x, npc_obj.y);
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+
+	while (npc_obj && npc_obj.hp && (npc_obj.mode != D2JSP_MODE_NPC_DEATH) &&
+		(npc_obj.mode != D2JSP_MODE_NPC_DEAD)) {
+		D2JSP_SKILL_SetAndUseSkill("Hydra", 0, npc_obj.x, npc_obj.y);
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+		for (var count_1 = 0; count_1 < 3; count_1++) {
+			TDW_BOT_CHECK_HealthChecks();
+			delay(250);
+			D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+				((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+		}
+	}
+
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	D2JSP_SKILL_SetAndUseSkill("Fire Wall", 0, npc_obj.x, npc_obj.y);
+
+	TDW_BOT_MOVE_TeleportToDestination(TDW_MB_ToMephistoList[1],
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	D2JSP_SKILL_SetAndUseSkill("Static Field", 0);
+	for (count_1 = 1; count_1 < 3; count_1++) {
+		D2JSP_SKILL_UseSkill(0);
+		TDW_BOT_CHECK_HealthChecks();
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+*/
+
+/*
+	while (npc_obj && npc_obj.hp && (npc_obj.mode != D2JSP_MODE_NPC_DEATH) &&
+		(npc_obj.mode != D2JSP_MODE_NPC_DEAD)) {
+		D2JSP_SKILL_SetAndUseSkill("Hydra", 0, npc_obj.x, npc_obj.y);
+		TDW_BOT_CHECK_HealthChecks();
+		D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+			((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Mephisto life = " +
+		((npc_obj.hp / npc_obj.hpmax) * 100).toFixed(2) + "%");
+*/
+
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Mephisto",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 1, 8, 18));
+
+	for (var count_1 = 1; count_1 < TDW_MB_ToMephistoList.length; count_1++) {
+		TDW_BOT_MOVE_TeleportToDestination(TDW_MB_ToMephistoList[count_1],
+			TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+		TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+		TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+		delay(100);
+/*
+		// If Mephisto died in this loop iteration, teleport back to the
+		//	key spot which makes the red portal accessible. We'll let it open
+		// while we pop chests...
+		if ((!mephisto_dead) && (!TDW_BOT_AttackNPCSpec.findNPC("Mephisto"))) {
+			TDW_BOT_MOVE_TeleportToDestination(TDW_MB_RedPortalCoords[0],
+				TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+			delay(100);
+			// Go back to where we came from.
+			TDW_BOT_MOVE_TeleportToDestination(TDW_MB_ToMephistoList[count_1],
+				TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+			mephisto_dead = true;
+		}
+*/
+	}
+
+	// If we didn't find Mephisto look around a bit...
+	if (TDW_BOT_AttackNPCSpec.findNPC("Mephisto")) {
+		for (var count_1 = 0; count_1 < 10; count_1++) {
+			if (!TDW_BOT_AttackNPCSpec.findNPC("Mephisto"))
+				break;
+			TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+				TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+			TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+				TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+			delay(100);
+		}
+	}
+
+	TDW_BOT_MOVE_TeleportToDestinationList(TDW_MB_RedPortalCoords,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	if (TDW_BOT_AttackNPCSpec.findNPC("Mephisto"))
+		TDW_BOT_Log.logError("Unable to locate Mephisto.");
+
+	TDW_MOVE_LookForAndTakePortal(0, "", 10);
+
+	return(0)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

@@ -1,0 +1,257 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+/*
+	Act 2 tomb golden chest.
+---------------------------------------------------------------------------
+Object Name      : chest
+Object Parent    : *NONE*
+Object Owner     : 0
+Object Owner Type: 0
+Object ID        : 16777879
+Object GID       : 663
+Object Class ID  : 397
+Object Act       : 2
+Object Area      : 1 (Rogue Encampment)
+Object Type      : 2
+Object Mode      : 0 (Object idle)
+Object Location  : [22843, 12703]
+---------------------------------------------------------------------------
+*/
+
+var TEST_ChestListI = [
+	"Casket",
+	"ArmorStand",
+	"Basket",
+	"BoneChest",
+	"Chest3",
+	"ChestL",
+	"ChestSL",
+	"ChestSR",
+	"CorpseOnStick",
+	"GuardCorpse",
+	"HungSkeleton",
+	"LargeUrn",
+	"Ldeathpole",
+	"Obelisk",
+	"RockPIle",
+	"RogueCorpse",
+	"Sarcophagus",
+	"TrappedSoul",
+	"WeaponRack",
+	"animated skulland rockpile",
+	"barrel wilderness",
+	"barrel wilderness",
+	"barrel",
+	"basket",
+	"bed",
+	"body",
+	"body",
+	"bookshelf",
+	"burialchestL",
+	"burialchestR",
+//	"burningbodies",
+//"burningpit",
+	"casket",
+	"casket",
+	"chest",
+	"chestR",
+	"cocoon",
+	"coffin",
+	"corpse",
+	"corpse",
+	"crate",
+	"dead body",
+	"dead guard",
+	"deadbarbarian",
+	"deadperson",
+	"deadperson2",
+	"deathpole",
+	"earmorstandL",
+	"earmorstandR",
+	"eunuch",
+	"eweaponrackL",
+	"eweaponrackR",
+	"fissure",
+	"flag wilderness",
+	"goo pile",
+	"groundtomb",
+	"groundtombL",
+	"hidden stash",
+	"hidden stash",
+	"hiddenstash",
+	"hiding spot",
+	"hollow log",
+	"icecavejar1",
+	"icecavejar2",
+	"icecavejar3",
+	"icecavejar4",
+	"jar1",
+	"jar2",
+	"jar3",
+	"jug",
+	"loose boulder",
+	"loose rock",
+//	"pileofskullsandrocks",	// No mode 1 animation causes crash
+	"pillar",
+//	"pole",
+	"ratnest",
+	"sarcophagus",
+	"skeleton",
+	"skull pile",
+	"skullpile",
+	"stash",
+//	"swingingheads",
+	"tomb",
+	"tomb1",
+	"tomb2",
+	"tomb3",
+	"Urn",
+	"urn",
+	"woodchest2L",
+	"woodchest2R",
+	"woodchestL",
+	"woodchestL",
+	"woodchestR",
+	"woodchestR",
+];
+var TEST_ChestListH = new Array();
+for (var count_1 = 0; count_1 < TEST_ChestListI.length; count_1++)
+	TEST_ChestListH[TEST_ChestListI[count_1]] = 1;
+
+/*
+	  1, Casket
+	  5, chest
+	  6, chest
+	 53, Casket
+	 54, RogueCorpse
+	 55, RogueCorpse
+	 56, RogueCorpse
+	 57, CorpseOnStick
+	 58, CorpseOnStick
+	 79, Casket
+	139, chest
+	140, chest
+	141, chest
+	144, chest
+	155, hidden stash
+	171, skeleton
+	174, loose rock
+	175, loose boulder
+	177, chest
+	179, bookshelf
+	180, bookshelf
+	241, chest
+	450, pileofskullsandrocks
+*/
+
+function main()
+{
+	var my_log        = new D2JSP_UTIL_Log("output/TDW_FindChests.log");
+	var callback_data = new Array()
+	var chest_list;
+	var results_data;
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+
+	my_log.syncModeOn();
+
+	while (true) {
+		D2JSP_UTIL_BNET_OverheadSafe(me.x + "," + me.y);
+		if (!D2JSP_AREA_IsTown()) {
+			callback_data[0] = 40;
+			callback_data[1] = new Array();
+			results_data     = D2JSP_OBJ_IterateObject(callback_data,
+				TEST_FindChests_Filter, D2JSP_OBJ_ActionContinue,
+				null, D2JSP_MODE_OBJECT_IDLE);
+			chest_list       = results_data[D2JSP_OBJ_CALLBACK_DATA][1];
+			chest_count      = chest_list.length;
+			while (chest_list.length) {
+				var this_chest = chest_list.shift();
+				var start_x    = me.x;
+				var start_y    = me.y;
+				var this_obj;
+				results_data = D2JSP_OBJ_IterateObject(this_chest,
+					TEST_ReFindChests_Filter, D2JSP_OBJ_ActionStop,
+					null, D2JSP_MODE_OBJECT_IDLE);
+				if (results_data[D2JSP_OBJ_LAST_OBJECT] != null) {
+my_log.logInfo("***** ABOUT TO POP [" + this_chest + "]");
+if (this_chest[2] == "pileofskullsandrocks") {
+	my_log.logInfo("***** EXCEPTION *****");
+	my_log.logInfo("***** PARENT     = " + results_data[D2JSP_OBJ_LAST_OBJECT].getParent());
+	my_log.logInfo("***** OWNER      = " + results_data[D2JSP_OBJ_LAST_OBJECT].owner);
+	my_log.logInfo("***** OWNER TYPE = " + results_data[D2JSP_OBJ_LAST_OBJECT].ownertype);
+	my_log.logInfo("************************************** DELAYING 10 SECONDS");
+	delay(10000);
+}
+
+					D2JSP_SKILL_TeleportTo(this_chest[0], this_chest[1]);
+					this_obj = results_data[D2JSP_OBJ_LAST_OBJECT];
+					if (Dist(me.x, me.y, this_obj.x, this_obj.y) <= 5)
+						D2JSP_UTIL_InteractObject(this_obj);
+					else
+						D2JSP_SKILL_TelekinesisOn(this_obj);
+					my_log.logInfo("Popped " + this_chest[2] + " at [" +
+						this_chest[0] + ", " + this_chest[1] + "] (classid = " +
+						this_chest[3] + ")");
+				}
+				else {
+					my_log.logWarning("Unable to find " + this_chest[2] +
+						" --- retrying...");
+					D2JSP_SKILL_TeleportTo(start_x, start_y);
+					chest_list.unshift(this_chest);
+//					print("Unable to find " + this_chest[2] + "!");
+//					print("Stopping script.");
+//					stop();
+				}
+			}
+			if (chest_count)
+				D2JSP_SKILL_TeleportTo(start_x, start_y);
+//print("Stopping");
+//stop();
+		}
+		delay(500);
+	}
+
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_FindChests_Filter(this_obj, callback_data)
+{
+	if ((!this_obj.getParent()) &&
+		(this_obj.name in TEST_ChestListH) &&
+		(this_obj.mode == D2JSP_MODE_OBJECT_IDLE) &&
+//		(!this_obj.area) &&
+		((!this_obj.area) || ((this_obj.name == "chest") && (this_obj.area == 1))) &&
+		(Dist(me.x, me.y, this_obj.x, this_obj.y) < callback_data[0])) {
+		callback_data[1].push([this_obj.x, this_obj.y, this_obj.name,
+			this_obj.classid]);
+		return(true);
+	}
+	else
+		return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_ReFindChests_Filter(this_obj, callback_data)
+{
+	if ((!this_obj.getParent()) &&
+		(this_obj.name == callback_data[2]) &&
+		(this_obj.mode == D2JSP_MODE_OBJECT_IDLE) &&
+//		(!this_obj.area) &&
+		(this_obj.x == callback_data[0]) &&
+		(this_obj.y == callback_data[1])) {
+		return(true);
+	}
+	else
+		return(false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

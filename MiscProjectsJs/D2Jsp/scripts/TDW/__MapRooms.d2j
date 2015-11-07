@@ -1,0 +1,530 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_RoomStats.d2l");
+
+var MyLog = new D2JSP_UTIL_Log("output/_MapRooms.log");
+
+function main()
+{
+	var my_area;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+	MyLog.logInfo("Area is: " + D2JSP_AREA_AreaToName());
+	print("Constructing area map...");
+	my_area = new MR_Area();
+	print("Done constructing area map.");
+
+	print("Writing area map to file...");
+	var area_name = D2JSP_AREA_AreaToName();
+	area_name = area_name.replace(/\s/g, "_");
+	area_name = area_name.replace(/\'/g, "_");
+	if ((file_handle = fileOpen("output/_MAP_" + area_name + ".txt", 1)) !=
+		null) {
+		for (count_2 = 0; count_2 < my_area.cell_rows; count_2++) {
+			D2JSP_UTIL_BNET_OverheadSafe(["Wait...", "Working..."][count_2 % 2]);
+			var this_line = "";
+			for (count_3 = 0; count_3 < my_area.cell_cols; count_3++) {
+if (true)	// For ASCII chars ('*')
+				this_line += (my_area.room_map[count_2][count_3] & 1) ? "*" : " ";
+else			// For Hex.
+				this_line += ((count_3) ? " 0x" : "0x") +
+					D2JSP_UTIL_FORMAT_ZeroFill(my_area.room_map[count_2][count_3].
+					toString(16), 2);
+			}
+			file_handle.writeLine(this_line);	// Not print(); too much data...
+		}
+		print("Done writing area map to file...");
+
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("Map Extents");
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("Meta-map rows: " + my_area.meta_map.length);
+		file_handle.writeLine("Meta-map cols: " + my_area.meta_map[0].length);
+		file_handle.writeLine("Map rows     : " + my_area.cell_rows);
+		file_handle.writeLine("Map cols     : " + my_area.cell_cols);
+		file_handle.writeLine("Map cells    : " + my_area.cell_rows * my_area.cell_cols);
+		file_handle.writeLine("================================================");
+
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("Mata-Map");
+		file_handle.writeLine("================================================");
+		for (count_1 = 0; count_1 < my_area.meta_map.length; count_1++) {
+			var meta_string = "";
+			for (count_2 = 0; count_2 < my_area.meta_map[count_1].length; count_2++)
+				meta_string += "|" + D2JSP_UTIL_FORMAT_RJust(
+					((my_area.meta_map[count_1][count_2] == null) ? "" :
+					my_area.meta_map[count_1][count_2]), 10);
+			file_handle.writeLine(meta_string);
+		}
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("");
+
+		print("Writing area map individual rooms to file...");
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("Room Display List");
+		file_handle.writeLine("================================================");
+		for (count_1 = 0; count_1 < my_area.room_list.length; count_1++) {
+			D2JSP_UTIL_BNET_OverheadSafe(["Wait...", "Working..."][count_1 % 2]);
+			file_handle.writeLine("---------------------------------------------");
+			file_handle.writeLine("Room: (index = " + count_1 +
+				" Number " + my_area.room_list[count_1].number +
+				"([" + my_area.room_list[count_1].x_1 + ", " +
+					my_area.room_list[count_1].y_1 + "] ---> [" +
+					my_area.room_list[count_1].x_2 + ", " +
+					my_area.room_list[count_1].y_2 + "])");
+			tmp_list = my_area.room_list[count_1].getStringList();
+			for (count_2 = 0; count_2 < tmp_list.length; count_2++)
+				file_handle.writeLine(tmp_list[count_2]);
+			file_handle.writeLine("---------------------------------------------");
+		}
+		file_handle.writeLine("================================================");
+		file_handle.writeLine("================================================");
+		print("Done writing area map individual rooms to file.");
+
+		file_handle.close();
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Done");
+
+	print("Done.");
+
+//	stop();
+}
+
+function MR_Room(in_room)
+{
+	var did_init = false;
+
+	if (!in_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEY)) {
+		in_room.init();
+		did_init = true;
+	}
+
+	this.level       = in_room.level;
+	this.number      = in_room.number;
+	this.id          = in_room.id;
+	this.x           = in_room.x;
+	this.y           = in_room.y;
+	this.correcttomb = in_room.correcttomb;
+
+	this.xStart      = in_room.getStat(D2JSP_ROOMSTAT_XSTART);
+	this.yStart      = in_room.getStat(D2JSP_ROOMSTAT_YSTART);
+	this.xSize1      = in_room.getStat(D2JSP_ROOMSTAT_XSIZE1);
+	this.ySize1      = in_room.getStat(D2JSP_ROOMSTAT_YSIZE1);
+	this.xPos        = in_room.getStat(D2JSP_ROOMSTAT_XPOS);
+	this.yPos        = in_room.getStat(D2JSP_ROOMSTAT_YPOS);
+	this.xSize2      = in_room.getStat(D2JSP_ROOMSTAT_XSIZE2);
+	this.ySize2      = in_room.getStat(D2JSP_ROOMSTAT_YSIZE2);
+//	this.Unused_8    = in_room.getStat(D2JSP_ROOMSTAT_UNUSED_8);
+	this.nPosGameX   = in_room.getStat(D2JSP_ROOMSTAT_NPOSGAMEX);
+	this.nPosGameY   = in_room.getStat(D2JSP_ROOMSTAT_NPOSGAMEY);
+	this.nSizeGameX  = in_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEX);
+	this.nSizeGameY  = in_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEY);
+	this.nPosRoomX   = in_room.getStat(D2JSP_ROOMSTAT_NPOSROOMX);
+	this.nPosRoomY   = in_room.getStat(D2JSP_ROOMSTAT_NPOSROOMY);
+	this.nSizeRoomX  = in_room.getStat(D2JSP_ROOMSTAT_NSIZEROOMX);
+	this.nSizeRoomY  = in_room.getStat(D2JSP_ROOMSTAT_NSIZEROOMY);
+
+	this.x_1         = this.xStart;
+	this.y_1         = this.yStart;
+	this.x_2         = this.x_1 + this.xSize1;
+	this.y_2         = this.y_1 + this.ySize1;
+	this.room_row    = 0;
+	this.room_col    = 0;
+	this.cell_row    = 0;
+	this.cell_col    = 0;
+	this.cell_rows   = this.y_2 - this.y_1;
+	this.cell_cols   = this.x_2 - this.x_1;
+
+	// Initialize the collision table...
+	this.coll_table  = new Array(this.ySize1);
+	for (count_1 = 0; count_1 < this.coll_table.length; count_1++) {
+		this.coll_table[count_1] = new Array(this.xSize1);
+		for (count_2 = 0; count_2 < this.xSize1; count_2++)
+			this.coll_table[count_1][count_2] =
+				in_room.getCollision(count_2, count_1);
+	}
+
+	if (did_init)
+		in_room.release();
+	
+	this.toString          = MR_Room_toString;
+	this.toStringCSV       = MR_Room_toStringCSV;
+	this.toStringCSVHeader = MR_Room_toStringCSVHeader;
+	this.getCollisionInfo  = MR_Room_getCollisionInfo;
+	this.getStringList     = MR_Room_getStringList;
+
+	function MR_Room_toString() {
+		return(
+			"id=" + this.id +
+			", number=" + this.number +
+			", x=" + this.x +
+			", y=" + this.y +
+			", room row=" + this.room_row +
+			", room col=" + this.room_col +
+			", cell row=" + this.cell_row +
+			", cell col=" + this.cell_col +
+			", xStart=" + this.xStart +
+			", yStart=" + this.yStart +
+			", xSize1=" + this.xSize1 +
+			", ySize1=" + this.ySize1 +
+			", xPos=" + this.xPos +
+			", yPos=" + this.yPos +
+			", xSize2=" + this.xSize2 +
+			", ySize2=" + this.ySize2 +
+			", nPosGameX=" + this.nPosGameX +
+			", nPosGameY=" + this.nPosGameY +
+			", nSizeGameX=" + this.nSizeGameX +
+			", nSizeGameY=" + this.nSizeGameY +
+			", nPosRoomX=" + this.nPosRoomX +
+			", nPosRoomY=" + this.nPosRoomY +
+			", nSizeRoomX=" + this.nSizeRoomX +
+			", nSizeRoomY=" + this.nSizeRoomY);
+	}
+
+	function MR_Room_toStringCSV() {
+		return(
+			this.id + "," +
+			this.number + "," +
+			this.x + "," +
+			this.y + "," +
+			this.room_row + "," +
+			this.room_col + "," +
+			this.cell_row + "," +
+			this.cell_col + "," +
+			this.xStart + "," +
+			this.yStart + "," +
+			this.xSize1 + "," +
+			this.ySize1 + "," +
+			this.xPos + "," +
+			this.yPos + "," +
+			this.xSize2 + "," +
+			this.ySize2 + "," +
+			this.nPosGameX + "," +
+			this.nPosGameY + "," +
+			this.nSizeGameX + "," +
+			this.nSizeGameY + "," +
+			this.nPosRoomX + "," +
+			this.nPosRoomY + "," +
+			this.nSizeRoomX + "," +
+			this.nSizeRoomY);
+	}
+
+	function MR_Room_toStringCSVHeader() {
+		return(
+			"\"id\"" +
+			",\"number\"" +
+			",\"x\"" +
+			",\"y\"" +
+			",\"room row\"" +
+			",\"room col\"" +
+			",\"cell row\"" +
+			",\"cell col\"" +
+			",\"xStart\"" +
+			",\"yStart\"" +
+			",\"xSize1\"" +
+			",\"ySize1\"" +
+			",\"xPos\"" +
+			",\"yPos\"" +
+			",\"xSize2\"" +
+			",\"ySize2\"" +
+			",\"nPosGameX\"" +
+			",\"nPosGameY\"" +
+			",\"nSizeGameX\"" +
+			",\"nSizeGameY\"" +
+			",\"nPosRoomX\"" +
+			",\"nPosRoomY\"" +
+			",\"nSizeRoomX\"" +
+			",\"nSizeRoomY\"");
+	}
+
+	function MR_Room_getCollisionInfo(x_size, y_size) {
+		var this_room = getRoom();
+		var count_1;
+		var count_2;
+
+		if (this_room) {
+			do {
+				if (this_room.id == this.id) {
+					var coll_table = new Array(y_size);
+					var did_init   = false;
+
+					if (!this_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEY)) {
+						this_room.init();
+						did_init = true;
+					}
+					for (count_1 = 0; count_1 < y_size; count_1++) {
+						coll_table[count_1] = new Array(x_size);
+						for (count_2 = 0; count_2 < x_size; count_2++)
+							coll_table[count_1][count_2] =
+							  this_room.getCollision(count_2, count_1);
+					}
+					if (did_init)
+						this_room.release();
+					return(coll_table);
+				}
+			} while (this_room && this_room.getNext());
+		}
+		return(null);
+	}
+
+	function MR_Room_getStringList() {
+		var out_list = new Array();
+		var count_1;
+		var count_2;
+
+		for (count_1 = 0; count_1 < this.coll_table.length; count_1++) {
+			out_list[count_1] = "";
+			for (count_2 = 0; count_2 < this.coll_table[count_1].length; count_2++)
+				out_list[count_1] += (this.coll_table[count_1][count_2] & 1) ?
+					"*" : " ";
+		}
+		return(out_list);
+	}
+}
+
+function MR_Area()
+{
+	var row_count  = 0;
+	var col_count  = 0;
+	var min_row    = Number.MAX_VALUE;
+	var min_col    = Number.MAX_VALUE;
+	var max_row    = 0;
+	var max_col    = 0;
+var min_cell_row = Number.MAX_VALUE;
+var min_cell_col = Number.MAX_VALUE;
+var max_cell_row = 0;
+var max_cell_col = 0;
+	var row_list_1 = new Array();
+	var col_list_1 = new Array();
+	var row_list_2 = new Array();
+	var col_list_2 = new Array();
+	var this_room;
+	var this_prop;
+	var count_1;
+	var count_2;
+	var count_3;
+
+	this.x_1         = 0;
+	this.y_1         = 0;
+	this.x_2         = 0;
+	this.y_2         = 0;
+	this.room_rows   = 0;
+	this.room_cols   = 0;
+	this.cell_rows   = 0;
+	this.cell_cols   = 0;
+	this.cell_x_size = 0;
+	this.cell_y_size = 0;
+	this.unit_x_size = 0;
+	this.unit_y_size = 0;
+	this.room_list   = new Array();
+	this.meta_map    = null;
+	this.room_map    = null;
+
+	//	////////////////////////////////////////////////////////////////////
+	//	////////////////////////////////////////////////////////////////////
+	// Get all the rooms which collectively constitute an area...
+	//	////////////////////////////////////////////////////////////////////
+MyLog.logInfo(">>> Locating rooms with this area...");
+	this_room = getRoom();
+	if (this_room) {
+		do {
+			this.room_list.push(new MR_Room(this_room));
+		} while (this_room && this_room.getNext());
+	}
+MyLog.logInfo(">>> Located " + this.room_list.length + " rooms.");
+	//	////////////////////////////////////////////////////////////////////
+
+	// Not really used anymore, but might be useful for finding in which
+	//	room a particular X,Y is located.
+	this.room_list.sort(MR_Room_CompareByYX);
+
+	//	////////////////////////////////////////////////////////////////////
+	//	////////////////////////////////////////////////////////////////////
+	// Find the boundaries of our map...
+	//	////////////////////////////////////////////////////////////////////
+MyLog.logInfo(">>> Determining area boundaries...");
+	for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+		if (min_cell_row > this.room_list[count_1].y_1)
+			min_cell_row = this.room_list[count_1].y_1;
+		if (min_cell_col > this.room_list[count_1].x_1)
+			min_cell_col = this.room_list[count_1].x_1;
+		if (max_cell_row < this.room_list[count_1].y_2)
+			max_cell_row = this.room_list[count_1].y_2;
+		if (max_cell_col < this.room_list[count_1].x_2)
+			max_cell_col = this.room_list[count_1].x_2;
+	}
+	this.y_1       = min_cell_row;
+	this.x_1       = min_cell_col;
+	this.y_2       = max_cell_row;
+	this.x_2       = max_cell_col;
+	this.cell_rows = this.y_2 - this.y_1;
+	this.cell_cols = this.x_2 - this.x_1;
+MyLog.logInfo(">>> Area boundaries determined at " +
+	"[" + this.x_1 + ", " + this.y_1 + "]" +
+	"[" + this.x_2 + ", " + this.y_2 + "] = total size = " +
+	this.cell_cols + " X " + this.cell_rows + "] = " +
+	(this.cell_cols * this.cell_rows) + " sub-tiles.");
+	//	////////////////////////////////////////////////////////////////////
+
+/*
+// Debugging
+var area_name = D2JSP_AREA_AreaToName();
+area_name = area_name.replace(/\s/g, "_");
+area_name = area_name.replace(/\'/g, "_");
+if ((file_handle = fileOpen("output/_MAP_" + area_name + ".csv", 1)) != null) {
+	file_handle.writeLine(this.room_list[0].toStringCSVHeader());
+	for (count_1 = 0; count_1 < this.room_list.length; count_1++)
+		file_handle.writeLine(this.room_list[count_1].toStringCSV());
+	file_handle.close();
+}
+*/
+
+MyLog.logInfo("min_cell_row = " + min_cell_row);
+MyLog.logInfo("min_cell_col = " + min_cell_col);
+MyLog.logInfo("max_cell_row = " + max_cell_row);
+MyLog.logInfo("max_cell_col = " + max_cell_col);
+MyLog.logInfo("this.y_1 = " + this.y_1);
+MyLog.logInfo("this.x_1 = " + this.x_1);
+MyLog.logInfo("this.y_2 = " + this.y_2);
+MyLog.logInfo("this.x_2 = " + this.x_2);
+MyLog.logInfo("this.cell_rows = " + this.cell_rows);
+MyLog.logInfo("this.cell_cols = " + this.cell_cols);
+MyLog.logInfo("Total cells    = " + this.cell_rows * this.cell_cols);
+//MyLog.logInfo("Stopping");
+//stop();
+
+	//	////////////////////////////////////////////////////////////////////
+	//	////////////////////////////////////////////////////////////////////
+	// Now that we know the dimensions of our area, we can create an
+	// array to hold the collision cell/sub-tile information...
+	//	////////////////////////////////////////////////////////////////////
+MyLog.logInfo(">>> Allocating the area map...");
+	this.room_map = new Array(this.cell_rows);
+	for (count_1 = 0; count_1 < this.cell_rows; count_1++) {
+			this.room_map[count_1] = new Array(this.cell_cols);
+		for (count_2 = 0; count_2 < this.cell_cols; count_2++)
+			this.room_map[count_1][count_2] = 0x00;
+	}
+MyLog.logInfo(">>> Area map allocated.");
+	//	////////////////////////////////////////////////////////////////////
+
+/*
+// Debugging
+var test_map = new Array(this.cell_rows);
+for (count_1 = 0; count_1 < this.cell_rows; count_1++) {
+	test_map[count_1] = new Array(this.cell_cols);
+	for (count_2 = 0; count_2 < this.cell_cols; count_2++)
+		test_map[count_1][count_2] = 0;
+}
+*/
+
+	//	////////////////////////////////////////////////////////////////////
+	//	////////////////////////////////////////////////////////////////////
+	// And, finally, we can populate it with the room data...
+	//	////////////////////////////////////////////////////////////////////
+MyLog.logInfo(">>> Populating the area map...");
+	for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+		my_row = this.room_list[count_1].y_1 - this.y_1;
+		my_col = this.room_list[count_1].x_1 - this.x_1;
+		for (count_2 = 0; count_2 < this.room_list[count_1].cell_rows;
+			count_2++) {
+			for (count_3 = 0; count_3 < this.room_list[count_1].cell_cols;
+				count_3++)
+{
+				this.room_map[my_row + count_2][my_col + count_3] |=
+					 this.room_list[count_1].coll_table[count_2][count_3];
+//test_map[my_row + count_2][my_col + count_3] = count_1 + 1;
+}
+		}
+	}
+MyLog.logInfo(">>> Area map populated.");
+	//	////////////////////////////////////////////////////////////////////
+
+/*
+// Debugging
+var area_name = D2JSP_AREA_AreaToName();
+area_name = area_name.replace(/\s/g, "_");
+area_name = area_name.replace(/\'/g, "_");
+if ((file_handle = fileOpen("output/_MAP_" + area_name + "_ROOM.csv", 1)) != null) {
+	for (count_2 = 0; count_2 < this.cell_rows; count_2++) {
+		var tmp_string = "";
+		for (count_3 = 0; count_3 < this.cell_cols; count_3++)
+			tmp_string += ((count_3) ? "," : "") + test_map[count_2][count_3];
+		file_handle.writeLine(tmp_string);
+	}
+	file_handle.close();
+}
+*/
+
+	//	////////////////////////////////////////////////////////////////////
+	//	////////////////////////////////////////////////////////////////////
+	// Build the meta-map...
+	//	////////////////////////////////////////////////////////////////////
+MyLog.logInfo(">>> Populating the meta-map...");
+	var meta_rows_hash = new Array();
+	var meta_cols_hash = new Array();
+	for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+		meta_rows_hash[this.room_list[count_1].y + ""] = count_1;
+		meta_cols_hash[this.room_list[count_1].x + ""] = count_1;
+	}
+
+	var meta_rows_list = new Array();
+	var meta_cols_list = new Array();
+	for (var this_prop in meta_rows_hash)
+		meta_rows_list.push(parseInt(this_prop, 10));
+	for (var this_prop in meta_cols_hash)
+		meta_cols_list.push(parseInt(this_prop, 10));
+
+	meta_rows_list.sort();
+	meta_cols_list.sort();
+//	this.room_list.sort(MR_Room_CompareByYX);
+
+	this.meta_map = new Array(meta_rows_list.length);
+	for (count_1 = 0; count_1 < meta_rows_list.length; count_1++) {
+		this.meta_map[count_1] = new Array(meta_cols_list.length);
+		for (count_2 = 0; count_2 < meta_cols_list.length; count_2++) {
+			for (count_3 = 0; count_3 < this.room_list.length; count_3++) {
+				if ((this.room_list[count_3].y == meta_rows_list[count_1]) &&
+					(this.room_list[count_3].x == meta_cols_list[count_2])) {
+					this.meta_map[count_1][count_2] = this.room_list[count_3].number;
+				}
+			}
+		}
+	}
+print(">>> **************" + meta_rows_list.length + ", " +
+	meta_cols_list.length);
+MyLog.logInfo(">>> Meta-map populated.");
+	//	////////////////////////////////////////////////////////////////////
+
+	this.getStringList = MR_Area_getStringList;
+
+	function MR_Area_getStringList() {
+		var out_list = new Array(this.cell_rows);
+		var count_1;
+		var count_2;
+
+		for (count_1 = 0; count_1 < this.cell_rows; count_1++) {
+			out_list[count_1] = "";
+			for (count_2 = 0; count_2 < this.cell_cols; count_2++)
+				out_list[count_1] +=
+					(this.room_map[count_1][count_2] & 1) ? "*" : " ";
+		}
+
+		return(out_list);
+	}
+}
+
+function MR_Room_CompareByYX(room_1, room_2)
+{
+	return((room_1.y < room_2.y) ? -1 : (room_1.y > room_2.y) ? 1 :
+		(room_1.x < room_2.x) ? -1 : (room_1.x > room_2.x) ? 1 : 0);
+}
+

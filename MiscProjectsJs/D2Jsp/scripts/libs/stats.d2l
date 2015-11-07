@@ -1,0 +1,1083 @@
+/*
+ *  STATS
+ */
+
+var D2JSP_STATS_NAMES = [];
+
+var D2JSP_STATS_STRENGTH = 0;
+    D2JSP_STATS_NAMES[0] = "strength";
+
+var D2JSP_STATS_ENERGY = 1;
+    D2JSP_STATS_NAMES[1] = "energy";
+
+var D2JSP_STATS_DEXTERITY = 2;
+    D2JSP_STATS_NAMES[2] = "dexterity";
+
+var D2JSP_STATS_VITALITY = 3;
+    D2JSP_STATS_NAMES[3] = "vitality";
+
+var D2JSP_STATS_STATPTS = 4;
+    D2JSP_STATS_NAMES[4] = "statpts";
+
+var D2JSP_STATS_NEWSKILLS = 5;
+    D2JSP_STATS_NAMES[5] = "newskills";
+
+var D2JSP_STATS_HITPOINTS = 6;
+    D2JSP_STATS_NAMES[6] = "hitpoints";
+
+var D2JSP_STATS_MAXHP = 7;
+    D2JSP_STATS_NAMES[7] = "maxhp";
+
+var D2JSP_STATS_MANA = 8;
+    D2JSP_STATS_NAMES[8] = "mana";
+
+var D2JSP_STATS_MAXMANA = 9;
+    D2JSP_STATS_NAMES[9] = "maxmana";
+
+var D2JSP_STATS_STAMINA = 10;
+    D2JSP_STATS_NAMES[10] = "stamina";
+
+var D2JSP_STATS_MAXSTAMINA = 11;
+    D2JSP_STATS_NAMES[11] = "maxstamina";
+
+var D2JSP_STATS_LEVEL = 12;
+    D2JSP_STATS_NAMES[12] = "level";
+
+var D2JSP_STATS_EXPERIENCE = 13;
+    D2JSP_STATS_NAMES[13] = "experience";
+
+var D2JSP_STATS_GOLD = 14;
+    D2JSP_STATS_NAMES[14] = "gold";
+
+var D2JSP_STATS_GOLDBANK = 15;
+    D2JSP_STATS_NAMES[15] = "goldbank";
+
+var D2JSP_STATS_ITEM_ARMOR_PERCENT = 16;
+    D2JSP_STATS_NAMES[16] = "item_armor_percent";
+
+var D2JSP_STATS_ITEM_MAXDAMAGE_PERCENT = 17;
+    D2JSP_STATS_NAMES[17] = "item_maxdamage_percent";
+
+var D2JSP_STATS_ITEM_MINDAMAGE_PERCENT = 18;
+    D2JSP_STATS_NAMES[18] = "item_mindamage_percent";
+
+var D2JSP_STATS_TOHIT = 19;
+    D2JSP_STATS_NAMES[19] = "tohit";
+
+var D2JSP_STATS_TOBLOCK = 20;
+    D2JSP_STATS_NAMES[20] = "toblock";
+
+var D2JSP_STATS_MINDAMAGE = 21;
+    D2JSP_STATS_NAMES[21] = "mindamage";
+
+var D2JSP_STATS_MAXDAMAGE = 22;
+    D2JSP_STATS_NAMES[22] = "maxdamage";
+
+var D2JSP_STATS_SECONDARY_MINDAMAGE = 23;
+    D2JSP_STATS_NAMES[23] = "secondary_mindamage";
+
+var D2JSP_STATS_SECONDARY_MAXDAMAGE = 24;
+    D2JSP_STATS_NAMES[24] = "secondary_maxdamage";
+
+var D2JSP_STATS_DAMAGEPERCENT = 25;
+    D2JSP_STATS_NAMES[25] = "damagepercent";
+
+var D2JSP_STATS_MANARECOVERY = 26;
+    D2JSP_STATS_NAMES[26] = "manarecovery";
+
+var D2JSP_STATS_MANARECOVERYBONUS = 27;
+    D2JSP_STATS_NAMES[27] = "manarecoverybonus";
+
+var D2JSP_STATS_STAMINARECOVERYBONUS = 28;
+    D2JSP_STATS_NAMES[28] = "staminarecoverybonus";
+
+var D2JSP_STATS_LASTEXP = 29;
+    D2JSP_STATS_NAMES[29] = "lastexp";
+
+var D2JSP_STATS_NEXTEXP = 30;
+    D2JSP_STATS_NAMES[30] = "nextexp";
+
+var D2JSP_STATS_ARMORCLASS = 31;
+    D2JSP_STATS_NAMES[31] = "armorclass";
+
+var D2JSP_STATS_ARMORCLASS_VS_MISSILE = 32;
+    D2JSP_STATS_NAMES[32] = "armorclass_vs_missile";
+
+var D2JSP_STATS_ARMORCLASS_VS_HTH = 33;
+    D2JSP_STATS_NAMES[33] = "armorclass_vs_hth";
+
+var D2JSP_STATS_NORMAL_DAMAGE_REDUCTION = 34;
+    D2JSP_STATS_NAMES[34] = "normal_damage_reduction";
+
+var D2JSP_STATS_MAGIC_DAMAGE_REDUCTION = 35;
+    D2JSP_STATS_NAMES[35] = "magic_damage_reduction";
+
+var D2JSP_STATS_DAMAGERESIST = 36;
+    D2JSP_STATS_NAMES[36] = "damageresist";
+
+var D2JSP_STATS_MAGICRESIST = 37;
+    D2JSP_STATS_NAMES[37] = "magicresist";
+
+var D2JSP_STATS_MAXMAGICRESIST = 38;
+    D2JSP_STATS_NAMES[38] = "maxmagicresist";
+
+var D2JSP_STATS_FIRERESIST = 39;
+    D2JSP_STATS_NAMES[39] = "fireresist";
+
+var D2JSP_STATS_MAXFIRERESIST = 40;
+    D2JSP_STATS_NAMES[40] = "maxfireresist";
+
+var D2JSP_STATS_LIGHTRESIST = 41;
+    D2JSP_STATS_NAMES[41] = "lightresist";
+
+var D2JSP_STATS_MAXLIGHTRESIST = 42;
+    D2JSP_STATS_NAMES[42] = "maxlightresist";
+
+var D2JSP_STATS_COLDRESIST = 43;
+    D2JSP_STATS_NAMES[43] = "coldresist";
+
+var D2JSP_STATS_MAXCOLDRESIST = 44;
+    D2JSP_STATS_NAMES[44] = "maxcoldresist";
+
+var D2JSP_STATS_POISONRESIST = 45;
+    D2JSP_STATS_NAMES[45] = "poisonresist";
+
+var D2JSP_STATS_MAXPOISONRESIST = 46;
+    D2JSP_STATS_NAMES[46] = "maxpoisonresist";
+
+var D2JSP_STATS_DAMAGEAURA = 47;
+    D2JSP_STATS_NAMES[47] = "damageaura";
+
+var D2JSP_STATS_FIREMINDAM = 48;
+    D2JSP_STATS_NAMES[48] = "firemindam";
+
+var D2JSP_STATS_FIREMAXDAM = 49;
+    D2JSP_STATS_NAMES[49] = "firemaxdam";
+
+var D2JSP_STATS_LIGHTMINDAM = 50;
+    D2JSP_STATS_NAMES[50] = "lightmindam";
+
+var D2JSP_STATS_LIGHTMAXDAM = 51;
+    D2JSP_STATS_NAMES[51] = "lightmaxdam";
+
+var D2JSP_STATS_MAGICMINDAM = 52;
+    D2JSP_STATS_NAMES[52] = "magicmindam";
+
+var D2JSP_STATS_MAGICMAXDAM = 53;
+    D2JSP_STATS_NAMES[53] = "magicmaxdam";
+
+var D2JSP_STATS_COLDMINDAM = 54;
+    D2JSP_STATS_NAMES[54] = "coldmindam";
+
+var D2JSP_STATS_COLDMAXDAM = 55;
+    D2JSP_STATS_NAMES[55] = "coldmaxdam";
+
+var D2JSP_STATS_COLDLENGTH = 56;
+    D2JSP_STATS_NAMES[56] = "coldlength";
+
+var D2JSP_STATS_POISONMINDAM = 57;
+    D2JSP_STATS_NAMES[57] = "poisonmindam";
+
+var D2JSP_STATS_POISONMAXDAM = 58;
+    D2JSP_STATS_NAMES[58] = "poisonmaxdam";
+
+var D2JSP_STATS_POISONLENGTH = 59;
+    D2JSP_STATS_NAMES[59] = "poisonlength";
+
+var D2JSP_STATS_LIFEDRAINMINDAM = 60;
+    D2JSP_STATS_NAMES[60] = "lifedrainmindam";
+
+var D2JSP_STATS_LIFEDRAINMAXDAM = 61;
+    D2JSP_STATS_NAMES[61] = "lifedrainmaxdam";
+
+var D2JSP_STATS_MANADRAINMINDAM = 62;
+    D2JSP_STATS_NAMES[62] = "manadrainmindam";
+
+var D2JSP_STATS_MANADRAINMAXDAM = 63;
+    D2JSP_STATS_NAMES[63] = "manadrainmaxdam";
+
+var D2JSP_STATS_STAMDRAINMINDAM = 64;
+    D2JSP_STATS_NAMES[64] = "stamdrainmindam";
+
+var D2JSP_STATS_STAMDRAINMAXDAM = 65;
+    D2JSP_STATS_NAMES[65] = "stamdrainmaxdam";
+
+var D2JSP_STATS_STUNLENGTH = 66;
+    D2JSP_STATS_NAMES[66] = "stunlength";
+
+var D2JSP_STATS_VELOCITYPERCENT = 67;
+    D2JSP_STATS_NAMES[67] = "velocitypercent";
+
+var D2JSP_STATS_ATTACKRATE = 68;
+    D2JSP_STATS_NAMES[68] = "attackrate";
+
+var D2JSP_STATS_OTHER_ANIMRATE = 69;
+    D2JSP_STATS_NAMES[69] = "other_animrate";
+
+var D2JSP_STATS_QUANTITY = 70;
+    D2JSP_STATS_NAMES[70] = "quantity";
+
+var D2JSP_STATS_VALUE = 71;
+    D2JSP_STATS_NAMES[71] = "value";
+
+var D2JSP_STATS_DURABILITY = 72;
+    D2JSP_STATS_NAMES[72] = "durability";
+
+var D2JSP_STATS_MAXDURABILITY = 73;
+    D2JSP_STATS_NAMES[73] = "maxdurability";
+
+var D2JSP_STATS_HPREGEN = 74;
+    D2JSP_STATS_NAMES[74] = "hpregen";
+
+var D2JSP_STATS_ITEM_MAXDURABILITY_PERCENT = 75;
+    D2JSP_STATS_NAMES[75] = "item_maxdurability_percent";
+
+var D2JSP_STATS_ITEM_MAXHP_PERCENT = 76;
+    D2JSP_STATS_NAMES[76] = "item_maxhp_percent";
+
+var D2JSP_STATS_ITEM_MAXMANA_PERCENT = 77;
+    D2JSP_STATS_NAMES[77] = "item_maxmana_percent";
+
+var D2JSP_STATS_ITEM_ATTACKERTAKESDAMAGE = 78;
+    D2JSP_STATS_NAMES[78] = "item_attackertakesdamage";
+
+var D2JSP_STATS_ITEM_GOLDBONUS = 79;
+    D2JSP_STATS_NAMES[79] = "item_goldbonus";
+
+var D2JSP_STATS_ITEM_MAGICBONUS = 80;
+    D2JSP_STATS_NAMES[80] = "item_magicbonus";
+
+var D2JSP_STATS_ITEM_KNOCKBACK = 81;
+    D2JSP_STATS_NAMES[81] = "item_knockback";
+
+var D2JSP_STATS_ITEM_TIMEDURATION = 82;
+    D2JSP_STATS_NAMES[82] = "item_timeduration";
+
+var D2JSP_STATS_ITEM_ADDCLASSSKILLS = 83;
+    D2JSP_STATS_NAMES[83] = "item_addclassskills";
+
+var D2JSP_STATS_UNSENTPARAM1 = 84;
+    D2JSP_STATS_NAMES[84] = "unsentparam1";
+
+var D2JSP_STATS_ITEM_ADDEXPERIENCE = 85;
+    D2JSP_STATS_NAMES[85] = "item_addexperience";
+
+var D2JSP_STATS_ITEM_HEALAFTERKILL = 86;
+    D2JSP_STATS_NAMES[86] = "item_healafterkill";
+
+var D2JSP_STATS_ITEM_REDUCEDPRICES = 87;
+    D2JSP_STATS_NAMES[87] = "item_reducedprices";
+
+var D2JSP_STATS_ITEM_DOUBLEHERBDURATION = 88;
+    D2JSP_STATS_NAMES[88] = "item_doubleherbduration";
+
+var D2JSP_STATS_ITEM_LIGHTRADIUS = 89;
+    D2JSP_STATS_NAMES[89] = "item_lightradius";
+
+var D2JSP_STATS_ITEM_LIGHTCOLOR = 90;
+    D2JSP_STATS_NAMES[90] = "item_lightcolor";
+
+var D2JSP_STATS_ITEM_REQ_PERCENT = 91;
+    D2JSP_STATS_NAMES[91] = "item_req_percent";
+
+var D2JSP_STATS_ITEM_LEVELREQ = 92;
+    D2JSP_STATS_NAMES[92] = "item_levelreq";
+
+var D2JSP_STATS_ITEM_FASTERATTACKRATE = 93;
+    D2JSP_STATS_NAMES[93] = "item_fasterattackrate";
+
+var D2JSP_STATS_ITEM_LEVELREQPCT = 94;
+    D2JSP_STATS_NAMES[94] = "item_levelreqpct";
+
+var D2JSP_STATS_LASTBLOCKFRAME = 95;
+    D2JSP_STATS_NAMES[95] = "lastblockframe";
+
+var D2JSP_STATS_ITEM_FASTERMOVEVELOCITY = 96;
+    D2JSP_STATS_NAMES[96] = "item_fastermovevelocity";
+
+var D2JSP_STATS_ITEM_NONCLASSSKILL = 97;
+    D2JSP_STATS_NAMES[97] = "item_nonclassskill";
+
+var D2JSP_STATS_STATE = 98;
+    D2JSP_STATS_NAMES[98] = "state";
+
+var D2JSP_STATS_ITEM_FASTERGETHITRATE = 99;
+    D2JSP_STATS_NAMES[99] = "item_fastergethitrate";
+
+var D2JSP_STATS_MONSTER_PLAYERCOUNT = 100;
+    D2JSP_STATS_NAMES[100] = "monster_playercount";
+
+var D2JSP_STATS_SKILL_POISON_OVERRIDE_LENGTH = 101;
+    D2JSP_STATS_NAMES[101] = "skill_poison_override_length";
+
+var D2JSP_STATS_ITEM_FASTERBLOCKRATE = 102;
+    D2JSP_STATS_NAMES[102] = "item_fasterblockrate";
+
+var D2JSP_STATS_SKILL_BYPASS_UNDEAD = 103;
+    D2JSP_STATS_NAMES[103] = "skill_bypass_undead";
+
+var D2JSP_STATS_SKILL_BYPASS_DEMONS = 104;
+    D2JSP_STATS_NAMES[104] = "skill_bypass_demons";
+
+var D2JSP_STATS_ITEM_FASTERCASTRATE = 105;
+    D2JSP_STATS_NAMES[105] = "item_fastercastrate";
+
+var D2JSP_STATS_SKILL_BYPASS_BEASTS = 106;
+    D2JSP_STATS_NAMES[106] = "skill_bypass_beasts";
+
+var D2JSP_STATS_ITEM_SINGLESKILL = 107;
+    D2JSP_STATS_NAMES[107] = "item_singleskill";
+
+var D2JSP_STATS_ITEM_RESTINPEACE = 108;
+    D2JSP_STATS_NAMES[108] = "item_restinpeace";
+
+var D2JSP_STATS_CURSE_RESISTANCE = 109;
+    D2JSP_STATS_NAMES[109] = "curse_resistance";
+
+var D2JSP_STATS_ITEM_POISONLENGTHRESIST = 110;
+    D2JSP_STATS_NAMES[110] = "item_poisonlengthresist";
+
+var D2JSP_STATS_ITEM_NORMALDAMAGE = 111;
+    D2JSP_STATS_NAMES[111] = "item_normaldamage";
+
+var D2JSP_STATS_ITEM_HOWL = 112;
+    D2JSP_STATS_NAMES[112] = "item_howl";
+
+var D2JSP_STATS_ITEM_STUPIDITY = 113;
+    D2JSP_STATS_NAMES[113] = "item_stupidity";
+
+var D2JSP_STATS_ITEM_DAMAGETOMANA = 114;
+    D2JSP_STATS_NAMES[114] = "item_damagetomana";
+
+var D2JSP_STATS_ITEM_IGNORETARGETAC = 115;
+    D2JSP_STATS_NAMES[115] = "item_ignoretargetac";
+
+var D2JSP_STATS_ITEM_FRACTIONALTARGETAC = 116;
+    D2JSP_STATS_NAMES[116] = "item_fractionaltargetac";
+
+var D2JSP_STATS_ITEM_PREVENTHEAL = 117;
+    D2JSP_STATS_NAMES[117] = "item_preventheal";
+
+var D2JSP_STATS_ITEM_HALFFREEZEDURATION = 118;
+    D2JSP_STATS_NAMES[118] = "item_halffreezeduration";
+
+var D2JSP_STATS_ITEM_TOHIT_PERCENT = 119;
+    D2JSP_STATS_NAMES[119] = "item_tohit_percent";
+
+var D2JSP_STATS_ITEM_DAMAGETARGETAC = 120;
+    D2JSP_STATS_NAMES[120] = "item_damagetargetac";
+
+var D2JSP_STATS_ITEM_DEMONDAMAGE_PERCENT = 121;
+    D2JSP_STATS_NAMES[121] = "item_demondamage_percent";
+
+var D2JSP_STATS_ITEM_UNDEADDAMAGE_PERCENT = 122;
+    D2JSP_STATS_NAMES[122] = "item_undeaddamage_percent";
+
+var D2JSP_STATS_ITEM_DEMON_TOHIT = 123;
+    D2JSP_STATS_NAMES[123] = "item_demon_tohit";
+
+var D2JSP_STATS_ITEM_UNDEAD_TOHIT = 124;
+    D2JSP_STATS_NAMES[124] = "item_undead_tohit";
+
+var D2JSP_STATS_ITEM_THROWABLE = 125;
+    D2JSP_STATS_NAMES[125] = "item_throwable";
+
+var D2JSP_STATS_ITEM_ELEMSKILL = 126;
+    D2JSP_STATS_NAMES[126] = "item_elemskill";
+
+var D2JSP_STATS_ITEM_ALLSKILLS = 127;
+    D2JSP_STATS_NAMES[127] = "item_allskills";
+
+var D2JSP_STATS_ITEM_ATTACKERTAKESLIGHTDAMAGE = 128;
+    D2JSP_STATS_NAMES[128] = "item_attackertakeslightdamage";
+
+var D2JSP_STATS_IRONMAIDEN_LEVEL = 129;
+    D2JSP_STATS_NAMES[129] = "ironmaiden_level";
+
+var D2JSP_STATS_LIFETAP_LEVEL = 130;
+    D2JSP_STATS_NAMES[130] = "lifetap_level";
+
+var D2JSP_STATS_THORNS_PERCENT = 131;
+    D2JSP_STATS_NAMES[131] = "thorns_percent";
+
+var D2JSP_STATS_BONEARMOR = 132;
+    D2JSP_STATS_NAMES[132] = "bonearmor";
+
+var D2JSP_STATS_BONEARMORMAX = 133;
+    D2JSP_STATS_NAMES[133] = "bonearmormax";
+
+var D2JSP_STATS_ITEM_FREEZE = 134;
+    D2JSP_STATS_NAMES[134] = "item_freeze";
+
+var D2JSP_STATS_ITEM_OPENWOUNDS = 135;
+    D2JSP_STATS_NAMES[135] = "item_openwounds";
+
+var D2JSP_STATS_ITEM_CRUSHINGBLOW = 136;
+    D2JSP_STATS_NAMES[136] = "item_crushingblow";
+
+var D2JSP_STATS_ITEM_KICKDAMAGE = 137;
+    D2JSP_STATS_NAMES[137] = "item_kickdamage";
+
+var D2JSP_STATS_ITEM_MANAAFTERKILL = 138;
+    D2JSP_STATS_NAMES[138] = "item_manaafterkill";
+
+var D2JSP_STATS_ITEM_HEALAFTERDEMONKILL = 139;
+    D2JSP_STATS_NAMES[139] = "item_healafterdemonkill";
+
+var D2JSP_STATS_ITEM_EXTRABLOOD = 140;
+    D2JSP_STATS_NAMES[140] = "item_extrablood";
+
+var D2JSP_STATS_ITEM_DEADLYSTRIKE = 141;
+    D2JSP_STATS_NAMES[141] = "item_deadlystrike";
+
+var D2JSP_STATS_ITEM_ABSORBFIRE_PERCENT = 142;
+    D2JSP_STATS_NAMES[142] = "item_absorbfire_percent";
+
+var D2JSP_STATS_ITEM_ABSORBFIRE = 143;
+    D2JSP_STATS_NAMES[143] = "item_absorbfire";
+
+var D2JSP_STATS_ITEM_ABSORBLIGHT_PERCENT = 144;
+    D2JSP_STATS_NAMES[144] = "item_absorblight_percent";
+
+var D2JSP_STATS_ITEM_ABSORBLIGHT = 145;
+    D2JSP_STATS_NAMES[145] = "item_absorblight";
+
+var D2JSP_STATS_ITEM_ABSORBMAGIC_PERCENT = 146;
+    D2JSP_STATS_NAMES[146] = "item_absorbmagic_percent";
+
+var D2JSP_STATS_ITEM_ABSORBMAGIC = 147;
+    D2JSP_STATS_NAMES[147] = "item_absorbmagic";
+
+var D2JSP_STATS_ITEM_ABSORBCOLD_PERCENT = 148;
+    D2JSP_STATS_NAMES[148] = "item_absorbcold_percent";
+
+var D2JSP_STATS_ITEM_ABSORBCOLD = 149;
+    D2JSP_STATS_NAMES[149] = "item_absorbcold";
+
+var D2JSP_STATS_ITEM_SLOW = 150;
+    D2JSP_STATS_NAMES[150] = "item_slow";
+
+var D2JSP_STATS_ITEM_AURA = 151;
+    D2JSP_STATS_NAMES[151] = "item_aura";
+
+var D2JSP_STATS_ITEM_INDESCTRUCTIBLE = 152;
+    D2JSP_STATS_NAMES[152] = "item_indesctructible";
+
+var D2JSP_STATS_ITEM_CANNOTBEFROZEN = 153;
+    D2JSP_STATS_NAMES[153] = "item_cannotbefrozen";
+
+var D2JSP_STATS_ITEM_STAMINADRAINPCT = 154;
+    D2JSP_STATS_NAMES[154] = "item_staminadrainpct";
+
+var D2JSP_STATS_ITEM_REANIMATE = 155;
+    D2JSP_STATS_NAMES[155] = "item_reanimate";
+
+var D2JSP_STATS_ITEM_PIERCE = 156;
+    D2JSP_STATS_NAMES[156] = "item_pierce";
+
+var D2JSP_STATS_ITEM_MAGICARROW = 157;
+    D2JSP_STATS_NAMES[157] = "item_magicarrow";
+
+var D2JSP_STATS_ITEM_EXPLOSIVEARROW = 158;
+    D2JSP_STATS_NAMES[158] = "item_explosivearrow";
+
+var D2JSP_STATS_ITEM_THROW_MINDAMAGE = 159;
+    D2JSP_STATS_NAMES[159] = "item_throw_mindamage";
+
+var D2JSP_STATS_ITEM_THROW_MAXDAMAGE = 160;
+    D2JSP_STATS_NAMES[160] = "item_throw_maxdamage";
+
+var D2JSP_STATS_SKILL_HANDOFATHENA = 161;
+    D2JSP_STATS_NAMES[161] = "skill_handofathena";
+
+var D2JSP_STATS_SKILL_STAMINAPERCENT = 162;
+    D2JSP_STATS_NAMES[162] = "skill_staminapercent";
+
+var D2JSP_STATS_SKILL_PASSIVE_STAMINAPERCENT = 163;
+    D2JSP_STATS_NAMES[163] = "skill_passive_staminapercent";
+
+var D2JSP_STATS_SKILL_CONCENTRATION = 164;
+    D2JSP_STATS_NAMES[164] = "skill_concentration";
+
+var D2JSP_STATS_SKILL_ENCHANT = 165;
+    D2JSP_STATS_NAMES[165] = "skill_enchant";
+
+var D2JSP_STATS_SKILL_PIERCE = 166;
+    D2JSP_STATS_NAMES[166] = "skill_pierce";
+
+var D2JSP_STATS_SKILL_CONVICTION = 167;
+    D2JSP_STATS_NAMES[167] = "skill_conviction";
+
+var D2JSP_STATS_SKILL_CHILLINGARMOR = 168;
+    D2JSP_STATS_NAMES[168] = "skill_chillingarmor";
+
+var D2JSP_STATS_SKILL_FRENZY = 169;
+    D2JSP_STATS_NAMES[169] = "skill_frenzy";
+
+var D2JSP_STATS_SKILL_DECREPIFY = 170;
+    D2JSP_STATS_NAMES[170] = "skill_decrepify";
+
+var D2JSP_STATS_SKILL_ARMOR_PERCENT = 171;
+    D2JSP_STATS_NAMES[171] = "skill_armor_percent";
+
+var D2JSP_STATS_ALIGNMENT = 172;
+    D2JSP_STATS_NAMES[172] = "alignment";
+
+var D2JSP_STATS_TARGET0 = 173;
+    D2JSP_STATS_NAMES[173] = "target0";
+
+var D2JSP_STATS_TARGET1 = 174;
+    D2JSP_STATS_NAMES[174] = "target1";
+
+var D2JSP_STATS_GOLDLOST = 175;
+    D2JSP_STATS_NAMES[175] = "goldlost";
+
+var D2JSP_STATS_CONVERSION_LEVEL = 176;
+    D2JSP_STATS_NAMES[176] = "conversion_level";
+
+var D2JSP_STATS_CONVERSION_MAXHP = 177;
+    D2JSP_STATS_NAMES[177] = "conversion_maxhp";
+
+var D2JSP_STATS_UNIT_DOOVERLAY = 178;
+    D2JSP_STATS_NAMES[178] = "unit_dooverlay";
+
+var D2JSP_STATS_ATTACK_VS_MONTYPE = 179;
+    D2JSP_STATS_NAMES[179] = "attack_vs_montype";
+
+var D2JSP_STATS_DAMAGE_VS_MONTYPE = 180;
+    D2JSP_STATS_NAMES[180] = "damage_vs_montype";
+
+var D2JSP_STATS_FADE = 181;
+    D2JSP_STATS_NAMES[181] = "fade";
+
+var D2JSP_STATS_ARMOR_OVERRIDE_PERCENT = 182;
+    D2JSP_STATS_NAMES[182] = "armor_override_percent";
+
+var D2JSP_STATS_UNUSED183 = 183;
+    D2JSP_STATS_NAMES[183] = "unused183";
+
+var D2JSP_STATS_UNUSED184 = 184;
+    D2JSP_STATS_NAMES[184] = "unused184";
+
+var D2JSP_STATS_UNUSED185 = 185;
+    D2JSP_STATS_NAMES[185] = "unused185";
+
+var D2JSP_STATS_UNUSED186 = 186;
+    D2JSP_STATS_NAMES[186] = "unused186";
+
+var D2JSP_STATS_UNUSED187 = 187;
+    D2JSP_STATS_NAMES[187] = "unused187";
+
+var D2JSP_STATS_ITEM_ADDSKILL_TAB = 188;
+    D2JSP_STATS_NAMES[188] = "item_addskill_tab";
+
+var D2JSP_STATS_UNUSED189 = 189;
+    D2JSP_STATS_NAMES[189] = "unused189";
+
+var D2JSP_STATS_UNUSED190 = 190;
+    D2JSP_STATS_NAMES[190] = "unused190";
+
+var D2JSP_STATS_UNUSED191 = 191;
+    D2JSP_STATS_NAMES[191] = "unused191";
+
+var D2JSP_STATS_UNUSED192 = 192;
+    D2JSP_STATS_NAMES[192] = "unused192";
+
+var D2JSP_STATS_UNUSED193 = 193;
+    D2JSP_STATS_NAMES[193] = "unused193";
+
+var D2JSP_STATS_ITEM_NUMSOCKETS = 194;
+    D2JSP_STATS_NAMES[194] = "item_numsockets";
+
+var D2JSP_STATS_ITEM_SKILLONATTACK = 195;
+    D2JSP_STATS_NAMES[195] = "item_skillonattack";
+
+var D2JSP_STATS_ITEM_SKILLONKILL = 196;
+    D2JSP_STATS_NAMES[196] = "item_skillonkill";
+
+var D2JSP_STATS_ITEM_SKILLONDEATH = 197;
+    D2JSP_STATS_NAMES[197] = "item_skillondeath";
+
+var D2JSP_STATS_ITEM_SKILLONHIT = 198;
+    D2JSP_STATS_NAMES[198] = "item_skillonhit";
+
+var D2JSP_STATS_ITEM_SKILLONLEVELUP = 199;
+    D2JSP_STATS_NAMES[199] = "item_skillonlevelup";
+
+var D2JSP_STATS_UNUSED200 = 200;
+    D2JSP_STATS_NAMES[200] = "unused200";
+
+var D2JSP_STATS_ITEM_SKILLONGETHIT = 201;
+    D2JSP_STATS_NAMES[201] = "item_skillongethit";
+
+var D2JSP_STATS_UNUSED202 = 202;
+    D2JSP_STATS_NAMES[202] = "unused202";
+
+var D2JSP_STATS_UNUSED203 = 203;
+    D2JSP_STATS_NAMES[203] = "unused203";
+
+var D2JSP_STATS_ITEM_CHARGED_SKILL = 204;
+    D2JSP_STATS_NAMES[204] = "item_charged_skill";
+
+var D2JSP_STATS_UNUSED204 = 205;
+    D2JSP_STATS_NAMES[205] = "unused204";
+
+var D2JSP_STATS_UNUSED205 = 206;
+    D2JSP_STATS_NAMES[206] = "unused205";
+
+var D2JSP_STATS_UNUSED206 = 207;
+    D2JSP_STATS_NAMES[207] = "unused206";
+
+var D2JSP_STATS_UNUSED207 = 208;
+    D2JSP_STATS_NAMES[208] = "unused207";
+
+var D2JSP_STATS_UNUSED208 = 209;
+    D2JSP_STATS_NAMES[209] = "unused208";
+
+var D2JSP_STATS_UNUSED209 = 210;
+    D2JSP_STATS_NAMES[210] = "unused209";
+
+var D2JSP_STATS_UNUSED210 = 211;
+    D2JSP_STATS_NAMES[211] = "unused210";
+
+var D2JSP_STATS_UNUSED211 = 212;
+    D2JSP_STATS_NAMES[212] = "unused211";
+
+var D2JSP_STATS_UNUSED212 = 213;
+    D2JSP_STATS_NAMES[213] = "unused212";
+
+var D2JSP_STATS_ITEM_ARMOR_PERLEVEL = 214;
+    D2JSP_STATS_NAMES[214] = "item_armor_perlevel";
+
+var D2JSP_STATS_ITEM_ARMORPERCENT_PERLEVEL = 215;
+    D2JSP_STATS_NAMES[215] = "item_armorpercent_perlevel";
+
+var D2JSP_STATS_ITEM_HP_PERLEVEL = 216;
+    D2JSP_STATS_NAMES[216] = "item_hp_perlevel";
+
+var D2JSP_STATS_ITEM_MANA_PERLEVEL = 217;
+    D2JSP_STATS_NAMES[217] = "item_mana_perlevel";
+
+var D2JSP_STATS_ITEM_MAXDAMAGE_PERLEVEL = 218;
+    D2JSP_STATS_NAMES[218] = "item_maxdamage_perlevel";
+
+var D2JSP_STATS_ITEM_MAXDAMAGE_PERCENT_PERLEVEL = 219;
+    D2JSP_STATS_NAMES[219] = "item_maxdamage_percent_perlevel";
+
+var D2JSP_STATS_ITEM_STRENGTH_PERLEVEL = 220;
+    D2JSP_STATS_NAMES[220] = "item_strength_perlevel";
+
+var D2JSP_STATS_ITEM_DEXTERITY_PERLEVEL = 221;
+    D2JSP_STATS_NAMES[221] = "item_dexterity_perlevel";
+
+var D2JSP_STATS_ITEM_ENERGY_PERLEVEL = 222;
+    D2JSP_STATS_NAMES[222] = "item_energy_perlevel";
+
+var D2JSP_STATS_ITEM_VITALITY_PERLEVEL = 223;
+    D2JSP_STATS_NAMES[223] = "item_vitality_perlevel";
+
+var D2JSP_STATS_ITEM_TOHIT_PERLEVEL = 224;
+    D2JSP_STATS_NAMES[224] = "item_tohit_perlevel";
+
+var D2JSP_STATS_ITEM_TOHITPERCENT_PERLEVEL = 225;
+    D2JSP_STATS_NAMES[225] = "item_tohitpercent_perlevel";
+
+var D2JSP_STATS_ITEM_COLD_DAMAGEMAX_PERLEVEL = 226;
+    D2JSP_STATS_NAMES[226] = "item_cold_damagemax_perlevel";
+
+var D2JSP_STATS_ITEM_FIRE_DAMAGEMAX_PERLEVEL = 227;
+    D2JSP_STATS_NAMES[227] = "item_fire_damagemax_perlevel";
+
+var D2JSP_STATS_ITEM_LTNG_DAMAGEMAX_PERLEVEL = 228;
+    D2JSP_STATS_NAMES[228] = "item_ltng_damagemax_perlevel";
+
+var D2JSP_STATS_ITEM_POIS_DAMAGEMAX_PERLEVEL = 229;
+    D2JSP_STATS_NAMES[229] = "item_pois_damagemax_perlevel";
+
+var D2JSP_STATS_ITEM_RESIST_COLD_PERLEVEL = 230;
+    D2JSP_STATS_NAMES[230] = "item_resist_cold_perlevel";
+
+var D2JSP_STATS_ITEM_RESIST_FIRE_PERLEVEL = 231;
+    D2JSP_STATS_NAMES[231] = "item_resist_fire_perlevel";
+
+var D2JSP_STATS_ITEM_RESIST_LTNG_PERLEVEL = 232;
+    D2JSP_STATS_NAMES[232] = "item_resist_ltng_perlevel";
+
+var D2JSP_STATS_ITEM_RESIST_POIS_PERLEVEL = 233;
+    D2JSP_STATS_NAMES[233] = "item_resist_pois_perlevel";
+
+var D2JSP_STATS_ITEM_ABSORB_COLD_PERLEVEL = 234;
+    D2JSP_STATS_NAMES[234] = "item_absorb_cold_perlevel";
+
+var D2JSP_STATS_ITEM_ABSORB_FIRE_PERLEVEL = 235;
+    D2JSP_STATS_NAMES[235] = "item_absorb_fire_perlevel";
+
+var D2JSP_STATS_ITEM_ABSORB_LTNG_PERLEVEL = 236;
+    D2JSP_STATS_NAMES[236] = "item_absorb_ltng_perlevel";
+
+var D2JSP_STATS_ITEM_ABSORB_POIS_PERLEVEL = 237;
+    D2JSP_STATS_NAMES[237] = "item_absorb_pois_perlevel";
+
+var D2JSP_STATS_ITEM_THORNS_PERLEVEL = 238;
+    D2JSP_STATS_NAMES[238] = "item_thorns_perlevel";
+
+var D2JSP_STATS_ITEM_FIND_GOLD_PERLEVEL = 239;
+    D2JSP_STATS_NAMES[239] = "item_find_gold_perlevel";
+
+var D2JSP_STATS_ITEM_FIND_MAGIC_PERLEVEL = 240;
+    D2JSP_STATS_NAMES[240] = "item_find_magic_perlevel";
+
+var D2JSP_STATS_ITEM_REGENSTAMINA_PERLEVEL = 241;
+    D2JSP_STATS_NAMES[241] = "item_regenstamina_perlevel";
+
+var D2JSP_STATS_ITEM_STAMINA_PERLEVEL = 242;
+    D2JSP_STATS_NAMES[242] = "item_stamina_perlevel";
+
+var D2JSP_STATS_ITEM_DAMAGE_DEMON_PERLEVEL = 243;
+    D2JSP_STATS_NAMES[243] = "item_damage_demon_perlevel";
+
+var D2JSP_STATS_ITEM_DAMAGE_UNDEAD_PERLEVEL = 244;
+    D2JSP_STATS_NAMES[244] = "item_damage_undead_perlevel";
+
+var D2JSP_STATS_ITEM_TOHIT_DEMON_PERLEVEL = 245;
+    D2JSP_STATS_NAMES[245] = "item_tohit_demon_perlevel";
+
+var D2JSP_STATS_ITEM_TOHIT_UNDEAD_PERLEVEL = 246;
+    D2JSP_STATS_NAMES[246] = "item_tohit_undead_perlevel";
+
+var D2JSP_STATS_ITEM_CRUSHINGBLOW_PERLEVEL = 247;
+    D2JSP_STATS_NAMES[247] = "item_crushingblow_perlevel";
+
+var D2JSP_STATS_ITEM_OPENWOUNDS_PERLEVEL = 248;
+    D2JSP_STATS_NAMES[248] = "item_openwounds_perlevel";
+
+var D2JSP_STATS_ITEM_KICK_DAMAGE_PERLEVEL = 249;
+    D2JSP_STATS_NAMES[249] = "item_kick_damage_perlevel";
+
+var D2JSP_STATS_ITEM_DEADLYSTRIKE_PERLEVEL = 250;
+    D2JSP_STATS_NAMES[250] = "item_deadlystrike_perlevel";
+
+var D2JSP_STATS_ITEM_FIND_GEMS_PERLEVEL = 251;
+    D2JSP_STATS_NAMES[251] = "item_find_gems_perlevel";
+
+var D2JSP_STATS_ITEM_REPLENISH_DURABILITY = 252;
+    D2JSP_STATS_NAMES[252] = "item_replenish_durability";
+
+var D2JSP_STATS_ITEM_REPLENISH_QUANTITY = 253;
+    D2JSP_STATS_NAMES[253] = "item_replenish_quantity";
+
+var D2JSP_STATS_ITEM_EXTRA_STACK = 254;
+    D2JSP_STATS_NAMES[254] = "item_extra_stack";
+
+var D2JSP_STATS_ITEM_FIND_ITEM = 255;
+    D2JSP_STATS_NAMES[255] = "item_find_item";
+
+var D2JSP_STATS_ITEM_SLASH_DAMAGE = 256;
+    D2JSP_STATS_NAMES[256] = "item_slash_damage";
+
+var D2JSP_STATS_ITEM_SLASH_DAMAGE_PERCENT = 257;
+    D2JSP_STATS_NAMES[257] = "item_slash_damage_percent";
+
+var D2JSP_STATS_ITEM_CRUSH_DAMAGE = 258;
+    D2JSP_STATS_NAMES[258] = "item_crush_damage";
+
+var D2JSP_STATS_ITEM_CRUSH_DAMAGE_PERCENT = 259;
+    D2JSP_STATS_NAMES[259] = "item_crush_damage_percent";
+
+var D2JSP_STATS_ITEM_THRUST_DAMAGE = 260;
+    D2JSP_STATS_NAMES[260] = "item_thrust_damage";
+
+var D2JSP_STATS_ITEM_THRUST_DAMAGE_PERCENT = 261;
+    D2JSP_STATS_NAMES[261] = "item_thrust_damage_percent";
+
+var D2JSP_STATS_ITEM_ABSORB_SLASH = 262;
+    D2JSP_STATS_NAMES[262] = "item_absorb_slash";
+
+var D2JSP_STATS_ITEM_ABSORB_CRUSH = 263;
+    D2JSP_STATS_NAMES[263] = "item_absorb_crush";
+
+var D2JSP_STATS_ITEM_ABSORB_THRUST = 264;
+    D2JSP_STATS_NAMES[264] = "item_absorb_thrust";
+
+var D2JSP_STATS_ITEM_ABSORB_SLASH_PERCENT = 265;
+    D2JSP_STATS_NAMES[265] = "item_absorb_slash_percent";
+
+var D2JSP_STATS_ITEM_ABSORB_CRUSH_PERCENT = 266;
+    D2JSP_STATS_NAMES[266] = "item_absorb_crush_percent";
+
+var D2JSP_STATS_ITEM_ABSORB_THRUST_PERCENT = 267;
+    D2JSP_STATS_NAMES[267] = "item_absorb_thrust_percent";
+
+var D2JSP_STATS_ITEM_ARMOR_BYTIME = 268;
+    D2JSP_STATS_NAMES[268] = "item_armor_bytime";
+
+var D2JSP_STATS_ITEM_ARMORPERCENT_BYTIME = 269;
+    D2JSP_STATS_NAMES[269] = "item_armorpercent_bytime";
+
+var D2JSP_STATS_ITEM_HP_BYTIME = 270;
+    D2JSP_STATS_NAMES[270] = "item_hp_bytime";
+
+var D2JSP_STATS_ITEM_MANA_BYTIME = 271;
+    D2JSP_STATS_NAMES[271] = "item_mana_bytime";
+
+var D2JSP_STATS_ITEM_MAXDAMAGE_BYTIME = 272;
+    D2JSP_STATS_NAMES[272] = "item_maxdamage_bytime";
+
+var D2JSP_STATS_ITEM_MAXDAMAGE_PERCENT_BYTIME = 273;
+    D2JSP_STATS_NAMES[273] = "item_maxdamage_percent_bytime";
+
+var D2JSP_STATS_ITEM_STRENGTH_BYTIME = 274;
+    D2JSP_STATS_NAMES[274] = "item_strength_bytime";
+
+var D2JSP_STATS_ITEM_DEXTERITY_BYTIME = 275;
+    D2JSP_STATS_NAMES[275] = "item_dexterity_bytime";
+
+var D2JSP_STATS_ITEM_ENERGY_BYTIME = 276;
+    D2JSP_STATS_NAMES[276] = "item_energy_bytime";
+
+var D2JSP_STATS_ITEM_VITALITY_BYTIME = 277;
+    D2JSP_STATS_NAMES[277] = "item_vitality_bytime";
+
+var D2JSP_STATS_ITEM_TOHIT_BYTIME = 278;
+    D2JSP_STATS_NAMES[278] = "item_tohit_bytime";
+
+var D2JSP_STATS_ITEM_TOHITPERCENT_BYTIME = 279;
+    D2JSP_STATS_NAMES[279] = "item_tohitpercent_bytime";
+
+var D2JSP_STATS_ITEM_COLD_DAMAGEMAX_BYTIME = 280;
+    D2JSP_STATS_NAMES[280] = "item_cold_damagemax_bytime";
+
+var D2JSP_STATS_ITEM_FIRE_DAMAGEMAX_BYTIME = 281;
+    D2JSP_STATS_NAMES[281] = "item_fire_damagemax_bytime";
+
+var D2JSP_STATS_ITEM_LTNG_DAMAGEMAX_BYTIME = 282;
+    D2JSP_STATS_NAMES[282] = "item_ltng_damagemax_bytime";
+
+var D2JSP_STATS_ITEM_POIS_DAMAGEMAX_BYTIME = 283;
+    D2JSP_STATS_NAMES[283] = "item_pois_damagemax_bytime";
+
+var D2JSP_STATS_ITEM_RESIST_COLD_BYTIME = 284;
+    D2JSP_STATS_NAMES[284] = "item_resist_cold_bytime";
+
+var D2JSP_STATS_ITEM_RESIST_FIRE_BYTIME = 285;
+    D2JSP_STATS_NAMES[285] = "item_resist_fire_bytime";
+
+var D2JSP_STATS_ITEM_RESIST_LTNG_BYTIME = 286;
+    D2JSP_STATS_NAMES[286] = "item_resist_ltng_bytime";
+
+var D2JSP_STATS_ITEM_RESIST_POIS_BYTIME = 287;
+    D2JSP_STATS_NAMES[287] = "item_resist_pois_bytime";
+
+var D2JSP_STATS_ITEM_ABSORB_COLD_BYTIME = 288;
+    D2JSP_STATS_NAMES[288] = "item_absorb_cold_bytime";
+
+var D2JSP_STATS_ITEM_ABSORB_FIRE_BYTIME = 289;
+    D2JSP_STATS_NAMES[289] = "item_absorb_fire_bytime";
+
+var D2JSP_STATS_ITEM_ABSORB_LTNG_BYTIME = 290;
+    D2JSP_STATS_NAMES[290] = "item_absorb_ltng_bytime";
+
+var D2JSP_STATS_ITEM_ABSORB_POIS_BYTIME = 291;
+    D2JSP_STATS_NAMES[291] = "item_absorb_pois_bytime";
+
+var D2JSP_STATS_ITEM_FIND_GOLD_BYTIME = 292;
+    D2JSP_STATS_NAMES[292] = "item_find_gold_bytime";
+
+var D2JSP_STATS_ITEM_FIND_MAGIC_BYTIME = 293;
+    D2JSP_STATS_NAMES[293] = "item_find_magic_bytime";
+
+var D2JSP_STATS_ITEM_REGENSTAMINA_BYTIME = 294;
+    D2JSP_STATS_NAMES[294] = "item_regenstamina_bytime";
+
+var D2JSP_STATS_ITEM_STAMINA_BYTIME = 295;
+    D2JSP_STATS_NAMES[295] = "item_stamina_bytime";
+
+var D2JSP_STATS_ITEM_DAMAGE_DEMON_BYTIME = 296;
+    D2JSP_STATS_NAMES[296] = "item_damage_demon_bytime";
+
+var D2JSP_STATS_ITEM_DAMAGE_UNDEAD_BYTIME = 297;
+    D2JSP_STATS_NAMES[297] = "item_damage_undead_bytime";
+
+var D2JSP_STATS_ITEM_TOHIT_DEMON_BYTIME = 298;
+    D2JSP_STATS_NAMES[298] = "item_tohit_demon_bytime";
+
+var D2JSP_STATS_ITEM_TOHIT_UNDEAD_BYTIME = 299;
+    D2JSP_STATS_NAMES[299] = "item_tohit_undead_bytime";
+
+var D2JSP_STATS_ITEM_CRUSHINGBLOW_BYTIME = 300;
+    D2JSP_STATS_NAMES[300] = "item_crushingblow_bytime";
+
+var D2JSP_STATS_ITEM_OPENWOUNDS_BYTIME = 301;
+    D2JSP_STATS_NAMES[301] = "item_openwounds_bytime";
+
+var D2JSP_STATS_ITEM_KICK_DAMAGE_BYTIME = 302;
+    D2JSP_STATS_NAMES[302] = "item_kick_damage_bytime";
+
+var D2JSP_STATS_ITEM_DEADLYSTRIKE_BYTIME = 303;
+    D2JSP_STATS_NAMES[303] = "item_deadlystrike_bytime";
+
+var D2JSP_STATS_ITEM_FIND_GEMS_BYTIME = 304;
+    D2JSP_STATS_NAMES[304] = "item_find_gems_bytime";
+
+var D2JSP_STATS_ITEM_PIERCE_COLD = 305;
+    D2JSP_STATS_NAMES[305] = "item_pierce_cold";
+
+var D2JSP_STATS_ITEM_PIERCE_FIRE = 306;
+    D2JSP_STATS_NAMES[306] = "item_pierce_fire";
+
+var D2JSP_STATS_ITEM_PIERCE_LTNG = 307;
+    D2JSP_STATS_NAMES[307] = "item_pierce_ltng";
+
+var D2JSP_STATS_ITEM_PIERCE_POIS = 308;
+    D2JSP_STATS_NAMES[308] = "item_pierce_pois";
+
+var D2JSP_STATS_ITEM_DAMAGE_VS_MONSTER = 309;
+    D2JSP_STATS_NAMES[309] = "item_damage_vs_monster";
+
+var D2JSP_STATS_ITEM_DAMAGE_PERCENT_VS_MONSTER = 310;
+    D2JSP_STATS_NAMES[310] = "item_damage_percent_vs_monster";
+
+var D2JSP_STATS_ITEM_TOHIT_VS_MONSTER = 311;
+    D2JSP_STATS_NAMES[311] = "item_tohit_vs_monster";
+
+var D2JSP_STATS_ITEM_TOHIT_PERCENT_VS_MONSTER = 312;
+    D2JSP_STATS_NAMES[312] = "item_tohit_percent_vs_monster";
+
+var D2JSP_STATS_ITEM_AC_VS_MONSTER = 313;
+    D2JSP_STATS_NAMES[313] = "item_ac_vs_monster";
+
+var D2JSP_STATS_ITEM_AC_PERCENT_VS_MONSTER = 314;
+    D2JSP_STATS_NAMES[314] = "item_ac_percent_vs_monster";
+
+var D2JSP_STATS_FIRELENGTH = 315;
+    D2JSP_STATS_NAMES[315] = "firelength";
+
+var D2JSP_STATS_BURNINGMIN = 316;
+    D2JSP_STATS_NAMES[316] = "burningmin";
+
+var D2JSP_STATS_BURNINGMAX = 317;
+    D2JSP_STATS_NAMES[317] = "burningmax";
+
+var D2JSP_STATS_PROGRESSIVE_DAMAGE = 318;
+    D2JSP_STATS_NAMES[318] = "progressive_damage";
+
+var D2JSP_STATS_PROGRESSIVE_STEAL = 319;
+    D2JSP_STATS_NAMES[319] = "progressive_steal";
+
+var D2JSP_STATS_PROGRESSIVE_OTHER = 320;
+    D2JSP_STATS_NAMES[320] = "progressive_other";
+
+var D2JSP_STATS_PROGRESSIVE_FIRE = 321;
+    D2JSP_STATS_NAMES[321] = "progressive_fire";
+
+var D2JSP_STATS_PROGRESSIVE_COLD = 322;
+    D2JSP_STATS_NAMES[322] = "progressive_cold";
+
+var D2JSP_STATS_PROGRESSIVE_LIGHTNING = 323;
+    D2JSP_STATS_NAMES[323] = "progressive_lightning";
+
+var D2JSP_STATS_ITEM_EXTRA_CHARGES = 324;
+    D2JSP_STATS_NAMES[324] = "item_extra_charges";
+
+var D2JSP_STATS_PROGRESSIVE_TOHIT = 325;
+    D2JSP_STATS_NAMES[325] = "progressive_tohit";
+
+var D2JSP_STATS_POISON_COUNT = 326;
+    D2JSP_STATS_NAMES[326] = "poison_count";
+
+var D2JSP_STATS_DAMAGE_FRAMERATE = 327;
+    D2JSP_STATS_NAMES[327] = "damage_framerate";
+
+var D2JSP_STATS_PIERCE_IDX = 328;
+    D2JSP_STATS_NAMES[328] = "pierce_idx";
+
+var D2JSP_STATS_PASSIVE_FIRE_MASTERY = 329;
+    D2JSP_STATS_NAMES[329] = "passive_fire_mastery";
+
+var D2JSP_STATS_PASSIVE_LTNG_MASTERY = 330;
+    D2JSP_STATS_NAMES[330] = "passive_ltng_mastery";
+
+var D2JSP_STATS_PASSIVE_COLD_MASTERY = 331;
+    D2JSP_STATS_NAMES[331] = "passive_cold_mastery";
+
+var D2JSP_STATS_PASSIVE_POIS_MASTERY = 332;
+    D2JSP_STATS_NAMES[332] = "passive_pois_mastery";
+
+var D2JSP_STATS_PASSIVE_FIRE_PIERCE = 333;
+    D2JSP_STATS_NAMES[333] = "passive_fire_pierce";
+
+var D2JSP_STATS_PASSIVE_LTNG_PIERCE = 334;
+    D2JSP_STATS_NAMES[334] = "passive_ltng_pierce";
+
+var D2JSP_STATS_PASSIVE_COLD_PIERCE = 335;
+    D2JSP_STATS_NAMES[335] = "passive_cold_pierce";
+
+var D2JSP_STATS_PASSIVE_POIS_PIERCE = 336;
+    D2JSP_STATS_NAMES[336] = "passive_pois_pierce";
+
+var D2JSP_STATS_PASSIVE_CRITICAL_STRIKE = 337;
+    D2JSP_STATS_NAMES[337] = "passive_critical_strike";
+
+var D2JSP_STATS_PASSIVE_DODGE = 338;
+    D2JSP_STATS_NAMES[338] = "passive_dodge";
+
+var D2JSP_STATS_PASSIVE_AVOID = 339;
+    D2JSP_STATS_NAMES[339] = "passive_avoid";
+
+var D2JSP_STATS_PASSIVE_EVADE = 340;
+    D2JSP_STATS_NAMES[340] = "passive_evade";
+
+var D2JSP_STATS_PASSIVE_WARMTH = 341;
+    D2JSP_STATS_NAMES[341] = "passive_warmth";
+
+var D2JSP_STATS_PASSIVE_MASTERY_MELEE_TH = 342;
+    D2JSP_STATS_NAMES[342] = "passive_mastery_melee_th";
+
+var D2JSP_STATS_PASSIVE_MASTERY_MELEE_DMG = 343;
+    D2JSP_STATS_NAMES[343] = "passive_mastery_melee_dmg";
+
+var D2JSP_STATS_PASSIVE_MASTERY_MELEE_CRIT = 344;
+    D2JSP_STATS_NAMES[344] = "passive_mastery_melee_crit";
+
+var D2JSP_STATS_PASSIVE_MASTERY_THROW_TH = 345;
+    D2JSP_STATS_NAMES[345] = "passive_mastery_throw_th";
+
+var D2JSP_STATS_PASSIVE_MASTERY_THROW_DMG = 346;
+    D2JSP_STATS_NAMES[346] = "passive_mastery_throw_dmg";
+
+var D2JSP_STATS_PASSIVE_MASTERY_THROW_CRIT = 347;
+    D2JSP_STATS_NAMES[347] = "passive_mastery_throw_crit";
+
+var D2JSP_STATS_PASSIVE_WEAPONBLOCK = 348;
+    D2JSP_STATS_NAMES[348] = "passive_weaponblock";
+
+var D2JSP_STATS_PASSIVE_SUMMON_RESIST = 349;
+    D2JSP_STATS_NAMES[349] = "passive_summon_resist";
+
+var D2JSP_STATS_MODIFIERLIST_SKILL = 350;
+    D2JSP_STATS_NAMES[350] = "modifierlist_skill";
+
+var D2JSP_STATS_MODIFIERLIST_LEVEL = 351;
+    D2JSP_STATS_NAMES[351] = "modifierlist_level";
+
+var D2JSP_STATS_LAST_SENT_HP_PCT = 352;
+    D2JSP_STATS_NAMES[352] = "last_sent_hp_pct";
+
+var D2JSP_STATS_SOURCE_UNIT_TYPE = 353;
+    D2JSP_STATS_NAMES[353] = "source_unit_type";
+
+var D2JSP_STATS_SOURCE_UNIT_ID = 354;
+    D2JSP_STATS_NAMES[354] = "source_unit_id";
+
+var D2JSP_STATS_SHORTPARAM1 = 355;
+    D2JSP_STATS_NAMES[355] = "shortparam1";
+
+var D2JSP_STATS_QUESTITEMDIFFICULTY = 356;
+    D2JSP_STATS_NAMES[356] = "questitemdifficulty";
+
+var D2JSP_STATS_PASSIVE_MAG_MASTERY = 357;
+    D2JSP_STATS_NAMES[357] = "passive_mag_mastery";
+
+var D2JSP_STATS_PASSIVE_MAG_PIERCE = 358;
+    D2JSP_STATS_NAMES[358] = "passive_mag_pierce";
+

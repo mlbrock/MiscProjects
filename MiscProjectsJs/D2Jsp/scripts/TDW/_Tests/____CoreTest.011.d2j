@@ -1,0 +1,135 @@
+/*
+	___CoreTest.010.d2j
+
+	Symptoms    :
+
+		Incorrect values for fname and suffix with items without suffices
+
+		To test, buy an one item with only a suffix and one item with only a
+		prefix from a vendor. Then run this script.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			28 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+var D2JSP_UTIL_COLOR_RED    = "ÿc1";
+
+includeonce("TDW/TDW_Move.d2l");
+
+function main()
+{
+	var log_name   = "output\\____CoreTest.011.d2j.log";
+	var log_handle = null;
+	var npc_obj;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready");
+
+while (true) {
+	if (me.area != 1)
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+
+	if (me.act == 1) {
+		npc_obj = NPC_Interact("Warriv");
+		npc_obj.useMenu(0x0D36);
+		for (count_1 = 0; count_1 < (5000 / 50); count_1++) {
+			if (me.act == 2)
+				break;
+			delay(50);
+		}
+		if (me.act != 2)
+			FatalError("Not in act 2.");
+	}
+
+	if (me.act == 2) {
+		npc_obj = NPC_Interact("Meshif");
+		npc_obj.useMenu(0x0D38);
+		for (count_1 = 0; count_1 < (5000 / 50); count_1++) {
+			if (me.act == 3)
+				break;
+			delay(50);
+		}
+		if (me.act != 3)
+			FatalError("Not in act 3.");
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+		TDW_MOVE_COMPAT_TownMove(1, "stash");
+	}
+}
+
+/*
+	if (me.act == 3) {
+		npc_obj = NPC_Interact("Meshif");
+		npc_obj.useMenu(0x0D39);
+		for (count_1 = 0; count_1 < (5000 / 50); count_1++) {
+			if (me.act == 2)
+				break;
+			delay(50);
+		}
+		if (me.act != 2)
+			FatalError("Not in act 2.");
+		npc_obj = NPC_Interact("Warriv");
+		npc_obj.useMenu(0x0D37);
+		for (count_1 = 0; count_1 < (5000 / 50); count_1++) {
+			if (me.act == 1)
+				break;
+			delay(50);
+		}
+		if (me.act != 1)
+			FatalError("Not in act 1.");
+	}
+*/
+
+	print("Script ending");
+}
+
+function NPC_Interact(npc_name)
+{
+	var npc_obj;
+
+	npc_obj = getUnit(1, npc_name);
+
+	if ((npc_obj == null) || (Dist(me.x, me.y, npc_obj.x, npc_obj.y) > 20))
+		TDW_MOVE_COMPAT_TownMove(npc_name);
+
+	npc_obj = getUnit(1, npc_name);
+
+	if (!npc_obj)
+		FatalError("Unable to locate " + npc_name + ".");
+
+	for (count_1 = 0; count_1 < 100; count_1++) {
+		me.move(npc_obj.x, npc_obj.y);
+		delay(100);
+		if (Dist(me.x, me.y, npc_obj.x, npc_obj.y) < 5)
+			break;
+	}
+
+	npc_obj.interact();
+
+	for (count_1 = 0; count_1 < (5000 / 50); count_1++) {
+		if (getUIFlag(8))
+			break;
+		delay(50);
+	}
+	if (!getUIFlag(8))
+		FatalError("Not in interaction with " + npc_name + ".");
+
+	return(npc_obj);
+}
+
+function FatalError(error_text)
+{
+	print(D2JSP_UTIL_COLOR_RED + "FATAL ERROR: " + error_text);
+
+	stop();
+}
+
+// Syadasti's d2jsp function library
+// Copyright (c) 2002 by Mike Gogulski
+function Dist2(x1, y1, x2, y2) {
+	return Math.floor((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)); }
+
+function Dist(x1, y1, x2, y2) {
+	return Math.floor(Math.sqrt(Dist2(x1, y1, x2, y2))); }
+
+

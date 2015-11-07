@@ -1,0 +1,83 @@
+/*
+	___CoreTest.013.d2j
+
+		Test protocol for the new 29 core UI Flags.
+
+*/
+var EM_UIList = [
+	[ 0x00, "0x00" ],
+	[ 0x01, "inv" ],
+	[ 0x02, "char" ],
+	[ 0x03, "quick skill" ],
+	[ 0x04, "skill" ],
+	[ 0x05, "chat" ],
+	[ 0x06, "0x06=?Game load started?" ],
+	[ 0x07, "0x07=?Realm mode game ready/Right-click A2 Book of Skill" ],
+	[ 0x08, "npc menu" ],
+	[ 0x09, "menu?" ],
+	[ 0x0a, "automap" ],
+	[ 0x0b, "config controls" ],
+	[ 0x0c, "shop" ],
+	[ 0x0d, "alt show items" ],
+	[ 0x0e, "cash/Add sockets screen/Imbue screen/Personalize screen/Horadic Orifice Screen" ],
+	[ 0x0f, "quest" ],
+	[ 0x10, "0x10=Right-click Scroll of Inifuss" ],
+	[ 0x11, "questlog button" ],
+	[ 0x12, "status area" ],
+	[ 0x13, "?=0x13=?Single player mode game ready?" ],
+	[ 0x14, "waypoint" ],
+	[ 0x15, "mini panel" ],
+	[ 0x16, "party" ],
+	[ 0x17, "?=Player trade request" ],
+	[ 0x18, "msgs" ],
+	[ 0x19, "stash" ],
+	[ 0x1a, "cube" ],
+	[ 0x1b, "0x1b" ],
+	[ 0x1c, "0x1c" ],
+	[ 0x1d, "0x1d" ],
+	[ 0x1e, "0x1e" ],
+	[ 0x1f, "belt" ],
+	[ 0x20, "0x20" ],
+	[ 0x21, "help" ],
+	[ 0x22, "0x22=?Game loading?" ],
+	[ 0x23, "0x23" ],
+	[ 0x24, "merc screen" ],
+	[ 0x25, "scroll of whatever" ],
+	[ 0x26, "0x26" ],
+	[ 0x27, "0x27" ],
+	[ 0x28, "0x28" ],
+	[ 0x29, "0x29" ],
+	[ 0x2a, "0x2a" ],
+	[ 0x2b, "0x2b" ],
+	[ 0x2c, "0x2c" ],
+	[ 0x2d, "0x2d" ],
+	[ 0x2e, "0x2e" ],
+	[ 0x2f, "0x2f" ],
+	[ 0x30, "0x30" ],
+];
+
+function main()
+{
+   var value_list = new Array(EM_UIList.length);
+	var count_1;
+
+	for (count_1 = 0; count_1 < value_list.length; count_1++)
+		value_list[count_1] = getUIFlag(EM_UIList[count_1][0]);
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+
+	while (true) {
+		for (count_1 = 0; count_1 < value_list.length; count_1++) {
+			if (value_list[count_1] != getUIFlag(EM_UIList[count_1][0])) {
+				print(EM_UIList[count_1][1] + ": was " + value_list[count_1] +
+					", now " + getUIFlag(EM_UIList[count_1][0]));
+				value_list[count_1] = getUIFlag(EM_UIList[count_1][0]);
+			}
+		}
+		me.overhead("Ready for UI test");
+		delay(500);
+	}
+}
+
+

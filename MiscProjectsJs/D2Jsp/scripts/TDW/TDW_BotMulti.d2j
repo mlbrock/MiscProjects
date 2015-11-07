@@ -1,0 +1,135 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotLib.d2l");
+include("TDW/TDW_BotPindleskin.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["teleport.step.size"]          = 15;
+TDW_BOT_ConfigureList["teleport.step.size.max"]      = 120;
+
+if (parseFloat(me.version) < 0.3518) {
+	TDW_BOT_ConfigureList["tdw.bot.multi.npc.list"]      = [
+		"Dac",
+		"Shenk",
+		"Eldritch",
+		"Thresh",
+		"Eyeback",
+		"Snapchip",
+		"Bonesaw",
+		"Pindleskin"
+	];
+}
+else {
+	TDW_BOT_ConfigureList["tdw.bot.multi.npc.list"]      = [
+		"Dac",
+		"Shenk",
+		"Eldritch",
+		"Eyeback",
+		"Thresh",
+		"Snapchip",
+		"Bonesaw",
+		"Pindleskin"
+	];
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_MULTIBOT_NPCList        = new Array();
+var TDW_MULTIBOT_PindleskinFlag = false;
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	TDW_MULTIBOT_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_MULTIBOT_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_BotMulti", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_MULTIBOT_NPCList        = new Array();
+	TDW_MULTIBOT_PindleskinFlag = false;
+	for (var count_1 = 0;
+		count_1 < TDW_BOT_ContextList["tdw.bot.multi.npc.list"].length;
+		count_1++) {
+		var this_npc = TDW_PATHL_EnemyList[
+			TDW_BOT_ContextList["tdw.bot.multi.npc.list"][count_1]];
+		if (this_npc) {
+			if (this_npc.npc_name == "Pindleskin")
+				TDW_MULTIBOT_PindleskinFlag = true;
+			else
+				TDW_MULTIBOT_NPCList.push(this_npc.npc_name);
+			TDW_BOT_Log.logInfo("Will attempt to kill " + this_npc.npc_name + ".");
+		}
+		else
+			TDW_BOT_Log.logWarning("NPC " + this_npc.npc_name + " not found in " +
+				"master list of NPC enemies --- ignored.");
+	}
+
+	if ((!(return_code = TDW_BOT_ATTACK_GenericNPCs(TDW_MULTIBOT_NPCList,
+		null, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT, true))) &&
+/*
+		null, TDW_PATHL_AREA_LOAD_FLAG_BASIC |
+		TDW_PATHL_AREA_LOAD_FLAG_COLL_DATA_COMPLEX |
+		TDW_PATHL_AREA_LOAD_FLAG_PATHING_DATA, true))) &&
+*/
+		TDW_MULTIBOT_PindleskinFlag) {
+		npc_spec = new TDW_BOT_ATTACK_SpecialNPC("Pindleskin",
+			TDW_BOT_ATTACK_NPC_FLAG_NO_INIT_MOVE | TDW_BOT_ATTACK_NPC_FLAG_NO_MOVE |
+			TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN, 100, 10, 20,
+			null, TDW_BOT_PB_PindleKill_AttackFunc, null, TDW_BOT_FinalComplete);
+		TDW_BOT_MOVE_RecoverInTown(false);
+		TDW_BOT_PB_PindleKill(npc_spec);
+	}
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

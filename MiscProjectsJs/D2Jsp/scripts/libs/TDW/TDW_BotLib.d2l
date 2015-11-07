@@ -1,0 +1,601 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Bot Lib Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BotLib.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Specialized bot library.
+//
+// Revison History : 2003-09-02 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_BotLib_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_BotLib_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BOTLIB_PresetUnitType_Good  = new Array();
+var TDW_BOTLIB_PresetUnitType_Bad   = new Array();
+var TDW_BOTLIB_PresetUnitType_Avoid = new Array();
+
+for (var count_1 = 0; count_1 < D2JSP_COMM_DoorClassIdList.length; count_1++)
+	TDW_BOTLIB_PresetUnitType_Good[D2JSP_UTIL_GETUNIT_OBJECT + "|" +
+		D2JSP_COMM_DoorClassIdList[count_1]] = true;
+
+TDW_BOTLIB_PresetUnitType_Avoid[D2JSP_UTIL_GETUNIT_OBJECT + "|" + 160];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BOTLIB_CLEARAREA_FLAG_NONE           = 0x0000;
+var TDW_BOTLIB_CLEARAREA_FLAG_NO_KILL        = 0x0001;
+var TDW_BOTLIB_CLEARAREA_FLAG_NO_ROOMS       = 0x0002;
+var TDW_BOTLIB_CLEARAREA_FLAG_ROOM_COLL_CHK  = 0x0004;
+var TDW_BOTLIB_CLEARAREA_FLAG_NO_SPECIAL_NPC = 0x0008;
+var TDW_BOTLIB_CLEARAREA_FLAG_MASK           =
+	TDW_BOTLIB_CLEARAREA_FLAG_NO_KILL       |
+	TDW_BOTLIB_CLEARAREA_FLAG_NO_ROOMS      |
+	TDW_BOTLIB_CLEARAREA_FLAG_ROOM_COLL_CHK |
+	TDW_BOTLIB_CLEARAREA_FLAG_NO_SPECIAL_NPC;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOTLIB_ClearArea(area_list, access_strategy, flags, load_flags)
+{
+	var return_code         = 0;
+	var access_strategy_old = access_strategy;
+	var action_flags;
+	var move_control;
+	var tmp_attack_spec;
+
+	action_flags = ((flags & TDW_BOTLIB_CLEARAREA_FLAG_NO_KILL) ?
+		TDW_BOT_SUPP_TP2DEST_FLAG_NONE : TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL) |
+		TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF |
+		TDW_BOT_SUPP_TP2DEST_FLAG_OPEN_DOORS |
+		TDW_BOT_SUPP_TP2DEST_FLAG_AVOID_NPCS_FINAL;
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	if (D2JSP_UTIL_GEN_TypeOfArray(area_list) && area_list.length) {
+		for (var count_1 = 0; count_1 < area_list.length; ) {
+			var this_area = (D2JSP_UTIL_GEN_TypeOfString(area_list[count_1])) ?
+				parseInt(area_list[count_1], 10) : area_list[count_1];
+			if ((this_area != null) && (!D2JSP_AREA_IsValidInGame(this_area))) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Invalid destination area specified (" +
+					area_list[count_1] + ") --- ignored.");
+				area_list.splice(count_1, 1);
+			}
+			else if (D2JSP_AREA_IsTown(this_area)) {
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_ERROR, "Destination area specified for " +
+					"clearance (area number " + this_area + " = " +
+					D2JSP_AREA_AreaToName(this_area) + " is a town --- ignored.");
+				area_list.splice(count_1, 1);
+			}
+			else
+				count_1++;
+		}
+	}
+
+	if ((!D2JSP_UTIL_GEN_TypeOfArray(area_list)) || (!area_list.length)) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"No valid destination area(s) specified in which to clear monsters!!!");
+		return(-1);
+	}
+
+	move_control = new TDW_BOT_ATTACK_MoveControl(action_flags);
+
+	move_control.no_change_max  = 3;
+	move_control.threat_avoid_spec                 = new TDW_THREAT_MoveSpec(0, 8);
+	access_strategy.move_control.threat_avoid_spec = move_control.threat_avoid_spec;
+
+	tmp_attack_spec       = TDW_BOT_AttackNPCSpec;
+	TDW_BOT_AttackNPCSpec = new TDW_BOT_ATTACK_SpecialNPCSpec();
+
+	var pass_name_1 = "Clearing area";
+
+	for (var count_1 = 0; count_1 < area_list.length; count_1++) {
+		var this_area = area_list[count_1];
+		access_strategy.action_flags = TDW_BOT_SUPP_TP2DEST_FLAG_NONE;
+		access_strategy.move_control = null;
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_STATUS,
+			"Target area is number " + this_area +
+			" (" + D2JSP_AREA_AreaToName(this_area) + ").");
+		if ((!(flags & TDW_BOTLIB_CLEARAREA_FLAG_NO_SPECIAL_NPC)) &&
+			(!(flags & TDW_BOTLIB_CLEARAREA_FLAG_NO_KILL))) {
+			var npc_list = TDW_PATHL_GetEnemyListForArea(this_area);
+			for (var count_2 = 0; count_2 < npc_list.length; count_2++) {
+				var this_npc = npc_list[count_2];
+				if (TDW_BOT_AttackNPCSpecData.findNPC(this_npc.npc_name))
+					TDW_BOT_AttackNPCSpec.addNPC(D2JSP_UTIL_GEN_CloneObject(
+						TDW_BOT_AttackNPCSpecData.findNPC(this_npc.npc_name)));
+				else
+					TDW_BOT_AttackNPCSpec.addNPC(
+						new TDW_BOT_ATTACK_SpecialNPC(this_npc.npc_name,
+						TDW_BOT_ATTACK_NPC_FLAG_NONE, 0, 0, 0));
+			}
+		}
+		if (me.act != D2JSP_AREA_GetAct(this_area))
+			TDW_BOT_MOVE_GotoActTownForArea(this_area);
+		TDW_BOT_CHECK_PrecastChecks(30000);
+		if (TDW_PATH_GotoTargetArea(this_area, access_strategy, load_flags))
+			continue;
+		TDW_BOT_CHECK_PrecastChecks(30000);
+		D2JSP_UTIL_BNET_OverheadSafe(pass_name_1 + ": 0%");
+		access_strategy.action_flags = action_flags;
+		access_strategy.move_control = move_control;
+		TDW_BOT_MOVE_DoArrival(action_flags, null, move_control);
+		D2JSP_UTIL_BNET_OverheadSafe(pass_name_1 + ": 0%");
+		TDW_PATH_CreateArea(me.area);
+		var preset_list = (flags & TDW_BOTLIB_CLEARAREA_FLAG_NO_ROOMS) ?
+			TDW_PATH_GetPresetList() : TDW_PATH_GetAreaCoverageList();
+		D2JSP_UTIL_BNET_OverheadSafe(pass_name_1 + ": 0%");
+		preset_list = TDW_PATH_ProgressivePathSortPresetUnit(preset_list);
+		var start_preset_count = preset_list.length;
+		while (preset_list.length) {
+//			TDW_BOT_MOVE_DoDeparture(action_flags, null, move_control);
+			D2JSP_UTIL_BNET_OverheadSafe(pass_name_1 + ": " +
+				(((start_preset_count - preset_list.length) / start_preset_count) *
+				100).toFixed(0) + "%");
+			if (ISF_LastChestPopUndoneCount) {
+				TDW_BOT_SUPP_PopNearbyChests(null, null, null, 999);
+				TDW_BOT_SUPP_DoPickup();
+				TDW_BOT_CHECK_DoChecks();
+			}
+			var next_coord = null;
+//			runGC();
+			while (preset_list.length) {
+				var next_preset = TDW_PATH_PopNearestCoordPresetUnit(preset_list);
+//var next_preset = preset_list.shift();
+				var preset_key  = next_preset.type + "|" + next_preset.id;
+				if (next_preset.type == -1) {
+					if ((!next_preset.other.is_excluded) &&
+						next_preset.other.is_pathable) {
+						next_coord = (flags & TDW_BOTLIB_CLEARAREA_FLAG_ROOM_COLL_CHK) ?
+							next_preset.other.getCenterAccessible() :
+							next_preset.other.getCenter();
+						if (next_coord &&
+							(myDist(next_coord[0], next_coord[1]) <= 15))
+							next_coord = null;
+					}
+				}
+				else {
+					var preset_room = TDW_PATH_FindRoomByXY(next_preset.area_x,
+						next_preset.area_y);
+					if ((!preset_room) || preset_room.is_excluded ||
+						(!preset_room.is_pathable))
+						;
+					else if (preset_key in TDW_BOTLIB_PresetUnitType_Good)
+						next_coord = [next_preset.area_x, next_preset.area_y];
+					else if (myDist(next_preset.area_x, next_preset.area_y) > 15) {
+						if (preset_key in TDW_BOTLIB_PresetUnitType_Avoid) {
+							do {
+								next_coord = [next_preset.area_x + rnd(-1, 1),
+									next_preset.area_y + rnd(-1, 1)];
+							} while ((next_preset.area_x == next_coord[0]) &&
+								(next_preset.area_y == next_coord[1]));
+						}
+						else if (!(preset_key in TDW_BOTLIB_PresetUnitType_Bad))
+							next_coord = [next_preset.area_x, next_preset.area_y];
+					}
+				}
+				if (next_coord)
+					break;
+			}
+			if (next_coord) {
+				var next_coord_orig = [next_coord[0], next_coord[1]];
+/*
+if (TDW_BOT_TestFlagNPCAvoid_2) {
+				if (myDist(next_coord[0], next_coord[1]) <= 50) {
+					var best_cell = TDW_THREAT_FindSafestSpot(next_coord,
+						move_control.threat_avoid_spec, TDW_THREAT_AVOID_FLAG_CENTER_IS_ATTACKABLE);
+					if (best_cell)
+						next_coord = [best_cell.x, best_cell.y];
+				}
+}
+*/
+				if (access_strategy.gotoXYPair(next_coord)) {
+					return_code = -1;
+//					break;
+				}
+/*
+if (TDW_BOT_TestFlagNPCAvoid_2) {
+				var best_cell = TDW_THREAT_FindSafestSpot(null,
+					move_control.threat_avoid_spec, TDW_THREAT_AVOID_FLAG_CENTER_IS_ATTACKABLE);
+				if (best_cell) {
+					if (access_strategy.gotoXYPairLocal([best_cell.x, best_cell.y],
+						TDW_BOT_SUPP_TP2DEST_FLAG_NO_AVOID_NPCS)) {
+						return_code = -1;
+//						break;
+					}
+				}
+}
+*/
+			}
+			D2JSP_UTIL_BNET_OverheadSafe(pass_name_1 + ": " +
+				(((start_preset_count - preset_list.length) / start_preset_count) *
+				100).toFixed(0) + "%");
+//			TDW_BOT_MOVE_DoArrival(action_flags, null, move_control);
+/*
+if (TDW_BOT_TestFlagNPCAvoid_2) {
+//			if (Dist(next_coord_orig[0], next_coord_orig[1], next_coord[0],
+//				next_coord[1]) > 5) {
+			if (myDist(next_coord_orig[0], next_coord_orig[1]) > 5) {
+	print(D2JSP_UTIL_COLOR_GOLD2 + "***** ORIGINAL COORD START: [" +
+		next_coord_orig + "] *****");
+				if (access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_GOTO_XYPAIR_LOCAL, next_coord_orig))
+					return_code = -1;
+	print(D2JSP_UTIL_COLOR_GOLD2 + "***** ORIGINAL COORD END  : [" +
+		next_coord_orig + "] *****");
+			}
+}
+*/
+			D2JSP_UTIL_BNET_OverheadSafe(pass_name_1 + ": " +
+				(((start_preset_count - preset_list.length) / start_preset_count) *
+				100).toFixed(0) + "%");
+			delay(10);
+//			runGC();
+			delay(10);
+		}
+		TDW_BOT_MOVE_DoDeparture(action_flags, null, move_control);
+		D2JSP_UTIL_BNET_OverheadSafe(pass_name_1 + ": 100%");
+		if (ISF_LastChestPopUndoneCount) {
+			TDW_BOT_SUPP_PopNearbyChests(null, null, null, 999);
+			TDW_BOT_SUPP_DoPickup();
+			TDW_BOT_CHECK_DoChecks();
+		}
+		D2JSP_UTIL_BNET_OverheadSafe("");
+	}
+
+	TDW_BOT_AttackNPCSpec = tmp_attack_spec;
+
+	access_strategy = access_strategy_old;
+
+	return(return_code);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_NONE				= 0x0000;
+var TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_CLEAR_TARGET	= 0x0001;
+var TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_END_TARGET		= 0x0002;
+var TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_ADJACENT_1		= 0x0004;
+var TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_DEPTH_2			= 0x0080;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_ClearRoomsNearbyByRoomNumber(dst_area, room_number, clear_flags,
+	access_strategy, clear_start_msg, clear_end_msg)
+{
+	if (TDW_BOT_ClearRoomsNearbyCheckArea(dst_area, access_strategy))
+		return(-1);
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	if (!D2JSP_UTIL_GEN_TypeOfNumber(room_number)) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"The specified room number parameter (" + room_number +
+			"is not a valid number.");
+		return(-1);
+	}
+
+	// Get the necessary room information for area...
+	TDW_PATH_CreateArea(dst_area);
+
+	// Use a reference to the area data for ease...
+	var area_ref     = TDW_PATH_MapGlobal.area_list[dst_area];
+
+	// Determine the target room using the specified coordinates...
+	var target_room  = area_ref.findRoomByNumberList(room_number);
+	if (!target_room.length) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"The specified room number ([" + room_number +
+			"]) is not within area number " + dst_area + " (" +
+			D2JSP_AREA_AreaToName(dst_area) + ").");
+		return(-1);
+	}
+	else if (target_room.length != 1) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"The specified room number ([" + room_number +
+			"]) occurs more that once within area number " + dst_area + " (" +
+			D2JSP_AREA_AreaToName(dst_area) + ").");
+		return(-1);
+	}
+
+	var target_room_center = target_room[0].getCenterAccessible();
+	if (!target_room_center) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"The specified room  ([" + room_number +
+			"]) does not have an accessible center.");
+		return(-1);
+	}
+
+	return(TDW_BOT_ClearRoomsNearby(dst_area, target_room_center, clear_flags,
+		access_strategy, clear_start_msg, clear_end_msg));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_ClearRoomsNearby(dst_area, central_coord, clear_flags,
+	access_strategy, clear_start_msg, clear_end_msg)
+{
+	if (TDW_BOT_ClearRoomsNearbyCheckArea(dst_area, access_strategy))
+		return(-1);
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	if (!D2JSP_UTIL_GEN_TypeOfCoord(central_coord)) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"The specified central coordinate parameter (" + central_coord +
+			"is not a valid coordinate.");
+		return(-1);
+	}
+
+	// Get the necessary room information for area...
+	TDW_PATH_CreateArea(dst_area);
+
+	// Use a reference to the area data for ease...
+	var area_ref     = TDW_PATH_MapGlobal.area_list[dst_area];
+
+	// Determine the target room using the specified coordinates...
+	var target_room  = area_ref.findRoomByXYPair(central_coord);
+	if (!target_room) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"The specified central coordinate parameter ([" + central_coord +
+			"]) is not within area number " + dst_area + " (" +
+			D2JSP_AREA_AreaToName(dst_area) + ").");
+		return(-1);
+	}
+
+	var target_room_center = target_room.getCenterAccessible();
+	if (!target_room_center) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"The specified central coordinate parameter ([" + central_coord +
+			"]) does not have an accessible center.");
+		return(-1);
+	}
+
+	// Get the list of rooms immediately adjacent to the target room...
+	var near_rooms_0 = area_ref.getAdjacentRoomsByXYPair(central_coord);
+	if (!near_rooms_0.length) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"Unable to locate rooms adjacent to the specified central " +
+			"coordinate ([" + central_coord + "]).");
+		return(-1);
+	}
+
+	// It may be that only one room adjacent to the target was specified to be
+	// cleared. In this case, we find an adjacent room which has an accessible
+	// center and use that room...
+	if (clear_flags & TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_ADJACENT_1) {
+		for (var count_1 = 0; count_1 < near_rooms_0.length; count_1++) {
+			var this_room = near_rooms_0[count_1];
+			var this_spot = this_room.getCenterAccessible();
+			if (this_spot) {
+				near_rooms_0 = [near_rooms_0[count_1]];
+				break;
+			}
+		}
+	}
+
+	// Of the rooms immediately adjacent to the target rooms, add those which
+	//	have a center accessible to the list of rooms to be cleared. Also get
+	// rooms which are adjacent to them, so they can be processed in turn
+	// (if clearance to depth 2 is specified)...
+	var base_coords  = null;
+	var near_rooms_1 = new Array();
+	var room_hash    = new Array();
+	var clear_list   = new Array();
+	room_hash[target_room.x_1 + "|" + target_room.y_1] = true;
+	for (var count_1 = 0; count_1 < near_rooms_0.length; count_1++) {
+		var this_room = near_rooms_0[count_1];
+		var this_spot = this_room.getCenterAccessible();
+		if (this_spot) {
+			clear_list.push([this_room, this_spot]);
+			room_hash[this_room.x_1 + "|" + this_room.y_1] = true;
+			near_rooms_1 = near_rooms_1.concat(area_ref.getAdjacentRoomsByXY(
+				this_room.x_1, this_room.y_1));
+			if (!base_coords)
+				base_coords = this_spot;
+		}
+	}
+
+	// If the clearance to depth 2 is specified, add rooms adjacent to the
+	//	first set of rooms to the list of rooms to be cleared.
+	//	Note that we use 'unshift()' to add these additional rooms to the
+	// array so that they will be cleared first. This is because they are
+	// further away from the target room...
+	if (clear_flags & TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_DEPTH_2) {
+		for (var count_1 = 0; count_1 < near_rooms_1.length; count_1++) {
+			var this_room = near_rooms_1[count_1];
+			var this_key  = this_room.x_1 + "|" + this_room.y_1;
+			if (!(this_key in room_hash)) {
+				var this_spot = this_room.getCenterAccessible();
+				if (this_spot) {
+					clear_list.unshift([this_room, this_spot]);
+					room_hash[this_room.x_1 + "|" + this_room.y_1] = true;
+					if (!base_coords)
+						base_coords = this_spot;
+				}
+			}
+		}
+	}
+
+	// If the target room is also to be cleared, we add it as the last room
+	//	to be cleared.
+	if (clear_flags & TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_CLEAR_TARGET)
+		clear_list.push([target_room, target_room_center]);
+
+	// Finally, prepare the area Dijkstra map information for pathing...
+	TDW_PATH_BuildMap(dst_area);
+
+	TDW_BOT_CHECK_PrecastChecks();
+
+	var move_control =
+		TDW_BOT_ATTACK_MoveControl(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL);
+
+	// Go to the specified area...
+	if (TDW_PATH_GotoTargetArea(dst_area, access_strategy,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT))
+		return(-1);
+
+	// Go to the first room to be cleared...
+	TDW_BOT_MOVE_GotoXYPair(clear_list[0][1], TDW_PATH_MAP_BUILD_FLAG_NONE);
+
+	if (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(clear_start_msg))
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_STATUS,
+			clear_start_msg);
+
+	// Clear the list of rooms...
+	var npc_flag_1;
+	do {
+		npc_flag_1 = false;
+		for (var count_1 = 0; count_1 < clear_list.length; count_1++) {
+			var this_room  = clear_list[count_1][0];
+			var this_coord = clear_list[count_1][1];
+			TDW_BOT_MOVE_GotoXYPair(this_coord, TDW_PATH_MAP_BUILD_FLAG_NONE,
+				move_control);
+			TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL, null,
+				move_control);
+			TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL, null,
+				move_control);
+			var npc_flag_2;
+			do {
+				var npc_obj  = getUnit(D2JSP_UTIL_GETUNIT_NPC, null,
+					D2JSP_MODE_FLAG_INDICATOR | D2JSP_MODE_NPC_FLAGS_ALL_BUT_DEAD);
+				npc_flag_2 = false;
+				if (npc_obj) {
+					do {
+						if (D2JSP_NPC_ShouldAttackEnemy(npc_obj) &&
+							(npc_obj.x >= this_room.x_1) &&
+							(npc_obj.x <= this_room.x_2) &&
+							(npc_obj.x >= this_room.x_1) &&
+							(npc_obj.y >= this_room.y_1) &&
+							(npc_obj.y <= this_room.y_2)) {
+							TDW_BOT_MOVE_GotoXYPair([npc_obj.x, npc_obj.y],
+								TDW_PATH_MAP_BUILD_FLAG_NONE, move_control);
+							TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL,
+								null, move_control);
+							TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL,
+							null, move_control);
+//							TDW_BOT_MOVE_GotoXYPair(this_coord,
+//								TDW_PATH_MAP_BUILD_FLAG_NONE);
+							npc_flag_1 = true;
+							npc_flag_2 = true;
+							break;
+						}
+					} while (npc_obj && npc_obj.getNext(null,
+						D2JSP_MODE_FLAG_INDICATOR | D2JSP_MODE_NPC_FLAGS_ALL_BUT_DEAD));
+				}
+			} while (npc_flag_2);
+		}
+	} while (npc_flag_1);
+
+	// Go to the final location...
+	var last_coord = (clear_flags & TDW_BOT_CLEAR_ROOMS_NEARBY_FLAG_END_TARGET) ?
+		target_room_center : base_coords;
+	TDW_BOT_MOVE_GotoXYPair(last_coord, TDW_PATH_MAP_BUILD_FLAG_NONE);
+
+	// Do a final check to ensure there aren't any enemies around...
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL, last_coord,
+			move_control);
+		TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL, last_coord,
+			move_control);
+		delay(100);
+	}
+
+	if (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(clear_end_msg))
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_STATUS,
+			clear_end_msg);
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_ClearRoomsNearbyCheckArea(dst_area, access_strategy)
+{
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	if (!D2JSP_AREA_IsValidInGame(dst_area)) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"Invalid destination area specified (" + dst_area + ").");
+		return(-1);
+	}
+	else if (D2JSP_AREA_IsTown(dst_area)) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"Destination area specified (" + dst_area + ") is a town --- ignored.");
+		return(-1);
+	}
+	else if (me.act != D2JSP_AREA_GetAct(dst_area)) {
+		access_strategy.callback_func(access_strategy, TDW_PATH_ASCB_MSG_ERROR,
+			"Destination area specified (" + dst_area + ") is in Act " +
+			D2JSP_AREA_GetAct(dst_area) + ", but you are in Act " + me.act +
+			" --- analysis cannot be performed.");
+		return(-1);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_BotLib_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var count_2;
+	var file_name = "output/RegressionTest.TDW_BotLib.d2l.txt";
+	var file_handle;
+
+	print("Writing 'TDW_BotLib.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

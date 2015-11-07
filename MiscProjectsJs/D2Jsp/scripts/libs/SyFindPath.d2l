@@ -1,0 +1,182 @@
+//----------------------------------------------------------------------------
+//
+// Syadasti's super-duper path finder
+//
+// version 0.1
+// 
+// Copyright (c) 2002 by Mike Gogulski
+//
+//----------------------------------------------------------------------------
+
+//
+// The only functions here that you need are Sy_FindPath() and Sy_BuildMap()
+//
+
+// constructor for Sy_Point object
+function Sy_Point() {
+	this.x = 0;
+	this.y = 0;
+	this.number = 0; }
+
+function Sy_FindPath(targetx, targety, maxsep) {
+//
+// PARAMETER: targetx = stairs down X
+// PARAMETER: targety = stairs down Y
+// PARAMETER: maxsep = max separation between vertices, divided by sqrt(2)
+// RETURNS: an array of Sy_Point objects containing the path
+//
+	dprint("Sy_FindPath(0x" + targetx.toString(16) + ", 0x" + targety.toString(16) + ", " + maxsep + ")");
+	var v = new Array;
+	for (_ii = 0; _ii <_Sy_Path_Max; _ii++) {
+		v[_ii] = new Vertex(); }
+	
+	_Points[0].x = me.x;
+	_Points[0].y = me.y;
+	_Points[1].x = targetx;
+	_Points[1].y = targety;
+
+	// Create the graph
+	dprint("Sy_FindPath() has " + i_Points + " locations to work with.");
+	
+	for (i = 0; i < i_Points; i++) {
+		for (j = 0; j < i_Points; j++) {
+			if (i != j) {
+				d = Dist2(_Points[i].x, _Points[i].y, _Points[j].x, _Points[j].y);
+				if (d <= 2 * maxsep * maxsep) {
+					//dprint("Arc from " + i + " to " + j);
+					v[i].push(j, Math.sqrt(d)); } } } }
+	
+	//dprint("Calling Sy_Dijkstra()");
+	Sy_Dijkstra(v, i_Points, 0);
+	i_ThingPath = 0;
+	//dprint("Calling CreatePath()");
+	Sy_CreatePath(v, 0, 1);
+	_HopsToThing = i_ThingPath;
+	dprint("Sy_FindPath() built a path with " + _HopsToThing + " hops.");
+	//dprint("Player at (" + me.x.toString(16) + ", " + me.y.toString(16) + ")");
+	//for (k = 0; k < i_ThingPath; k++) {
+	//	dprint("Hop " + k + ": (" + _ThingPath[k][0].toString(16) + ", " + _ThingPath[k][1].toString(16) + ")"); }
+	//dprint("Target at (" + targetx.toString(16) + ", " + targety.toString(16) + ")");
+	return _ThingPath;
+}
+
+
+
+function Sy_BuildMap(lo, hi, offset) {
+//
+// PARAMETER: lo = room number of the first type of room to match
+// PARAMETER: hi = room number of the last type of room to match
+// PARAMETER: offset = number of game coordinates to offset the x/y
+//                     coordinates of room corners to arrive at teleport
+//                     hop target coordinates
+// RETURNS: a Sy_Point object containing the X/Y position of the target room
+//
+	i_Points = 2;
+	var ret = new Sy_Point();
+	room = getRoom();
+	do {
+		if (room) {
+			var seen = false;
+			for (i = 0; i < i_Points; i++) {
+				if (_Points[i].number == room.number) {
+					seen = true; } }
+			if (!seen) {
+				if (room.number >= lo && room.number <= hi) {
+					ret.x = room.x * 5 + offset;
+					ret.y = room.y * 5 + offset;
+				}
+				_Points[i_Points].x = room.x * 5 + offset;
+				_Points[i_Points].y = room.y * 5 + offset;
+				_Points[i_Points].number = room.number;
+				//dprint("Room #" + _Points[i_Points].number + " at 0x" + _Points[i_Points].x.toString(16) + ", 0x" + _Points[i_Points].y.toString(16));
+				i_Points++; } }
+	} while (room && room.getNext());
+	// FIXME: we're not handling error conditions here at all
+	return ret; }
+
+//----------------------------------------------------------------------------
+
+var _Sy_Path_Max = 256;
+var _Points = new Array;
+for (_ii = 0; _ii < _Sy_Path_Max; _ii++) {
+	_Points[_ii] = new Sy_Point(); }
+
+var _ThingPath = new Array;
+for (_ii = 0; _ii < _Sy_Path_Max; _ii++) {
+	_ThingPath[_ii] = new Array; }
+
+var i_Points = 2;		// start at 2 to avoid PLAYER and STAIRS
+var i_ThingPath = 0;
+var _HopsToThing = 0;
+
+// constructor for Vertex objects
+function Vertex() {
+	this.NumAdjacencies = 0;
+	this.Adjacent = new Array;
+	this.AdjacencyWeight = new Array;
+	this.Previous = 0;
+	this.Cost = 0;
+	this.push = PushMethod;
+}
+
+// the Vertex object's sole method
+function PushMethod(neighbor, Cost) {
+	this.Adjacent[this.NumAdjacencies] = neighbor;
+	this.AdjacencyWeight[this.NumAdjacencies] = Cost;
+	this.NumAdjacencies++;
+}
+
+function Sy_Dijkstra(v, size, source) {
+	var _Sy_Path_Max = 256;
+	var _INFINITY = 32767;
+	var Cost = new Array;
+	var done = new Array;
+	var to_do = size;
+
+	for (i = 0; i < size; i++) {
+		v[i].Cost = Cost[i] = _INFINITY;
+		v[i].Previous = -1;
+		done[i] = 0;
+	}
+
+	Cost[source] = 0;
+	while (to_do) {
+
+		for (i = 0; i < size; i++) {
+			if (!done[i]) {
+				iMin=i;
+				break;
+			}
+		}
+
+		for (i = iMin + 1; i < size; i++) {
+			if (!done[i] && Cost[i] < Cost[iMin]) {
+				iMin = i;
+			}
+		}
+
+		done[iMin] = 1;
+		to_do--;
+		for (i = 0; i < v[iMin].NumAdjacencies; i++) {
+			if (Cost[iMin] + v[iMin].AdjacencyWeight[i] < Cost[v[iMin].Adjacent[i]]) {
+				v[v[iMin].Adjacent[i]].Previous = iMin;
+				v[v[iMin].Adjacent[i]].Cost = Cost[v[iMin].Adjacent[i]] =
+					Cost[iMin] + v[iMin].AdjacencyWeight[i];
+			}
+		}
+	}
+}
+
+function Sy_CreatePath(v, source, dest) {
+	if (source == dest) {
+		_ThingPath[i_ThingPath] = [_Points[dest].x, _Points[dest].y];
+		i_ThingPath++; }
+	else {
+		if (v[dest].Previous != -1) {
+			Sy_CreatePath(v, source, v[dest].Previous);
+			_ThingPath[i_ThingPath] = [_Points[dest].x, _Points[dest].y];
+			i_ThingPath++; }
+		else {
+			dprint("ABORT: Unable to build path");
+			delay(1000); quit(); } }
+}

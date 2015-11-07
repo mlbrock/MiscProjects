@@ -1,0 +1,201 @@
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Mephisto Bot Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BotMephisto.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Mephisto Bot Library.
+//
+// Revison History : 2003-04-10 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_BotMephisto_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_BotMephisto_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["tdw.bot.mephisto.red.portal.bounce"] = false;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_MB_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_MB_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_MB_Run();
+
+	TDW_BOT_MB_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_MB_Init(config_list)
+{
+	return(TDW_BOT_Init("TDW_BotMephisto", null, config_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_MB_Run()
+{
+	return(TDW_BOT_MB_KillMephisto());
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_MB_Finish()
+{
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_MB_KillMephisto(access_strategy)
+{
+	var mephisto_dead               = false;
+	var TDW_BOT_MB_RedPortalClassId = 342;
+	var TDW_BOT_MB_RedPortalCoords  = [[17588, 8069], [17602, 8069]];
+	var TDW_BOT_MB_AvoidXMax        = 17583;
+	var TDW_BOT_MB_AvoidYMin        =  8037;
+	var TDW_BOT_MB_AvoidYMax        =  8107;
+	var TDW_BOT_MB_AvoidNPCList     = [
+		"Bremm Sparkfist",
+		"Wyand Voidbringer",
+		"Maffer Dragonhand",
+		"Undead Stygian Doll"
+	];
+	var TDW_BOT_MB_ToMephistoList   = [
+		[17581, 8070],
+		[17563, 8070],
+		[17515, 8063]
+	];
+
+	access_strategy = (access_strategy instanceof TDW_PATH_LinkAccessStrategy) ?
+		access_strategy : TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	TDW_MOVE_COMPAT_TownMove("waypoint");
+
+	if (!TDW_MOVE_WaypointAccessDataDoneFlag) {
+		TDW_MOVE_GetMyWayPointAccess();
+		access_strategy.wp_access =
+			D2JSP_UTIL_GEN_CloneObject(TDW_MOVE_WaypointAccessData);
+	}
+
+	if (!D2JSP_AREA_HasWaypointAccess(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2,
+		access_strategy.wp_access)) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_WARNING, "You don't have the " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2) +
+			" waypoint --- attempting to acquire it...");
+		TDW_BOT_CHECK_PrecastChecks(30000);
+		if (TDW_BOT_WP_AcquireWaypointOneBasic(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2,
+			access_strategy))
+			return(-1);
+	}
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	if (TDW_PATH_GotoTargetArea(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3,
+		access_strategy, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT)) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_WARNING, "Unable to get to area " +
+			D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3 + " (" +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3) + ").");
+		return(-1);
+	}
+
+	if (!TDW_BOT_CHECK_PrecastChecks(30000)) {
+		TDW_BOT_Log.logError("Aborting run because precasts could not be " +
+			"completed.");
+		return(-1);
+	}
+
+	TDW_BOT_MOVE_TeleportToDestination(TDW_BOT_MB_ToMephistoList[0],
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	for (var count_1 = 0; count_1 < TDW_BOT_MB_AvoidNPCList.length; count_1++){
+		var this_npc = getUnit(D2JSP_UTIL_GETUNIT_NPC,
+			TDW_BOT_MB_AvoidNPCList[count_1]);
+		if (this_npc) {
+			do {
+				if ((this_npc.mode != D2JSP_MODE_NPC_DEATH) &&
+					(this_npc.mode != D2JSP_MODE_NPC_DEAD) && this_npc.hp &&
+					(this_npc.x <= TDW_BOT_MB_AvoidXMax) &&
+					(this_npc.y >= TDW_BOT_MB_AvoidYMin) &&
+					(this_npc.y <= TDW_BOT_MB_AvoidYMax))
+					TDW_BOT_CHECK_PerformChicken("NPC " + this_npc.name +
+						" was found on Mephisto's side of the Blood Moat.");
+			} while (this_npc && this_npc.getNext(TDW_BOT_MB_AvoidNPCList[count_1]));
+		}
+	}
+
+	TDW_BOT_AttackNPCSpec.addNPC(new TDW_BOT_ATTACK_SpecialNPC("Mephisto",
+		TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN | TDW_BOT_ATTACK_NPC_FLAG_NO_CLUSTER,
+		(me.diff == 2) ? 1 : 3, 0, 0));
+
+	var action_flags = TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE;
+
+	for (var count_1 = 1; count_1 < TDW_BOT_MB_ToMephistoList.length; count_1++) {
+		TDW_BOT_MOVE_TeleportToDestination(TDW_BOT_MB_ToMephistoList[count_1],
+			action_flags);
+//		TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+//		TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+		delay(100);
+		// If Mephisto died in this loop iteration, teleport back to the
+		//	key spot which makes the red portal accessible. We'll let it open
+		// while we pop chests...
+		if ((!mephisto_dead) && (!TDW_BOT_AttackNPCSpec.findNPC("Mephisto"))) {
+			if (TDW_BOT_ContextList["tdw.bot.mephisto.red.portal.bounce"]) {
+				TDW_BOT_MOVE_TeleportToDestination(TDW_BOT_MB_RedPortalCoords[1],
+					TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+				delay(100);
+			}
+			mephisto_dead = true;
+			action_flags  = TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF;
+		}
+	}
+
+	// If we didn't find Mephisto, look around a bit...
+	if (TDW_BOT_AttackNPCSpec.findNPC("Mephisto")) {
+		for (var count_1 = 0; count_1 < 10; count_1++) {
+			if (!TDW_BOT_AttackNPCSpec.findNPC("Mephisto"))
+				break;
+			TDW_BOT_MOVE_DoArrival(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+				TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+			TDW_BOT_MOVE_DoDeparture(TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_ALL |
+				TDW_BOT_SUPP_TP2DEST_FLAG_PICKUP_ISF);
+			delay(100);
+		}
+	}
+
+	TDW_BOT_MOVE_TeleportToDestinationList(TDW_BOT_MB_RedPortalCoords,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	if (TDW_BOT_AttackNPCSpec.findNPC("Mephisto"))
+		TDW_BOT_Log.logError("Unable to locate Mephisto.");
+
+	TDW_MOVE_LookForAndTakePortal(0, "", 100, 50, true);
+
+	return(0)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_BotMephisto_d2l) == "undefined") {
+

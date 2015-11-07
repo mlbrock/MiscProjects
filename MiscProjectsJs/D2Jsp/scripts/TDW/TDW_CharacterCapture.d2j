@@ -1,0 +1,534 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Area Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BeltManager.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion area constants.
+//
+// Revison History : 2003-01-07 --- Creation.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_BodyLocations.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+includeonce("TDW/TDW_Move.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_CC_FileHandle = null;
+var TDW_CC_WPAccess   = null;
+var TDW_CC_CharStats  = [
+	D2JSP_STAT_STRENGTH,
+	D2JSP_STAT_ENERGY,
+	D2JSP_STAT_DEXTERITY,
+	D2JSP_STAT_VITALITY,
+	D2JSP_STAT_STATPTS,
+	D2JSP_STAT_NEWSKILLS,
+	D2JSP_STAT_HITPOINTS,
+	D2JSP_STAT_MAXHP,
+	D2JSP_STAT_MANA,
+	D2JSP_STAT_MAXMANA,
+	D2JSP_STAT_STAMINA,
+	D2JSP_STAT_MAXSTAMINA,
+	D2JSP_STAT_LEVEL,
+	D2JSP_STAT_EXPERIENCE,
+	D2JSP_STAT_GOLD,
+	D2JSP_STAT_GOLDBANK
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var file_name;
+
+	file_name = "output/TDW_CharacterCapture." + me.realm + "." +
+		me.account + "." + me.name + ".d2i.INPUT.txt";
+
+	if ((TDW_CC_WPAccess = TDW_MOVE_GetMyWayPointAccess()) != null) {
+		if ((TDW_CC_FileHandle = fileOpen(file_name, 1)) != null) {
+			TDW_CC_DoMainData();
+			TDW_CC_DoQuestData();
+			TDW_CC_DoWayPointData();
+			TDW_CC_DoNPCIntrosData();
+			last_offset = TDW_CC_DoCharStatsData();
+			last_offset = TDW_CC_DoSkillsData(last_offset);
+			TDW_CC_FileHandle.close();
+		}
+		else
+			print("Unable to open TDW_CharacterCapture.d2i output file '" +
+				file_name + "' for writing.");
+	}
+	else
+		print("Unable to determine waypoint accessibility.");
+
+	print("Script execution complete.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_DoMainData(creation_date)
+{
+	var merc_obj = D2JSP_NPC_GetMercObj();
+
+	creation_date = (creation_date != null) ? creation_date : (new Date());
+
+	TDW_CC_EmitBlankLine();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitComment("Main section identifier");
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitData("D",  0, 0xAA55AA55);
+	TDW_CC_EmitComment("Diablo II File version 1.09");
+	TDW_CC_EmitData("D",  4, 92);
+	TDW_CC_EmitComment("File size (to be calculated by Perl script)");
+	TDW_CC_EmitData("D",  8, 0);
+	TDW_CC_EmitComment("Check sum (to be calculated by Perl script)");
+	TDW_CC_EmitData("D", 12, 0);
+	TDW_CC_EmitData("D", 16, 0);
+	TDW_CC_EmitComment("Character name");
+	TDW_CC_EmitData("S", 20, D2JSP_UTIL_FORMAT_LJust(me.name, 16, "\0"));
+	TDW_CC_EmitData("B", 36, (me.playertype << 2) | (me.gametype << 5));
+	TDW_CC_EmitData("B", 37, 15);
+	TDW_CC_EmitData("W", 38, 0);
+	TDW_CC_EmitData("B", 40, me.classid);
+	TDW_CC_EmitData("B", 41, 16);
+	TDW_CC_EmitData("B", 42, 30);
+	TDW_CC_EmitComment("Character level");
+	TDW_CC_EmitData("B", 43, me.getStat(D2JSP_STAT_LEVEL));
+	TDW_CC_EmitData("D", 44, 0);
+	TDW_CC_EmitComment("Character capture date/time");
+	TDW_CC_EmitData("D", 48, creation_date.valueOf() / 1000);
+	TDW_CC_EmitData("D", 52, 0);
+	TDW_CC_EmitComment("Skill hotkeys (not implemented)");
+	TDW_CC_EmitData("D", 56, [	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+										0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+										0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+										0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]);
+	TDW_CC_EmitData("D", 120, D2JSP_SKILL_ToSkillNumber(me.getSkill(1)));
+	TDW_CC_EmitData("D", 124, D2JSP_SKILL_ToSkillNumber(me.getSkill(0)));
+	// Need weapon switch here...
+	TDW_CC_EmitData("D", 128, D2JSP_SKILL_ToSkillNumber(me.getSkill(1)));
+	TDW_CC_EmitData("D", 132, D2JSP_SKILL_ToSkillNumber(me.getSkill(0)));
+	// Need weapon switch back to original here...
+	TDW_CC_EmitComment("32 bytes of unknown data...");
+	TDW_CC_EmitFillData("B", 136, 32, 0);
+	TDW_CC_EmitData("B", 168, (me.diff == 0) ? ((me.act - 1) | 0x80) : 1);
+	TDW_CC_EmitData("B", 169, (me.diff == 1) ? ((me.act - 1) | 0x80) : 1);
+	TDW_CC_EmitData("B", 170, (me.diff == 2) ? ((me.act - 1) | 0x80) : 1);
+	TDW_CC_EmitComment("The single-player map identifier (faked here)");
+	TDW_CC_EmitData("D", 171, 0x12345678);
+	TDW_CC_EmitComment("2 bytes of unknown data");
+	TDW_CC_EmitData("W", 175, 0);
+	TDW_CC_EmitComment("2 bytes of uncertain data");
+	TDW_CC_EmitData("W", 177, 0);
+	TDW_CC_EmitComment("Random mercenary id (not yet implemented)");
+	TDW_CC_EmitData("D", 179, 0x12345678);
+	TDW_CC_EmitComment("Mercenary name index (not yet implemented)");
+	TDW_CC_EmitData("W", 183, 0);
+	TDW_CC_EmitComment("Mercenary act/difficulty level info (not yet implemented)");
+	TDW_CC_EmitData("W", 185, 0);
+	TDW_CC_EmitComment("Mercenary experience points");
+	TDW_CC_EmitData("D", 187, (merc_obj) ?
+		merc_obj.getStat(D2JSP_STAT_EXPERIENCE) : 0);
+	TDW_CC_EmitComment("144 bytes of unknown data");
+	TDW_CC_EmitFillData("B", 191, 144, 0);
+
+	TDW_CC_EmitCommentHeader();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_DoQuestData()
+{
+	TDW_CC_EmitBlankLine();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitComment("Quest section identifier");
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitData("S", 335, "Woo!");
+	TDW_CC_EmitComment("6 bytes of unknown data");
+	TDW_CC_EmitData("B", 339, [6, 0, 0, 0, 42, 1]);
+
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		TDW_CC_EmitCommentHeader("-");
+		TDW_CC_EmitComment("Quest data for difficulty " + count_1 + " (" +
+			["Normal", "Nightmare", "Hell"][count_1] + ")");
+		if (count_1 != me.diff)
+			TDW_CC_EmitComment("NOTE: Quest status for this difficulty has " +
+				"been copied from the quest status for " +
+				["Normal", "Nightmare", "Hell"][me.diff]);
+		var quest_words = new Array(48);
+		for (var count_2 = 0; count_2 < quest_words.length; count_2++) {
+			quest_words[count_2] = 0;
+			for (var count_3 = 0; count_3 < 16; count_3++)
+				quest_words[count_2] |= me.getQuest(count_2, count_3);
+		}
+		TDW_CC_EmitData("W", 345 + (count_1 * 96), quest_words);
+	}
+
+	TDW_CC_EmitCommentHeader();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_DoWayPointData()
+{
+	TDW_CC_EmitBlankLine();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitComment("Waypoint section identifier");
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitData("S", 633, "WS");
+	TDW_CC_EmitComment("6 bytes of unknown data");
+	TDW_CC_EmitData("B", 635, [0, 0, 0, 0, 0, 0]);
+
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		TDW_CC_EmitCommentHeader("-");
+		TDW_CC_EmitComment("Waypoint data for difficulty " + count_1 + " (" +
+			["Normal", "Nightmare", "Hell"][count_1] + ")");
+		if (count_1 != me.diff)
+			TDW_CC_EmitComment("NOTE: Waypoint status for this difficulty has " +
+				"been copied from the waypoint status for " +
+				["Normal", "Nightmare", "Hell"][me.diff]);
+		TDW_CC_EmitComment("2 bytes of unknown data");
+		TDW_CC_EmitData("B", 641 + (count_1 * 24), [2, 1]);
+		var wp_bytes = [0, 0, 0, 0, 0];
+		var wp_index = 0;
+		var wp_bit   = 0;
+		for (var count_2 = 0; count_2 < TDW_CC_WPAccess.length; count_2++) {
+			for (var count_3 = 0; count_3 < TDW_CC_WPAccess[count_2].length;
+				count_3++) {
+				if (TDW_CC_WPAccess[count_2][count_3])
+					wp_bytes[wp_index] |= (1 << wp_bit);
+				if (++wp_bit == 8) {
+					wp_index++;
+					wp_bit = 0;
+				}
+			}
+		}
+		TDW_CC_EmitComment("Waypoint bits");
+		TDW_CC_EmitData("B", 641 + (count_1 * 24) + 2, wp_bytes);
+		TDW_CC_EmitComment("17 bytes of unknown data");
+		TDW_CC_EmitFillData("B", 641 + (count_1 * 24) + 2 + 5, 17, 0);
+	}
+
+	TDW_CC_EmitComment("1 byte of unknown data");
+	TDW_CC_EmitData("B", 713, 0);
+
+	TDW_CC_EmitCommentHeader();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_DoNPCIntrosData()
+{
+	TDW_CC_EmitBlankLine();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitComment("NPC Introductions section identifier");
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitData("S", 714, "w4");
+	TDW_CC_EmitComment("1 byte of unknown data");
+	TDW_CC_EmitData("B", 716, 0);
+
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		TDW_CC_EmitCommentHeader("-");
+		TDW_CC_EmitComment("NPC introduction data for difficulty " + count_1 +
+			" (" + ["Normal", "Nightmare", "Hell"][count_1] + ")");
+		TDW_CC_EmitComment("NOTE: All unset because this not yet supported by " +
+			"d2jsp core");
+		TDW_CC_EmitFillData("B", 717 + (count_1 * 8), 5 + 3, 0);
+	}
+
+	for (var count_1 = 0; count_1 < 3; count_1++) {
+		TDW_CC_EmitCommentHeader("-");
+		TDW_CC_EmitComment("NPC welcome back data for difficulty " + count_1 +
+			" (" + ["Normal", "Nightmare", "Hell"][count_1] + ")");
+		TDW_CC_EmitComment("NOTE: All unset because this not yet supported by " +
+			"d2jsp core");
+		TDW_CC_EmitFillData("B", 741 + (count_1 * 8), 4 + 4, 0);
+	}
+
+	TDW_CC_EmitCommentHeader();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_DoCharStatsData()
+{
+	TDW_CC_EmitBlankLine();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitComment("Character statistics section identifier");
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitData("S", 765, "gf");
+
+	var stat_bitfield = 0;
+	for (var count_1 = 0; count_1 < TDW_CC_CharStats.length; count_1++)
+		stat_bitfield |= (me.getStat(TDW_CC_CharStats[count_1])) ?
+			(1 << count_1) : 0;
+	TDW_CC_EmitComment("Character statistics bit-field");
+	TDW_CC_EmitData("W", 767, stat_bitfield);
+
+	var this_offset = 767 + 2;
+	for (var count_1 = 0; count_1 < TDW_CC_CharStats.length; count_1++) {
+		if (me.getStat(TDW_CC_CharStats[count_1])) {
+			TDW_CC_EmitComment("Character statistic: " +
+				D2JSP_STAT_StatToName(TDW_CC_CharStats[count_1]));
+			TDW_CC_EmitData("D", this_offset, me.getStat(TDW_CC_CharStats[count_1]));
+			this_offset += 4;
+		}
+	}
+
+	TDW_CC_EmitCommentHeader();
+
+	return(this_offset);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_DoSkillsData(in_offset)
+{
+	TDW_CC_EmitBlankLine();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitComment("Character skills section identifier");
+	TDW_CC_EmitCommentHeader();
+	TDW_CC_EmitData("S", in_offset, "if");
+
+	this_offset = in_offset + 2;
+
+	for (var count_1 = 0;
+		count_1 < D2JSP_SKILL_ClassSkillOffsets[me.classid].length; count_1++) {
+		var skill_name = D2JSP_SKILL_ToSkillName(
+			D2JSP_SKILL_ClassSkillOffsets[me.classid][count_1]);
+		TDW_CC_EmitComment("Character skill points (" + skill_name + ")");
+		TDW_CC_EmitData("B", this_offset + count_1, me.getSkill(skill_name));
+	}
+
+	TDW_CC_EmitCommentHeader();
+
+	return(this_offset);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_FormatString(in_string)
+{
+	var out_string = "";
+
+	for (var count_1 = 0; count_1 < in_string.length; count_1++) {
+		var char_code = in_string.charCodeAt(count_1);
+		if ((char_code < 32) || (char_code > 127) || (char_code == 34) ||
+			(char_code == 36))
+			out_string += "\\x" + ((char_code < 16) ? "0" : "") +
+				char_code.toString(16);
+		else
+			out_string += in_string.charAt(count_1);
+	}
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_FormatByte(in_data)
+{
+	var out_string = "";
+	var data_list  = TDW_CC_FormatDWordBasic(in_data);
+
+	while (data_list.length)
+		out_string += data_list.shift().substr(6);
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_FormatWord(in_data)
+{
+	var out_string = "";
+	var data_list  = TDW_CC_FormatDWordBasic(in_data);
+
+	while (data_list.length)
+		out_string += data_list.shift().substr(4);
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_FormatDWord(in_data)
+{
+	var out_string = "";
+	var data_list  = TDW_CC_FormatDWordBasic(in_data);
+
+	while (data_list.length)
+		out_string += data_list.shift();
+
+	return(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_FormatDWordBasic(in_data)
+{
+	var out_data = new Array();
+
+	if (!D2JSP_UTIL_GEN_TypeOfArray(in_data))
+		 out_data.push(D2JSP_UTIL_FORMAT_ZeroFill(in_data.toString(16), 8));
+	else {
+		for (count_1 = 0; count_1 < in_data.length; count_1++)
+			 out_data.push(D2JSP_UTIL_FORMAT_ZeroFill(
+				in_data[count_1].toString(16), 8));
+	}
+
+	return(out_data);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_EmitData(in_type, in_offset, in_data)
+{
+	var out_string = "";
+	var count_1;
+
+	in_data    = (in_data == null) ? 0 : in_data;
+
+	out_string = in_type.toUpperCase() + "=" +
+		D2JSP_UTIL_FORMAT_ZeroFill(in_offset, 10) + "=";
+
+	switch (in_type.toUpperCase()) {
+		case "C"	:
+			if (!D2JSP_UTIL_GEN_TypeOfArray(in_data))
+				 out_string += TDW_CC_FormatString(in_data.charCodeAt(0));
+			else {
+				for (count_1 = 0; count_1 < in_data.length; count_1++)
+					out_string += TDW_CC_FormatString(in_data[0].charCodeAt(0));
+			}
+			break;
+		case "S"	:
+			if (!D2JSP_UTIL_GEN_TypeOfArray(in_data))
+				 out_string += TDW_CC_FormatString(in_data);
+			else {
+				for (count_1 = 0; count_1 < in_data.length; count_1++)
+					out_string += TDW_CC_FormatString(in_data[0]);
+			}
+			break;
+		case "B"	:
+			out_string += TDW_CC_FormatByte(in_data);
+			break;
+		case "W"	:
+			out_string += TDW_CC_FormatWord(in_data);
+			break;
+		case "D"	:
+			out_string += TDW_CC_FormatDWord(in_data);
+			break;
+		default	:
+			print("Error in TDW_CC_EmitData(): Invalid emit type (" +
+				in_type + ")");
+			print("Stopping script");
+			stop();
+	}
+
+	TDW_CC_FileHandle.writeLine(out_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_EmitFillData(in_type, in_offset, in_count, in_value)
+{
+	var out_string = "";
+	var tmp_data   = "";
+	var count_1;
+
+	in_count   = (in_count < 2) ? 1 : in_count;
+	in_value   = (in_value == null) ? 0 : in_value;
+
+	out_string = in_type.toUpperCase() + "=" +
+		D2JSP_UTIL_FORMAT_ZeroFill(in_offset, 10) + "=";
+
+	switch (in_type.toUpperCase()) {
+		case "C"	:
+			in_data = (D2JSP_UTIL_GEN_TypeOfString(in_value)) ?
+				in_value.charAt(0) : String.fromCharCode(in_value & 0xFF);
+			if (in_count == 1)
+				tmp_data = in_data;
+			else {
+				tmp_data = new Array(in_count);
+				for (count_1 = 0; count_1 < in_count; count_1++)
+					tmp_data[count_1] = in_data;
+			}
+			break;
+		case "S"	:
+			in_data = (D2JSP_UTIL_GEN_TypeOfString(in_value)) ?
+				in_value.charAt(0) : String.fromCharCode(in_value & 0xFF);
+			if (in_count == 1)
+				tmp_data = in_data;
+			else {
+				for (count_1 = 0; count_1 < in_count; count_1++)
+					tmp_data += in_data;
+			}
+			break;
+		case "B"	:
+		case "W"	:
+		case "D"	:
+			tmp_data = new Array(in_count);
+			for (count_1 = 0; count_1 < in_count; count_1++)
+				tmp_data[count_1] = in_value;
+			break;
+		default	:
+			print("Error in TDW_CC_EmitFillData(): Invalid emit type (" +
+				in_type + ")");
+			print("Stopping script");
+			stop();
+	}
+
+	TDW_CC_EmitData(in_type, in_offset, tmp_data);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_EmitComment(in_string)
+{
+	TDW_CC_FileHandle.writeLine("; " + in_string);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_EmitCommentHeader(fill_char)
+{
+	var tmp_char;
+
+	tmp_char = ((arguments.length < 1) || (typeof(fill_char) != "string") ||
+		(fill_char == "")) ? "*" :
+		fill_char.toString(fill_char.charCodeAt(0, 1));
+
+	TDW_CC_FileHandle.writeLine("; " + D2JSP_UTIL_FORMAT_LJust("", 77, tmp_char));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CC_EmitBlankLine()
+{
+	TDW_CC_FileHandle.writeLine("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+

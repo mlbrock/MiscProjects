@@ -1,0 +1,46 @@
+/*
+	___CoreTest.002.d2j
+
+	Symptoms    : 
+
+		24 Core:
+			Quiet failure. Script never displays result of the fourth 'print()'
+			statement.
+
+			NB : Task Manager reports that the thread count increases by one,
+			then decrease after second test.
+
+		25 Core:
+			Catastrophic failure: UNHANDLED EXCEPTION: INT_DIVIDE_BY_ZERO (c0000094)
+
+			Failure occurs in the fourth 'print()' statement.
+
+		26 Core:
+			Back to the same behavior as with the 24 Core.
+
+	Notes:
+
+			See also ____CoreTest.001.d2j
+
+	Tested under :
+
+		D2X Product and D2 Loader for
+			24 Core --- Win 2000 / SP 3 / 1 2.0 Ghz Pentium 4 CPU / 512KB RAM
+			24 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			25 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+			26 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	print("rnd(0, 0)...");
+	print(" = " + rnd(0, 0) + " ...done!");
+
+	print("rnd(0, 0.1)...");
+
+	// Never gets here, but D2 process doesn't crash under 24 core.
+	// Process crashes under 25 core.
+	print(" = " + rnd(0, 0.1) + " ...done!");
+
+	print("All tests done.");
+}
+

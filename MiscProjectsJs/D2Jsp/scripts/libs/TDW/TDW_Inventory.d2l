@@ -1,0 +1,521 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Inventory Capture Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Inventory.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains support routines for capturing mule inventories.
+//
+// Revison History : 2002-11-17 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2002 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some necessary include files ...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_BodyLocations.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+if (parseFloat(me.version < 0.3518)) {
+	var TDW_INV_StatList   = [
+		["Sockets",				D2JSP_STAT_ITEM_NUMSOCKETS],
+		["Armor Class",		D2JSP_STAT_ARMORCLASS],
+		["Enhance Defense",	D2JSP_STAT_ITEM_ARMOR_PERCENT],
+		["Min Damage %",		D2JSP_STAT_ITEM_MINDAMAGE_PERCENT],
+		["Max Damage %",		D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT],
+		["Damage To Mana",	D2JSP_STAT_ITEM_DAMAGETOMANA],
+		["Magic Find",			D2JSP_STAT_ITEM_MAGICBONUS],
+		["Skills All",			D2JSP_STAT_ITEM_ALLSKILLS],
+		["Skills Amazon",		D2JSP_STAT_ITEM_ADDAMASKILLPOINTS],
+		["Skills Assassin",	D2JSP_STAT_ITEM_ADDASSSKILLPOINTS],
+		["Skills Barb",		D2JSP_STAT_ITEM_ADDBARSKILLPOINTS],
+		["Skills Druid",		D2JSP_STAT_ITEM_ADDDRUSKILLPOINTS],
+		["Skills Necro",		D2JSP_STAT_ITEM_ADDNECSKILLPOINTS],
+		["Skills Paladin",	D2JSP_STAT_ITEM_ADDPALSKILLPOINTS],
+		["Skills Sorc",		D2JSP_STAT_ITEM_ADDSORSKILLPOINTS],
+		["Add Skill Tab 1",	D2JSP_STAT_ITEM_ADDSKILL_TAB1],
+		["Strength",			D2JSP_STAT_STRENGTH],
+		["Energy",				D2JSP_STAT_ENERGY],
+		["Dexterity",			D2JSP_STAT_DEXTERITY],
+		["Vitality",			D2JSP_STAT_VITALITY],
+		["HP",					D2JSP_STAT_HITPOINTS],
+		["Max HP",				D2JSP_STAT_MAXHP],
+		["Mana",					D2JSP_STAT_MANA],
+		["Max Mana",			D2JSP_STAT_MAXMANA],
+		["Res Fire",			D2JSP_STAT_FIRERESIST],
+		["Res Light",			D2JSP_STAT_LIGHTRESIST],
+		["Res Cold",			D2JSP_STAT_COLDRESIST],
+		["Res Poison",			D2JSP_STAT_POISONRESIST],
+		["Max Res Fire",		D2JSP_STAT_MAXFIRERESIST],
+		["Max Res Light",		D2JSP_STAT_MAXLIGHTRESIST],
+		["Max Res Cold",		D2JSP_STAT_MAXCOLDRESIST],
+		["Max Res Poison",	D2JSP_STAT_MAXPOISONRESIST],
+		["Phys DR Amount",	D2JSP_STAT_NORMAL_DAMAGE_REDUCTION],
+		["Phys DR Percent",	D2JSP_STAT_DAMAGERESIST],
+		["Magic DR Amount",	D2JSP_STAT_MAGIC_DAMAGE_REDUCTION],
+		["Magic DR Percent",	D2JSP_STAT_MAGICRESIST]
+	];
+}
+else {
+	var TDW_INV_StatList   = [
+		["Sockets",				D2JSP_STAT_ITEM_NUMSOCKETS],
+		["Armor Class",		D2JSP_STAT_ARMORCLASS],
+		["Enhance Defense",	D2JSP_STAT_ITEM_ARMOR_PERCENT],
+		["Min Damage %",		D2JSP_STAT_ITEM_MINDAMAGE_PERCENT],
+		["Max Damage %",		D2JSP_STAT_ITEM_MAXDAMAGE_PERCENT],
+		["Damage To Mana",	D2JSP_STAT_ITEM_DAMAGETOMANA],
+		["Magic Find",			D2JSP_STAT_ITEM_MAGICBONUS],
+/*
+		["Skills All",			D2JSP_STAT_ITEM_ALLSKILLS],
+		["Skills Amazon",		D2JSP_STAT_ITEM_ADDAMASKILLPOINTS, D2JSP_CLASS_ID_AMAZON],
+		["Skills Assassin",	D2JSP_STAT_ITEM_ADDASSSKILLPOINTS, D2JSP_CLASS_ID_ASSASSIN],
+		["Skills Barb",		D2JSP_STAT_ITEM_ADDBARSKILLPOINTS, D2JSP_CLASS_ID_BARBARIAN],
+		["Skills Druid",		D2JSP_STAT_ITEM_ADDDRUSKILLPOINTS, D2JSP_CLASS_ID_DRUID],
+		["Skills Necro",		D2JSP_STAT_ITEM_ADDNECSKILLPOINTS, D2JSP_CLASS_ID_NECROMANCER],
+		["Skills Paladin",	D2JSP_STAT_ITEM_ADDPALSKILLPOINTS, D2JSP_CLASS_ID_PALADIN],
+		["Skills Sorc",		D2JSP_STAT_ITEM_ADDSORSKILLPOINTS, D2JSP_CLASS_ID_SORCERESS],
+//		["Add Skill Tab 1",	D2JSP_STAT_ITEM_ADDSKILL_TAB1],
+*/
+		["Strength",			D2JSP_STAT_STRENGTH],
+		["Energy",				D2JSP_STAT_ENERGY],
+		["Dexterity",			D2JSP_STAT_DEXTERITY],
+		["Vitality",			D2JSP_STAT_VITALITY],
+		["HP",					D2JSP_STAT_HITPOINTS],
+		["Max HP",				D2JSP_STAT_MAXHP],
+		["Mana",					D2JSP_STAT_MANA],
+		["Max Mana",			D2JSP_STAT_MAXMANA],
+		["Res Fire",			D2JSP_STAT_FIRERESIST],
+		["Res Light",			D2JSP_STAT_LIGHTRESIST],
+		["Res Cold",			D2JSP_STAT_COLDRESIST],
+		["Res Poison",			D2JSP_STAT_POISONRESIST],
+		["Max Res Fire",		D2JSP_STAT_MAXFIRERESIST],
+		["Max Res Light",		D2JSP_STAT_MAXLIGHTRESIST],
+		["Max Res Cold",		D2JSP_STAT_MAXCOLDRESIST],
+		["Max Res Poison",	D2JSP_STAT_MAXPOISONRESIST],
+		["Phys DR Amount",	D2JSP_STAT_NORMAL_DAMAGE_REDUCTION],
+		["Phys DR Percent",	D2JSP_STAT_DAMAGERESIST],
+		["Magic DR Amount",	D2JSP_STAT_MAGIC_DAMAGE_REDUCTION],
+		["Magic DR Percent",	D2JSP_STAT_MAGICRESIST],
+		["Skills All",			D2JSP_STAT_ITEM_ALLSKILLS]
+	];
+	for (var count_1 = 0; count_1 < D2JSP_CLASS_ID_COUNT; count_1++)
+		TDW_INV_StatList.push(
+			["Skills " + D2JSP_CLASS_ID_NameList[count_1],
+			D2JSP_STAT_ITEM_ADDAMASKILLPOINTS, count_1]);
+	for (var count_1 = 0;
+		count_1 < D2JSP_UTIL_DAMAGE_BaseElementList[count_1].length; count_1++)
+		TDW_INV_StatList.push(
+			["Skills Elemental " + D2JSP_UTIL_DAMAGE_BaseElementList[count_1],
+			D2JSP_STAT_ITEM_FIRESKILL, count_1]);
+	for (var count_1 = 0; count_1 < D2JSP_SKILL_TreeList.length; count_1++)
+		TDW_INV_StatList.push(
+			["Skills Tree " + D2JSP_SKILL_TreeList[count_1].name,
+			D2JSP_STAT_ITEM_ADDSKILL_TAB1, D2JSP_SKILL_TreeList[count_1].value_110]);
+/*
+	// To wide for Excel.
+	for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 < D2JSP_SKILL_MAXIMUM;
+		count_1++)
+		TDW_INV_StatList.push(
+			["+Skills " + D2JSP_SKILL_SkillList[count_1],
+			D2JSP_STAT_ITEM_SINGLESKILL1, count_1]);
+*/
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var TDW_INV_IgnoreList = new Array();
+TDW_INV_IgnoreList["gps"] = 1;
+TDW_INV_IgnoreList["ops"] = 1;
+TDW_INV_IgnoreList["gpm"] = 1;
+TDW_INV_IgnoreList["opm"] = 1;
+TDW_INV_IgnoreList["gpl"] = 1;
+TDW_INV_IgnoreList["opl"] = 1;
+TDW_INV_IgnoreList["yps"] = 1;
+TDW_INV_IgnoreList["vps"] = 1;
+TDW_INV_IgnoreList["wms"] = 1;
+TDW_INV_IgnoreList["hp1"] = 1;
+TDW_INV_IgnoreList["mp1"] = 1;
+TDW_INV_IgnoreList["hp2"] = 1;
+TDW_INV_IgnoreList["mp2"] = 1;
+TDW_INV_IgnoreList["hp3"] = 1;
+TDW_INV_IgnoreList["mp3"] = 1;
+TDW_INV_IgnoreList["hp4"] = 1;
+TDW_INV_IgnoreList["mp4"] = 1;
+TDW_INV_IgnoreList["hp5"] = 1;
+TDW_INV_IgnoreList["mp5"] = 1;
+TDW_INV_IgnoreList["rvs"] = 1;
+TDW_INV_IgnoreList["rvl"] = 1;
+TDW_INV_IgnoreList["isc"] = 1;
+TDW_INV_IgnoreList["tsc"] = 1;
+TDW_INV_IgnoreList["tbk"] = 1;
+TDW_INV_IgnoreList["ibk"] = 1;
+TDW_INV_IgnoreList["aqv"] = 1;
+TDW_INV_IgnoreList["cqv"] = 1;
+TDW_INV_IgnoreList["key"] = 1;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_WriteToFile(file_name, append_flag, flags)
+{
+	var file_handle;
+
+	if ((!arguments.length) || (file_name == null) || (file_name == ""))
+		file_name = "output/TDW_Inventory." + me.realm + "." + me.account + "." +
+			me.name + ".csv";
+
+	var pre_existed_flag = D2JSP_UTIL_GEN_FileExists(file_name);
+
+	if (file_handle = fileOpen(file_name, ((append_flag) ? 2 : 1))) {
+		print("Beginning comprehensive game inventory...");
+		if ((!pre_existed_flag) && append_flag)
+			file_handle.writeLine(TDW_INV_WriteHeader());
+		TDW_INV_WriteToHandle(file_handle, append_flag, flags);
+		file_handle.close();
+		print("Comprehensive game inventory complete!");
+		return(0);
+	}
+	else {
+		print("Unable to open file '" + file_name + "' for " +
+			((append_flag) ? "appending." : "writing."));
+		return(-1);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_WriteToHandle(file_handle, append_flag, flags)
+{
+	var this_line = "";
+
+	if (!append_flag)
+		this_line = TDW_INV_WriteHeader() + "\n";
+//	this_line += TDW_INV_DoInventory(file_handle, false)
+	this_line += TDW_INV_DoInventory(file_handle, true)
+	file_handle.writeLine(this_line);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_DoInventory(file_handle, all_flag)
+{
+	var this_obj  = getUnit(D2JSP_UTIL_GETUNIT_ITEM);
+	var this_line = "";
+	var out_line  = "";
+	var merc_name;
+	var obj_parent;
+	var this_date;
+	var this_loc;
+
+	merc_name = D2JSP_NPC_GetMercName();
+	merc_name = (merc_name != "") ? merc_name : "*NOT-A-NAME*";
+
+	if (this_obj) {
+		do {
+			obj_parent = this_obj.getParent();
+			if (obj_parent &&
+				((obj_parent.name == me.name) || (obj_parent.name == merc_name)) &&
+				(all_flag || (typeof(TDW_INV_IgnoreList[this_obj.code]) ==
+				"undefined"))) {
+				this_date  = D2JSP_UTIL_DATE_ToSmallDate();
+				this_line  = TDW_INV_String(this_date.substr(0,this_date.length-4));
+				this_line += TDW_INV_String(me.realm);
+				this_line += TDW_INV_String(me.account);
+				this_line += TDW_INV_String(me.name);
+				this_line += TDW_INV_String(((!me.gametype) ?
+					"Classic" : "Expansion"));
+				this_line += TDW_INV_String(((!me.playertype) ?
+					"Softcore" : "Hardcore"));
+				this_line += TDW_INV_String("*UNKNOWN*");
+				this_line += TDW_INV_String(this_obj.code);
+				this_line +=
+					TDW_INV_String(D2JSP_ITEMTYPE_TypeToName(
+					D2JSP_ITEM_GetItemType(this_obj)));
+				this_line += TDW_INV_Number(this_obj.ilvl);
+				switch (this_obj.mode) {
+					case D2JSP_MODE_ITEM_INVEN_STASH_CUBE_STORE	:
+						item_loc = D2JSP_ITEM_CONT_ToName(
+							D2JSP_ITEM_CONT_ItemContainer(this_obj));
+						break;
+					case D2JSP_MODE_ITEM_EQUIPPED_SELF_OR_MERC	:
+						item_loc = D2JSP_BODYLOC_BodyLocToName(this_obj.itemloc);
+						break;
+					case D2JSP_MODE_ITEM_IN_BELT						:
+						item_loc = "belt";
+						break;
+					case D2JSP_MODE_ITEM_ON_GROUND					:
+						item_loc = "on ground";
+						break;
+					case D2JSP_MODE_ITEM_ON_CURSOR					:
+						item_loc = "on cursor";
+						break;
+					case D2JSP_MODE_ITEM_BEING_DROPPED				:
+						item_loc = "being dropped";
+						break;
+					case D2JSP_MODE_ITEM_SOCKETED_IN_ITEM			:
+						item_loc = "socketed";
+						break;
+					case D2JSP_MODE_ITEM_IN_INVENTORY				:
+						item_loc = "inventory";
+						break;
+					case D2JSP_MODE_ITEM_IN_STORE						:
+						item_loc = "in store";
+						break;
+					case D2JSP_MODE_ITEM_IN_CUBE						:
+						item_loc = "cube";
+						break;
+					case D2JSP_MODE_ITEM_IN_STASH						:
+						item_loc = "stash";
+						break;
+					default													:
+						item_loc = "*INVALID*";
+						break;
+				}
+				this_line += TDW_INV_String(item_loc.toLowerCase());
+				this_line += TDW_INV_String((obj_parent.name == me.name) ?
+					"self" : "merc");
+				this_line += TDW_INV_String(
+					D2JSP_ITEM_QualityToName(this_obj.quality));
+				this_line += TDW_INV_String(D2JSP_ITEM_GetItemName(this_obj));
+				this_line += TDW_INV_FullName(D2JSP_ITEM_GetItemFName(
+					this_obj));
+//this_line += TDW_INV_String(this_obj.fname);
+/*
+				for (var count_1 = 0; count_1 < TDW_INV_StatList.length;
+					count_1++)
+					this_line += TDW_INV_Number(this_obj.getStat(
+						TDW_INV_StatList[count_1][1]));
+*/
+				this_line += TDW_INV_DoItemStats(this_obj);
+				out_line  += this_line.substr(0, this_line.length - 1) + "\n";
+			}
+		}
+		while (this_obj && this_obj.getNext());
+	}
+
+	return(out_line);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_DoItemStats(this_obj)
+{
+	var this_line = "";
+
+	if (parseFloat(me.version < 0.3518)) {
+		for (var count_1 = 0; count_1 < TDW_INV_StatList.length; count_1++)
+			this_line +=
+				TDW_INV_Number(this_obj.getStat(TDW_INV_StatList[count_1][1]));
+	}
+	else {
+		for (var count_1 = 0; count_1 < TDW_INV_StatList.length; count_1++)
+			this_line += (TDW_INV_StatList[count_1].length == 2) ?
+				TDW_INV_Number(this_obj.getStat(TDW_INV_StatList[count_1][1])) :
+				TDW_INV_Number(this_obj.getStat(TDW_INV_StatList[count_1][1],
+				TDW_INV_StatList[count_1][2]));
+		for (var count_1 = D2JSP_SKILL_MINIMUM; count_1 < D2JSP_SKILL_MAXIMUM;
+			count_1++) {
+			var this_value = this_obj.getStat(D2JSP_STAT_ITEM_SINGLESKILL1,
+				count_1);
+			if (this_value)
+				this_line += TDW_INV_String("Skills " +
+					D2JSP_SKILL_SkillList[count_1] + " = " + this_value);
+		}
+	}
+
+	return(this_line);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_WriteItemStatsHeader()
+{
+	var this_line = "";
+
+	for (var count_1 = 0; count_1 < TDW_INV_StatList.length; count_1++)
+		this_line += TDW_INV_String(TDW_INV_StatList[count_1][0]);
+
+	return(this_line);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_WriteHeader()
+{
+	var this_line;
+
+	this_line  = TDW_INV_String("Date");
+	this_line += TDW_INV_String("Realm");
+	this_line += TDW_INV_String("Account");
+	this_line += TDW_INV_String("Character");
+	this_line += TDW_INV_String("Game Type");
+	this_line += TDW_INV_String("Player Type");
+	this_line += TDW_INV_String("Ladder Type");
+	this_line += TDW_INV_String("Code");
+	this_line += TDW_INV_String("Type");
+	this_line += TDW_INV_String("Ilvl");
+	this_line += TDW_INV_String("Location");
+	this_line += TDW_INV_String("Location Spec");
+	this_line += TDW_INV_String("Quality");
+	this_line += TDW_INV_String("Base Name");
+	this_line += TDW_INV_String("Full Name");
+
+	this_line += TDW_INV_WriteItemStatsHeader();
+
+	return(this_line.substr(0, this_line.length - 1));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_String(in_data)
+{
+	return("\"" + D2JSP_UTIL_FORMAT_Trim(in_data + "") + "\",");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_Number(in_data)
+{
+	return(D2JSP_UTIL_FORMAT_Trim(in_data + "") + ",");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_String(in_data)
+{
+	return("\"" + D2JSP_UTIL_FORMAT_Trim(in_data + "") + "\",");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_FullName(in_data)
+{
+	in_data = (typeof(in_data) == "string") ? in_data : "";
+
+	return(TDW_INV_String(in_data.replace(/\(null\)/g, "")));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_SPACE_WriteToFile(file_name, append_flag)
+{
+	var file_handle;
+
+	if ((!arguments.length) || (file_name == null) || (file_name == ""))
+		file_name = "output/TDW_InventorySpace." + me.realm + "." + me.account +
+			"." + me.name + ".csv";
+
+	var pre_existed_flag = D2JSP_UTIL_GEN_FileExists(file_name);
+
+	if (file_handle = fileOpen(file_name, ((append_flag) ? 2 : 1))) {
+		print("Beginning comprehensive game inventory space analysis...");
+		if ((!pre_existed_flag) && append_flag)
+			file_handle.writeLine(TDW_INV_SPACE_WriteHeader(file_handle));
+		TDW_INV_SPACE_WriteToHandle(file_handle, append_flag);
+		file_handle.close();
+		print("Comprehensive game inventory space analysis complete!");
+		return(0);
+	}
+	else {
+		print("Unable to open file '" + file_name + "' for " +
+			((append_flag) ? "appending." : "writing."));
+		return(-1);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_SPACE_WriteToHandle(file_handle, append_flag)
+{
+	var this_line = "";
+
+	if (!append_flag)
+		this_line = TDW_INV_SPACE_WriteHeader(file_handle);
+	this_line += TDW_INV_SPACE_DoInventorySpace(file_handle)
+	file_handle.writeLine(this_line);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_SPACE_DoInventorySpace(file_handle)
+{
+	var this_line   = "";
+	var out_line    = "";
+	var space_avail = D2JSP_ITEM_CONT_GetAvailableSpace();
+	var this_date;
+
+	for (var count_1 = 0; count_1 < space_avail.length; count_1++) {
+		this_date  = D2JSP_UTIL_DATE_ToSmallDate();
+		this_line  = TDW_INV_String(this_date.substr(0,this_date.length-4));
+		this_line += TDW_INV_String(me.realm);
+		this_line += TDW_INV_String(me.account);
+		this_line += TDW_INV_String(me.name);
+		this_line += TDW_INV_String(((!me.gametype) ? "Classic" : "Expansion"));
+		this_line += TDW_INV_String(((!me.playertype) ? "Softcore" : "Hardcore"));
+		this_line += TDW_INV_String(D2JSP_ITEM_CONT_SizeData[count_1][0] + " X " +
+			D2JSP_ITEM_CONT_SizeData[count_1][1]);
+		this_line += TDW_INV_String(space_avail[count_1][0]);
+		for (var count_2 = 0; count_2 < D2JSP_ITEM_CONT_COUNT; count_2++)
+			this_line += TDW_INV_String(space_avail[count_1][1][count_2]);
+		out_line  += this_line.substr(0, this_line.length - 1) + "\n";
+	}
+
+	return(out_line);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_INV_SPACE_WriteHeader(file_handle)
+{
+	var this_line;
+
+	this_line  = TDW_INV_String("Date");
+	this_line += TDW_INV_String("Realm");
+	this_line += TDW_INV_String("Account");
+	this_line += TDW_INV_String("Character");
+	this_line += TDW_INV_String("Game Type");
+	this_line += TDW_INV_String("Player Type");
+	this_line += TDW_INV_String("Size");
+	this_line += TDW_INV_String("Total");
+
+	for (var count_1 = 0; count_1 < D2JSP_ITEM_CONT_SourceData.length; count_1++)
+		this_line += TDW_INV_String(D2JSP_ITEM_CONT_SourceData[count_1][0]);
+
+	return(this_line.substr(0, this_line.length - 1));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	D2JSP_UTIL_GEN_CheckGameReady();
+	print("Ready.");
+
+	TDW_INV_WriteToFile(null, false, false);
+
+	print("Done.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {

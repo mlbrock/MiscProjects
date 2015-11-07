@@ -1,0 +1,41 @@
+/*
+	___CoreTest.010.d2j
+
+	Symptoms    :
+
+		Incorrect values for fname and suffix with items without suffices
+
+		To test, buy an one item with only a suffix and one item with only a
+		prefix from a vendor. Then run this script.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			28 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	var log_name   = "output\\____CoreTest.010.d2j.log";
+	var log_handle = null;
+	var this_item;
+
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready");
+
+	if (!(log_handle = fileOpen(log_name, 1))) {
+		print("Unable to open log file '" + log_name + "'.");
+		quit();
+	}
+
+	this_item = getUnit(4);
+	if (this_item) {
+		do {
+			log_handle.writeLine(this_item.name + " (prefix = " + this_item.prefix+
+				", s= " + this_item.suffix + ") = " + this_item.fname);
+		} while (this_item && this_item.getNext());
+	}
+
+	print("Script ending");
+}
+
+

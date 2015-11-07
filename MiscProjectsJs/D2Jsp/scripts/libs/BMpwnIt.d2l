@@ -1,0 +1,1296 @@
+// ParseIt!
+// by blue mind
+// -----------------------------------------------------------------------------
+// History :
+//
+// 1.53 : Added in the ability to use | in the inis
+// 1.52 : Made the ini parsing one variable, and cleaned up code
+// 1.51 : Added in <autoid> support
+// 1.5c : Much easier to read logging
+// 1.5a : Fixed a possible memory leak...
+// 1.5 : Added in the ability to log items that are set not to be picked up
+// 1.4 : Bug fixes, added in distance code, and hopefully made it work with pickit
+// 1.3 : Added in belt management and ranged items
+// 1.2 : Added in a better method to deal with the ini in memory from FryGuy
+// 1.1a : Added in checking if items should be ided
+// 1.1 : Completed snagit
+// 1.0a : Added quote removal in the ini parsing
+// 1.0 : Added the start of the code for SnagIt!
+// 0.9a : Added better logging
+// 0.9 : Added quality checking for unique items
+// 0.8 : Added jewel checking method
+// 0.7e : Fixed a ton of bugs
+// 0.7d : Made the library universal to check mods of all items
+// 0.7c : stupid bug in 0.7b
+// 0.7b : removed the need to call getINI() from outside the script
+// 0.7 : items logging
+// 0.6 : standalone reusable library
+//       beta 20+ required for normal/exceptional/elite detection
+//       ini and mods parsing are working
+// 0.5 : ini parsing added
+// 0.4 : working and working fast already. anya support only
+// 0.3- : didn't bother to keep a history log
+
+/* ææææææææææææææææææææææææææææ
+Do not edit anything past this point!
+ææææææææææææææææææææææææææææ */
+
+// ** Logging related
+var logging=1;
+var fLog="output/"+me.name+"ItemLog.html";
+var writedesc=false;
+
+// ** The INI
+var INI = new Array();
+var WhichINI="temp";
+var idValid=false;
+
+// ** SnagIt variables
+var bitcheck=0;
+var DontLog=false;
+var SkipType=new Array();
+var snagrad=60;
+var SkipGID=new Array();
+
+// ** Mods parsing
+var itemQual=["none","lowquality","normal","superior","magic","set","rare","unique","craft"];
+
+/* ææææææææææææææææææææææææææææ
+ShopIt! section:
+ææææææææææææææææææææææææææææ */
+
+function ShopIt(who,npc)
+{
+	var checkprint=0;
+	var shopdesc="";
+
+	var shopitem = getUnit(4,null,0);
+	if (shopitem) do
+	{
+		var owner = shopitem.getParent();
+		if (owner) if (owner.name==who)
+		{
+			if (logging >= 1)
+				shopdesc=shopitem.fname;
+			if (logging >= 2)
+				shopdesc+=getAllStats(shopitem);
+
+			if(checkprint == 0)
+			{
+				print("Shopping at: " +who);
+				checkprint++;
+			}
+
+			if (CheckItem(shopitem, "settings/bmShopIt.ini"))
+			{
+				writedesc=shopdesc;
+				Slog(shopitem);
+				shopitem.shop(npc,2);
+				DoDel(1000);
+			}
+			if (logging >= 3) PrintFile(STime()+" " +shopdesc);
+		}
+		shopitem.fname="";
+	} while(shopitem && shopitem.getNext(null,0));
+	if(checkprint == 0) print("Shopping at " +who +" failed!");
+}
+
+/* ææææææææææææææææææææææææææææ
+SnagIt! section:
+ææææææææææææææææææææææææææææ */
+
+function SnagIt(which)
+{
+	var reloop=true;
+
+	snagqual=5;
+	NormalItem=0;
+	while(reloop)
+	{
+		clearcursor();
+		var snagitem = getUnit(4);
+		reloop=false;
+		if (snagitem) itemloop : do
+		{
+			if((snagitem.mode==3 || snagitem.mode==5) && snagitem.quality >= snagqual)
+			{
+				for(m=0; m<SkipType.length; m++)
+				{
+					if(SkipType[m]==snagitem.itemtype)
+						continue itemloop;
+				}
+				for(var y=0; y<SkipGID.length; y++)
+				{
+					if(SkipGID[y]==snagitem.gid)
+						continue itemloop;
+				}
+				SkipGID.push(snagitem.gid);
+				if(snagitem.code!="gld" && snagitem.itemtype!=78)
+				{
+					if(CheckItem(snagitem, which, snagqual))
+					{
+						if (calcrange(snagitem.x, snagitem.y) <= snagrad)
+						{
+							reloop=true;
+							if(!PickUpItem(snagitem)) continue itemloop;
+							Slog(snagitem);
+						} else
+						{
+							if(me.classid==1) GoToItem(snagitem);
+							Slog(snagitem);
+						}
+					}
+				}
+				if(calcrange(snagitem.x, snagitem.y) <= snagrad && snagqual==0 && NormalItem < 6)
+				{
+					if(snagitem.code=="gld" && me.getStat(14) != (me.getStat(12) * 10000) && (bitcheck&2))
+					{
+						print("Your gold is not full!  Picking up gold!");
+						reloop=true;
+						NormalItem++
+						if(!DoCast("Telekinesis",0,snagitem))
+						{
+							MoveTo(snagitem.x, snagitem.y);
+							if(snagitem.mode==3 || snagitem.mode==5) snagitem.interact();
+							DoDel(500);
+						}
+					}
+					if(snagitem.code!="gld" && countpotions())
+					{
+						if(snagitem.code=="rvl" && (bitcheck&8))
+						{
+							print("Picking up a Full Rejuv potion");
+							reloop=true;
+							PickUpItem(snagitem);
+						}
+						if(snagitem.code=="rvs" && (bitcheck&4))
+						{
+							print("Picking up a Rejuv potion");
+							reloop=true;
+							PickUpItem(snagitem);
+						}
+					}
+				}
+			}
+		} while(snagitem && snagitem.getNext());
+		if(snagqual==5) reloop=true;
+		snagqual=0;
+	}
+}
+
+function AutoIDit(item)
+{
+	var itemColors=["ÿc0","ÿc0","ÿc0","ÿc0","ÿc3","ÿc2","ÿc9","ÿc4","ÿc8"];
+	if(item.quality==5) file = fileOpen("settings/snagset.ini", 0);
+	else if(item.quality==7) file = fileOpen("settings/snagunique.ini", 0);
+	else file=false;
+	if (file)
+	{
+		while(!file.eof)
+		{
+			line = file.readLine();
+			a = line.split("=");
+			if (a.length == 2)
+			{
+				if (a[0] == item.code)
+				{
+						file.close();
+						return a[1];
+				}
+			}
+		}
+		file.close();
+		return itemColors[item.quality]+" "+itemQual[item.quality]+" "+item.name;
+	} else return itemColors[item.quality]+" "+itemQual[item.quality]+" "+item.name;
+}
+
+
+function PickUpItem(snagitem)
+{
+	clearcursor();
+	MoveTo(snagitem.x, snagitem.y);
+	if(snagitem.mode==3 || snagitem.mode==5) snagitem.interact();
+	DoDel(50);
+	attemptnum=0;
+	tryagain=20;
+	while(snagitem.mode==3 || snagitem.mode==5)
+	{
+		DoDel(20);
+		attemptnum++;
+		if(attemptnum>=200) return false;
+		if(attemptnum>=tryagain)
+		{
+			tryagain+=20;
+			if(snagitem.mode==3 || snagitem.mode==5)
+			{
+				clearcursor();
+				if(snagitem.mode==3 || snagitem.mode==5) snagitem.interact();
+			}
+		}
+	}
+	return true;
+}
+
+function GoToItem(item)
+{
+	ITEMxd=(item.x - me.x);
+	ITEMyd=(item.y - me.y);
+
+	HOPx=Math.abs(Math.ceil(ITEMxd / 30));
+	HOPy=Math.abs(Math.ceil(ITEMyd / 30));
+
+	if(HOPx < HOPy)
+	{
+		checkx=Math.ceil(ITEMxd / HOPy);
+		checky=Math.ceil(ITEMyd / HOPy);
+	}
+	else if(HOPx < HOPy)
+	{
+		checkx=Math.ceil(ITEMxd / HOPx);
+		checky=Math.ceil(ITEMyd / HOPx);
+	}
+	else
+	{
+		checkx=Math.ceil(ITEMxd / HOPx);
+		checky=Math.ceil(ITEMyd / HOPy);
+	}
+
+	onitem=false;
+	while(!onitem)
+	{
+		if(calcrange(item.x, item.y) <= 24) onitem=true;
+		else Telejump(HOPx,HOPy,checkx,checky);
+	}
+	PickUpItem(item);
+}
+
+function Telejump(HOPx,HOPy,checkx,checky)
+{
+	if(HOPx == 0 || checkx == NaN || checkx == "Infinity")
+		MoveTo(me.x, me.y + checky);
+	else if(HOPy == 0 || checky == NaN || checky == "Infinity")
+		MoveTo(me.x + checkx, me.y);
+	else MoveTo(me.x + checkx, me.y + checky);
+	GoToItem();
+}
+
+/* ææææææææææææææææææææææææææææ
+SnagIt! belt management section:
+ææææææææææææææææææææææææææææ */
+/* ææææææææææææææææææææææææææææ
+Taken from Sherpya's common library's
+ææææææææææææææææææææææææææææ */
+
+function countpotions()
+{
+	if(bitcheck&16) return true;
+	count = 0;
+	start = getUnit(4,null,2);
+	if (start) do
+	{
+		owner = start.getParent();
+		if (owner)
+		{
+			if(start.mode==2 && owner.name==me.name)
+				count++;
+		}
+	} while (start.getNext(null,2));
+	if(FindBelt()>count) return true;
+	return false;
+}
+
+var beltscap = {
+	"lbl":   8, // Sash
+	"vbl":   8, // Light Belt
+	"mbl":   12, // Belt
+	"tbl":   12  // Heavy Belt
+}
+
+/* Returns the belt capability in rows */
+function BeltCapabilty(belt)
+{
+	if (beltscap[belt.code])
+		return beltscap[belt.code]
+
+	return 16;
+}
+
+/* Find the item of equiped belt */
+function FindBelt()
+{
+	belt = false;
+	item = getUnit(4,null,1);
+	if (item) do
+	{
+		if (item.itemloc == 8) // Belt
+		{
+			belt = item;
+			break;
+		}
+	} while (item && item.getNext(null,1));
+
+	if (!belt) return 4;
+	return BeltCapabilty(belt);
+}
+
+/* ææææææææææææææææææææææææææææ
+ParseIt! section:
+ææææææææææææææææææææææææææææ */
+
+function ParseIt(which, cx, cy, DoLog)
+{
+	var parseitem = getUnit(4,null,0);
+	if (parseitem) do
+	{
+		var owner = parseitem.getParent();
+		if (owner && owner.name==me.name && parseitem.getFlag(0x10))
+		{
+			if ((parseitem.x == cx) && (parseitem.y == cy) && (parseitem.itemloc == 0))
+			{
+				KeepIt=CheckItem(parseitem, which);
+				if(parseitem.quality!=4) writedesc=parseitem.fname +" " +parseitem.name;
+				else writedesc=(parseitem.prefix==""?"":parseitem.prefix +" ") +parseitem.name +(parseitem.suffix==""?"":" "+parseitem.suffix);
+				if (logging >= 2) writedesc+=getAllStats(parseitem);
+				if(KeepIt)
+				{
+					if (logging == 1)
+						Slog(parseitem);
+					if (logging >= 2)
+						Slog(parseitem);
+					return KeepIt;
+				}
+				if (DoLog>=1 && logging >= 3)
+				{
+					PrintFile(STime()+" " +writedesc);
+					print("Found and dropped a " +parseitem.fname);
+				}
+				return false;
+			}
+		}
+		parseitem.suffix=false; parseitem.prefix=false; parseitem.fname=false;
+	} while(parseitem && parseitem.getNext(null,0));
+}
+
+/* ææææææææææææææææææææææææææææ
+SnagIt! and ParseIt! item parsing section:
+ææææææææææææææææææææææææææææ */
+
+function CheckItem(item, which, snagqual)
+{
+	if(WhichINI!=which) getINI(which);
+
+	lloop : for(i=0;i<INI.length;i++)
+	{
+		nKeys=INI[i].length;
+		idValid=false;
+		writedesc=false;
+		DontLog=false;
+		loganyhow=false;
+		var OrSkip=new Array();
+		for(j=1;j<nKeys;j++)
+		{
+			type=INI[i][j][0];
+			key=INI[i][j][1];
+			val=INI[i][j][2];
+			if(type=="|")
+			{
+				if(!OrCase(val,item,OrSkip))
+					continue lloop;
+			}
+			else
+			{
+				if(!KeyCase(type,key,val,item))
+					continue lloop;
+			}
+		}
+		if (loganyhow)
+		{
+			if(writedesc!=false && snagqual==5)
+			{
+				GetDesc(item);
+				print("Ignoring a "+writedesc+"!");
+				if(!DontLog)
+				{
+					Rcolor();
+					PrintFile(STime()+" " +writedesc);
+				}
+			}
+			continue;
+		}
+		debugprint("!!Keeping an item from section: " +INI[i][0],0);
+		return true;
+	}
+	return false;
+}
+
+function OrCase(string,item,OrSkip)
+{
+	LastOne=true;
+	divider=string.indexOf("|");
+	lastloop : while(LastOne)
+	{
+		debugprint(string,0);
+		if(divider==-1) LastOne=false;
+		if(LastOne)
+		{
+			cursub=string.substring(0,divider);
+			string=string.substring(divider+1);
+		} else cursub=string;
+		var TypeTable=["=",">","<","!"];
+		for (oi=0;oi<TypeTable.length;oi++)
+		{
+			nEndOfKey = cursub.indexOf(TypeTable[oi]);
+			if (nEndOfKey!=-1)
+			{
+				KeyName=cursub.substring(0,nEndOfKey);
+				KeyValue=StripQuotes(cursub.substring(nEndOfKey+1));
+				typeval=oi;
+				break;
+			}
+		}
+		debugprint("Argument: "+TypeTable[typeval]+" -- Entering KeyName: "+KeyName+" -- and KeyValue: "+KeyValue,0);
+		if(KeyCase(TypeTable[typeval],KeyName,KeyValue,item))
+		{
+			for (oi=0;oi<OrSkip.length;oi++)
+			{
+				if(OrSkip[oi][0]==TypeTable[typeval] && OrSkip[oi][1]==KeyName && OrSkip[oi][2]==KeyValue) continue lastloop;
+			}
+			OrSkip.push(TypeTable[typeval],KeyName,KeyValue)
+			return true;
+		}
+		divider=string.indexOf("|");
+	}
+	return false;
+}
+
+function KeyCase(type,key,val,item)
+{
+	switch(key)
+	{
+		case "description":	//Printed value for snagit
+			writedesc=val;
+			return true;
+		case "show":	//Place holder, in case someone uses the old command
+			writedesc=val;
+			return true;
+		case "pickup":	//If set to 0, it will log it but not pick it up
+			if (val==0) loganyhow=true;
+			return true;
+		case "iditem":	//If set to 1, will id the item if it is in your inventory
+			if (val==1) idValid=true;
+			return true;
+		case "log":	//If set to 0, the item will be picked up, but not logged
+			if (val==0) DontLog=true;
+			return true;
+		case "type":	//I have to set this up still
+			print("The option of picking up certain item types is not currently supported by SnagIt!");
+			return false;
+		case "mod":	//Specific mod names, like cruel
+			if(item.getFlag(0x10)) return true;
+			if(item.fname.toLowerCase().indexOf(val) == -1) return false;
+			return true;
+		case "isethereal":	//Ethereal check
+			if (val==1 && item.getFlag(0x400000) == 0) return false;
+			if (val==0 && item.getFlag(0x400000)) return false;
+			return true;
+		case "hassockets":	//Socket check
+			if (val==1 && !item.getFlag(0x800)) return false;
+			if (val==0 && item.getFlag(0x800)) return false;
+			return true;
+		case "identified":	//Identified check
+			if (val==0 && item.getFlag(0x10)) return false;
+			if (val==1 && item.getFlag(0x10) == 0) return false;
+			return true;
+		case "item":	//Item type, item code, or an items name
+			return CodeCase(type,val,item);
+		case "needprefix":
+			if (val==1 && !item.prefix) return false;
+			return true;
+		case "needsuffix":
+			if (val==1 && !item.suffix) return false;
+			return true;
+		case "code":	//Item type, item code, or an items name
+			return CodeCase(type,val,item);
+		case "qual":	//Item quality, Such as magic or unique.  Number or name accepted.
+			return QualCase(type,val,item);
+		case "level":	//Item quality, Such as magic or unique.  Number or name accepted.
+			return QualCase(type,val,item);
+		case "classlevel":	//Normal, elite, or exceptional.  Number or name accepted.
+			return ClassCase(type,val,item);
+		case "ilvl":	//The items ilvl.
+			return ilvlCase(type,val,item);
+		case "eval-pu":
+			return item.eval(val);
+		case "eval-id":
+			if (item.getFlag(0x10) == 0) return false; // not ID'd
+			return item.eval(val);
+		default:	//Specific mod values, in numeric form.
+			return TypeCase(type,val,key,item);
+	}
+	return false;
+}
+
+function CodeCase(type,val,item)
+{
+	switch(type)
+	{
+		case "=":
+			if ((val!=item.code) && (val!=item.name.toLowerCase()) && (val!=String(item.itemtype))) return false;
+			return true;
+		case ">":
+			if (parseInt(val)<item.itemtype) return false;
+			return true;
+		case "<":
+			if (parseInt(val)>item.itemtype) return false;
+			return true;
+		case "!":
+			if ((val==item.code) || (val==item.name.toLowerCase()) || (val==String(item.itemtype))) return false;
+			return true;
+	}
+	return false;
+}
+
+function ilvlCase(type,val,item)
+{
+	switch(type)
+	{
+		case "=":
+			if (item.ilvl != parseInt(val)) return false;
+			return true;
+		case ">":
+			if (item.ilvl < parseInt(val)) return false;
+			return true;
+		case "<":
+			if (item.ilvl > parseInt(val)) return false;
+			return true;
+		case "!":
+			if (item.ilvl == parseInt(val)) return false;
+			return true;
+	}
+	return false;
+}
+
+function TypeCase(type,val,key,item)
+{
+	if(isNaN(parseInt(key,10)) || isNaN(parseInt(val,10))) return false;
+	switch(type)
+	{
+		case "=":
+			if (item.getStat(parseInt(key,10)) != parseInt(val,10)) return false;
+			return true;
+		case ">":
+			if (item.getStat(parseInt(key,10)) < parseInt(val,10)) return false;
+			return true;
+		case "<":
+			if (item.getStat(parseInt(key,10)) > parseInt(val,10)) return false;
+			return true;
+		case "!":
+			if (item.getStat(parseInt(key,10)) == parseInt(val,10)) return false;
+			return true;
+	}
+	return false;
+}
+
+function QualCase(type,val,item)
+{
+	QualPOS=getPosition(val,itemQual);
+	switch(type)
+	{
+		case "=":
+			if (item.quality!=QualPOS) return false;
+			return true;
+		case ">":
+			if (item.quality<QualPOS) return false;
+			return true;
+		case "<":
+			if (item.quality>QualPOS || QualPOS==-1) return false;
+			return true;
+		case "!":
+			if (item.quality==QualPOS) return false;
+			return true;
+	}
+	return false;
+}
+
+function ClassCase(type,val,item)
+{
+	var itemClass=["normal","exceptional","elite"];
+	ClassPOS=getPosition(val,itemClass);
+	switch(type)
+	{
+		case "=":
+			if (item.itemclass!=ClassPOS) return false;
+			return true;
+		case ">":
+			if (item.itemclass<ClassPOS) return false;
+			return true;
+		case "<":
+			if (item.itemclass>ClassPOS || ClassPOS==-1) return false;
+			return true;
+		case "!":
+			if (item.itemclass==ClassPOS) return false;
+			return true;
+	}
+	return false;
+}
+
+/* ææææææææææææææææææææææææææææ
+Utility functions:
+ææææææææææææææææææææææææææææ */
+
+function clearcursor()
+{
+	if (!me.itemoncursor) return false;
+	cursoritem = getUnit(4,null,4);
+	if (cursoritem)
+	{
+		tryloop : for (mc = 1; mc <= 10; mc++)
+		{
+			cursoritem.cancel();
+			for (cm = 0; cm < 25; cm++)
+			{
+				if(!me.itemoncursor) return true;
+				DoDel(20);
+			}
+		}
+	}
+	return false;
+}
+
+/* ææææææææææææææææææææææææææææ
+INI and logging section:
+ææææææææææææææææææææææææææææ */
+
+function STime()
+{
+	timer=new Date();
+	newtime=timer.toString();
+	GMT = newtime.indexOf("GMT");
+	ptimer=newtime.substring(4, GMT-1);
+	return ptimer;
+}
+
+function Slog(item)
+{
+	if (writedesc!=false)
+	{
+		GetDesc(item);
+		print("Just found " +writedesc+"ÿc on "+STime());
+		if(!DontLog)
+		{
+			Rcolor();
+			PrintFile("!!"+STime()+" " +writedesc);
+		}
+	} else print("Just found a "+itemQual[item.quality]+" "+item.name+"!");
+}
+
+function Rcolor()
+{
+	Color = writedesc.indexOf("ÿ");
+	if(Color!=-1)
+		ConvertColors();
+}
+
+// convert a D2 color into an HTML color
+function ConvertColors()
+{
+	var htmlColors = ["000080", "FF00000", "00FF00", "0000FF", "666600", "666666", "000000", "999900", "FF9900", "BBBB00"];
+
+	while ((Color = writedesc.indexOf("ÿ")) != -1)
+	{
+		var htmlColor = htmlColors[parseInt(writedesc[Color+2])];
+		writedesc = writedesc.substring(0,Color) +
+			"</font><font color=\"#"+htmlColor+"\">"+
+			writedesc.substring(Color+3);+"</font><font color=\"#000080\">"
+		Color = writedesc.indexOf("ÿ");
+	}
+}
+
+function GetDesc(item)
+{
+	rExp = /<autoid>/gi;
+	if(writedesc.search(rExp) == -1) rExp = /<auto-id>/gi;
+	if(writedesc.search(rExp) != -1)
+		writedesc=writedesc.replace(rExp, AutoIDit(item));
+}
+
+function calcrange(x, y)
+{
+	xdiff = Math.abs(me.x - x);
+	ydiff = Math.abs(me.y - y);
+	xyrange = Math.sqrt((Math.pow(xdiff,2)) + (Math.pow(ydiff,2)));
+
+	return parseInt(xyrange);
+}
+
+function PrintFile(string)
+{
+	FileWriteLog=fileOpen(fLog, 2);
+	if (FileWriteLog)
+	{
+		FileWriteLog.writeLine(string +"<br> \n");
+		FileWriteLog.close();
+	}
+}
+
+function getINI(which) {
+	INI = new Array();
+	ipLoadFile(which);
+	if (INI && (INI.length)) {
+		for (i=0;i<INI.length;i++)
+		{
+			for (j=1;j<INI[i].length;j++)
+			{
+				if (INI[i][j].length>1)
+				{
+					INI[i][j][1] = INI[i][j][1].toLowerCase();
+					if (INI[i][j][1]!="description")
+						INI[i][j][2] = INI[i][j][2].toLowerCase();
+				}
+			}
+		}
+		WhichINI=which;
+		initConfig();
+		return 0;
+	} else {
+		print("Error loading INI");
+		return 1;
+	}
+}
+
+function initConfig() {
+	var logLevels=["none","useful","all","full"];
+	for (i=0;i<INI.length;i++)
+	{
+		keyloop : for (j=0;j<INI[i].length;j++)
+		{
+			key=INI[i][j][1];
+			val=INI[i][j][2];
+			switch(key)
+			{
+				case "loglevel":
+					logging=getPosition(val.toLowerCase(),logLevels);
+					continue keyloop;
+				case "logfile":
+					fLog="output/"+me.name+val;
+					continue keyloop;
+				case "goldenabled":
+					if(val==1) GrabGold=true;
+					continue keyloop;
+				case "skip":
+					SkipType.push(val);
+					continue keyloop;
+				case "pickupradius":
+					snagrad=val;
+					continue keyloop;
+				case "fillbelt":
+					if(val==0) bitcheck|=16;
+					continue keyloop;
+			}
+			switch(val)
+			{
+				case "gld":
+					bitcheck|=2;
+					continue keyloop;
+				case "rvl":
+					bitcheck|=8;
+					continue keyloop;
+				case "rvs":
+					bitcheck|=4;
+					continue keyloop;
+			}
+		}
+	}
+}
+
+function debugprint(String,dlevel) {
+	if (dlevel == 1 || dlevel > 2)
+		print(String);
+	if (dlevel >= 2)
+	{
+		fDebug = fileOpen("output/parseit-debug.txt", 2);
+		if(fDebug)
+		{
+			fDebug.writeLine(String);
+			fDebug.close
+		}
+	}
+}
+
+function getPosition(value,table) {
+	for (var k=0; k<table.length; k++) {
+		if (value==table[k]) return k;
+		if (value==String(k)) return k;
+	}
+	return -1;
+}
+
+function getAllStats(item) {
+	var output="--Stats: ";
+	for (i=0;i<324;i++)
+	{
+		if (item.getStat(i))
+		{
+			if(i==17) continue;
+			else if(i==7 || i==9 || i==11) statval=item.getStat(i) / 256;
+			else if(i==57 || i==58) statval=parseInt(item.getStat(i) * (item.getStat(59) / 25) * 25 / 256);
+			else statval=item.getStat(i);
+			output += "("+Sy_StatNumberToName(i)+"="+ statval+") ";
+		}
+	}
+	return output;
+}
+
+function Sy_StatNumberToName(stat) {
+  return [
+	"Strength",
+	"Energy",
+	"Dexterity",
+	"Vitality",
+	"STATPTS",
+	"NEWSKILLS",
+	"HITPOINTS",
+	"Life",
+	"MAXMANA",
+	"Mana",
+	"STAMINA",
+	"Stamina",
+	"LEVEL",
+	"EXPERIENCE",
+	"GOLD",
+	"GOLDBANK",
+	"%Enhanced Defense",
+	"ITEM_MAXDAMAGE_PERCENT",
+	"Enhanced Damage",
+	"Attack Rating",
+	"%To Block",
+	"1-handed Min Damage",
+	"1-handed Max Damage",
+	"2-handed Min Damage",
+	"2-handed Max Damage",
+	"DAMAGEPERCENT",
+	"MANARECOVERY",
+	"%Mana Regeneration",
+	"%Stamina Recovery",
+	"LASTEXP",
+	"NEXTEXP",
+	"Base Armor Class",
+	"Missile Defense",
+	"Melee Defense",
+	"Reduced Damage",
+	"Magic Damage Reduction",
+	"%Damage Reduction",
+	"MAGICRESIST",
+	"MAXMAGICRESIST",
+	"Fire Resistance",
+	"Max Fire Resistance",
+	"Lightning Resistance",
+	"Max Lightning Resistance",
+	"Cold Resistance",
+	"Max Cold Resistance",
+	"Poison Resistance",
+	"Max Poison Resistance",
+	"DAMAGEAURA",
+	"Min Fire Damage",
+	"Max Fire Damage",
+	"Min Lightning Damage",
+	"Max Lightning Damage",
+	"Min Magic Damage",
+	"max Magic Damage",
+	"Min Cold Damage",
+	"Max Cold Damage",
+	"Cold Duration[25=second]",
+	"Min Poison Damage",
+	"Max Poison Damage",
+	"Poison Duration[25=second]",
+	"Life Leach",
+	"LIFEDRAINMAXDAM",
+	"Mana Leach",
+	"MANADRAINMAXDAM",
+	"STAMDRAINMINDAM",
+	"STAMDRAINMAXDAM",
+	"STUNLENGTH",
+	"Speed Reduction",
+	"Base Attack Rate",
+	"OTHER_ANIMRATE",
+	"Quantity",
+	"VALUE",
+	"Durability",
+	"Max Durabilty",
+	"Replenish Life",
+	"%Enhanced Durability",
+	"%Max Life",
+	"%Max Mana",
+	"Attacker Takes Damage",
+	"%Gold Find",
+	"%Magic Find",
+	"KnockBack",
+	"ITEM_TIMEDURATION",
+	"Amazon Skills",
+	"Paladin Skills",
+	"Necro Skills",
+	"Sorceress Skills",
+	"Barbarian Skills",
+	"ITEM_DOUBLEHERBDURATION",
+	"Light Radiues",
+	"ITEM_LIGHTCOLOR",
+	"Minus Requirements",
+	"ITEM_FASTATTACKRATE",
+	"Increased Attack Speed",
+	"ITEM_FASTESTATTACKRATE",
+	"ITEM_FASTMOVEVELOCITY",
+	"Increased Run/Walk Speed",
+	"ITEM_FASTESTMOVEVELOCITY",
+	"ITEM_FASTGETHITRATE",
+	"Faster Hit Recovery",
+	"ITEM_FASTESTGETHITRATE",
+	"ITEM_FASTBLOCKRATE",
+	"Increased Block Speed",
+	"ITEM_FASTESTBLOCKRATE",
+	"ITEM_FASTCASTRATE",
+	"Faster Cast Rate",
+	"ITEM_FASTESTCASTRATE",
+	"Increase Single Skill",
+	"Increase Single Skill",
+	"Increase Single Skill",
+	"Reduce Poison Length",
+	"ITEM_NORMALDAMAGE",
+	"Hit Causes Monster to Flea[96=75%]",
+	"Hit Blinds Target",
+	"%Damage Goes to Mana",
+	"Ignore Target Defense",
+	"%Defense Reduction",
+	"Prevent Monster Heal",
+	"Half Freeze Duration",
+	"%Attack Rating",
+	"ITEM_DAMAGETARGETAC",
+	"Enhanced Damage to Demons",
+	"Enhanced Damage to Undead",
+	"Attack Rating to Demons",
+	"Attack Rating to Undead",
+	"ITEM_THROWABLE",
+	"Increase Fire Skills",
+	"ITEM_ALLSKILLS",
+	"Attacker Takes Lightning Damage",
+	"IRONMAIDEN_LEVEL",
+	"LIFETAP_LEVEL",
+	"THORNS_LEVEL",
+	"BONEARMOR",
+	"BONEARMORMAX",
+	"Freeze Target",
+	"Open Wounds",
+	"Crushing Blow",
+	"ITEM_KICKDAMAGE",
+	"Mana After kill",
+	"ITEM_HEALAFTERDEMONKILL",
+	"ITEM_EXTRABLOOD",
+	"Deadly Strike",
+	"%Fire Absorb",
+	"Fire Absorb",
+	"%Lightning Absorb",
+	"Lightning Absorb",
+	"%Magic Absorb",
+	"Magic Absorb",
+	"%Cold Absorb",
+	"Cold Absorb",
+	"Slows Target",
+	"ITEM_BLESSEDAIM",
+	"ITEM_DEFIANCE",
+	"Cannot Be Frozen",
+	"Decreased Stamina Drain",
+	"ITEM_REANIMATE",
+	"Pierce",
+	"Fires Magic Arrows",
+	"Fires Explosive Arrows",
+	"Base Min Throw Damage",
+	"Base Max Throw Damage",
+	"SKILL_HANDOFATHENA",
+	"SKILL_STAMINAPERCENT",
+	"SKILL_PASSIVE_STAMINAPERCENT",
+	"SKILL_CONCENTRATION",
+	"SKILL_ENCHANT",
+	"SKILL_PIERCE",
+	"SKILL_CONVICTION",
+	"SKILL_CHILLINGARMOR",
+	"SKILL_FRENZY",
+	"SKILL_DECREPIFY",
+	"SKILL_ARMOR_PERCENT",
+	"ALIGNMENT",
+	"TARGET0",
+	"TARGET1",
+	"GOLDLOST",
+	"CONVERSION_LEVEL",
+	"CONVERSION_MAXHP",
+	"UNIT_DOOVERLAY",
+	"Druid Skills",
+	"Assasin Skills",
+	"ITEM_ADDSKILL_SINGLE4",
+	"ITEM_ADDSKILL_SINGLE5",
+	"ITEM_ADDSKILL_SINGLE6",
+	"ITEM_ADDSKILL_SINGLE7",
+	"ITEM_ADDSKILL_SINGLE8",
+	"ITEM_ADDSKILL_SINGLE9",
+	"ITEM_ADDSKILL_SINGLE10",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Plus Skill Tree",
+	"Sockets",
+	"Cast On Attack",
+	"Cast On Attack",
+	"Cast On Attack",
+	"Cast On Striking",
+	"Cast On Striking",
+	"Cast On Striking",
+	"Cast On Being Hit",
+	"Cast On Being Hit",
+	"Cast On Being Hit",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Skill Charges",
+	"Increased Armor Class Per Level",
+	"%Increased Armor Class Per Level",
+	"Increased Life Per Level",
+	"Increased Mana Per Level",
+	"Increased Max Damage Per Level",
+	"%Increased Max Damage Per Level",
+	"Increased Strength Per Level",
+	"Increased Dexterity Per Level",
+	"Increased Energy Per Level",
+	"Increased Vitality Per Level",
+	"Increased Attack Rating Per Level",
+	"%Increased Attack Rating Per Level",
+	"Increased Cold Max Damage Per Level",
+	"Increased Fire Max Damage Per Level",
+	"Increased Lightning Max Damage Per Level",
+	"Increased Poison Max Damage Per Level",
+	"Increased Cold Resistances Per Level",
+	"Increased Fire Resistances Per Level",
+	"Increased Lightning Resistances Per Level",
+	"Increased Poison Resistances Per Level",
+	"Cold Absorb Per Level",
+	"Fire Absorb Per Level",
+	"Lightning Absorb Per Level",
+	"Poison Absorb Per Level",
+	"Increase Attacker Takes Damage Per Level",
+	"Increase Gold Find Per Level",
+	"Increase Magic Find Per Level",
+	"Increase Stamina Recovery Per Level",
+	"Increase Stamina Per Level",
+	"Damage to Demons Per Level",
+	"Damage to Undead Per Level",
+	"Attack Rating vs. Demons Per Level",
+	"Attack Rating vs. Undead Per Level",
+	"Increased Crushing Blow Per Level",
+	"Increased Open Wounds Per Level",
+	"Increased Kick Damage Per Level",
+	"Increased Deadly Strike Per Level",
+	"ITEM_FIND_GEMS_PERLEVEL",
+	"Replenish Durability",
+	"ITEM_REPLENISH_QUANTITY",
+	"Increased Stack Size",
+	"ITEM_FIND_ITEM",
+	"ITEM_SLASH_DAMAGE",
+	"ITEM_SLASH_DAMAGE_PERCENT",
+	"ITEM_CRUSH_DAMAGE",
+	"ITEM_CRUSH_DAMAGE_PERCENT",
+	"ITEM_THRUST_DAMAGE",
+	"ITEM_THRUST_DAMAGE_PERCENT",
+	"ITEM_ABSORB_SLASH",
+	"ITEM_ABSORB_CRUSH",
+	"ITEM_ABSORB_THRUST",
+	"ITEM_ABSORB_SLASH_PERCENT",
+	"ITEM_ABSORB_CRUSH_PERCENT",
+	"ITEM_ABSORB_THRUST_PERCENT",
+	"ITEM_ARMOR_BYTIME",
+	"ITEM_ARMORPERCENT_BYTIME",
+	"ITEM_HP_BYTIME",
+	"ITEM_MANA_BYTIME",
+	"ITEM_MAXDAMAGE_BYTIME",
+	"ITEM_MAXDAMAGE_PERCENT_BYTIME",
+	"ITEM_STRENGTH_BYTIME",
+	"ITEM_DEXTERITY_BYTIME",
+	"ITEM_ENERGY_BYTIME",
+	"ITEM_VITALITY_BYTIME",
+	"ITEM_TOHIT_BYTIME",
+	"ITEM_TOHITPERCENT_BYTIME",
+	"ITEM_COLD_DAMAGEMAX_BYTIME",
+	"ITEM_FIRE_DAMAGEMAX_BYTIME",
+	"ITEM_LTNG_DAMAGEMAX_BYTIME",
+	"ITEM_POIS_DAMAGEMAX_BYTIME",
+	"ITEM_RESIST_COLD_BYTIME",
+	"ITEM_RESIST_FIRE_BYTIME",
+	"ITEM_RESIST_LTNG_BYTIME",
+	"ITEM_RESIST_POIS_BYTIME",
+	"ITEM_ABSORB_COLD_BYTIME",
+	"ITEM_ABSORB_FIRE_BYTIME",
+	"ITEM_ABSORB_LTNG_BYTIME",
+	"ITEM_ABSORB_POIS_BYTIME",
+	"ITEM_FIND_GOLD_BYTIME",
+	"ITEM_FIND_MAGIC_BYTIME",
+	"ITEM_REGENSTAMINA_BYTIME",
+	"ITEM_STAMINA_BYTIME",
+	"ITEM_DAMAGE_DEMON_BYTIME",
+	"ITEM_DAMAGE_UNDEAD_BYTIME",
+	"ITEM_TOHIT_DEMON_BYTIME",
+	"ITEM_TOHIT_UNDEAD_BYTIME",
+	"ITEM_CRUSHINGBLOW_BYTIME",
+	"ITEM_OPENWOUNDS_BYTIME",
+	"ITEM_KICK_DAMAGE_BYTIME",
+	"ITEM_DEADLYSTRIKE_BYTIME",
+	"ITEM_FIND_GEMS_BYTIME",
+	"ITEM_PIERCE_COLD",
+	"ITEM_PIERCE_FIRE",
+	"ITEM_PIERCE_LTNG",
+	"ITEM_PIERCE_POIS",
+	"ITEM_DAMAGE_VS_MONSTER",
+	"ITEM_DAMAGE_PERCENT_VS_MONSTER",
+	"ITEM_TOHIT_VS_MONSTER",
+	"ITEM_TOHIT_PERCENT_VS_MONSTER",
+	"ITEM_AC_VS_MONSTER",
+	"ITEM_AC_PERCENT_VS_MONSTER",
+	"FIRELENGTH",
+	"BURNINGMIN",
+	"BURNINGMAX",
+	"PROGRESSIVE_DAMAGE",
+	"PROGRESSIVE_STEAL",
+	"PROGRESSIVE_OTHER",
+	"PROGRESSIVE_FIRE",
+	"PROGRESSIVE_COLD",
+	"PROGRESSIVE_LIGHTNING",
+	"ITEM_EXTRA_CHARGES",
+	"PROGRESSIVE_TOHIT"
+  ][stat];
+}
+
+// Ini library v0.2 - by blue mind
+// -----------------------------------------------------------------------------
+// History :
+//
+// s.2 : accepts > and <, not only =
+//       returns a slightly different structure
+// 0.2 : bug corrections, now it works ;)
+// 0.1 : first draft, should get the job done at least. it only returns one big
+//       array containing all the info
+
+// The actual parsed content of the INI
+// this contains one array per section nItem in the ini
+// each section array is formed like this :
+// INI[0]=["Section Name",[TYPE,"First key name","First key value"],...]
+
+////////////////////////////////////////////////////////////////////////////////
+// ipLoadFile(strFileName)                                                    //
+////////////////////////////////////////////////////////////////////////////////
+// Loads the ini and fills INI with it                                        //
+// Will consider ; or // on the beginning of lines as a comment               //
+////////////////////////////////////////////////////////////////////////////////
+function ipLoadFile(strFileName) {
+	nDebug=0;
+	var nLines=0;
+
+	ipFile=fileOpen(strFileName, 0);
+	if (!ipFile) {
+		for (oi=0;oi<10;oi++) print("ÿc1Failed to open "+strFileName+" for reading");
+		delay(10000);
+		return;
+	}
+
+	FileLoop : while (!ipFile.eof) {
+		strCurrentLine = ipStripSpaces(ipFile.readLine());
+		nLines++;
+		debugprint("ÿc7Line "+nLines+" ÿc@"+strCurrentLine,nDebug);
+
+		// Check to see if this line is actually a comment, or is empty
+		if ((strCurrentLine=="") || (strCurrentLine[0]==";") || (strCurrentLine.indexOf("//")==0)) {
+			debugprint("ÿc9Skipping useless line, line n°"+nLines,nDebug);
+			continue;
+		}
+
+		// Check to see if it's a new section
+		if (strCurrentLine[0]=="[") {
+			// check if section name is actually valid
+			nEndOfSection = strCurrentLine.lastIndexOf("]");
+
+			// invalid section name, skip to next line and warn user
+			if (nEndOfSection < 2) {
+				print("Error at line "+nLines+" in "+strFileName+" : invalid section name");
+				continue;
+			}
+
+			nIniLen=INI.length;
+			debugprint("ÿc/Starting section "+nIniLen+" at line "+nLines,nDebug);
+			INI[nIniLen] = new Array();
+			INI[nIniLen].push(strCurrentLine.substring(1,nEndOfSection));
+			continue;
+		}
+
+		if(strCurrentLine.indexOf("|")!=-1)
+		{
+			nIniLen=INI.length;
+			debugprint("ÿc\"Entering new or block: ("+strCurrentLine+") at line "+nLines+", inserting in section "+INI[nIniLen-1][0],nDebug);
+			INI[nIniLen-1].push(["|","orblock",strCurrentLine]);
+			continue;
+		}
+
+		// Then it must be a key
+		// Four types of keys : =, >, <, and !
+		var TypeTable=["=",">","<","!"];
+		for (oi=0;oi<TypeTable.length;oi++)
+		{
+			nEndOfKey = strCurrentLine.indexOf(TypeTable[oi]);
+			if (nEndOfKey!=-1) {
+				FillINI(nEndOfKey,strCurrentLine,nLines,TypeTable[oi]);
+				continue FileLoop;
+			}
+		}
+
+		print("Some parsing error occurred at line "+nLines+" in "+strFileName+" : unknown case");
+	}
+	ipFile.close();
+}
+
+function FillINI(nEndOfKey,cString,nLines,keyval)
+{
+	nIniLen=INI.length;
+	strKeyName=cString.substring(0,nEndOfKey);
+	strKeyValue=StripQuotes(cString.substring(nEndOfKey+1),nLines);
+	if (strKeyName.substring(0,4) == "eval")
+		strKeyValue = PreparseEvalString(strKeyValue);
+	debugprint("ÿc\"Entering new key ("+strKeyName+" "+keyval+" "+strKeyValue+") at line "+nLines+", inserting in section "+INI[nIniLen-1][0],0);
+	INI[nIniLen-1].push([keyval,strKeyName,strKeyValue]);
+}
+
+function StripQuotes(string,nLines)
+{
+	Quotes = string.indexOf("\"");
+	if (Quotes!=-1)
+	{
+		EndQuotes=string.lastIndexOf("\"");
+		if(EndQuotes==-1)
+		{
+			if(arguments.length>=2) print("ÿc1Invalid quotes at line #"+nLines+"!!!");
+			return string;
+		}
+		return string.substring(Quotes+1,EndQuotes);
+	}
+	return string;
+}
+
+// Removes the spaces and tabs at the beginning of the string
+function ipStripSpaces(strLine) {
+	var nLength=strLine.length;
+	var nPos=0;
+	while (nPos<nLength && ((strLine[nPos]==" ") || (strLine[nPos]=="	"))) {
+		nPos++;
+	}
+	return strLine.substring(nPos);
+}

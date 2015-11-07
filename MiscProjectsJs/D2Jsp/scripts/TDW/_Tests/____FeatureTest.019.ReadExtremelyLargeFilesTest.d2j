@@ -1,0 +1,30 @@
+var TEST_FileName = "output/____BigFile.txt";
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	var file_handle;
+
+	if ((file_handle = fileOpen(TEST_FileName, 0)) != null) {
+		print("Opened file '" + TEST_FileName + "' for reading.");
+		var line_count = 0;
+		while (!file_handle.eof) {
+			file_handle.readLine();
+			if (!(++line_count % 10000)) {
+				me.overhead(line_count);
+				runGC();
+			}
+		}
+		print("Lines read from file '" + TEST_FileName + "': " + line_count);
+	}
+	else
+		print("Unable to open file '" + TEST_FileName + "' for reading.");
+
+
+	print("Script completed normally.");
+}
+
+

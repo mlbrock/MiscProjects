@@ -1,0 +1,133 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Enchants.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+
+var MyLog = null;
+
+// ////////////////////////////////////////////////////////////////////////////
+var TEST_UnitList = [
+	[D2JSP_UTIL_GETUNIT_PLAYER,  "getEnchant",            "getSkill", "getState", "getStat"],
+	[D2JSP_UTIL_GETUNIT_NPC,     "getEnchant",            "getSkill", "getState", "getStat"],
+	[D2JSP_UTIL_GETUNIT_OBJECT,                                                            ],
+	[D2JSP_UTIL_GETUNIT_MISSILE                                                            ],
+	[D2JSP_UTIL_GETUNIT_ITEM,                  "getFlag",                         "getStat"],
+	[D2JSP_UTIL_GETUNIT_TILE                                                               ],
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// Njaguar patented Insta-Crash:
+//.exec i=getUnit(4); print(i.getSkill(0));
+//.exec n=getUnit(1); print(n.name+":"+n.getSkill(0));
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	MyLog = new D2JSP_UTIL_Log("output/____FeatureTest.030.copyUnitTest.d2j.log",
+		"FeatureTest.030", null, null, null, true);
+
+	MyLog.syncModeOn();
+
+	print("Delaying 3 seconds...");
+	delay(3000);
+
+	for (var count_1 = 0; count_1 < TEST_UnitList.length; count_1++)
+		TEST_DoAUnit(TEST_UnitList[count_1]);
+
+	MyLog.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TEST_DoAUnit(unit_info)
+{
+	var this_unit = getUnit(unit_info[0]);
+
+	MyLog.emitSep("=");
+	MyLog.emitSep("=");
+	MyLog.logInfo("Copy Test for Unit Type " + unit_info[0] +
+		" (" + D2JSP_UTIL_UnitNameList[unit_info[0]] + ")");
+	MyLog.emitSep("=");
+
+	if (!this_unit)
+		MyLog.logInfo("No unit of the specified type was found.");
+	else {
+		var unit_copy = copyUnit(this_unit);
+		var count_not_found      = 0;
+		var count_value_diff     = 0;
+		var count_value_diff_sub = 0;
+		MyLog.logInfo(D2JSP_UTIL_UnitNameList[unit_info[0]] + " Base Properties:");
+		MyLog.emitSep("-");
+		for (var this_prop in this_unit) {
+			if (!(this_prop in unit_copy)) {
+				MyLog.logInfoQuiet("PROPERTY NOT FOUND IN COPY: " + this_prop +
+					" = " + this_unit[this_prop]);
+				count_not_found++;
+			}
+			else if (this_unit[this_prop] != unit_copy[this_prop]) {
+				MyLog.logInfoQuiet("PROPERTY DIFFERENT IN COPY: " + this_prop +
+					": ORIGINAL = " + this_unit[this_prop] + ", COPY = " +
+					unit_copy[this_prop]);
+				count_value_diff++;
+			}
+		}
+		for (var count_1 = 1; count_1 < unit_info.length; count_1++) {
+			MyLog.emitSep("=");
+			MyLog.logInfo(D2JSP_UTIL_UnitNameList[unit_info[0]] +
+				" Subsidiary " + unit_info[count_1] + "() Properties:");
+			MyLog.emitSep("-");
+			var value_list = new Array();
+			switch (unit_info[count_1]) {
+				case "getEnchant"	:
+					value_list = D2JSP_ENCHANT_ValidList;
+					break;
+				case "getFlag"		:
+					value_list = D2JSP_ITEMFLAG_ValidList;
+					break;
+				case "getSkill"	:
+//					value_list = D2JSP_SKILL_ValidList;
+					value_list = D2JSP_UTIL_GEN_CloneObject(D2JSP_SKILL_SkillList);
+					for (var count_2 = 0; count_2 < value_list.length; count_2++)
+						value_list[count_2] = "\"" + value_list[count_2] + "\"";
+					break;
+				case "getState"	:
+					value_list = D2JSP_STATE_ValidList;
+					break;
+				case "getStat"		:
+					value_list = D2JSP_STAT_ValidList;
+					break;
+				default				:
+					MyLog.logWarning("Invalid method name ('" + unit_info[count_1] +
+						"')");
+					return(-1);
+			}
+			for (var count_2 = 0; count_2 < value_list.length; count_2++) {
+				var value_orig = eval("this_unit." + unit_info[count_1] +
+					"(" + value_list[count_2] + ");");
+				var value_copy = eval("unit_copy." + unit_info[count_1] +
+					"(" + value_list[count_2] + ");");
+				if (value_orig != value_copy) {
+					MyLog.logInfoQuiet("PROPERTY DIFFERENT IN COPY FOR " +
+						unit_info[count_1] + "(" + value_list[count_2] + "): " +
+						": ORIGINAL = " + value_orig + ", COPY = " + value_copy);
+					count_value_diff_sub++
+				}
+			}
+		}
+		MyLog.emitSep("=");
+		MyLog.logInfo(D2JSP_UTIL_UnitNameList[unit_info[0]] +
+			" Properties Not Found       : " + count_not_found);
+		MyLog.logInfo(D2JSP_UTIL_UnitNameList[unit_info[0]] +
+			" Property Value Differences : " + count_value_diff);
+		MyLog.logInfo(D2JSP_UTIL_UnitNameList[unit_info[0]] +
+			" Subsdiary Value Differences: " + count_value_diff_sub);
+	}
+
+	MyLog.emitSep("=");
+	MyLog.logInfoQuiet("");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

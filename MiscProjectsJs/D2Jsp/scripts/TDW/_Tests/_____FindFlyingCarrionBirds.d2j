@@ -1,0 +1,22 @@
+var WaterNPCList = ["Stygian Watcher", "Water Watcher", "River Stalker"];
+
+function main()
+{
+	print("Running...");
+
+	while (true) {
+		this_npc = getUnit(1, "Carrion Bird", 8);
+		if (this_npc) {
+			do {
+				if ((this_npc.name == "Carrion Bird") && (this_npc.mode == 8))
+					me.overhead("Flying Carrion Bird @ [" + this_npc.x +
+						", " + this_npc.y + "]");
+			} while (this_npc && this_npc.getNext("Carrion Bird", 8));
+		}
+		else
+			me.overhead(" ");
+		delay(500);
+	}
+}
+
+while (true) { var c=getUnit(1, "River Stalker"); if (c) { do { if ((c.mode != 0) && (c.mode != 12)) print(c.name + ":" + c.mode); } while (c && c.getNext("River Stalker")); } delay(500);}

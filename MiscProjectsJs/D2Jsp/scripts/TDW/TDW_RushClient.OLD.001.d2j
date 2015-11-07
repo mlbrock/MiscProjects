@@ -1,0 +1,615 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_ItemFlags.d2l");
+includeonce("TDW/_D2JSP_Items.d2l");
+includeonce("TDW/_D2JSP_ItemTypes.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/_D2JSP_Objects.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_Stats.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/TDW_Move.d2l");
+//includeonce("SyLib.d2l");
+
+includeonce("mlMap.d2l");
+
+	// The path in Duriel's Lair from Duriel's location to Tyrael's.
+const TDW_MOVE_Area73 = [
+	[22638, 15693],
+	[22641, 15698],
+	[22638, 15702],
+	[22633, 15705],
+	[22628, 15707],
+	[22624, 15710],
+	[22619, 15710],
+	[22614, 15710],
+	[22609, 15707],
+	[22604, 15705],
+	[22599, 15705],
+	[22594, 15706],
+	[22589, 15706],
+	[22584, 15705],
+	[22580, 15702],
+	[22579, 15697],
+	[22577, 15692],
+	[22578, 15687],
+	[22578, 15682],
+	[22578, 15677],
+	[22579, 15672],
+	[22579, 15667],
+	[22579, 15662],
+	[22580, 15657],
+	[22581, 15652],
+	[22583, 15647],
+	[22579, 15644],
+	[22575, 15641],
+	[22575, 15636],
+	[22575, 15631],
+	[22574, 15626],
+	[22574, 15621],
+	[22576, 15616],
+	[22576, 15611],
+	[22576, 15606],
+	[22576, 15601],
+];
+
+	// The path in Durance 3 from the right-most Wyand's side) weapon rack to
+	// the bridge to Mephisto's red portal which leads to Act 4.
+const TDW_MOVE_Area102 = [
+	[17572, 8003],
+	[17572, 8008],
+	[17573, 8013],
+	[17572, 8018],
+	[17571, 8023],
+	[17571, 8028],
+	[17570, 8033],
+	[17569, 8038],
+	[17568, 8043],
+	[17567, 8048],
+	[17567, 8053],
+	[17567, 8058],
+	[17568, 8063],
+	[17571, 8067],
+	[17576, 8070],
+	[17581, 8070],
+	[17586, 8070],
+	[17591, 8069],
+];
+
+const RC_PublicOverhead = 1;
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/TDW_RushClient." + me.realm +
+		"." + me.account + "." + me.name + ".log", "TDW_RushCLient");
+	var starting_act;
+	var act_index;
+
+	my_log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	print("Waiting 1 seconds for game load to complete...");
+	delay(1000);
+	print("Ready.");
+
+	me.randommove = true;
+
+	starting_act  = me.act;
+
+	if (!RC_Initialize()) {
+		for (act_index = me.act; act_index <= 5; act_index++)
+			RC_StartAct();
+		if (me.act != starting_act) {
+			print("Returning to the act in which I started...");
+			TDW_MOVE_COMPAT_TownMove(starting_act, "waypoint");
+		}
+		print("Done!");
+	}
+
+	print("Script ending");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function RC_Initialize()
+{
+	var tbk_obj;
+	var tsc_count;
+
+	if (D2JSP_COMM_PickupForCorpse()) {
+		D2JSP_UTIL_LOG_GetALog().logError("Unable to pickup corpse --- probably "+
+			"not prudent to continue");
+		return(-1);
+	}
+
+	tbk_obj = D2JSP_COMM_GetALocalTome("tbk");
+
+	if (tbk_obj) {
+		tsc_count = tbk_obj.getStat(D2JSP_STAT_QUANTITY);
+		if ((tsc_count < 10) && D2JSP_NPC_FillTBK()) {
+			D2JSP_UTIL_LOG_GetALog().logError(
+				"Was unable to re-fill a Tome of Townportal.");
+			return(-1);
+		}
+	}
+	else if (D2JSP_NPC_PurchaseTBK()) {
+		D2JSP_UTIL_LOG_GetALog().logError(
+			"Was unable to purchase a Tome of Townportal.");
+		return(-1);
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function RC_StartAct()
+{
+	var desired_act   = me.act;
+	var portal_parent = "*";
+	var tmp_parent;
+	var target_area;
+
+	// Get corpse.
+
+if (false) {
+	//	CODE NOTE: For testing without going to the actual quest locations.
+	if (me.act == 1)
+		target_area = D2JSP_AREA_CATACOMBS_LEVEL_2;
+	else if (me.act == 2)
+		target_area = D2JSP_AREA_CANYON_OF_THE_MAGI;
+	else if (me.act == 3)
+		target_area = D2JSP_AREA_DURANCE_OF_HATE_LEVEL_2;
+	else if (me.act == 4)
+		target_area = D2JSP_AREA_RIVER_OF_FLAME;
+	else
+		target_area = D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2;
+}
+else {
+	if (me.act == 1)
+		target_area = D2JSP_AREA_CATACOMBS_LEVEL_4;
+	else if (me.act == 2)
+		target_area = D2JSP_AREA_DURIELS_LAIR;
+	else if (me.act == 3)
+		target_area = D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3;
+	else if (me.act == 4)
+		target_area = D2JSP_AREA_CHAOS_SANCTUM;
+	else
+		target_area = D2JSP_AREA_THE_WORLDSTONE_CHAMBER;
+}
+
+	TDW_MOVE_COMPAT_TownMove(me.act, (me.act != 5) ? "portalspot" : "malah");
+	TDW_MOVE_RandomizeLocation();
+
+	print("At portal spot.");
+
+	tmp_parent = TDW_RC_DoQuest(target_area, portal_parent);
+	if (portal_parent == "*")
+		portal_parent = tmp_parent;
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function MLB_AR_HandleQuestRequest()
+{
+	MLB_AR_QuestRequest      = new Array();
+	MLB_AR_QuestRequestReady = true;
+
+	while (true) {
+		if (MLB_AR_QuestRequest.length) {
+			D2JSP_UTIL_BNET_OverheadSafe("");
+			MLB_AR_QuestRequestReady = false;
+			var this_params  = MLB_AR_QuestRequest.shift();
+			var this_params  = this_params.split(/[\s]/);
+			var this_request = this_params[0];
+			this_params.shift();
+			if (this_request.toLowerCase() == ">quit") {
+				print("TDW RS quit request noted... exiting request mode.");
+				break;
+			}
+			else if ((this_request.length < 2) || (this_request.charAt(0) != ">"))
+				print("Invalid TDW RS quest request (" + this_request + ")");
+			else {
+				this_request = this_request.substr(1);
+				if (!(this_request.toLowerCase() in MLB_AR_RQNameList))
+					print("Invalid TDW RS quest request ('" + this_request + "')");
+				else if (MLB_AR_RQNameList[this_request.toLowerCase()] == null)
+					print("That quest is not yet supported.");
+				else
+					DoAQuest(MLB_AR_RQNameList[this_request.toLowerCase()],
+						this_params);
+			}
+			MLB_AR_QuestRequest      = new Array();
+			MLB_AR_QuestRequestReady = true;
+		}
+		D2JSP_UTIL_BNET_OverheadSafe("Ready for requests");
+		delay(250);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_RC_DoQuest(target_area, portal_parent)
+{
+	var last_area = me.area;
+	var tmp_portal_parent;
+
+	while (true) {
+		D2JSP_UTIL_BNET_OverheadSafe("Waiting for a TP to area " +
+			D2JSP_AREA_AreaToName(target_area) + "...", RC_PublicOverhead);
+		tmp_portal_parent = TDW_MOVE_LookForAndTakePortal(target_area,
+			portal_parent, 1, 0, true);
+		if (tmp_portal_parent != "*")
+			break;
+		delay(500);
+	}
+
+	say(me.name + " is waiting for this portal owned by \'" +
+		tmp_portal_parent + "' to vanish...");
+	delay(500);
+
+	// Wait for portal to vanish...
+	while (TDW_MOVE_LookForPortal(-1, tmp_portal_parent, 1))
+		delay(500);
+
+	print("Portal is gone! Proceeding to finalize quest...");
+
+	delay(500);
+
+	say("Finalizing the Act " + me.act + " quest...");
+
+	delay(500);
+
+	if (me.act == 1)
+		FinalizeQuestAct1();
+	else if (me.act == 2)
+		FinalizeQuestAct2();
+	else if (me.act == 3)
+		FinalizeQuestAct3();
+	else if (me.act == 4)
+		FinalizeQuestAct4();
+	else
+		FinalizeQuestAct5();
+
+	return(tmp_portal_parent);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function FinalizeQuestAct1()
+{
+	var npc_obj;
+	var count_1;
+
+	ReturnToTown();
+
+	say("Moving to Warriv...");
+	TDW_MOVE_COMPAT_TownMove(1, "stash");
+
+	if ((npc_obj = D2JSP_COMM_InteractWithNPC("Warriv")) != null) {
+		npc_obj.useMenu(D2JSP_NPC_USEMENU_GO_EAST);
+		for (count_1 = 0; count_1 < 100; count_1++) {
+			if (me.act == 2)
+				break;
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+	}
+
+	while (me.act != 2) {
+		D2JSP_UTIL_BNET_OverheadSafe("Ask Warriv to take you East to Lut Gholein.",
+			RC_PublicOverhead);
+		delay(500);
+	}
+	D2JSP_UTIL_BNET_OverheadSafe("Now in Act " + me.act, RC_PublicOverhead);
+
+	TDW_MOVE_COMPAT_TownMove(2, "stash");
+	TDW_MOVE_COMPAT_TownMove(2, "portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function FinalizeQuestAct2()
+{
+	var this_portal;
+	var count_1;
+	var jerhyn_obj;
+	var meshif_obj;
+	var count_1;
+	var my_map;
+	var my_path;
+
+	if (me.area == D2JSP_AREA_DURIELS_LAIR) {
+		this_portal = TDW_MOVE_LookForPortal(D2JSP_AREA_LUT_GHOLEIN, "", 1);
+		if (this_portal)
+			say("All take " + this_portal.getParent() + "'s portal to " +
+				D2JSP_AREA_AreaToName(me.area) + "!");
+		else
+			say("All come now to " + D2JSP_AREA_AreaToName(me.area) + "!");
+		print("Building " + D2JSP_AREA_AreaToName(me.area) + " map...");
+		my_map = new oMap(true, false);
+		my_map.InitializeMap();
+		delay(1000);
+		for (count_1 = 60; count_1; count_1--) {
+			if (!(count_1 % 10))
+				say("Waiting for " + count_1 +
+					" seconds for all characters to arrive at " +
+					D2JSP_AREA_AreaToName(me.area) + ".");
+			else if (count_1 <= 5)
+				say(count_1);
+			delay(1000);
+		}
+		say("0");
+		the_path = my_map.FindPath(me.x, me.y,
+			TDW_MOVE_Area73[TDW_MOVE_Area73.length - 1][0],
+			TDW_MOVE_Area73[TDW_MOVE_Area73.length - 1][1], 5,
+			mlREDUCEWALK, mlASTAR, mlFHDIAGSHORTCUT, 1);
+		say("Moving to Tyrael...");
+		D2JSP_UTIL_BNET_OverheadSafe("Moving to Tyrael...", RC_PublicOverhead);
+		if (the_path != null)
+			my_map.PathMove(the_path, false, 0);
+		else
+			TDW_MOVE_DoPathList(TDW_MOVE_Area73);
+		D2JSP_COMM_InteractWithNPC("Tyrael");
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Moving to Jerhyn", RC_PublicOverhead);
+	ReturnToTown();
+
+	D2JSP_UTIL_BNET_OverheadSafe("Moving to Jerhyn", RC_PublicOverhead);
+	TDW_MOVE_COMPAT_TownMove("palace");
+
+	jerhyn_obj = D2JSP_COMM_InteractWithNPC("Jerhyn");
+	if (jerhyn_obj) {
+		D2JSP_UTIL_BNET_OverheadSafe("Moving to Meshif", RC_PublicOverhead);
+		meshif_obj = D2JSP_COMM_InteractWithNPC("Meshif");
+		if (meshif_obj) {
+			meshif_obj.useMenu(D2JSP_NPC_USEMENU_SAIL_EAST);
+			for (count_1 = 0; count_1 < 100; count_1++) {
+				if (me.act == 3)
+					break;
+				D2JSP_UTIL_GEN_FuzzyDelay(50);
+			}
+		}
+  }
+
+	while (me.act != 3) {
+		D2JSP_UTIL_BNET_OverheadSafe("Ensure that you've talked with Jerhyn then ask Meshif to " +
+			"take sail East to Kurast.", RC_PublicOverhead);
+		delay(500);
+	}
+	D2JSP_UTIL_BNET_OverheadSafe("Now in Act " + me.act, RC_PublicOverhead);
+
+	TDW_MOVE_COMPAT_TownMove(3, "portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function FinalizeQuestAct3()
+{
+	var my_map;
+	var my_path;
+	var count_1;
+	var nearest_index;
+
+	if (me.area == D2JSP_AREA_DURANCE_OF_HATE_LEVEL_3) {
+		print("Building " + D2JSP_AREA_AreaToName(me.area) + " map...");
+		my_map = new oMap(true, false);
+		my_map.InitializeMap();
+		// Try to find Meph's red portal...
+		the_path = my_map.FindPath(me.x, me.y,
+			TDW_MOVE_Area102[TDW_MOVE_Area102.length - 1][0],
+			TDW_MOVE_Area102[TDW_MOVE_Area102.length - 1][1], 5,
+			mlREDUCEWALK, mlASTAR, mlFHDIAGSHORTCUT, 1);
+		D2JSP_UTIL_BNET_OverheadSafe("Moving to Meph's red portal...", RC_PublicOverhead);
+		if (the_path != null)
+			my_map.PathMove(the_path, false, 0);
+		else {
+			for (count_1 = 0; count_1 < 10; count_1++) {
+				nearest_index = TDW_MOVE_GetNearestCoord(TDW_MOVE_Area102);
+				TDW_MOVE_MoveToXYPair(TDW_MOVE_Area102[nearest_index]);
+				if (D2JSP_SYLIB_myDistPair(TDW_MOVE_Area102[nearest_index]) < 5)
+					break;
+				delay(250);
+			}
+			for (count_1 = 0; count_1 < 50; count_1++) {
+				nearest_index = TDW_MOVE_GetNearestCoord(TDW_MOVE_Area102);
+				if (!TDW_MOVE_DoPathListBasic(TDW_MOVE_Area102,
+					nearest_index, (TDW_MOVE_Area102.length - nearest_index) + 1))
+					break;
+				if (myDist(TDW_MOVE_Area102[TDW_MOVE_Area102.length - 1][0],
+					TDW_MOVE_Area102[TDW_MOVE_Area102.length - 1][1]) < 5)
+					break;
+				delay(250);
+			}
+		}
+		D2JSP_UTIL_BNET_OverheadSafe("Waiting for portal bridge to be raised...", RC_PublicOverhead);
+		delay(3000);
+		D2JSP_UTIL_BNET_OverheadSafe("Trying to find Meph's red portal...", RC_PublicOverhead);
+//		TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_THE_PANDEMONIUM_FORTRESS, "", 10);
+		TDW_MOVE_LookForAndTakePortal(0, "", 10);
+if (me.act != 4) {
+	var file_handle;
+	say("Didn't find Meph's red portal!");
+	file_handle = fileOpen(me.name + ".PortalSearch.txt", 2);
+	if (file_handle) {
+		file_handle.writeLine("// ///////////////////////");
+		var this_portal = getUnit(D2JSP_UTIL_GETUNIT_OBJECT);
+		var this_parent_name;
+		if (this_portal) {
+			do {
+//			if (this_portal && (this_portal.mode == D2JSP_MODE_OBJECT_OPENED))
+				if (this_portal.name.toLowerCase() == "portal") {
+					this_parent_name =
+						(this_portal.getParent() && this_portal.getParent().name) ?
+						this_portal.getParent().name : "";
+					file_handle.writeLine("Portal to " +
+						D2JSP_AREA_GetAct(
+							D2JSP_UTIL_GetObjectTargetArea(this_portal)) +
+						": " + D2JSP_UTIL_GetObjectTargetArea(this_portal) + " = " +
+						D2JSP_AREA_AreaToName(
+							D2JSP_UTIL_GetObjectTargetArea(this_portal)) +
+						" found ('" + this_parent_name + "') --- mode = " +
+						this_portal.mode + ", location = [" + this_portal.x + ", " +
+						this_portal.y + "]");
+					delay(10);
+				}
+			} while (this_portal && this_portal.getNext());
+		}
+		file_handle.close();
+	}
+}
+	}
+
+	while (me.act != 4) {
+		D2JSP_UTIL_BNET_OverheadSafe("Go to and use Meph's red portal.", RC_PublicOverhead);
+		delay(500);
+	}
+	D2JSP_UTIL_BNET_OverheadSafe("Now in Act " + me.act, RC_PublicOverhead);
+
+	TDW_MOVE_COMPAT_TownMove(4, "portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function FinalizeQuestAct4()
+{
+	var tyrael_obj;
+	var count_1;
+
+	ReturnToTown();
+
+	say("Moving to Tyrael...");
+
+	tyrael_obj = D2JSP_COMM_InteractWithNPC("tyrael");
+
+	if (tyrael_obj) {
+		tyrael_obj.useMenu(D2JSP_NPC_USEMENU_GO_TO_HARROGATH);
+		for (count_1 = 0; count_1 < 100; count_1++) {
+			if (me.act == 5)
+				break;
+			D2JSP_UTIL_GEN_FuzzyDelay(50);
+		}
+	}
+
+	while (me.act != 5) {
+		D2JSP_UTIL_BNET_OverheadSafe("Talk to Tyrael then use the red portal.", RC_PublicOverhead);
+		delay(500);
+	}
+
+	D2JSP_UTIL_BNET_OverheadSafe("Now in Act " + me.act, RC_PublicOverhead);
+
+//	TDW_MOVE_COMPAT_TownMove(5, "malah");
+	TDW_MOVE_COMPAT_TownMove(5, "portalspot");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function FinalizeQuestAct5()
+{
+	ReturnToTown();
+
+	D2JSP_UTIL_BNET_OverheadSafe("Act 5 quest completed!", RC_PublicOverhead);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function ReturnToTown()
+{
+	say(me.name + "is now taking portal back to town...");
+
+	if (TDW_MOVE_PortalToTown()) {
+		print("FATAL ERROR: Unable to use Tome of Town Portal...");
+		print("Stopping");
+		stop();
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfo(arguments[0]);
+
+	if (arguments[0].match(/\s+invites\s+/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = getUnit(D2JSP_UTIL_GETUNIT_PLAYER, player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i) &&
+		(arguments[0][0] != "*")) {
+		log_obj.logInfo("*****" + arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = getUnit(D2JSP_UTIL_GETUNIT_PLAYER, player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Offered a party invitation to player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Did not offer a party invitation to player " +
+						player_name + ".");
+			}
+			else
+				log_obj.logWarning("Unable to offer a party invitation to player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (MLB_AR_QuestRequestReady) {
+		var msg_data = D2JSP_UTIL_GEN_ParseNetString(arguments[0]);
+		if ((msg_data) && (msg_data[1].charAt(0) == ">"))
+		  MLB_AR_QuestRequest.push(msg_data[1]);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+	runGC();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

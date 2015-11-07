@@ -1,0 +1,78 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/TDW_Move.d2l");
+includeonce("TDW/_D2JSP_Rooms.d2l");
+
+var MyLog = new D2JSP_UTIL_Log("output/TDW_AnalyzeBorders.log",
+	"TDW_AnalyzeBorders", null, null, null, true);
+
+function main()
+{
+	for (var this_act = 1; this_act <= 5; this_act++) {
+		if (me.act != this_act)
+			TDW_MOVE_COMPAT_TownMove(this_act, "waypoint");
+		if (me.act != this_act) {
+			MyLog.logError("Unable to get to Act " + this_act + " --- aborting.");
+			break;
+		}
+		var inited_area_list = TDW_PATH_GetInitedAreas();
+		for (var this_area = (D2JSP_AREA_MINIMUM + 1);
+			this_area <= D2JSP_AREA_MAXIMUM; this_area++) {
+			if (me.act != D2JSP_AREA_GetAct(this_area))
+				continue;
+			var room_list   = new D2JSP_RoomList(this_area);
+			var border_flag = false;
+			MyLog.emitSep("=");
+			MyLog.emitSep("=");
+			MyLog.logInfoQuiet("Borders for area " + this_area + " (" +
+				D2JSP_AREA_AreaToName(this_area) + "):");
+			MyLog.emitSep("-");
+			for (var this_room_number in room_list.room_hash) {
+				if (D2JSP_ROOM_IsBorderRoom(parseInt(this_room_number, 10))) {
+					if (!border_flag) {
+						MyLog.logInfo("Area " + this_area + " (" +
+							D2JSP_AREA_AreaToName(this_area) + " has borders.");
+						for (var count_1 = 0; count_1 < room_list.meta_map.length;
+							count_1++) {
+							var meta_string = "";
+							for (var count_2 = 0;
+								count_2 < room_list.meta_map[count_1].length; count_2++)
+								meta_string += "|" + D2JSP_UTIL_FORMAT_RJust(
+									(room_list.meta_map[count_1][count_2] != null) ?
+									room_list.meta_map[count_1][count_2].number : "", 10);
+								MyLog.logInfoQuiet(meta_string + "|");
+						}
+						MyLog.emitSep("-");
+						MyLog.writeLine(room_list.getStringList());
+						MyLog.emitSep("-");
+						border_flag = true;
+						runGC();
+					}
+					for (var count_1 = 0;
+						count_1 < room_list.room_hash[this_room_number].length;
+						count_1++) {
+						var room_obj = room_list.room_hash[this_room_number][count_1];
+						MyLog.logInfoQuiet("Room number " +
+							D2JSP_UTIL_FORMAT_RJust(room_obj.number, 3) +
+							" at meta-map location [" + room_obj.room_row + ", " +
+							room_obj.room_col + "]");
+						MyLog.writeLine(room_obj.getStringList());
+						runGC();
+					}
+				}
+			}
+			MyLog.emitSep("=");
+			room_list = null;
+			runGC();
+			delay(1000);
+		}
+		TDW_PATH_FreeInitedAreas(inited_area_list, MyLog);
+		runGC();
+	}
+
+	MyLog.logInfo("Script completed.");
+
+	MyLog.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

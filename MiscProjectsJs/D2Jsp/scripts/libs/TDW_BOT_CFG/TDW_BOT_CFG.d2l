@@ -1,0 +1,11 @@
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "VirginC") ||
+		(me.name == "AKAB_PA") || (me.name == "AKAB_PB") ||
+		(me.name == "ChestPopper")) {
+		TDW_BOT_ConfigureList["skill.attack.local"]  = new Array();
+		TDW_BOT_ConfigureList["skill.attack.ranged"] =
+			["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+

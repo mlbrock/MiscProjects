@@ -1,0 +1,37 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+var MsgCount = 0;
+
+function main()
+{
+	var my_log =
+		new D2JSP_UTIL_Log("output/____FeatureTest.013.TestGameMessages." +
+		me.realm + "." + me.account + "." + me.name + ".log",
+		"TestGameMessages", null, null, null, true);
+
+	my_log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	me.overhead(" ");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	print("Ready for game messages on PID " + getMyPID() + " = " +
+		getMyPID().toString(16));
+
+	while (true) {
+		var last_mode = me.mode;
+		while ((me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN) &&
+			(me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN)) {
+			last_mode = me.mode;
+			me.overhead("Last Mode=" + last_mode);
+			D2JSP_UTIL_GEN_FuzzyDelay(10);
+		}
+		me.overhead("Last Mode=" + last_mode);
+		delay(10);
+	}
+
+	print("Script done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

@@ -1,0 +1,277 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Configuration File Loading Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Cfg.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Configuration file location and reading library.
+//
+// Revison History : 2003-09-25 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_TDW_Cfg_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_TDW_Cfg_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CFG_GetFileSpec(prefix, suffix, ext, realm, account, name,
+	suffix_priority)
+{
+	var name_list = TDW_CFG_GetFileSpecList(prefix, suffix, ext, realm,
+		account, name, suffix_priority);
+
+	while (name_list.length) {
+		if (D2JSP_UTIL_GEN_FileExists(name_list[0]))
+			return(name_list[0]);
+		name_list.shift();
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CFG_GetFileSpecList(prefix, suffix, ext, realm, account,
+	name, suffix_priority)
+{
+	var name_list       = new Array();
+	var look_aside_list = new Array();
+
+	prefix  = prefix.replace(/\\+/g, "/");
+	prefix  = prefix.replace(/\/+/g, "/");
+	prefix  = prefix.replace(/^\s+|\s+$/g, "");
+	prefix  = (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(prefix))  ? prefix  :
+		"settings/";
+	suffix  = (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(suffix))  ? suffix  : null;
+	realm   = (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(realm))   ? realm   :
+		((D2JSP_UTIL_GEN_TypeOfStringNotEmpty(me.realm)) ? me.realm : "#SP#");
+	account = (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(account)) ? account :
+		((D2JSP_UTIL_GEN_TypeOfStringNotEmpty(me.account)) ? me.account : "#SP#");
+	name    = (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(name))    ? name    : me.name;
+	ext     = (D2JSP_UTIL_GEN_TypeOfStringNotEmpty(ext))     ? ext     : "cfg";
+	ext     = ext.replace(/^\.+/g, "");
+	ext     = "." + ext;
+
+	var final_name   = prefix + ext;
+	var portion_list = [realm, account, name];
+	var tmp_file_name;
+	var tmp_file_name;
+
+	var portion_count = portion_list.length + 1;
+	for (var count_1 = 0; count_1 < portion_count; count_1++) {
+		if (suffix) {
+			tmp_file_name = prefix + "." + suffix +
+				((portion_list.length) ? "." : "") + portion_list.join(".") + ext;
+			name_list.push(tmp_file_name);
+		}
+		tmp_file_name = prefix + ((portion_list.length) ? "." : "") +
+			portion_list.join(".") + ext;
+		if (tmp_file_name == final_name)
+			break;
+		if (suffix_priority)
+			look_aside_list.push(tmp_file_name);
+		else
+			name_list.push(tmp_file_name);
+		portion_list.pop();
+	}
+
+	name_list = name_list.concat(look_aside_list);
+
+	name_list.push(final_name);
+
+	return(name_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CFG_ReadFileSimple(file_name, error_list)
+{
+	var line_list = TDW_CFG_ReadFile(file_name, error_list);
+
+	if (line_list) {
+		var out_list = new Array(line_list.length);
+		for (var count_1 = 0; count_1 < line_list.length; count_1++)
+			out_list[count_1] = line_list[count_1][2];
+		runGC();
+		return(out_list);
+	}
+	else
+		return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CFG_ReadFile(file_name, error_list)
+{
+	var out_list = new Array();
+	var inc_list = new Array();
+
+	error_list = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(error_list)) ? error_list :
+		(new Array());
+
+	return((!TDW_CFG_ReadFileInternal(file_name, inc_list, out_list,
+		error_list)) ? out_list : null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CFG_ReadFileInternal(file_name, inc_list, out_list,
+	error_list)
+{
+	var line_list = D2JSP_UTIL_GEN_ReadFile(file_name);
+
+	if (line_list == null) {
+		error_list.push("Unable to open file '" + file_name + "' for reading.");
+		return(-1);
+	}
+	else {
+		inc_list[file_name.toLowerCase()] = true;
+		for (var count_1 = 0; count_1 < line_list.length; count_1++) {
+			var this_line = line_list[count_1];
+			var inc_name  = this_line.match(/^\s*include\s+\"(.+)\"\s*$/i);
+			if (inc_name && (inc_name.length == 2)) {
+				inc_name[1] = inc_name[1].replace(/\\+/g, "/");
+				inc_name[1] = inc_name[1].replace(/\/+/g, "/");
+				inc_name[1] = inc_name[1].replace(/^\s+|\s+$/g, "");
+				if (inc_list[inc_name[1].toLowerCase()]) {
+					error_list.push("Error on line " + (count_1 + 1) + " of file '" +
+						file_name + "': " + "File '" + inc_name[1] +
+						"' may not be included recursively.");
+					return(-1);
+				}
+				if (TDW_CFG_ReadFileInternal(inc_name[1], inc_list, out_list,
+					error_list))
+					return(-1);
+			}
+			else if (!this_line.match(/^\s*;|^\s*$/g))
+				out_list.push([count_1 + 1, file_name, this_line]);
+		}
+		inc_list[file_name.toLowerCase()] = false;
+	}
+
+	runGC();
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_TDW_Cfg_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main()
+{
+	var file_name = "output/RegressionTest.TDW_Cfg.d2l.txt";
+	var log_obj   = new D2JSP_UTIL_Log(file_name, "TDW_Cfg", null, null, null,
+							true);
+
+	print("Writing 'TDW_Cfg.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	var name_list;
+	log_obj.emitSep("=");
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("TDW_CFG_GetFileSpecList() Test / " +
+		"Suffix Priority = false:");
+	log_obj.emitSep("-");
+	name_list = TDW_CFG_GetFileSpecList("settings/ISF", "SUFFIX", null, null,
+		null, null, false);
+	while (name_list.length)
+		log_obj.logInfoQuiet(name_list.shift());
+	log_obj.emitSep("=");
+
+	log_obj.emitSep("=");
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("TDW_CFG_GetFileSpecList() Test / " +
+		"Suffix Priority = true:");
+	log_obj.emitSep("-");
+	name_list = TDW_CFG_GetFileSpecList("settings/ISF", "SUFFIX", null, null,
+		null, null, true);
+	while (name_list.length)
+		log_obj.logInfoQuiet(name_list.shift());
+	log_obj.emitSep("=");
+
+	var file_name = TDW_CFG_GetFileSpec("settings/ISF");
+	log_obj.emitSep("=");
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("TDW_CFG_ReadFile() Test:");
+	log_obj.logInfoQuiet("File Name              :" + file_name);
+	log_obj.emitSep("-");
+	var error_list = new Array();
+	var line_list  = TDW_CFG_ReadFile(file_name, error_list);
+	if (line_list) {
+		var max_length = 0;
+		for (var count_1 = 0; count_1 < line_list.length; count_1++)
+			max_length = Math.max(max_length, line_list[count_1][1].length);
+		while (line_list.length) {
+			log_obj.logInfoQuiet(D2JSP_UTIL_FORMAT_RJust(line_list[0][0], 6) +
+				"|" + D2JSP_UTIL_FORMAT_LJust(line_list[0][1], max_length) + "|" +
+				line_list[0][2]);
+			line_list.shift();
+		}
+	}
+	else {
+		while (error_list.length)
+			log_obj.logError("TDW CFG ERROR: " + error_list.shift());
+	}
+	log_obj.emitSep("=");
+
+	var file_name = TDW_CFG_GetFileSpec("settings/ISF");
+	log_obj.emitSep("=");
+	log_obj.emitSep("=");
+	log_obj.logInfoQuiet("TDW_CFG_ReadFileSimple() Test:");
+	log_obj.logInfoQuiet("File Name              :" + file_name);
+	log_obj.emitSep("-");
+	var error_list = new Array();
+	var line_list  = TDW_CFG_ReadFileSimple(file_name, error_list);
+	if (line_list) {
+		while (line_list.length) {
+			log_obj.logInfoQuiet(line_list[0]);
+			line_list.shift();
+		}
+	}
+	else {
+		while (error_list.length)
+			log_obj.logError("TDW CFG ERROR: " + error_list.shift());
+	}
+	log_obj.emitSep("=");
+
+	log_obj.closeLog();
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_AREA_TEST_WriteSep(file_handle)
+{
+	file_handle.writeLine(
+"// /////////////////////////////////////////////////////////////////////////");
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

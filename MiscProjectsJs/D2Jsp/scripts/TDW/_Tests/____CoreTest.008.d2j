@@ -1,0 +1,53 @@
+/*
+	___CoreTest.008.d2j
+
+	Symptoms    :
+		Catastrophic failure:
+			Assertion Failure
+			Location : D2Lang\StrTable\strtable.cpp, line #699
+			Expression : 0
+
+		Catastrophic failure occurs when attempting to access the 'fname'
+		member of an unidentified magic item.
+
+		Haven't tested with rares (compare ____CoreTest.005.d2j).
+
+	Tested under :
+		D2X Product and D2 Loader for
+			28 Core --- Win 2000 / SP 3 / 1 2.0 Ghz Pentium 4 CPU / 512KB RAM
+			28 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+function main()
+{
+	var this_item  = getUnit(4);
+	var found_flag = false;
+
+	if (this_item) {
+		do {
+			if (!this_item.getFlag(0x10)) {
+				if (this_item.quality == 4) {
+					print("An unidentified magic " + this_item.name + " was found.");
+					print("Get ready to lose your Diablo window in 3 seconds...");
+					delay(3000);
+					found_flag = true;
+				}
+				print("An unidentified " + this_item.name + " was found " +
+					"(prefix = " + this_item.prefix + ", suffix = " +
+					this_item.suffix + ") --- fname = " + this_item.fname);
+			}
+		} while (this_item && this_item.getNext());
+	}
+
+	if (found_flag) {
+		print("Hmmm... Found an unidentified magic item, but didn't crash.");
+		print("Unable to replicate the problem in this environment or it's " +
+			"been fixed in the core.");
+	}
+	else
+		print("No unidentified magic items found in the vicinity --- " +
+			"can't perform the test.");
+
+	print("End of test.");
+}
+
+

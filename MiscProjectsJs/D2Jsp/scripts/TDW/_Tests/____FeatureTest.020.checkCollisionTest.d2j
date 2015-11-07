@@ -1,0 +1,129 @@
+include("TDW/_D2JSP_Utility.d2l");
+includeonce("TDW/_D2JSP_Rooms.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+var TEST_Log            = null;
+
+var TEST_OtherName      = "bank";
+var TEST_IterationCount = 100000;
+
+// .exec while (true) { var w=getUnit(2, "waypoint"); if (w) me.overhead(getLoS(me, w, 9)); delay(100); }
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	TEST_Log = new D2JSP_UTIL_Log("output/" +
+		"____FeatureTest.020.checkCollisionTest.d2j" + "." + me.realm +
+		"." + me.account + "." + me.name + ".log", "FeatureTest.020",
+		null, null, null, true);
+
+	TEST_Waypoint();
+//	TEST_RE();
+//	SaveArea();
+}
+
+function TEST_RE()
+{
+	if (me.act != 1)
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+
+	var other_obj  = getUnit(2, TEST_OtherName);
+	if (other_obj) {
+		var start_time = new Date();
+/*
+		for (count_1 = 0; count_1 < TEST_IterationCount; count_1++)
+			checkCollision(me, other_obj, 0x0B);
+*/
+		for (count_1 = 0; count_1 < TEST_IterationCount; count_1++)
+			checkCollision(me.area, me.x, me.y, 2, other_obj.x, other_obj.y, 2, 0x0B);
+		var end_time   = new Date();
+		var total_time = (end_time - start_time);
+		print("Did " + TEST_IterationCount + " iterations in " +
+			(total_time / 1000).toFixed(3) +
+			" (" + ((total_time / TEST_IterationCount) / 1000).toFixed(3) +
+			" per iteration).");
+	}
+	else
+		print("Unable to locate " + TEST_OtherName + ". Re-position and re-run.");
+
+	print("Script completed normally.");
+}
+
+function TEST_Waypoint()
+{
+	var other_obj  = getUnit(2, "Waypoint");
+	if (other_obj) {
+		var start_time = new Date();
+/*
+		for (count_1 = 0; count_1 < TEST_IterationCount; count_1++)
+			checkCollision(me, other_obj, 0x0B);
+*/
+		for (count_1 = 0; count_1 < TEST_IterationCount; count_1++)
+			checkCollision(me.area, me.x, me.y, 2, other_obj.x, other_obj.y, 2, 0x0B);
+		var end_time   = new Date();
+		var total_time = (end_time - start_time);
+		print("Did " + TEST_IterationCount + " iterations in " +
+			(total_time / 1000).toFixed(3) +
+			" (" + ((total_time / TEST_IterationCount) / 1000).toFixed(3) +
+			" per iteration).");
+	}
+	else
+		print("Unable to locate waypoint. Re-position and re-run.");
+
+	print("Script completed normally.");
+}
+
+function SaveArea(area_number)
+{
+	area_number = ((area_number == null) || (area_number < 1)) ? me.area :
+		area_number;
+
+	var start_time;
+	var end_time;
+
+	TEST_Log.logInfo("Creating D2JSP_RoomList object for area " + area_number +
+		" (" + D2JSP_AREA_AreaToName(area_number) + ")...");
+
+	var room_list = new D2JSP_RoomList(area_number);
+
+	TEST_Log.logInfo("D2JSP_RoomList object for area " + area_number +
+		" (" + D2JSP_AREA_AreaToName(area_number) + ") has been created.");
+
+	TEST_Log.logInfo("Writing D2JSP_RoomList object map for area " +
+		area_number + " (" + D2JSP_AREA_AreaToName(area_number) + ").");
+
+	TEST_Log.emitSep("=");
+	TEST_Log.logInfoQuiet("D2JSP_RoomList map:");
+	TEST_Log.emitSep("-");
+	TEST_Log.logInfoQuiet(room_list.getStringList(0x0B));
+	TEST_Log.emitSep("=");
+
+	TEST_Log.logInfo("Creating checkCollision() data for area " + area_number +
+		" (" + D2JSP_AREA_AreaToName(area_number) + ")...");
+
+	var check_coll_list = new Array(room_list.cell_rows);
+
+	for (var count_1 = 1; count_1 < room_list.cell_rows; count_1++) {
+		check_coll_list[count_1] = "";
+		for (count_2 = 1; count_2 < room_list.cell_cols; count_2++)
+			check_coll_list[count_1] +=
+				(checkCollision(area_number, room_list.x_1 + (count_2 - 1),
+					room_list.y_1 + (count_1 - 1), 2, room_list.x_1 + count_2,
+					room_list.y_1 + count_1, 2, 0x01)) ? "*" : " ";
+	}
+
+	TEST_Log.logInfo("checkCollision() object for area " + area_number +
+		" (" + D2JSP_AREA_AreaToName(area_number) + ") has been created.");
+
+	TEST_Log.logInfo("Writing checkCollision() data map for area " +
+		area_number + " (" + D2JSP_AREA_AreaToName(area_number) + ").");
+
+	TEST_Log.emitSep("=");
+	TEST_Log.logInfoQuiet("checkCollision() data map:");
+	TEST_Log.emitSep("-");
+	TEST_Log.logInfoQuiet(check_coll_list);
+	TEST_Log.emitSep("=");
+}
+

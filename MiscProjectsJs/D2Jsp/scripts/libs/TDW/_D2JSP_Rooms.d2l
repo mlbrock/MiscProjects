@@ -1,0 +1,3488 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Rooms Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_Rooms.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion room stat constants.
+//
+// Revison History : 2003-01-25 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_Rooms_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_Rooms_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_RoomStats.d2l");
+includeonce("SyLib.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant room edge values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ROOM_EDGE_MIN_X			= 0;
+var D2JSP_ROOM_EDGE_MIN_Y			= 1;
+var D2JSP_ROOM_EDGE_MAX_X			= 2;
+var D2JSP_ROOM_EDGE_MAX_Y			= 3;
+var D2JSP_ROOM_EDGE_COUNT			= 4;
+
+//var D2JSP_ROOM_MAX_VALID_ROOM    = 1089;
+var D2JSP_ROOM_MAX_VALID_ROOM    = 999999999;
+var D2JSP_ROOM_DEFAULT_COLL_MASK = 0x0B;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_IsRoomInArea(in_room)
+{
+	if (arguments.length) {
+		var room_obj = getRoom();
+		var count_1;
+		if (room_obj) {
+			do {
+				if (room_obj.number <= D2JSP_ROOM_MAX_VALID_ROOM) {
+					if (D2JSP_UTIL_GEN_TypeOfNumber(in_room) &&
+						(room_obj.number == in_room))
+						return(room_obj);
+					else if (D2JSP_UTIL_GEN_TypeOfArrayHashed(in_room) &&
+						(room_obj.number in in_room))
+						return(room_obj);
+					else if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(in_room)) {
+						for (count_1 = 0; count_1 < in_room.length; count_1++) {
+							if (room_obj.number == in_room[count_1])
+								return(room_obj);
+						}
+					}
+					else {
+						for (count_1 = 0; count_1 < arguments.length; count_1++) {
+							if (room_obj.number == arguments[count_1])
+								return(room_obj);
+						}
+					}
+				}
+			} while (room_obj && room_obj.getNext());
+		}
+		runGC();
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetCoordsBoundary(in_room)
+{
+	var room_coords = null;
+
+	if ((arguments.length < 1) || (in_room == null))
+		in_room = getRoom(0);
+
+	room_coords = [in_room.getStat(D2JSP_ROOMSTAT_XSTART),
+		in_room.getStat(D2JSP_ROOMSTAT_YSTART),
+		in_room.getStat(D2JSP_ROOMSTAT_XSTART) +
+			in_room.getStat(D2JSP_ROOMSTAT_XSIZE1),
+		in_room.getStat(D2JSP_ROOMSTAT_YSTART) +
+			in_room.getStat(D2JSP_ROOMSTAT_YSIZE1)];
+
+	return(room_coords);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetCoordsMiddle(in_room)
+{
+	var room_coords = D2JSP_ROOM_GetCoordsBoundary(in_room);
+
+	return([Math.floor(room_coords[0] + ((room_coords[2] - room_coords[0]) / 2)),
+		Math.floor(room_coords[1] + ((room_coords[3] - room_coords[1]) / 2))]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetCurrentRoom(source)
+{
+	var room_obj = getRoom();
+	var room_coords;
+	var source_x;
+	var source_y;
+
+	if ((arguments.length < 1) || (!source) || (source == null) ||
+		(source == Math.NaN)) {
+		if (parseFloat(me.version) >= 0.32)
+			return(getRoom(0));
+		source_x = me.x;
+		source_y = me.y;
+	}
+	else if ((arguments.length == 2) &&
+		D2JSP_UTIL_GEN_TypeOfNumber(arguments[0]) &&
+		D2JSP_UTIL_GEN_TypeOfNumber(arguments[1])) {
+		source_x = arguments[0];
+		source_y = arguments[1];
+	}
+	else if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(source) &&
+		(source.length == 2) && D2JSP_UTIL_GEN_TypeOfNumber(source[0]) &&
+		D2JSP_UTIL_GEN_TypeOfNumber(source[1])) {
+		source_x = source[0];
+		source_y = source[1];
+	}
+	else if (D2JSP_UTIL_GEN_TypeOfObject(source) && ("x" in source) &&
+		("y" in source) && D2JSP_UTIL_GEN_TypeOfNumber(source.x) &&
+		D2JSP_UTIL_GEN_TypeOfNumber(source.y)) {
+		source_x = source.x;
+		source_y = source.y;
+	}
+	else {
+		source_x = me.x;
+		source_y = me.y;
+	}
+
+	if (room_obj) {
+		do {
+			if (room_obj.number <= D2JSP_ROOM_MAX_VALID_ROOM) {
+				room_coords = D2JSP_ROOM_GetCoordsBoundary(room_obj);
+				if ((source_x >= room_coords[0]) && (source_y >= room_coords[1]) &&
+					(source_x <= room_coords[2]) && (source_y <= room_coords[3]))
+					break;
+			}
+		} while (room_obj && room_obj.getNext());
+		runGC();
+	}
+
+	return(room_obj);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetCurrentRoomNumber(source)
+{
+	var this_room = D2JSP_ROOM_GetCurrentRoom(source);
+
+	return((this_room) ? this_room.number : 0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_IsInRoom(source, room_spec)
+{
+	if (arguments.length >= 2) {
+		var room_number = D2JSP_ROOM_GetCurrentRoomNumber(source);
+		if (room_number) {
+			if (D2JSP_UTIL_GEN_TypeOfNumber(room_spec))
+				return((room_number == room_spec) ? room_number : 0);
+			else if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(room_spec)) {
+				var count_1;
+				for (count_1 = 0; count_1 < room_spec.length; count_1++) {
+					if (room_number == room_spec[count_1])
+						return(room_number);
+				}
+			}
+		}
+	}
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetRoomByNumber(room_number)
+{
+	var room_obj = getRoom();
+
+	if (room_obj) {
+		do {
+			if (room_obj.number == room_number)
+				return(room_obj);
+		} while (room_obj && room_obj.getNext());
+		runGC();
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetRoomByBaseXY(room_x, room_y, area)
+{
+	area = (D2JSP_AREA_IsValidInGame(area) &&
+		(D2JSP_AREA_GetAct(area) == me.act)) ? area : me.area;
+
+	var room_obj = getRoom(area);
+
+	if (room_obj) {
+		do {
+			if ((room_obj.x == room_x) && (room_obj.y == room_y))
+				return(room_obj);
+		} while (room_obj && room_obj.getNext());
+		runGC();
+	}
+
+	return(null);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetDirectionDeltas()
+{
+	return([[0, -1], [-1, 0], [0, 1], [1, 0]]);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetAreaFurthest(collision_mask)
+{
+	var my_list = new D2JSP_RoomList();
+
+print("Creating area...");
+	my_list.createArea();
+print("...done");
+
+print("Finding extents...");
+	var access_list = my_list.findMinMaxAccessibleCoord(collision_mask);
+print("...done");
+
+	for (var count_1 = 0; count_1 < 4; count_1++)
+		print(count_1 + ": [" + access_list[count_1] + "]");
+
+	return(access_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetPresetList(room_obj, unit_type, unit_classid,
+	first_only_flag)
+{
+/*
+	var did_init = false;
+	var preset_list;
+
+	room_obj     = (room_obj != null) ? room_obj : getRoom(0);
+	unit_classid = (unit_classid != null) ?
+		D2JSP_UTIL_GEN_ExpandArgs(unit_classid) : (new Array());
+
+	if (!room_obj.getStat(D2JSP_ROOMSTAT_NSIZEGAMEY)) {
+		room_obj.init();
+		did_init = true;
+	}
+
+	if (!unit_classid.length)
+		preset_list = room_obj.getPresetUnits(unit_type, null);
+	else if (unit_classid.length == 1)
+		preset_list = room_obj.getPresetUnits(unit_type, unit_classid[0]);
+	else {
+		preset_list  = new Array();
+		unit_classid = D2JSP_UTIL_GEN_UniqueArray(unit_classid);
+		for (var count_1 = 0; count_1 < unit_classid.length; count_1++) {
+			var tmp_list = room_obj.getPresetUnits(unit_type, unit_classid[count_1]);
+			if (tmp_list)
+				preset_list = preset_list.concat(tmp_list);
+		}
+	}
+
+	if (preset_list && preset_list.length) {
+		for (var count_1 = 0; count_1 < preset_list.length; count_1++) {
+			preset_list[count_1].area_x = ((room_obj.x * 5) + preset_list[count_1].x);
+			preset_list[count_1].area_y = ((room_obj.y * 5) + preset_list[count_1].y);
+		}
+	}
+
+	if (did_init)
+		room_obj.release();
+
+	runGC();
+
+	return(preset_list);
+*/
+	var preset_list;
+
+	room_obj     = (room_obj != null) ? room_obj : getRoom(0);
+	unit_classid = (unit_classid != null) ?
+		D2JSP_UTIL_GEN_ExpandArgs(unit_classid) : (new Array());
+
+	if (!unit_classid.length)
+		preset_list = D2JSP_ROOM_GetPresetListBasic(room_obj, unit_type,
+			unit_classid, first_only_flag);
+	else if (unit_classid.length == 1)
+		preset_list = D2JSP_ROOM_GetPresetListBasic(room_obj, unit_type,
+			unit_classid[0], first_only_flag);
+	else {
+		preset_list  = new Array();
+		unit_classid = D2JSP_UTIL_GEN_UniqueArray(unit_classid);
+		for (var count_1 = 0; count_1 < unit_classid.length; count_1++) {
+			var tmp_list = D2JSP_ROOM_GetPresetListBasic(room_obj, unit_type,
+				unit_classid[count_1], first_only_flag);
+			if (tmp_list.length) {
+				preset_list = preset_list.concat(tmp_list);
+				if (first_only_flag)
+					break;
+			}
+		}
+	}
+
+	runGC();
+
+	return(preset_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetPresetListArea(unit_type, unit_classid, first_only_flag)
+{
+	var preset_list = new Array();
+	var room_obj    = getRoom();
+
+	unit_classid = (unit_classid != null) ?
+		D2JSP_UTIL_GEN_ExpandArgs(unit_classid) : (new Array());
+
+	if (room_obj) {
+		do {
+			var tmp_list = D2JSP_ROOM_GetPresetList(room_obj, unit_type,
+				unit_classid, first_only_flag);
+			if (tmp_list.length) {
+				preset_list = preset_list.concat(tmp_list);
+				if (first_only_flag)
+					break;
+			}
+		} while (room_obj && room_obj.getNext());
+	}
+
+	runGC();
+	return(preset_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetPresetListForArea(in_area, unit_type, unit_classid,
+	room_spec, first_only_flag)
+{
+	var preset_list = new Array();
+
+	if (parseFloat(me.version) >= 0.3501) {
+		var tmp_classid = (unit_classid != null) ?
+			D2JSP_UTIL_GEN_ExpandArgs(unit_classid) : (new Array());
+		if (!tmp_classid.length)
+			preset_list = getPresetUnits(in_area, unit_type, null, room_spec);
+		else if (tmp_classid.length == 1)
+			preset_list = getPresetUnits(in_area, unit_type, tmp_classid[0],
+				room_spec);
+		else {
+			tmp_classid = D2JSP_UTIL_GEN_UniqueArray(tmp_classid);
+			for (var count_1 = 0; count_1 < unit_classid.length; count_1++) {
+				var tmp_list = getPresetUnits(in_area, unit_type,
+					unit_classid[count_1], room_spec);
+				if (tmp_list && tmp_list.length) {
+					preset_list = preset_list.concat(tmp_list);
+					if (first_only_flag)
+						break;
+				}
+			}
+		}
+		if (!preset_list)
+			preset_list = new Array();
+		else if (first_only_flag && preset_list.length)
+			preset_list = [preset_list[0]];
+		else
+			preset_list = D2JSP_ROOM_UniquePresetList(preset_list)
+		for (var count_1 = 0; count_1 < preset_list.length; count_1++) {
+			preset_list[count_1].room_number = preset_list[count_1].roomid;
+			preset_list[count_1].room_base_x = preset_list[count_1].roomx;
+			preset_list[count_1].room_base_y = preset_list[count_1].roomy;
+			preset_list[count_1].area_x      =
+				((preset_list[count_1].roomx * 5) + preset_list[count_1].x);
+			preset_list[count_1].area_y      =
+				((preset_list[count_1].roomy * 5) + preset_list[count_1].y);
+		}
+	}
+
+	return(preset_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// This function does NOT expand the 'unit_classid' parameter and thus retrieves
+// preset units for one classid (if specified). Should be called only from
+// within this library.
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_GetPresetListBasic(room_obj, unit_type, unit_classid)
+{
+	var preset_list = null;
+
+	room_obj    = (room_obj != null) ? room_obj : getRoom(0);
+	preset_list = room_obj.getPresetUnits(unit_type, unit_classid);
+
+	if (preset_list == null)
+		preset_list = new Array();
+	else {
+		if (preset_list.length > 1) {
+			var tmp_hash = new Array();
+			var tmp_list = new Array();
+			for (var count_1 = 0; count_1 < preset_list.length; count_1++)
+				tmp_hash[preset_list[count_1].type + "|" + preset_list[count_1].id +
+					"|" + preset_list[count_1].x + "|" + preset_list[count_1].y] =
+					preset_list[count_1];
+			for (var this_prop in tmp_hash)
+				tmp_list.push(tmp_hash[this_prop]);
+			preset_list = tmp_list;
+		}
+		for (var count_1 = 0; count_1 < preset_list.length; count_1++) {
+			preset_list[count_1].room_number = room_obj.number;
+			preset_list[count_1].room_base_x = room_obj.x;
+			preset_list[count_1].room_base_y = room_obj.y;
+			preset_list[count_1].area_x      =
+				((room_obj.x * 5) + preset_list[count_1].x);
+			preset_list[count_1].area_y      =
+				((room_obj.y * 5) + preset_list[count_1].y);
+		}
+	}
+
+	runGC();
+
+	return(preset_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_UniquePresetList(preset_list)
+{
+	if (preset_list == null)
+		preset_list = new Array();
+	else {
+		if (preset_list.length > 1) {
+			var tmp_hash = new Array();
+			var tmp_list = new Array();
+			if (parseFloat(me.version) < 0.3501) {
+				for (var count_1 = 0; count_1 < preset_list.length; count_1++)
+					tmp_hash[
+						preset_list[count_1].type + "|" +
+						preset_list[count_1].id   + "|" +
+						preset_list[count_1].x    + "|" +
+						preset_list[count_1].y] = preset_list[count_1];
+			}
+			else {
+				for (var count_1 = 0; count_1 < preset_list.length; count_1++)
+					tmp_hash[
+						preset_list[count_1].type  + "|" +
+						preset_list[count_1].id    + "|" +
+						preset_list[count_1].roomx + "|" +
+						preset_list[count_1].roomy + "|" +
+						preset_list[count_1].x     + "|" +
+						preset_list[count_1].y] = preset_list[count_1];
+			}
+			for (var this_prop in tmp_hash)
+				tmp_list.push(tmp_hash[this_prop]);
+			preset_list = tmp_list;
+			runGC();
+		}
+	}
+
+	return(preset_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_PresetListToCoords(preset_list)
+{
+	var coord_list;
+
+	if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(preset_list)) {
+		var coord_list = new Array(preset_list.length);
+		for (var count_1 = 0; count_1 < preset_list.length; count_1++)
+			coord_list[count_1] = [preset_list[count_1].area_x,
+				preset_list[count_1].area_y];
+	}
+	else
+		coord_list = (new Array());
+
+	return(coord_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_FixCollisionMask(collision_mask)
+{
+	return(((!collision_mask) || (collision_mask == null) ||
+		(!(collision_mask & 0xFF))) ? D2JSP_ROOM_DEFAULT_COLL_MASK :
+		(collision_mask & 0xFF));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_IsBorderRoom(room_number)
+{
+	return((D2JSP_UTIL_GEN_TypeOfNumber(room_number) && (room_number > 0) &&
+		(room_number <= 1089)) ? D2JSP_ROOM_RoomListBorder[room_number] : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOM_IsBorderIgnoreRoom(room_number)
+{
+	return((D2JSP_UTIL_GEN_TypeOfNumber(room_number) && (room_number > 0) &&
+		(room_number <= 1089) && (D2JSP_ROOM_RoomListBorder[room_number] ||
+		D2JSP_ROOM_RoomListBorderIgnore[room_number])) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ROOM_RoomListBorder = new Array();
+D2JSP_ROOM_RoomListBorder[836] = true;
+D2JSP_ROOM_RoomListBorder[881] = true;
+D2JSP_ROOM_RoomListBorder[882] = true;
+D2JSP_ROOM_RoomListBorder[883] = true;
+D2JSP_ROOM_RoomListBorder[884] = true;
+D2JSP_ROOM_RoomListBorder[885] = true;
+D2JSP_ROOM_RoomListBorder[886] = true;
+D2JSP_ROOM_RoomListBorder[887] = true;
+D2JSP_ROOM_RoomListBorder[888] = true;
+D2JSP_ROOM_RoomListBorder[889] = true;
+D2JSP_ROOM_RoomListBorder[890] = true;
+D2JSP_ROOM_RoomListBorder[891] = true;
+D2JSP_ROOM_RoomListBorder[892] = true;
+D2JSP_ROOM_RoomListBorder[893] = true;
+D2JSP_ROOM_RoomListBorder[894] = true;
+D2JSP_ROOM_RoomListBorder[895] = true;
+D2JSP_ROOM_RoomListBorder[896] = true;
+D2JSP_ROOM_RoomListBorder[897] = true;
+D2JSP_ROOM_RoomListBorder[898] = true;
+D2JSP_ROOM_RoomListBorder[899] = true;
+D2JSP_ROOM_RoomListBorder[900] = true;
+D2JSP_ROOM_RoomListBorder[901] = true;
+D2JSP_ROOM_RoomListBorder[902] = true;
+D2JSP_ROOM_RoomListBorder[903] = true;
+D2JSP_ROOM_RoomListBorder[904] = true;
+D2JSP_ROOM_RoomListBorder[905] = true;
+D2JSP_ROOM_RoomListBorder[906] = true;
+D2JSP_ROOM_RoomListBorder[957] = true;
+D2JSP_ROOM_RoomListBorder[958] = true;
+D2JSP_ROOM_RoomListBorder[959] = true;
+D2JSP_ROOM_RoomListBorder[960] = true;
+D2JSP_ROOM_RoomListBorder[961] = true;
+D2JSP_ROOM_RoomListBorder[962] = true;
+D2JSP_ROOM_RoomListBorder[963] = true;
+D2JSP_ROOM_RoomListBorder[964] = true;
+D2JSP_ROOM_RoomListBorder[965] = true;
+D2JSP_ROOM_RoomListBorder[966] = true;
+D2JSP_ROOM_RoomListBorder[967] = true;
+D2JSP_ROOM_RoomListBorder[968] = true;
+D2JSP_ROOM_RoomListBorder[969] = true;
+D2JSP_ROOM_RoomListBorder[970] = true;
+D2JSP_ROOM_RoomListBorder[971] = true;
+D2JSP_ROOM_RoomListBorder[972] = true;
+D2JSP_ROOM_RoomListBorder[973] = true;
+D2JSP_ROOM_RoomListBorder[974] = true;
+D2JSP_ROOM_RoomListBorder[975] = true;
+D2JSP_ROOM_RoomListBorder[976] = true;
+D2JSP_ROOM_RoomListBorder[977] = true;
+D2JSP_ROOM_RoomListBorder[978] = true;
+D2JSP_ROOM_RoomListBorder[979] = true;
+D2JSP_ROOM_RoomListBorder[980] = true;
+D2JSP_ROOM_RoomListBorder[981] = true;
+D2JSP_ROOM_RoomListBorder[982] = true;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ROOM_RoomListBorderIgnore  = new Array();
+D2JSP_ROOM_RoomListBorderIgnore[4]   = true;
+D2JSP_ROOM_RoomListBorderIgnore[5]   = true;
+D2JSP_ROOM_RoomListBorderIgnore[6]   = true;
+D2JSP_ROOM_RoomListBorderIgnore[7]   = true;
+D2JSP_ROOM_RoomListBorderIgnore[8]   = true;
+D2JSP_ROOM_RoomListBorderIgnore[9]   = true;
+D2JSP_ROOM_RoomListBorderIgnore[10]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[11]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[12]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[13]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[14]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[15]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[16]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[17]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[18]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[19]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[20]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[21]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[22]  = true;
+D2JSP_ROOM_RoomListBorderIgnore[23]  = true;
+//D2JSP_ROOM_RoomListBorderIgnore[24] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[25] = true;
+	// Act 2
+D2JSP_ROOM_RoomListBorderIgnore[364] = true;
+D2JSP_ROOM_RoomListBorderIgnore[365] = true;
+D2JSP_ROOM_RoomListBorderIgnore[366] = true;
+D2JSP_ROOM_RoomListBorderIgnore[367] = true;
+D2JSP_ROOM_RoomListBorderIgnore[368] = true;
+D2JSP_ROOM_RoomListBorderIgnore[369] = true;
+D2JSP_ROOM_RoomListBorderIgnore[370] = true;
+D2JSP_ROOM_RoomListBorderIgnore[371] = true;
+D2JSP_ROOM_RoomListBorderIgnore[372] = true;
+D2JSP_ROOM_RoomListBorderIgnore[373] = true;
+D2JSP_ROOM_RoomListBorderIgnore[374] = true;
+D2JSP_ROOM_RoomListBorderIgnore[375] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[376] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[377] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[378] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[379] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[380] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[381] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[382] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[383] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[384] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[385] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[386] = true;
+//D2JSP_ROOM_RoomListBorderIgnore[387] = true;
+	// Act 3
+D2JSP_ROOM_RoomListBorderIgnore[605] = true;
+D2JSP_ROOM_RoomListBorderIgnore[606] = true;
+D2JSP_ROOM_RoomListBorderIgnore[607] = true;
+D2JSP_ROOM_RoomListBorderIgnore[608] = true;
+D2JSP_ROOM_RoomListBorderIgnore[609] = true;
+D2JSP_ROOM_RoomListBorderIgnore[610] = true;
+D2JSP_ROOM_RoomListBorderIgnore[611] = true;
+D2JSP_ROOM_RoomListBorderIgnore[612] = true;
+D2JSP_ROOM_RoomListBorderIgnore[619] = true;
+D2JSP_ROOM_RoomListBorderIgnore[620] = true;
+D2JSP_ROOM_RoomListBorderIgnore[621] = true;
+D2JSP_ROOM_RoomListBorderIgnore[622] = true;
+D2JSP_ROOM_RoomListBorderIgnore[623] = true;
+D2JSP_ROOM_RoomListBorderIgnore[624] = true;
+D2JSP_ROOM_RoomListBorderIgnore[625] = true;
+D2JSP_ROOM_RoomListBorderIgnore[626] = true;
+D2JSP_ROOM_RoomListBorderIgnore[636] = true;
+D2JSP_ROOM_RoomListBorderIgnore[637] = true;
+D2JSP_ROOM_RoomListBorderIgnore[638] = true;
+D2JSP_ROOM_RoomListBorderIgnore[639] = true;
+D2JSP_ROOM_RoomListBorderIgnore[640] = true;
+D2JSP_ROOM_RoomListBorderIgnore[641] = true;
+D2JSP_ROOM_RoomListBorderIgnore[642] = true;
+D2JSP_ROOM_RoomListBorderIgnore[643] = true;
+	// Act 4
+D2JSP_ROOM_RoomListBorderIgnore[799] = true;
+D2JSP_ROOM_RoomListBorderIgnore[800] = true;
+D2JSP_ROOM_RoomListBorderIgnore[801] = true;
+D2JSP_ROOM_RoomListBorderIgnore[802] = true;
+D2JSP_ROOM_RoomListBorderIgnore[803] = true;
+D2JSP_ROOM_RoomListBorderIgnore[804] = true;
+D2JSP_ROOM_RoomListBorderIgnore[805] = true;
+D2JSP_ROOM_RoomListBorderIgnore[806] = true;
+D2JSP_ROOM_RoomListBorderIgnore[807] = true;
+D2JSP_ROOM_RoomListBorderIgnore[808] = true;
+D2JSP_ROOM_RoomListBorderIgnore[809] = true;
+D2JSP_ROOM_RoomListBorderIgnore[810] = true;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_RoomListExclude = new Array();
+D2JSP_RoomListExclude["112|930|" + D2JSP_UTIL_CCITT_GetForString(
+	D2JSP_UTIL_FORMAT_RepeatString(D2JSP_UTIL_FORMAT_RepeatString("\0", 5) +
+	D2JSP_UTIL_FORMAT_RepeatString("\5", 35), 5) +
+	D2JSP_UTIL_FORMAT_RepeatString("\5", 35 * 40))] = true;
+D2JSP_RoomListExclude["110|879|" + D2JSP_UTIL_CCITT_GetForString(
+	D2JSP_UTIL_FORMAT_RepeatString("\5", 40) +
+	D2JSP_UTIL_FORMAT_RepeatString("\5",  5) +
+		D2JSP_UTIL_FORMAT_RepeatString("\0", 35) +
+	D2JSP_UTIL_FORMAT_RepeatString("\5", 38 * 40))] = true;
+D2JSP_RoomListExclude["110|879|" + D2JSP_UTIL_CCITT_GetForString(
+	D2JSP_UTIL_FORMAT_RepeatString("\7", 15) +
+		D2JSP_UTIL_FORMAT_RepeatString("\1",  5) +
+		D2JSP_UTIL_FORMAT_RepeatString("\5", 20) +
+	D2JSP_UTIL_FORMAT_RepeatString("\0", 15) +
+		D2JSP_UTIL_FORMAT_RepeatString("\1",  5) +
+		D2JSP_UTIL_FORMAT_RepeatString("\5", 20) +
+	D2JSP_UTIL_FORMAT_RepeatString(D2JSP_UTIL_FORMAT_RepeatString("\1", 20) +
+		D2JSP_UTIL_FORMAT_RepeatString("\5", 20), 3) +
+	D2JSP_UTIL_FORMAT_RepeatString("\5", 35 * 40))] = true;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_RoomList(level)
+{
+	this.level            = (D2JSP_AREA_IsValidInGame(level)) ? level : me.area;
+	this.room_list        = new Array();
+	this.meta_map         = new Array();
+	this.room_hash        = new Array();
+	this.base_hash        = new Array();
+  	this.x_1              = 0;
+  	this.y_1              = 0;
+  	this.x_2              = 0;
+  	this.y_2              = 0;
+	this.cell_rows        = 0;
+	this.cell_cols        = 0;
+	this.edge_list        = new Array(D2JSP_ROOM_EDGE_COUNT);
+	this.edge_list_simple = new Array(D2JSP_ROOM_EDGE_COUNT);
+
+	this.createArea                  = D2JSP_RoomList_createArea;
+	this.destroy                     = D2JSP_RoomList_destroy;
+	this.clearCollisionInfo          = D2JSP_RoomList_clearCollisionInfo;
+	this.clearPresetUnitInfo         = D2JSP_RoomList_clearPresetUnitInfo;
+	this.getAreaCoords               = D2JSP_RoomList_getAreaCoords;
+	this.addRoom                     = D2JSP_RoomList_addRoom;
+	this.isValidXY                   = D2JSP_RoomList_isValidXY;
+	this.isValidXYPair               = D2JSP_RoomList_isValidXYPair;
+	this.findRoomByNumber            = D2JSP_RoomList_findRoomByNumber;
+	this.findRoomByNumberList        = D2JSP_RoomList_findRoomByNumberList;
+	this.findRoomByNumberSpec        = D2JSP_RoomList_findRoomByNumberSpec;
+	this.findRoomByXY                = D2JSP_RoomList_findRoomByXY;
+	this.findRoomByBaseXY            = D2JSP_RoomList_findRoomByBaseXY;
+	this.findRoomByXYPair            = D2JSP_RoomList_findRoomByXYPair;
+	this.findRoomByObject            = D2JSP_RoomList_findRoomByObject;
+
+	this.getMetaCoordsByXY           = D2JSP_RoomList_getMetaCoordsByXY;
+	this.getMetaCoordsByBaseXY       = D2JSP_RoomList_getMetaCoordsByBaseXY;
+	this.getMetaCoordsByXYPair       = D2JSP_RoomList_getMetaCoordsByXYPair;
+	this.getMetaCoordsByObject       = D2JSP_RoomList_getMetaCoordsByObject;
+
+	this.getRoomObjectByBaseXY       = D2JSP_RoomList_getRoomObjectByBaseXY;
+
+	this.getRoomXYHash               = D2JSP_RoomList_getRoomXYHash;
+
+	this.getDirectionDeltas          = D2JSP_RoomList_getDirectionDeltas;
+
+	this.createCollisionInfo         = D2JSP_RoomList_createCollisionInfo;
+
+	this.getAccessibleEdge           = D2JSP_RoomList_getAccessibleEdge;
+	this.getAccessibleEdgeMinX       = D2JSP_RoomList_getAccessibleEdgeMinX;
+	this.getAccessibleEdgeMinY       = D2JSP_RoomList_getAccessibleEdgeMinY;
+	this.getAccessibleEdgeMaxX       = D2JSP_RoomList_getAccessibleEdgeMaxX;
+	this.getAccessibleEdgeMaxY       = D2JSP_RoomList_getAccessibleEdgeMaxY;
+	this.getAccessibleEdgeList       = D2JSP_RoomList_getAccessibleEdgeList;
+
+	this.getAccessibleEdgeSimple     = D2JSP_RoomList_getAccessibleEdgeSimple;
+	this.getAccessibleEdgeMinXSimple = D2JSP_RoomList_getAccessibleEdgeMinXSimple;
+	this.getAccessibleEdgeMinYSimple = D2JSP_RoomList_getAccessibleEdgeMinYSimple;
+	this.getAccessibleEdgeMaxXSimple = D2JSP_RoomList_getAccessibleEdgeMaxXSimple;
+	this.getAccessibleEdgeMaxYSimple = D2JSP_RoomList_getAccessibleEdgeMaxYSimple;
+	this.getAccessibleEdgeListSimple = D2JSP_RoomList_getAccessibleEdgeListSimple;
+	this.compressAccessibleEdgeList  = D2JSP_RoomList_compressAccessibleEdgeList;
+
+	this.getCenterList               = D2JSP_RoomList_getCenterList;
+	this.getCenterAccessibleList     = D2JSP_RoomList_getCenterAccessibleList;
+	this.getCenterSmartList          = D2JSP_RoomList_getCenterSmartList;
+
+	this.getPresetList               = D2JSP_RoomList_getPresetList;
+	this.getPresetCoordsList         = D2JSP_RoomList_getPresetCoordsList;
+
+	this.getAdjacentRoomsByNumber    = D2JSP_RoomList_getAdjacentRoomsByNumber;
+	this.getAdjacentRoomsByXY        = D2JSP_RoomList_getAdjacentRoomsByXY;
+	this.getAdjacentRoomsByBaseXY    = D2JSP_RoomList_getAdjacentRoomsByBaseXY;
+	this.getAdjacentRoomsByXYPair    = D2JSP_RoomList_getAdjacentRoomsByXYPair;
+	this.getAdjacentRoomsByObject    = D2JSP_RoomList_getAdjacentRoomsByObject;
+	this.getAdjacentRooms            = D2JSP_RoomList_getAdjacentRooms;
+
+	this.getAdjacentAccessibleRoomsByNumber = D2JSP_RoomList_getAdjacentAccessibleRoomsByNumber;
+	this.getAdjacentAccessibleRoomsByXY     = D2JSP_RoomList_getAdjacentAccessibleRoomsByXY;
+	this.getAdjacentAccessibleRoomsByBaseXY = D2JSP_RoomList_getAdjacentAccessibleRoomsByBaseXY;
+	this.getAdjacentAccessibleRoomsByXYPair = D2JSP_RoomList_getAdjacentAccessibleRoomsByXYPair;
+	this.getAdjacentAccessibleRoomsByObject = D2JSP_RoomList_getAdjacentAccessibleRoomsByObject;
+	this.getAdjacentAccessibleRooms         = D2JSP_RoomList_getAdjacentAccessibleRooms;
+
+	this.findMinMaxAccessibleCoord   = D2JSP_RoomList_findMinMaxAccessibleCoord;
+	this.findMinAccessibleCoord_X    = D2JSP_RoomList_findMinAccessibleCoord_X;
+	this.findMinAccessibleCoord_Y    = D2JSP_RoomList_findMinAccessibleCoord_Y;
+	this.findMaxAccessibleCoord_X    = D2JSP_RoomList_findMaxAccessibleCoord_X;
+	this.findMaxAccessibleCoord_Y    = D2JSP_RoomList_findMaxAccessibleCoord_Y;
+
+	this.getStringList               = D2JSP_RoomList_getStringList;
+	this.getStringSepList            = D2JSP_RoomList_getStringSepList;
+	this.getStringValueList          = D2JSP_RoomList_getStringValueList;
+	this.getStringMetaMapList        = D2JSP_RoomList_getStringMetaMapList;
+	this.getStringListBounded        = D2JSP_RoomList_getStringListBounded;
+
+	this.sortByCoord_X_1             = D2JSP_RoomList_sortByCoord_X_1;
+	this.sortByCoord_Y_1             = D2JSP_RoomList_sortByCoord_Y_1;
+	this.sortByCoord_X_2             = D2JSP_RoomList_sortByCoord_X_2;
+	this.sortByCoord_Y_2             = D2JSP_RoomList_sortByCoord_Y_2;
+
+	this.createArea();
+
+	function D2JSP_RoomList_createArea() {
+		this.destroy();
+
+		// ///////////////////////////////////////////////////////////////////
+		// ///////////////////////////////////////////////////////////////////
+		// Create the room list...
+		// ///////////////////////////////////////////////////////////////////
+		var room_obj = getRoom(this.level);
+		if (room_obj) {
+			do {
+				this.room_list.push(new D2JSP_Room(room_obj));
+			} while (room_obj && room_obj.getNext(this.level));
+//			runGC();
+		}
+		// ///////////////////////////////////////////////////////////////////
+
+		// ///////////////////////////////////////////////////////////////////
+		// ///////////////////////////////////////////////////////////////////
+		// Determine some basic area dimensions...
+		// ///////////////////////////////////////////////////////////////////
+		this.x_1 = this.room_list[0].x_1;
+		this.y_1 = this.room_list[0].y_1;
+		this.x_2 = this.room_list[0].x_2;
+		this.y_2 = this.room_list[0].y_2;
+
+		for (var count_1 = 1; count_1 < this.room_list.length; count_1++) {
+			this.x_1 = Math.min(this.x_1, this.room_list[count_1].x_1);
+			this.y_1 = Math.min(this.y_1, this.room_list[count_1].y_1);
+			this.x_2 = Math.max(this.x_2, this.room_list[count_1].x_2);
+			this.y_2 = Math.max(this.y_2, this.room_list[count_1].y_2);
+		}
+
+		this.cell_rows = (this.y_2 - this.y_1) + 1;
+		this.cell_cols = (this.x_2 - this.x_1) + 1;
+		// ///////////////////////////////////////////////////////////////////
+
+		// ///////////////////////////////////////////////////////////////////
+		// ///////////////////////////////////////////////////////////////////
+		// Create the meta-map...
+		// ///////////////////////////////////////////////////////////////////
+		var count_1;
+		var count_2;
+		var count_3;
+		var meta_rows_hash = new Array();
+		var meta_cols_hash = new Array();
+		var meta_rows_list = new Array();
+		var meta_cols_list = new Array();
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			meta_rows_hash[this.room_list[count_1].y + ""] = count_1;
+			meta_cols_hash[this.room_list[count_1].x + ""] = count_1;
+		}
+		for (var this_prop in meta_rows_hash)
+			meta_rows_list.push(parseInt(this_prop, 10));
+		for (var this_prop in meta_cols_hash)
+			meta_cols_list.push(parseInt(this_prop, 10));
+		meta_rows_list.sort(D2JSP_UTIL_GEN_CompareNumeric);
+		meta_cols_list.sort(D2JSP_UTIL_GEN_CompareNumeric);
+		this.meta_map = new Array(meta_rows_list.length);
+		for (count_1 = 0; count_1 < meta_rows_list.length; count_1++) {
+			this.meta_map[count_1] = new Array(meta_cols_list.length);
+			for (count_2 = 0; count_2 < meta_cols_list.length; count_2++) {
+				for (count_3 = 0; count_3 < this.room_list.length; count_3++) {
+					if ((this.room_list[count_3].y == meta_rows_list[count_1]) &&
+						(this.room_list[count_3].x == meta_cols_list[count_2])) {
+						this.meta_map[count_1][count_2]  = this.room_list[count_3];
+						this.room_list[count_3].room_row = count_1;
+						this.room_list[count_3].room_col = count_2;
+						break;
+					}
+				}
+			}
+		}
+//		runGC();
+		// ///////////////////////////////////////////////////////////////////
+
+		// ///////////////////////////////////////////////////////////////////
+		// ///////////////////////////////////////////////////////////////////
+		// Create the room hashes...
+		// ///////////////////////////////////////////////////////////////////
+		var room_name;
+		var base_name;
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			room_name = this.room_list[count_1].number + "";
+			base_name = this.room_list[count_1].x + "|" + this.room_list[count_1].y;
+			if (!(room_name in this.room_hash))
+				this.room_hash[room_name] = new Array();
+			this.room_hash[room_name].push(this.room_list[count_1]);
+			this.base_hash[base_name] = this.room_list[count_1];
+		}
+		// ///////////////////////////////////////////////////////////////////
+
+		runGC();
+	}
+
+	function D2JSP_RoomList_destroy() {
+		this.room_list = new Array();
+		this.meta_map  = new Array();
+		this.room_hash = new Array();
+		runGC();
+	}
+
+	function D2JSP_RoomList_clearCollisionInfo() {
+		for (var count_1 = 0; count_1 < this.room_list.length; count_1++)
+			this.room_list[count_1].clearCollisionInfo();
+		runGC();
+	}
+
+	function D2JSP_RoomList_clearPresetUnitInfo() {
+		for (var count_1 = 0; count_1 < this.room_list.length; count_1++)
+			this.room_list[count_1].clearPresetUnitInfo();
+		runGC();
+	}
+
+	function D2JSP_RoomList_getAreaCoords() {
+		return([this.x_1, this.y_1, this.x_2, this.y_2]);
+	}
+
+	function D2JSP_RoomList_addRoom(room_obj) {
+		if (typeof(room_obj) == "D2JSP_Room")
+			this.room_list.push(room_obj);
+		else if (D2JSP_UTIL_GEN_TypeOfObject(room_obj) &&
+			("correcttomb" in room_obj) &&
+			D2JSP_UTIL_GEN_TypeOfNumber(room_obj.correcttomb))
+			this.room_list.push(new D2JSP_Room(room_obj));
+	}
+
+	function D2JSP_RoomList_isValidXY(in_x, in_y) {
+		return(((in_x >= this.x_1) && (in_x <= this.x_2) && (in_y >= this.y_1) &&
+			(in_y <= this.y_2)) ? true : false);
+	}
+	function D2JSP_RoomList_isValidXYPair(in_x_y_pair) {
+		return(this.isValidXY(in_x_y_pair[0], in_x_y_pair[1]));
+	}
+
+	function D2JSP_RoomList_findRoomByNumber(room_number) {
+		return(((room_number + "") in this.room_hash) ?
+			this.room_hash[room_number + ""][0] : null);
+	}
+	function D2JSP_RoomList_findRoomByNumberList(room_number) {
+		return(((room_number + "") in this.room_hash) ?
+			this.room_hash[room_number + ""] : (new Array()));
+	}
+	function D2JSP_RoomList_findRoomByNumberSpec(room_spec) {
+		var room_list = new Array();
+
+		room_spec = (room_spec != null) ? D2JSP_UTIL_GEN_ExpandArgs(room_spec) :
+			(new Array());
+		for (var count_1 = 0; count_1 < room_spec.length; count_1++) {
+			var tmp_list = this.findRoomByNumberList(room_spec[count_1]);
+			room_list = room_list.concat(tmp_list);
+		}
+
+		return(room_list);
+	}
+	function D2JSP_RoomList_findRoomByXY(in_x, in_y) {
+		for (var count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			if ((this.room_list[count_1].x_1 <= in_x) &&
+				(this.room_list[count_1].y_1 <= in_y) &&
+				(this.room_list[count_1].x_2 >= in_x) &&
+				(this.room_list[count_1].y_2 >= in_y))
+				return(this.room_list[count_1]);
+		}
+		return(null);
+	}
+	function D2JSP_RoomList_findRoomByBaseXY(in_x, in_y) {
+		return(((in_x + "|" + in_y) in this.base_hash) ?
+			this.base_hash[in_x + "|" + in_y] : null);
+	}
+	function D2JSP_RoomList_findRoomByXYPair(in_x_y_pair) {
+		return(this.findRoomByXY(in_x_y_pair[0], in_x_y_pair[1]));
+	}
+	function D2JSP_RoomList_findRoomByObject(in_object) {
+		in_object = (in_object instanceof Object) ? in_object : me;
+		return(this.findRoomByXY(in_object.x, in_object.y));
+	}
+
+	function D2JSP_RoomList_getRoomObjectByBaseXY(in_x, in_y) {
+		var my_room = this.findRoomByBaseXY(in_x, in_y);
+
+		return((my_room) ? my_room.getRoomByBaseXY(in_x, in_y) : null);
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function D2JSP_RoomList_getMetaCoordsByXY(in_x, in_y) {
+		var tmp_room = this.findRoomByXY(in_x, in_y);
+
+		return((tmp_room) ? [tmp_room.room_row, tmp_room.room_col] : null);
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function D2JSP_RoomList_getMetaCoordsByBaseXY(in_x, in_y) {
+		var tmp_room = this.findRoomByBaseXY(in_x, in_y);
+
+		return((tmp_room) ? [tmp_room.room_row, tmp_room.room_col] : null);
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function D2JSP_RoomList_getMetaCoordsByXYPair(in_x_y_pair) {
+		return(this.getMetaCoordsByXY(in_x_y_pair[0], in_x_y_pair[1]));
+	}
+
+	// Meta-map coords returned by Y, X (that is: row, col). In order to use
+	//	them to reference the meta-map, use [row][col].
+	function D2JSP_RoomList_getMetaCoordsByObject(in_object) {
+		in_object = (in_object instanceof Object) ? in_object : me;
+		return(this.getMetaCoordsByXY(in_object.x, in_object.y));
+	}
+
+	function D2JSP_RoomList_getRoomXYHash() {
+		var out_list = new Array();
+
+		for (var count_1 = 0; count_1 < this.room_list.length; count_1++)
+			out_list[this.room_list[count_1].x + "|" + this.room_list[count_1].y] =
+				this.room_list[count_1];
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_isCompleteEdgeList(edge_list) {
+		return((edge_list[0] && edge_list[1] && edge_list[2] && edge_list[3]) ?
+			true : false);
+	}
+
+	function D2JSP_RoomList_getDirectionDeltas() {
+		return(D2JSP_ROOM_GetDirectionDeltas());
+	}
+
+	function D2JSP_RoomList_getRoomXYHash() {
+		var out_list = new Array();
+
+		for (var count_1 = 0; count_1 < this.room_list.length; count_1++)
+			out_list[this.room_list[count_1].x + "|" + this.room_list[count_1].y] =
+				this.room_list[count_1];
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_createCollisionInfo() {
+		for (var count_1 = 0; count_1 < this.room_list.length; count_1++)
+			this.room_list[count_1].createCollisionInfo();
+	}
+
+	function D2JSP_RoomList_getAccessibleEdge(edge, collision_mask) {
+		switch (edge) {
+			case D2JSP_ROOM_EDGE_MIN_X	:
+				return(this.getAccessibleEdgeMinX(collision_mask));
+				break;
+			case D2JSP_ROOM_EDGE_MIN_Y	:
+				return(this.getAccessibleEdgeMinY(collision_mask));
+				break;
+			case D2JSP_ROOM_EDGE_MAX_X	:
+				return(this.getAccessibleEdgeMaxX(collision_mask));
+				break;
+			case D2JSP_ROOM_EDGE_MAX_Y	:
+				return(this.getAccessibleEdgeMaxY(collision_mask));
+				break;
+			default							:
+				break;
+		}
+	
+		return(null);
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMinX(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		// Minimum X
+		var this_edge = D2JSP_ROOM_EDGE_MIN_X;
+		if (this.edge_list[this_edge] == null) {
+			for (count_1 = 0; count_1 < this.meta_map[0].length; count_1++) {
+				var tmp_room = this.meta_map[0][count_1];
+				if (tmp_room != null)
+					edge_list = edge_list.concat(tmp_room.
+						findAccessibleEdgeMin_X(collision_mask));
+			}
+			this.edge_list[this_edge] = D2JSP_UTIL_GEN_CloneObject(edge_list);
+		}
+		else
+			edge_list = D2JSP_UTIL_GEN_CloneObject(this.edge_list[this_edge]);
+
+		runGC();
+
+		return(edge_list);
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMinY(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		// Minimum Y
+		var this_edge = D2JSP_ROOM_EDGE_MIN_Y;
+		if (this.edge_list[this_edge] == null) {
+			for (count_1 = 0; count_1 < this.meta_map.length; count_1++) {
+				var tmp_room = this.meta_map[count_1][0];
+				if (tmp_room != null)
+					edge_list = edge_list.concat(tmp_room.
+						findAccessibleEdgeMin_Y(collision_mask));
+			}
+			this.edge_list[this_edge] = D2JSP_UTIL_GEN_CloneObject(edge_list);
+		}
+		else
+			edge_list = D2JSP_UTIL_GEN_CloneObject(this.edge_list[this_edge]);
+
+		runGC();
+
+		return(edge_list);
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMaxX(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		// Maximum X
+		var this_edge = D2JSP_ROOM_EDGE_MAX_X;
+		if (this.edge_list[this_edge] == null) {
+			for (count_1 = 0;
+				count_1 < this.meta_map[this.meta_map.length - 1].length;
+				count_1++) {
+				var tmp_room = this.meta_map[this.meta_map.length - 1][count_1];
+				if (tmp_room != null)
+					edge_list = edge_list.concat(tmp_room.
+						findAccessibleEdgeMax_X(collision_mask));
+			}
+			this.edge_list[this_edge] = D2JSP_UTIL_GEN_CloneObject(edge_list);
+		}
+		else
+			edge_list = D2JSP_UTIL_GEN_CloneObject(this.edge_list[this_edge]);
+
+		runGC();
+
+		return(edge_list);
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMaxY(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		// Maximum Y
+		var this_edge = D2JSP_ROOM_EDGE_MAX_Y;
+		if (this.edge_list[this_edge] == null) {
+			for (count_1 = 0; count_1 < this.meta_map.length; count_1++) {
+				var tmp_room = this.meta_map[count_1][this.meta_map[0].length - 1];
+				if (tmp_room != null)
+					edge_list = edge_list.concat(tmp_room.
+						findAccessibleEdgeMax_Y(collision_mask));
+			}
+			this.edge_list[this_edge] = D2JSP_UTIL_GEN_CloneObject(edge_list);
+		}
+		else
+			edge_list = D2JSP_UTIL_GEN_CloneObject(this.edge_list[this_edge]);
+
+		runGC();
+
+		return(edge_list);
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeList(collision_mask) {
+		var edge_list = new Array(4);
+
+		edge_list[D2JSP_ROOM_EDGE_MIN_X] =
+			this.getAccessibleEdgeMinX(collision_mask);
+		edge_list[D2JSP_ROOM_EDGE_MIN_Y] =
+			this.getAccessibleEdgeMinY(collision_mask);
+		edge_list[D2JSP_ROOM_EDGE_MAX_X] =
+			this.getAccessibleEdgeMaxX(collision_mask);
+		edge_list[D2JSP_ROOM_EDGE_MAX_Y] =
+			this.getAccessibleEdgeMaxY(collision_mask);
+
+		return(edge_list);
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeSimple(edge, collision_mask) {
+		switch (edge) {
+			case D2JSP_ROOM_EDGE_MIN_X	:
+				return(this.getAccessibleEdgeMinXSimple(collision_mask));
+				break;
+			case D2JSP_ROOM_EDGE_MIN_Y	:
+				return(this.getAccessibleEdgeMinYSimple(collision_mask));
+				break;
+			case D2JSP_ROOM_EDGE_MAX_X	:
+				return(this.getAccessibleEdgeMaxXSimple(collision_mask));
+				break;
+			case D2JSP_ROOM_EDGE_MAX_Y	:
+				return(this.getAccessibleEdgeMaxYSimple(collision_mask));
+				break;
+			default							:
+				break;
+		}
+	
+		return(null);
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMinXSimple(collision_mask) {
+		var edge_list = new Array(4);
+
+		// Minimum X
+		var this_edge = D2JSP_ROOM_EDGE_MIN_X;
+
+		if (this.edge_list_simple[this_edge] == null) {
+			edge_list[this_edge] =
+				this.getAccessibleEdgeMinX(collision_mask);
+			var compress_list = this.compressAccessibleEdgeList(edge_list);
+			this.edge_list_simple[this_edge] =
+				D2JSP_UTIL_GEN_CloneObject(compress_list[this_edge]);
+			return(compress_list[this_edge]);
+		}
+		else
+			return(D2JSP_UTIL_GEN_CloneObject(this.edge_list_simple[this_edge]));
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMinYSimple(collision_mask) {
+		var edge_list = new Array(4);
+
+		// Minimum Y
+		var this_edge = D2JSP_ROOM_EDGE_MIN_Y;
+
+		if (this.edge_list_simple[this_edge] == null) {
+			edge_list[this_edge] =
+				this.getAccessibleEdgeMinY(collision_mask);
+			var compress_list = this.compressAccessibleEdgeList(edge_list);
+			this.edge_list_simple[this_edge] =
+				D2JSP_UTIL_GEN_CloneObject(compress_list[this_edge]);
+			return(compress_list[this_edge]);
+		}
+		else
+			return(D2JSP_UTIL_GEN_CloneObject(this.edge_list_simple[this_edge]));
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMaxXSimple(collision_mask) {
+		var edge_list = new Array(4);
+
+		// Maximum X
+		var this_edge = D2JSP_ROOM_EDGE_MAX_X;
+
+		if (this.edge_list_simple[this_edge] == null) {
+			edge_list[this_edge] =
+				this.getAccessibleEdgeMaxX(collision_mask);
+			var compress_list = this.compressAccessibleEdgeList(edge_list);
+			this.edge_list_simple[this_edge] =
+				D2JSP_UTIL_GEN_CloneObject(compress_list[this_edge]);
+			return(compress_list[this_edge]);
+		}
+		else
+			return(D2JSP_UTIL_GEN_CloneObject(this.edge_list_simple[this_edge]));
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeMaxYSimple(collision_mask) {
+		var edge_list = new Array(4);
+
+		// Maximum Y
+		var this_edge = D2JSP_ROOM_EDGE_MAX_Y;
+
+		if (this.edge_list_simple[this_edge] == null) {
+			edge_list[this_edge] =
+				this.getAccessibleEdgeMaxY(collision_mask);
+			var compress_list = this.compressAccessibleEdgeList(edge_list);
+			this.edge_list_simple[this_edge] =
+				D2JSP_UTIL_GEN_CloneObject(compress_list[this_edge]);
+			return(compress_list[this_edge]);
+		}
+		else
+			return(D2JSP_UTIL_GEN_CloneObject(this.edge_list_simple[this_edge]));
+	}
+
+	function D2JSP_RoomList_getAccessibleEdgeListSimple(collision_mask) {
+		var edge_list = new Array(4);
+
+		edge_list[D2JSP_ROOM_EDGE_MIN_X] =
+			this.getAccessibleEdgeMinXSimple(collision_mask);
+		edge_list[D2JSP_ROOM_EDGE_MIN_Y] =
+			this.getAccessibleEdgeMinYSimple(collision_mask);
+		edge_list[D2JSP_ROOM_EDGE_MAX_X] =
+			this.getAccessibleEdgeMaxXSimple(collision_mask);
+		edge_list[D2JSP_ROOM_EDGE_MAX_Y] =
+			this.getAccessibleEdgeMaxYSimple(collision_mask);
+
+		return(edge_list);
+	}
+
+	function D2JSP_RoomList_compressAccessibleEdgeList(edge_list) {
+		var compress_list = new Array();
+		var count_1;
+		var total_count;
+		var total_coord;
+
+		for (count_1 = 0; count_1 < 4; count_1++) {
+			compress_list[count_1] = new Array();
+			if ((edge_list[count_1] == null) || (!edge_list[count_1].length))
+				continue;
+			var static_index       = (!(count_1 % 2)) ? 1 : 0;
+			var coord_index        = (!(count_1 % 2)) ? 0 : 1;
+			var coord_list         = new Array();
+			var start_index        = 0;
+			var total_count        = 1;
+			var total_coord        = edge_list[count_1][0][coord_index];
+			for (count_2 = 1; count_2 < edge_list[count_1].length; count_2++) {
+				if (edge_list[count_1][count_2][coord_index] ==
+					(edge_list[count_1][count_2 - 1][coord_index] + 1)) {
+					total_count++;
+					total_coord += edge_list[count_1][count_2][coord_index];
+				}
+				else {
+					total_coord = Math.floor(total_coord / total_count);
+					total_coord = (static_index < coord_index) ?
+						[edge_list[count_1][count_2 - 1][static_index], total_coord] :
+						[total_coord, edge_list[count_1][count_2 - 1][static_index]];
+					compress_list[count_1].push(total_coord);
+					total_count  = 1;
+					total_coord  = edge_list[count_1][count_2][coord_index];
+				}
+			}
+			total_coord = Math.floor(total_coord / total_count);
+			total_coord = (static_index < coord_index) ?
+				[edge_list[count_1][count_2 - 1][static_index], total_coord] :
+				[total_coord, edge_list[count_1][count_2 - 1][static_index]];
+			compress_list[count_1].push(total_coord);
+		}
+
+		runGC();
+
+		return(compress_list);
+	}
+
+	function D2JSP_RoomList_getCenterList(room_spec) {
+		var center_list = new Array();
+		var count_1;
+
+		room_spec = (room_spec != null) ? D2JSP_UTIL_GEN_ExpandArgs(room_spec) :
+			(new Array());
+		if (!room_spec.length) {
+			for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+				if (!this.room_list[count_1].isExcluded())
+					center_list.push(this.room_list[count_1].getCenter());
+			}
+		}
+		else {
+/*
+			for (count_1 = 0; count_1 < room_spec.length; count_1++) {
+				for (var count_2 = 0; count_2 < this.room_list.length; count_2++) {
+					if ((this.room_list[count_2].number == room_spec[count_1]) &&
+						(!this.room_list[count_2].isExcluded()))
+						center_list.push(this.room_list[count_2].getCenter());
+				}
+			}
+*/
+			for (count_1 = 0; count_1 < room_spec.length; count_1++) {
+				var tmp_list = this.findRoomByNumberList(room_spec[count_1]);
+				for (var count_2 = 0; count_2 < tmp_list.length; count_2++) {
+					if (!tmp_list[count_2].isExcluded())
+						center_list.push(tmp_list[count_2].getCenter());
+				}
+			}
+		}
+
+		runGC();
+
+		return(center_list);
+	}
+
+	function D2JSP_RoomList_getCenterAccessibleList(collision_mask, room_spec) {
+		var center_list = new Array();
+		var count_1;
+
+		room_spec = (room_spec != null) ? D2JSP_UTIL_GEN_ExpandArgs(room_spec) :
+			(new Array());
+
+		if (!room_spec.length) {
+			for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+				if (!this.room_list[count_1].isExcluded()) {
+					var room_center = this.room_list[count_1].
+						getCenterAccessible(collision_mask);
+					if (room_center != null)
+						center_list.push(room_center);
+				}
+			}
+		}
+		else {
+			for (count_1 = 0; count_1 < room_spec.length; count_1++) {
+				var tmp_list = this.findRoomByNumberList(room_spec[count_1]);
+				for (var count_2 = 0; count_2 < tmp_list.length; count_2++) {
+					if (!tmp_list[count_2].isExcluded()) {
+						var room_center = tmp_list[count_2].
+							getCenterAccessible(collision_mask);
+						if (room_center != null)
+							center_list.push(room_center);
+					}
+				}
+			}
+		}
+
+		runGC();
+
+		return(center_list);
+	}
+
+	function D2JSP_RoomList_getCenterSmartList(collision_mask, room_spec) {
+		var center_list = new Array();
+		var count_1;
+
+		room_spec = (room_spec != null) ? D2JSP_UTIL_GEN_ExpandArgs(room_spec) :
+			(new Array());
+		if (!room_spec.length) {
+			for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+				if (!this.room_list[count_1].isExcluded()) {
+					var room_center = this.room_list[count_1].
+						getCenterSmart(collision_mask);
+					if (room_center != null)
+						center_list.push(room_center);
+				}
+			}
+		}
+		else {
+/*
+			for (count_1 = 0; count_1 < room_spec.length; count_1++) {
+				for (var count_2 = 0; count_2 < this.room_list.length; count_2++) {
+					if ((this.room_list[count_2].number == room_spec[count_1]) &&
+						(!this.room_list[count_2].isExcluded())) {
+						var room_center = this.room_list[count_2].
+							getCenterSmart(collision_mask);
+						if (room_center != null)
+							center_list.push(room_center);
+					}
+				}
+			}
+*/
+			for (count_1 = 0; count_1 < room_spec.length; count_1++) {
+				var tmp_list = this.findRoomByNumberList(room_spec[count_1]);
+				for (var count_2 = 0; count_2 < tmp_list.length; count_2++) {
+					if (!tmp_list[count_2].isExcluded()) {
+						var room_center = tmp_list[count_2].
+							getCenterSmart(collision_mask);
+						if (room_center != null)
+							center_list.push(room_center);
+					}
+				}
+			}
+		}
+
+		runGC();
+
+		return(center_list);
+	}
+
+	function D2JSP_RoomList_getPresetList(room_spec, unit_type, unit_classid,
+		first_only_flag) {
+if (parseFloat(me.version) >= 0.3501) {
+		return(D2JSP_ROOM_GetPresetListForArea(this.level, unit_type,
+			unit_classid, room_spec, first_only_flag));
+}
+else {
+		var preset_list = new Array();
+		var count_1;
+
+		room_spec    = (room_spec != null) ?
+			D2JSP_UTIL_GEN_ExpandArgs(room_spec) : (new Array());
+		unit_classid = (unit_classid != null) ?
+			D2JSP_UTIL_GEN_ExpandArgs(unit_classid) : (new Array());
+
+		if (!room_spec.length) {
+			for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+				if (!this.room_list[count_1].isExcluded()) {
+					var tmp_list = this.room_list[count_1].
+						getPresetList(unit_type, unit_classid, first_only_flag);
+					if (tmp_list && tmp_list.length) {
+						preset_list = preset_list.concat(tmp_list);
+						if (first_only_flag)
+							break;
+					}
+				}
+			}
+		}
+		else {
+			for (count_1 = 0; count_1 < room_spec.length; count_1++) {
+				var spec_list = this.findRoomByNumberList(room_spec[count_1]);
+				for (var count_2 = 0; count_2 < spec_list.length; count_2++) {
+					if (!spec_list[count_2].isExcluded()) {
+						var tmp_list = spec_list[count_2].getPresetList(unit_type,
+							unit_classid, first_only_flag);
+						if (tmp_list && tmp_list.length) {
+							preset_list = preset_list.concat(tmp_list);
+							if (first_only_flag) {
+								count_1 = room_spec.length;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		runGC();
+
+		return(preset_list);
+}
+	}
+
+	function D2JSP_RoomList_getPresetCoordsList(room_spec, unit_type,
+		unit_classid, first_only_flag) {
+		return(D2JSP_ROOM_PresetListToCoords(this.getPresetList(room_spec,
+			unit_type, unit_classid, first_only_flag)));
+	}
+
+	function D2JSP_RoomList_getAdjacentRoomsByNumber(room_number, adjacency) {
+		my_room = this.findRoomByNumber(room_number);
+		return((my_room) ? this.getAdjacentRooms(my_room, adjacency) :
+			(new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentRoomsByXY(in_x, in_y, adjacency) {
+		my_room = this.findRoomByXY(in_x, in_y);
+		return((my_room) ? this.getAdjacentRooms(my_room, adjacency) :
+			(new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentRoomsByBaseXY(in_x, in_y,
+		adjacency) {
+		my_room = this.findRoomByBaseXY(in_x, in_y);
+		return((my_room) ? this.getAdjacentRooms(my_room, adjacency) :
+			(new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentRoomsByXYPair(in_x_y_pair,
+		adjacency) {
+		my_room = this.findRoomByXYPair(in_x_y_pair);
+		return((my_room) ? this.getAdjacentRooms(my_room, adjacency) :
+			(new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentRoomsByObject(in_object,
+		adjacency) {
+		my_room = this.findRoomByObject(in_object);
+		return((my_room) ? this.getAdjacentRooms(my_room, adjacency) :
+			(new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentRooms(my_room, adjacency) {
+		var adjacency_list = new Array();
+
+		if (!(my_room instanceof D2JSP_Room))
+			my_room = this.findRoomByObject();
+
+		if (my_room instanceof D2JSP_Room) {
+			adjacency = ((!D2JSP_UTIL_GEN_TypeOfNumber(adjacency)) ||
+				(!adjacency)) ? 1 : adjacency;
+			adjacency = (adjacency < 0) ? (0 - adjacency) : adjacency;
+			for (var count_1 = (my_room.room_row - adjacency);
+				count_1 <= (my_room.room_row + adjacency); count_1++) {
+				for (var count_2 = (my_room.room_col - adjacency);
+					count_2 <= (my_room.room_col + adjacency); count_2++) {
+					if ((count_1 > -1) && (count_1 < this.meta_map.length) &&
+						(count_2 > -1) && (count_2 < this.meta_map[0].length) &&
+						(this.meta_map[count_1][count_2] != null)) {
+						if ((my_room.room_row != count_1) ||
+							(my_room.room_col != count_2))
+							adjacency_list.push(this.meta_map[count_1][count_2]);
+					}
+				}
+			}
+		}
+
+		return(adjacency_list);
+	}
+
+	function D2JSP_RoomList_getAdjacentAccessibleRoomsByNumber(room_number,
+		adjacency, collision_mask) {
+		my_room = this.findRoomByNumber(room_number);
+		return((my_room) ? this.getAdjacentAccessibleRooms(my_room, adjacency,
+			collision_mask) : (new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentAccessibleRoomsByXY(in_x, in_y, adjacency,
+		collision_mask) {
+		my_room = this.findRoomByXY(in_x, in_y);
+		return((my_room) ? this.getAdjacentAccessibleRooms(my_room, adjacency,
+			collision_mask) : (new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentAccessibleRoomsByBaseXY(in_x, in_y,
+		adjacency, collision_mask) {
+		my_room = this.findRoomByBaseXY(in_x, in_y);
+		return((my_room) ? this.getAdjacentAccessibleRooms(my_room, adjacency,
+			collision_mask) : (new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentAccessibleRoomsByXYPair(in_x_y_pair,
+		adjacency, collision_mask) {
+		my_room = this.findRoomByXYPair(in_x_y_pair);
+		return((my_room) ? this.getAdjacentAccessibleRooms(my_room, adjacency,
+			collision_mask) : (new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentAccessibleRoomsByObject(in_object,
+		adjacency, collision_mask) {
+		my_room = this.findRoomByObject(in_object);
+		return((my_room) ? this.getAdjacentAccessibleRooms(my_room, adjacency,
+			collision_mask) : (new Array()));
+	}
+
+	function D2JSP_RoomList_getAdjacentAccessibleRooms(my_room, adjacency,
+		collision_mask) {
+		var center_list    = new Array();
+		var adjacency_list = this.getAdjacentRooms(my_room, adjacency);
+
+		for (var count_1 = 0; count_1 < tmp_list.length; count_1++) {
+			if (!tmp_list[count_1].isExcluded()) {
+				var room_center = tmp_list[count_1].
+					getCenterAccessible(collision_mask);
+				if (room_center != null)
+					center_list.push(room_center);
+			}
+		}
+
+print("D2JSP_RoomList_getAdjacentAccessibleRooms() RESULT = " + center_list.length);
+		return(center_list);
+	}
+
+	function D2JSP_RoomList_findMinMaxAccessibleCoord(collision_mask) {
+		var out_list = new Array(4);
+
+		out_list[0] = this.findMinAccessibleCoord_X(collision_mask);
+print("---> 0");
+		out_list[1] = this.findMinAccessibleCoord_Y(collision_mask);
+print("---> 1");
+		out_list[2] = this.findMaxAccessibleCoord_X(collision_mask);
+print("---> 2");
+		out_list[3] = this.findMaxAccessibleCoord_Y(collision_mask);
+print("---> 3");
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_findMinAccessibleCoord_X(collision_mask) {
+		var out_list   = new Array();
+		var last_coord = Number.MAX_VALUE;
+		var count_1;
+
+		this.room_list = this.sortByCoord_X_1();
+
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			if (this.room_list[count_1].x_1 > last_coord)
+				break;
+			var this_coord =
+				this.room_list[count_1].findMinAccessibleCoord_X(collision_mask);
+			if (this_coord) {
+//				this_coord = [this.room_list[count_1].number, this_coord];
+				if (this_coord[0] < last_coord) {
+					out_list = new Array();
+					out_list.push(this_coord);
+					last_coord = this_coord[0];
+				}
+				else if (this_coord[0] == last_coord)
+					out_list.push(this_coord);
+			}
+		}
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_findMinAccessibleCoord_Y(collision_mask) {
+		var out_list   = new Array();
+		var last_coord = Number.MAX_VALUE;
+		var count_1;
+
+		this.sortByCoord_Y_1();
+
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			if (this.room_list[count_1].y_1 > last_coord)
+				break;
+			var this_coord =
+				this.room_list[count_1].findMinAccessibleCoord_Y(collision_mask);
+			if (this_coord) {
+//				this_coord = [this.room_list[count_1].number, this_coord];
+				if (this_coord[1] < last_coord) {
+					out_list = new Array();
+					out_list.push(this_coord);
+					last_coord = this_coord[1];
+				}
+				else if (this_coord[1] == last_coord)
+					out_list.push(this_coord);
+			}
+		}
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_findMaxAccessibleCoord_X(collision_mask) {
+		var out_list   = new Array();
+		var last_coord = Number.MIN_VALUE;
+		var count_1;
+
+		this.sortByCoord_X_2();
+
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			if (this.room_list[count_1].x_2 < last_coord)
+				break;
+			var this_coord =
+				this.room_list[count_1].findMaxAccessibleCoord_X(collision_mask);
+			if (this_coord) {
+//				this_coord = [this.room_list[count_1].number, this_coord];
+				if (this_coord[0] > last_coord) {
+					out_list = new Array();
+					out_list.push(this_coord);
+					last_coord = this_coord[0];
+				}
+				else if (this_coord[0] == last_coord)
+					out_list.push(this_coord);
+			}
+		}
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_findMaxAccessibleCoord_Y(collision_mask) {
+		var out_list   = new Array();
+		var last_coord = Number.MIN_VALUE;
+		var count_1;
+
+		this.sortByCoord_Y_2();
+
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			if (this.room_list[count_1].y_2 < last_coord)
+				break;
+			var this_coord =
+				this.room_list[count_1].findMaxAccessibleCoord_Y(collision_mask);
+			if (this_coord) {
+//				this_coord = [this.room_list[count_1].number, this_coord];
+				if (this_coord[1] > last_coord) {
+					out_list = new Array();
+					out_list.push(this_coord);
+					last_coord = this_coord[1];
+				}
+				else if (this_coord[1] == last_coord)
+					out_list.push(this_coord);
+			}
+		}
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_getStringList(collision_mask, coll_true, coll_false){
+		var string_coll_list = new Array(this.cell_rows);
+		var tmp_array        = new Array(this.cell_cols + 1);
+		var count_1;
+		var count_2;
+
+		coll_true = (!D2JSP_UTIL_GEN_TypeOfString(coll_true))  ? "*" :
+			coll_true.charAt(0);
+
+		for (count_1 = 0; count_1 < this.cell_rows; count_1++)
+			string_coll_list[count_1] = tmp_array.join("#");
+//			string_coll_list[count_1] = tmp_array.join(coll_true);
+
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			var room_row       = this.room_list[count_1].y_1 - this.y_1;
+			var room_col       = this.room_list[count_1].x_1 - this.x_1;
+			var room_coll_list = this.room_list[count_1].
+				getStringList(collision_mask, coll_true, coll_false);
+			for (count_2 = 0; count_2 < room_coll_list.length; count_2++)
+				string_coll_list[room_row + count_2] =
+					string_coll_list[room_row + count_2].substr(0, room_col) +
+					room_coll_list[count_2] +
+					string_coll_list[room_row + count_2].
+					substr(room_col + room_coll_list[count_2].length);
+		}
+
+		runGC();
+
+		return(string_coll_list);
+	}
+
+	function D2JSP_RoomList_getStringSepList(collision_mask, coll_true,
+		coll_false) {
+		var string_coll_list =
+			new Array(this.cell_rows + (this.meta_map.length - 1) + 1);
+		var tmp_array        =
+			new Array(this.cell_cols + (this.meta_map[0].length - 1) + 1);
+
+		for (var count_1 = 0;
+			count_1 < (this.cell_rows + (this.meta_map.length - 1) + 1);
+			count_1++)
+			string_coll_list[count_1] = tmp_array.join("#");
+
+		for (count_1 = 0; count_1 < this.meta_map.length; count_1++) {
+			for (var count_2 = 0; count_2 < this.meta_map[count_1].length;
+				count_2++) {
+				var this_room = this.meta_map[count_1][count_2];
+				if (!this_room)
+					continue;
+				var room_row       = this_room.y_1 - this.y_1;
+				var room_col       = this_room.x_1 - this.x_1;
+				var room_coll_list = this_room.getStringList(collision_mask,
+					coll_true, coll_false);
+				for (var count_3 = 0; count_3 < room_coll_list.length; count_3++) {
+					string_coll_list[room_row + count_3 + count_1] =
+						string_coll_list[room_row + count_3 + count_1].
+						substr(0, room_col + count_2) + room_coll_list[count_3] +
+						string_coll_list[room_row + count_3 + count_1].
+							substr(room_col + room_coll_list[count_3].length + count_2);
+					if (count_2)
+						string_coll_list[room_row + count_3 + count_1] =
+							string_coll_list[room_row + count_3 + count_1].
+							substr(0, room_col + (count_2 - 1)) + "|" +
+							string_coll_list[room_row + count_3 + count_1].
+								substr(room_col + 1 + (count_2 - 1));
+				}
+				room_row = (this_room.y_1 - this.y_1) + room_coll_list.length;
+				var tmp_str  = ((count_2) ? "+" : "-") +
+					D2JSP_UTIL_FORMAT_LJust("", room_coll_list[0].length, "-");
+				string_coll_list[room_row + count_1] =
+					string_coll_list[room_row + count_1].
+					substr(0, room_col + (count_2 - 1)) + tmp_str +
+					string_coll_list[room_row + count_1].
+						substr(room_col + tmp_str.length + 1 + (count_2 - 1));
+			}
+		}
+		string_coll_list.unshift(tmp_array.join("-"));
+
+		for (var count_1 = 0; count_1 < string_coll_list.length; count_1++)
+			string_coll_list[count_1] = "|" + string_coll_list[count_1] + "|";
+
+		runGC();
+
+		return(string_coll_list);
+	}
+
+	function D2JSP_RoomList_getStringValueList(radix, separator) {
+		var string_coll_list = new Array(this.cell_rows);
+		var width_list       = [8, 3, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2];
+		var tmp_array        = new Array(this.cell_cols);
+		var tmp_string       = "";
+		var width;
+		var count_1;
+		var count_2;
+
+		radix     = ((radix >= 2) || (radix <= 16)) ? radix : 16;
+		separator = (!D2JSP_UTIL_GEN_TypeOfString(separator))  ? " " :
+			separator.charAt(0);
+		width     = width_list[radix - 2];
+
+		tmp_string = D2JSP_UTIL_FORMAT_ZeroFill((255).toString(radix), width);
+		for (count_1 = 0; count_1 < this.cell_cols; count_1++)
+			tmp_array[count_1] = tmp_string;
+		tmp_string = tmp_array.join(separator);
+		for (count_1 = 0; count_1 < this.cell_rows; count_1++)
+			string_coll_list[count_1] = tmp_string;
+
+		for (count_1 = 0; count_1 < this.room_list.length; count_1++) {
+			var room_row       = this.room_list[count_1].y_1 - this.y_1;
+			var room_col       = ((this.room_list[count_1].x_1 - this.x_1) *
+				width) + (this.room_list[count_1].x_1 - this.x_1);
+			var room_coll_list = this.room_list[count_1].
+				getStringValueList(radix, separator);
+			for (count_2 = 0; count_2 < room_coll_list.length; count_2++)
+				string_coll_list[room_row + count_2] =
+					string_coll_list[room_row + count_2].substr(0, room_col) +
+					room_coll_list[count_2] +
+					string_coll_list[room_row + count_2].
+					substr(room_col + room_coll_list[count_2].length);
+		}
+
+		runGC();
+
+		return(string_coll_list);
+	}
+
+	function D2JSP_RoomList_getStringMetaMapList() {
+		var out_list = new Array();
+
+		for (var count_1 = 0; count_1 < this.meta_map.length; count_1++) {
+			var meta_string = "";
+			for (var count_2 = 0; count_2 < this.meta_map[count_1].length;
+				count_2++)
+				meta_string += "|" + D2JSP_UTIL_FORMAT_RJust(
+					(this.meta_map[count_1][count_2] != null) ?
+					this.meta_map[count_1][count_2].number : "", 10);
+			out_list.push(meta_string + "|");
+		}
+
+		runGC();
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_getStringListBounded(in_bounding_box, collision_mask,
+		coll_true, coll_false) {
+		var bounding_box = (D2JSP_UTIL_GEN_TypeOfArrayIndexed(in_bounding_box) &&
+			(in_bounding_box.length == 2) &&
+			D2JSP_UTIL_GEN_TypeOfCoord(in_bounding_box[0]) &&
+			D2JSP_UTIL_GEN_TypeOfCoord(in_bounding_box[1])) ? in_bounding_box :
+			null;
+
+		var out_list = this.getStringList(collision_mask, coll_true, coll_false);
+
+		if (!bounding_box)
+			return(out_list);
+
+		bounding_box =
+			[
+				[
+					Math.min(bounding_box[0][0], bounding_box[1][0]),
+					Math.min(bounding_box[0][1], bounding_box[1][1])
+				],
+				[
+					Math.max(bounding_box[0][0], bounding_box[1][0]),
+					Math.max(bounding_box[0][1], bounding_box[1][1])
+				]
+			];
+
+		if (bounding_box[1][0] <= this.x_2) {
+			for (count_1 = 0; count_1 < out_list.length; count_1++)
+				out_list[count_1] =
+					out_list[count_1].substr(0, bounding_box[1][0] - this.x_1) +
+					"|" +
+					out_list[count_1].substr(bounding_box[1][0] - this.x_1);
+		}
+
+		if (bounding_box[0][0] >= this.x_1) {
+			for (count_1 = 0; count_1 < out_list.length; count_1++)
+				out_list[count_1] =
+					out_list[count_1].substr(0, bounding_box[0][0] - this.x_1) +
+					"|" +
+					out_list[count_1].substr(bounding_box[0][0] - this.x_1);
+		}
+
+		if (bounding_box[1][1] <= this.y_2)
+			out_list.splice(bounding_box[1][1] - this.y_1, 0,
+				new Array(out_list[0].length + 1).join("-"));
+
+		if (bounding_box[0][1] >= this.y_1)
+			out_list.splice(bounding_box[0][1] - this.y_1, 0,
+				new Array(out_list[0].length + 1).join("-"));
+
+		runGC();
+
+		return(out_list);
+	}
+
+	function D2JSP_RoomList_sortByCoord_X_1()
+		{ return(this.room_list.sort(D2JSP_Room_compareByCoord_X_1)); }
+	function D2JSP_RoomList_sortByCoord_Y_1()
+		{ return(this.room_list.sort(D2JSP_Room_compareByCoord_Y_1)); }
+	function D2JSP_RoomList_sortByCoord_X_2()
+		{ return(this.room_list.sort(D2JSP_Room_compareByCoord_X_2)); }
+	function D2JSP_RoomList_sortByCoord_Y_2()
+		{ return(this.room_list.sort(D2JSP_Room_compareByCoord_Y_2)); }
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_Room(in_room)
+{
+	this.level             = in_room.level;
+	this.number            = in_room.number;
+	this.subnumber         = in_room.subnumber;
+	this.id                = in_room.id;
+	this.x                 = in_room.x;
+	this.y                 = in_room.y;
+	this.correcttomb       = in_room.correcttomb;
+	this.levelx            = in_room.levelx;
+	this.levely            = in_room.levely;
+
+if (parseFloat(me.version) != 0.3518) {
+	this.coll_table        = in_room.getCollision();
+	if (!this.coll_table) {
+		var log_obj = D2JSP_UTIL_LOG_GetALog();
+		log_obj.logError("***** EMPTY COLL TABLE!!! (core room obj=" + in_room +
+			", level=" + in_room.level + " (" +
+			D2JSP_AREA_AreaToName(in_room.level) + "), room base x = " +
+			in_room.x + ", room base y = " + in_room.y);
+		runGC();
+		var attempt_time = 10 * 100;
+		this.coll_table = in_room.getCollision();
+		if ((!this.coll_table) && D2JSP_AREA_IsTown(me.area)) {
+			log_obj.logInfo("Waiting 10 seconds before re-trying collision " +
+				"table acquisition.");
+			delay(10000);
+		}
+		for (var count_1 = 0; count_1 < 10; count_1++) {
+			log_obj.logWarning("Re-trying collision table acquisition.");
+			this.coll_table = in_room.getCollision();
+			if (this.coll_table) {
+				log_obj.logInfo("Collision table has been acquired.");
+				break;
+			}
+			delay(100);
+		}
+		if ((!this.coll_table) && D2JSP_AREA_IsTown(me.area)) {
+			attempt_time += 20 * 500;
+			for (var count_1 = 0; count_1 < 20; count_1++) {
+				log_obj.logWarning("Re-trying collision table acquisition.");
+				this.coll_table = in_room.getCollision();
+				if (this.coll_table) {
+					log_obj.logInfo("Collision table has been acquired.");
+					break;
+				}
+				delay(500);
+			}
+		}
+		if (!this.coll_table)
+			log_obj.logFatal("Collision table not acquired after " +
+				attempt_time + " milliseconds.");
+	}
+	this.coll_analysis     = false;
+	this.xStart            = this.x * 5;
+	this.yStart            = this.y * 5;
+	this.xSize1            = this.coll_table[0].length;
+	this.ySize1            = this.coll_table.length;
+}
+else {
+	this.coll_analysis     = false;
+	this.xStart            = in_room.getStat(D2JSP_ROOMSTAT_XSTART);
+	this.yStart            = in_room.getStat(D2JSP_ROOMSTAT_YSTART);
+	this.xSize1            = in_room.getStat(D2JSP_ROOMSTAT_XSIZE1);
+	this.ySize1            = in_room.getStat(D2JSP_ROOMSTAT_YSIZE1);
+}
+
+/*
+	if (!D2JSP_AREA_IsComplex(this.level));
+		this.coll_table = null;
+*/
+//	this.coll_table = null;
+	
+/*
+	this.xStart            = in_room.getStat(D2JSP_ROOMSTAT_XSTART);
+	this.yStart            = in_room.getStat(D2JSP_ROOMSTAT_YSTART);
+	this.xSize1            = in_room.getStat(D2JSP_ROOMSTAT_XSIZE1);
+	this.ySize1            = in_room.getStat(D2JSP_ROOMSTAT_YSIZE1);
+*/
+
+/*
+	this.xPos              = in_room.getStat(D2JSP_ROOMSTAT_XPOS);
+	this.yPos              = in_room.getStat(D2JSP_ROOMSTAT_YPOS);
+	this.xSize2            = in_room.getStat(D2JSP_ROOMSTAT_XSIZE2);
+	this.ySize2            = in_room.getStat(D2JSP_ROOMSTAT_YSIZE2);
+//	this.Unused_8          = in_room.getStat(D2JSP_ROOMSTAT_UNUSED_8);
+	this.nPosGameX         = in_room.getStat(D2JSP_ROOMSTAT_NPOSGAMEX);
+	this.nPosGameY         = in_room.getStat(D2JSP_ROOMSTAT_NPOSGAMEY);
+	this.nSizeGameX        = in_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEX);
+	this.nSizeGameY        = in_room.getStat(D2JSP_ROOMSTAT_NSIZEGAMEY);
+	this.nPosRoomX         = in_room.getStat(D2JSP_ROOMSTAT_NPOSROOMX);
+	this.nPosRoomY         = in_room.getStat(D2JSP_ROOMSTAT_NPOSROOMY);
+	this.nSizeRoomX        = in_room.getStat(D2JSP_ROOMSTAT_NSIZEROOMX);
+	this.nSizeRoomY        = in_room.getStat(D2JSP_ROOMSTAT_NSIZEROOMY);
+*/
+
+	this.x_1                         = this.xStart;
+	this.y_1                         = this.yStart;
+	this.x_2                         = this.x_1 + (this.xSize1 - 1);
+	this.y_2                         = this.y_1 + (this.ySize1 - 1);
+	this.room_row                    = 0;
+	this.room_col                    = 0;
+	this.cell_row                    = 0;
+	this.cell_col                    = 0;
+	this.cell_rows                   = (this.y_2 - this.y_1) + 1;
+	this.cell_cols                   = (this.x_2 - this.x_1) + 1;
+//	this.coll_table                  = null;
+	this.preset_list                 = null;
+//	this.preset_list                 = D2JSP_ROOM_GetPresetListBasic(in_room);
+
+	this.center_coord                = null;
+	this.center_coord_mask           = null;
+	this.accessible_count            = 0;
+	this.check_sum                   = 0;
+	this.is_excluded                 = false;
+	this.is_pathable                 = true;
+
+	this.isInRoomXY                  = D2JSP_Room_isInRoomXY;
+	this.isInRoomXYPair              = D2JSP_Room_isInRoomXYPair;
+	this.isInRoomObject              = D2JSP_Room_isInRoomObject;
+	this.isAccessible                = D2JSP_Room_isAccessible;
+	this.isExcluded                  = D2JSP_Room_isExcluded;
+
+	this.getRoomByBaseXY             = D2JSP_Room_getRoomByBaseXY;
+
+	this.createCollisionInfoInternal = D2JSP_Room_createCollisionInfoInternal;
+	this.createCollisionInfo         = D2JSP_Room_createCollisionInfo;
+	this.getCollisionInfoRaw         = D2JSP_Room_getCollisionInfoRaw
+	this.getCollisionInfo            = D2JSP_Room_getCollisionInfo;
+	this.getCollisionInfoMasked      = D2JSP_Room_getCollisionInfoMasked;
+
+	this.clearCollisionInfo          = D2JSP_Room_clearCollisionInfo;
+	this.clearPresetUnitInfo         = D2JSP_Room_clearPresetUnitInfo;
+
+	this.getDirectionDeltas          = D2JSP_Room_getDirectionDeltas;
+
+	this.findAccessibleEdgeMin_X     = D2JSP_Room_findAccessibleEdgeMin_X;
+	this.findAccessibleEdgeMin_Y     = D2JSP_Room_findAccessibleEdgeMin_Y;
+	this.findAccessibleEdgeMax_X     = D2JSP_Room_findAccessibleEdgeMax_X;
+	this.findAccessibleEdgeMax_Y     = D2JSP_Room_findAccessibleEdgeMax_Y;
+
+	this.getCenter                   = D2JSP_Room_getCenter;
+	this.getCenterAccessible         = D2JSP_Room_getCenterAccessible;
+this.getCenterAccessible_1         = D2JSP_Room_getCenterAccessible_1;
+this.getCenterAccessible_2         = D2JSP_Room_getCenterAccessible_2;
+	this.getCenterSmart              = D2JSP_Room_getCenterSmart;
+
+	this.getPresetList               = D2JSP_Room_getPresetList;
+	this.getPresetCoordsList         = D2JSP_Room_getPresetCoordsList;
+
+
+/*
+	this.findMinAccessibleCoord      = D2JSP_Room_findMinAccessibleCoord;
+	this.findMaxAccessibleCoord      = D2JSP_Room_findMaxAccessibleCoord;
+*/
+
+	this.findMinAccessibleCoord_X    = D2JSP_Room_findMinAccessibleCoord_X;
+	this.findMinAccessibleCoord_Y    = D2JSP_Room_findMinAccessibleCoord_Y;
+	this.findMaxAccessibleCoord_X    = D2JSP_Room_findMaxAccessibleCoord_X;
+	this.findMaxAccessibleCoord_Y    = D2JSP_Room_findMaxAccessibleCoord_Y;
+
+	this.toString                    = D2JSP_Room_toString;
+	this.toStringCSV                 = D2JSP_Room_toStringCSV;
+	this.toStringCSVHeader           = D2JSP_Room_toStringCSVHeader;
+	this.getStringList               = D2JSP_Room_getStringList;
+	this.getStringValueList          = D2JSP_Room_getStringValueList;
+
+//	this.createCollisionInfoInternal(in_room);
+
+/*
+	this.coll_table        = in_room.getCollision();
+	this.xStart            = this.x * 5;
+	this.yStart            = this.y * 5;
+	this.xSize1            = this.coll_table[0].length;
+	this.ySize1            = this.coll_table.length;
+	this.x_1               = this.xStart;
+	this.y_1               = this.yStart;
+	this.x_2               = this.x_1 + (this.xSize1 - 1);
+	this.y_2               = this.y_1 + (this.ySize1 - 1);
+	this.room_row          = 0;
+	this.room_col          = 0;
+	this.cell_row          = 0;
+	this.cell_col          = 0;
+	this.cell_rows         = (this.y_2 - this.y_1) + 1;
+	this.cell_cols         = (this.x_2 - this.x_1) + 1;
+	this.accessible_count  = this.xSize1 * this.ySize1;
+*/
+
+	if ((this.number == 836) &&
+		((this.level == D2JSP_AREA_RIVER_OF_FLAME) ||
+		(this.level == D2JSP_AREA_CHAOS_SANCTUM) ||
+		(this.level == D2JSP_AREA_HELL1) ||
+		(this.level == D2JSP_AREA_HELL2) ||
+		(this.level == D2JSP_AREA_HELL3))) {
+		this.coll_analysis    = true;
+		this.check_sum        = -1;
+		this.is_excluded      = true;
+		this.is_pathable      = false;
+		this.accessible_count = 0;
+	}
+	else if (D2JSP_ROOM_IsBorderRoom(this.number)) {
+		this.is_excluded      = true;
+//		this.is_pathable      = false;
+		this.accessible_count = 0;
+		return(true);
+	}
+	else if ((this.number == 26) || (this.number == 27))
+		this.is_pathable = false;
+
+	function D2JSP_Room_isInRoomXY(in_x, in_y) {
+		return(((in_x >= this.x_1) && (in_y >= this.y_1) &&
+			(in_x <= this.x_2) && (in_y <= this.y_2)) ? true : false);
+	}
+	function D2JSP_Room_isInRoomXYPair(in_x_y_pair) {
+		return(this.isInRoomXY(in_x_y_pair[0], in_x_y_pair[1]));
+	}
+	function D2JSP_Room_isInRoomObject(in_object) {
+		in_object = (in_object instanceof Object) ? in_object : me;
+		return(this.isInRoomXY(in_object.x, in_object.y));
+	}
+	function D2JSP_Room_isAccessible() {
+		this.createCollisionInfo();
+		return(((!this.is_excluded) && this.accessible_count) ? true : false);
+	}
+	function D2JSP_Room_isExcluded() {
+		if (this.is_excluded)
+			return(true);
+		else if ((this.number == 836) &&
+			((this.level == D2JSP_AREA_RIVER_OF_FLAME) ||
+			(this.level == D2JSP_AREA_CHAOS_SANCTUM) ||
+			(this.level == D2JSP_AREA_HELL1) ||
+			(this.level == D2JSP_AREA_HELL2) ||
+			(this.level == D2JSP_AREA_HELL3))) {
+			this.is_excluded = true;
+			return(true);
+		}
+		else if (D2JSP_ROOM_IsBorderRoom(this.number)) {
+			this.is_excluded = true;
+			return(true);
+		}
+		else
+			return(false);
+	}
+
+	function D2JSP_Room_getRoomByBaseXY(room_x, room_y) {
+		var room_obj = getRoom(this.level);
+		if (room_obj) {
+			do {
+				if ((room_obj.x == room_x) && (room_obj.y == room_y))
+					return(room_obj);
+			} while (room_obj && room_obj.getNext(this.level));
+		}
+		return(null);
+	}
+
+	function D2JSP_Room_createCollisionInfoInternal(room_obj) {
+		if (!this.coll_analysis) {
+			if (this.coll_table == null)
+				this.coll_table = this.getRoomByBaseXY(this.x, this.y).getCollision();
+			this.coll_analysis = true;
+			// Initialize the collision table...
+			this.accessible_count = 0;
+			if (parseFloat(me.version) >= 0.32) {
+				// ADF NOTE: New two-dimension array logic
+				if ((this.number == 836) &&
+					((this.level == D2JSP_AREA_RIVER_OF_FLAME) ||
+					(this.level == D2JSP_AREA_CHAOS_SANCTUM) ||
+					(this.level == D2JSP_AREA_HELL1) ||
+					(this.level == D2JSP_AREA_HELL2) ||
+					(this.level == D2JSP_AREA_HELL3))) {
+					this.check_sum        = -1;
+					this.is_excluded      = true;
+					this.accessible_count = 0;
+				}
+				else
+					this.accessible_count = this.xSize1 * this.ySize1;
+			}
+/*
+			else {
+				var room_coll = new Array();
+				this.coll_table = new Array(this.ySize1);
+				for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+					this.coll_table[count_1] = new Array(this.xSize1);
+					for (count_2 = 0; count_2 < this.xSize1; count_2++) {
+						this.coll_table[count_1][count_2]  =
+							room_obj.getCollision(count_2, count_1);
+						this.accessible_count             +=
+							(this.coll_table[count_1][count_2] &
+							D2JSP_ROOM_DEFAULT_COLL_MASK) ? 0 : 1;
+						room_coll.push(this.coll_table[count_1][count_2]);
+					}
+				}
+				this.check_sum   = D2JSP_UTIL_CCITT_GetForArray(room_coll);
+				this.is_excluded = ((this.level + "|" + this.number + "|" +
+					this.check_sum) in D2JSP_RoomListExclude) ? true : false;
+			}
+*/
+			runGC();
+		}
+	}
+
+	function D2JSP_Room_createCollisionInfo() {
+		if (!this.coll_analysis)
+			this.createCollisionInfoInternal();
+	}
+
+	function D2JSP_Room_getCollisionInfoRaw() {
+		if (!this.coll_analysis)
+			this.createCollisionInfo();
+		return(this.coll_table);
+	}
+
+	function D2JSP_Room_getCollisionInfo() {
+		return(D2JSP_UTIL_GEN_CloneObject(this.getCollisionInfoRaw()));
+	}
+
+	function D2JSP_Room_getCollisionInfoMasked(collision_mask) {
+		var my_coll_table = this.getCollisionInfo();
+		var count_1;
+		var count_2;
+		for (count_1 = 0; count_1 < my_coll_table.length; count_1++) {
+			for (count_2 = 0; count_2 < my_coll_table[count_1].length; count_2++)
+				my_coll_table[count_1][count_2] &= collision_mask;
+		}
+		return(my_coll_table);
+	}
+
+	function D2JSP_Room_clearCollisionInfo() {
+		this.coll_analysis    = false;
+		this.coll_table       = null;
+		this.is_excluded      = false;
+		this.accessible_count = 0;
+		this.check_sum        = 0;
+	}
+
+	function D2JSP_Room_clearPresetUnitInfo() {
+		this.preset_list = null;
+	}
+
+	function D2JSP_Room_getDirectionDeltas() {
+		return(D2JSP_ROOM_GetDirectionDeltas());
+	}
+
+/*
+	function D2JSP_Room_findMinAccessibleCoord(collision_mask) {
+		var tmp_table;
+		var count_1;
+		var count_2;
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+		tmp_table      = (collision_mask >= 0xFF) ? this.getCollisionInfoRaw() :
+			this.getCollisionInfoMasked(collision_mask);
+
+		for (count_1 = 0; count_1 < tmp_table.length; count_1++) {
+			for (count_2 = 0; count_2 < tmp_table[count_1].length; count_2++) {
+				if (!(tmp_table[count_1][count_2] & collision_mask))
+					return([count_1 + this.x_1, count_2 + this.y_1]);
+			}
+		}
+		return(null);
+	}
+
+	function D2JSP_Room_findMaxAccessibleCoord(collision_mask) {
+		var tmp_table;
+		var count_1;
+		var count_2;
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+		tmp_table      = (collision_mask >= 0xFF) ? this.getCollisionInfoRaw() :
+			this.getCollisionInfoMasked(collision_mask);
+
+		for (count_1 = tmp_table.length; count_1; ) {
+			count_1--
+			for (count_2 = tmp_table[count_1].length; count_2 ; ) {
+				count_2--
+				if (!(tmp_table[count_1][count_2] & collision_mask))
+					return([count_1 + this.x_1, count_2 + this.y_1]);
+			}
+		}
+		return(null);
+	}
+*/
+
+	function D2JSP_Room_findAccessibleEdgeMin_X(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		if (!this.isAccessible())
+			return(edge_list);
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+/*
+		for (count_1 = 0; count_1 < this.xSize1; count_1++) {
+			if (!(this.coll_table[0][count_1] & collision_mask))
+				edge_list.push([this.x_1 + count_1, this.y_1]);
+		}
+*/
+		for (count_1 = 0; count_1 < this.xSize1; count_1++) {
+			if ((!(this.coll_table[0][count_1] & collision_mask)) &&
+				(!(this.coll_table[1][count_1] & collision_mask)))
+				edge_list.push([this.x_1 + count_1, this.y_1]);
+		}
+
+		return(edge_list);
+	}
+
+	function D2JSP_Room_findAccessibleEdgeMin_Y(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		if (!this.isAccessible())
+			return(edge_list);
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+/*
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			if (!(this.coll_table[count_1][0] & collision_mask))
+				edge_list.push([this.x_1, this.y_1 + count_1]);
+		}
+*/
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			if ((!(this.coll_table[count_1][0] & collision_mask)) &&
+				(!(this.coll_table[count_1][1] & collision_mask)))
+				edge_list.push([this.x_1, this.y_1 + count_1]);
+		}
+
+		return(edge_list);
+	}
+
+	function D2JSP_Room_findAccessibleEdgeMax_X(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		if (!this.isAccessible())
+			return(edge_list);
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+/*
+		for (count_1 = 0; count_1 < this.xSize1; count_1++) {
+			if (!(this.coll_table[this.coll_table.length - 1][count_1] &
+				collision_mask))
+				edge_list.push([this.x_1 + count_1, this.y_2]);
+		}
+*/
+		for (count_1 = 0; count_1 < this.xSize1; count_1++) {
+			if ((!(this.coll_table[this.coll_table.length - 1][count_1] &
+				collision_mask)) &&
+				(!(this.coll_table[this.coll_table.length - 2][count_1] &
+				collision_mask)))
+				edge_list.push([this.x_1 + count_1, this.y_2]);
+		}
+
+		return(edge_list);
+	}
+
+	function D2JSP_Room_findAccessibleEdgeMax_Y(collision_mask) {
+		var edge_list = new Array();
+		var count_1;
+
+		if (!this.isAccessible())
+			return(edge_list);
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+/*
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			if (!(this.coll_table[count_1][this.coll_table[0].length - 1] &
+				collision_mask))
+				edge_list.push([this.x_2, this.y_1 + count_1]);
+		}
+*/
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			if ((!(this.coll_table[count_1][this.coll_table[0].length - 1] &
+				collision_mask)) &&
+				(!(this.coll_table[count_1][this.coll_table[0].length - 2] &
+				collision_mask)))
+				edge_list.push([this.x_2, this.y_1 + count_1]);
+		}
+
+		return(edge_list);
+	}
+
+	function D2JSP_Room_getCenter() {
+		return([Math.floor(this.x_1 + (this.xSize1 / 2)),
+			Math.floor(this.y_1 + (this.ySize1 / 2))]);
+	}
+
+	// //////////////////////////////////////////////////////////////////////
+	function D2JSP_Room_getCenterAccessible(collision_mask) {
+return(this.getCenterAccessible_2(collision_mask));
+		// Find the coordinate at the center of the room...
+		var center_coord = this.getCenter();
+
+/*
+		if ((parseFloat(me.version) >= 0.3405) &&
+			(myDist(center_coord[0], center_coord[1]) < 100)) {
+			// If that coordinate is clear, we're done.
+			if (!checkCollision(this.level, center_coord[0], center_coord[1],
+				0, 1))
+				return(center_coord);
+			// Otherwise, get a list of clear coordinates in the room...
+			var coord_list = new Array();
+			var count_1;
+			var count_2;
+			for (count_1 = 0; count_1 < (this.ySize1 - 1); count_1++) {
+				for (count_2 = 0; count_2 < (this.xSize1 - 1); count_2++) {
+					if (!checkCollision(this.level, this.x_1 + count_2,
+						this.y_1 + count_1, 0, 1))
+						coord_list.push([this.x_1 + count_2, this.y_1 + count_1]);
+				}
+			}
+			// If we found no clear coordinates, we can't go any further...
+			if (!coord_list.length)
+				return(null);
+			// Otherwise, find the coordinate nearest to the center and return that.
+			var nearest_coord_index = D2JSP_UTIL_PATH_GetNearestCoord(coord_list,
+				center_coord);
+			runGC();
+			return(coord_list[nearest_coord_index]);
+			
+		}
+*/
+		if (!this.isAccessible())
+			return(null);
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+/*
+		// NEW
+		if ((this.center_coord != null) &&
+			(this.center_coord_mask == collision_mask))
+			return(this.center_coord);
+*/
+
+/*
+		// Find the coordinate at the center of the room...
+		center_coord = [Math.floor(this.x_1 + (this.xSize1 / 2)),
+			Math.floor(this.y_1 + (this.ySize1 / 2))];
+*/
+
+		// If that coordinate is clear, we're done.
+		if (!(this.coll_table[center_coord[1] - this.y_1]
+			[center_coord[0] - this.x_1] & collision_mask))
+			return(center_coord);
+
+		var coord_list = new Array();
+		var count_1;
+		var count_2;
+
+		// Otherwise, get a list of clear coordinates in the room...
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			for (count_2 = 0; count_2 < this.xSize1; count_2++) {
+				if (!(this.coll_table[count_1][count_2] & collision_mask))
+					coord_list.push([this.x_1 + count_2, this.y_1 + count_1]);
+			}
+		}
+
+		// If we found no clear coordinates, we can't go any further...
+		if (!coord_list.length)
+			return(null);
+
+		var nearest_coord_index = -1;
+		var nearest_coord       = Number.MAX_VALUE;
+		var this_distance;
+
+		// Otherwise, find the coordinate nearest to the center and return that.
+		for (count_1 = 0; count_1 < coord_list.length; count_1++) {
+			if (((this_distance = Dist(center_coord[0], center_coord[1],
+				coord_list[count_1][0], coord_list[count_1][1])) < nearest_coord) ||
+				(!count_1)) {
+				nearest_coord       = this_distance;
+				nearest_coord_index = count_1;
+			}
+		}
+
+/*
+		// NEW
+		this.center_coord      = coord_list[nearest_coord_index];
+		this.center_coord_mask = collision_mask;
+*/
+
+		runGC();
+
+		return(coord_list[nearest_coord_index]);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	function D2JSP_Room_getCenterAccessible_1(collision_mask) {
+		var center_coord;
+
+		if (!this.isAccessible())
+			return(null);
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+/*
+		// NEW
+		if ((this.center_coord != null) &&
+			(this.center_coord_mask == collision_mask))
+			return(this.center_coord);
+*/
+
+		// Find the coordinate at the center of the room...
+		center_coord = [Math.floor(this.x_1 + (this.xSize1 / 2)),
+			Math.floor(this.y_1 + (this.ySize1 / 2))];
+
+		// If that coordinate is clear, we're done.
+		if (!(this.coll_table[center_coord[1] - this.y_1]
+			[center_coord[0] - this.x_1] & collision_mask))
+			return(center_coord);
+
+		var coord_list = new Array();
+		var count_1;
+		var count_2;
+
+		// Otherwise, get a list of clear coordinates in the room...
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			for (count_2 = 0; count_2 < this.xSize1; count_2++) {
+				if (!(this.coll_table[count_1][count_2] & collision_mask))
+					coord_list.push([this.x_1 + count_2, this.y_1 + count_1]);
+			}
+		}
+
+		// If we found no clear coordinates, we can't go any further...
+		if (!coord_list.length)
+			return(null);
+
+		var nearest_coord_index = -1;
+		var nearest_coord       = Number.MAX_VALUE;
+		var this_distance;
+
+		// Otherwise, find the coordinate nearest to the center and return that.
+		for (count_1 = 0; count_1 < coord_list.length; count_1++) {
+			if (((this_distance = Dist2(center_coord[0], center_coord[1],
+				coord_list[count_1][0], coord_list[count_1][1])) < nearest_coord) ||
+				(!count_1)) {
+				nearest_coord       = this_distance;
+				nearest_coord_index = count_1;
+			}
+		}
+
+/*
+		// NEW
+		this.center_coord      = coord_list[nearest_coord_index];
+		this.center_coord_mask = collision_mask;
+*/
+
+		runGC();
+
+		return(coord_list[nearest_coord_index]);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	// //////////////////////////////////////////////////////////////////////
+	function D2JSP_Room_getCenterAccessible_2(collision_mask) {
+		var center_coord;
+
+		if (!this.isAccessible())
+			return(null);
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+/*
+		// NEW
+		if ((this.center_coord != null) &&
+			(this.center_coord_mask == collision_mask))
+			return(this.center_coord);
+*/
+
+		// Find the coordinate at the center of the room...
+		center_coord = [Math.floor(this.x_1 + (this.xSize1 / 2)),
+			Math.floor(this.y_1 + (this.ySize1 / 2))];
+
+		// If that coordinate is clear, we're done.
+		if (!(this.coll_table[center_coord[1] - this.y_1]
+			[center_coord[0] - this.x_1] & collision_mask))
+			return(center_coord);
+
+		var coord_list  = new Array(this.ySize1 * this.xSize1);
+		var coord_index = 0;
+		var count_1;
+		var count_2;
+
+		// Otherwise, get a list of clear coordinates in the room...
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			for (count_2 = 0; count_2 < this.xSize1; count_2++) {
+				if (!(this.coll_table[count_1][count_2] & collision_mask))
+					coord_list[coord_index++] = [this.x_1 + count_2, this.y_1 + count_1];
+			}
+		}
+		coord_list.length = coord_index;
+
+		// If we found no clear coordinates, we can't go any further...
+		if (!coord_list.length)
+			return(null);
+
+		var nearest_coord_index = -1;
+		var nearest_coord       = Number.MAX_VALUE;
+		var this_distance;
+
+		// Otherwise, find the coordinate nearest to the center and return that.
+		for (count_1 = 0; count_1 < coord_list.length; count_1++) {
+			if (((this_distance = Dist(center_coord[0], center_coord[1],
+				coord_list[count_1][0], coord_list[count_1][1])) < nearest_coord) ||
+				(!count_1)) {
+				nearest_coord       = this_distance;
+				nearest_coord_index = count_1;
+			}
+		}
+
+/*
+		// NEW
+		this.center_coord      = coord_list[nearest_coord_index];
+		this.center_coord_mask = collision_mask;
+*/
+
+		runGC();
+
+		return(coord_list[nearest_coord_index]);
+	}
+	// //////////////////////////////////////////////////////////////////////
+
+	function D2JSP_Room_getCenterSmart(collision_mask) {
+/*
+		return((this.coll_table == null) ?
+			((this.isExcluded()) ? null : this.getCenter()) :
+			this.getCenterAccessible(collision_mask));
+*/
+		return((this.isExcluded()) ? null :
+			((!this.coll_analysis) ? this.getCenter() :
+			this.getCenterAccessible(collision_mask)));
+	}
+
+	function D2JSP_Room_getPresetList(unit_type, unit_classid, first_only_flag) {
+		if (this.preset_list == null) {
+			if (D2JSP_AREA_GetAct(this.level) != me.act)
+				return(new Array());
+			var room_obj = this.getRoomByBaseXY(this.x, this.y);
+			if (room_obj)
+				this.preset_list = D2JSP_ROOM_GetPresetListBasic(room_obj);
+			else {
+				D2JSP_UTIL_LOG_GetALog().logFatal(D2JSP_UTIL_COLOR_RED +
+					"FATAL ERROR IN D2JSP_Room.getPresetList(): Unable to " +
+					"locate a room by its X,Y coordinates ([" + this.x + ", " +
+					this.y + "]). Room number = " + this.number + ", area = " +
+					this.level + " (" + D2JSP_AREA_AreaToName(this.level) + ")!!!");
+				stop(1);
+			}
+		}
+
+		if (!this.preset_list.length)
+			return(new Array());
+
+		unit_classid = (unit_classid != null) ?
+			D2JSP_UTIL_GEN_ExpandArgs(unit_classid) : (new Array());
+
+		var preset_list       = new Array();
+		var unit_classid_hash = new Array();
+		
+		for (var count_1 = 0; count_1 < unit_classid.length; count_1++)
+			unit_classid_hash[unit_classid[count_1] + ""] = true;
+
+		for (var count_1 = 0; count_1 < this.preset_list.length; count_1++) {
+			if ((unit_type != null) &&
+				(this.preset_list[count_1].type != unit_type))
+				continue;
+			else if (unit_classid.length &&
+				(!((this.preset_list[count_1].id + "") in unit_classid_hash)))
+				continue;
+			preset_list.push(this.preset_list[count_1]);
+			if (first_only_flag)
+				break;
+		}
+
+		return(D2JSP_UTIL_GEN_CloneObject(preset_list));
+	}
+
+	function D2JSP_Room_getPresetCoordsList(unit_type, unit_classid,
+		first_only_flag) {
+		return(D2JSP_ROOM_PresetListToCoords(this.getPresetList(unit_type,
+			unit_classid, first_only_flag)));
+	}
+
+	function D2JSP_Room_findMinAccessibleCoord_X(collision_mask) {
+		var tmp_table;
+		var count_1;
+		var count_2;
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+		tmp_table      = (collision_mask >= 0xFF) ? this.getCollisionInfoRaw() :
+			this.getCollisionInfoMasked(collision_mask);
+
+		for (count_1 = 0; count_1 < this.xSize1; count_1++) {
+			for (count_2 = 0; count_2 < this.ySize1; count_2++) {
+				if (!(tmp_table[count_1][count_2] & collision_mask))
+					return([count_1 + this.x_1, count_2 + this.y_1]);
+			}
+		}
+		return(null);
+	}
+
+	function D2JSP_Room_findMinAccessibleCoord_Y(collision_mask) {
+		var tmp_table;
+		var count_1;
+		var count_2;
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+		tmp_table      = (collision_mask >= 0xFF) ? this.getCollisionInfoRaw() :
+			this.getCollisionInfoMasked(collision_mask);
+
+		for (count_1 = 0; count_1 < this.ySize1; count_1++) {
+			for (count_2 = 0; count_2 < this.xSize1; count_2++) {
+				if (!(tmp_table[count_1][count_2] & collision_mask))
+					return([count_2 + this.x_1, count_1 + this.y_1]);
+			}
+		}
+		return(null);
+	}
+
+	function D2JSP_Room_findMaxAccessibleCoord_X(collision_mask) {
+		var tmp_table;
+		var count_1;
+		var count_2;
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+		tmp_table      = (collision_mask >= 0xFF) ? this.getCollisionInfoRaw() :
+			this.getCollisionInfoMasked(collision_mask);
+
+		for (count_1 = this.xSize1; count_1; ) {
+			count_1--
+			for (count_2 = this.ySize1; count_2 ; ) {
+				count_2--
+				if (!(tmp_table[count_1][count_2] & collision_mask))
+					return([count_1 + this.x_1, count_2 + this.y_1]);
+			}
+		}
+		return(null);
+	}
+
+	function D2JSP_Room_findMaxAccessibleCoord_Y(collision_mask) {
+		var tmp_table;
+		var count_1;
+		var count_2;
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+
+		tmp_table      = (collision_mask >= 0xFF) ? this.getCollisionInfoRaw() :
+			this.getCollisionInfoMasked(collision_mask);
+
+		for (count_1 = this.ySize1; count_1; ) {
+			count_1--
+			for (count_2 = this.xSize1; count_2 ; ) {
+				count_2--
+				if (!(tmp_table[count_1][count_2] & collision_mask))
+					return([count_2 + this.x_1, count_1 + this.y_1]);
+			}
+		}
+		return(null);
+	}
+
+	function D2JSP_Room_toString() {
+		return(
+			"id=" + this.id +
+			", number=" + this.number +
+			", x=" + this.x +
+			", y=" + this.y +
+			", room row=" + this.room_row +
+			", room col=" + this.room_col +
+			", cell row=" + this.cell_row +
+			", cell col=" + this.cell_col +
+			", xStart=" + this.xStart +
+			", yStart=" + this.yStart +
+			", xSize1=" + this.xSize1 +
+			", ySize1=" + this.ySize1 +
+			", xPos=" + this.xPos +
+			", yPos=" + this.yPos +
+			", xSize2=" + this.xSize2 +
+			", ySize2=" + this.ySize2 +
+			", nPosGameX=" + this.nPosGameX +
+			", nPosGameY=" + this.nPosGameY +
+			", nSizeGameX=" + this.nSizeGameX +
+			", nSizeGameY=" + this.nSizeGameY +
+			", nPosRoomX=" + this.nPosRoomX +
+			", nPosRoomY=" + this.nPosRoomY +
+			", nSizeRoomX=" + this.nSizeRoomX +
+			", nSizeRoomY=" + this.nSizeRoomY);
+	}
+
+	function D2JSP_Room_toStringCSV() {
+		return(
+			this.id + "," +
+			this.number + "," +
+			this.x + "," +
+			this.y + "," +
+			this.room_row + "," +
+			this.room_col + "," +
+			this.cell_row + "," +
+			this.cell_col + "," +
+			this.xStart + "," +
+			this.yStart + "," +
+			this.xSize1 + "," +
+			this.ySize1 + "," +
+			this.xPos + "," +
+			this.yPos + "," +
+			this.xSize2 + "," +
+			this.ySize2 + "," +
+			this.nPosGameX + "," +
+			this.nPosGameY + "," +
+			this.nSizeGameX + "," +
+			this.nSizeGameY + "," +
+			this.nPosRoomX + "," +
+			this.nPosRoomY + "," +
+			this.nSizeRoomX + "," +
+			this.nSizeRoomY);
+	}
+
+	function D2JSP_Room_toStringCSVHeader() {
+		return(
+			"\"id\"" +
+			",\"number\"" +
+			",\"x\"" +
+			",\"y\"" +
+			",\"room row\"" +
+			",\"room col\"" +
+			",\"cell row\"" +
+			",\"cell col\"" +
+			",\"xStart\"" +
+			",\"yStart\"" +
+			",\"xSize1\"" +
+			",\"ySize1\"" +
+			",\"xPos\"" +
+			",\"yPos\"" +
+			",\"xSize2\"" +
+			",\"ySize2\"" +
+			",\"nPosGameX\"" +
+			",\"nPosGameY\"" +
+			",\"nSizeGameX\"" +
+			",\"nSizeGameY\"" +
+			",\"nPosRoomX\"" +
+			",\"nPosRoomY\"" +
+			",\"nSizeRoomX\"" +
+			",\"nSizeRoomY\"");
+	}
+
+	function D2JSP_Room_getStringList(collision_mask, coll_true, coll_false) {
+		var out_list = new Array(this.ySize1);
+		var count_1;
+		var count_2;
+
+		collision_mask = ((!arguments.length) || (!collision_mask)) ?
+			D2JSP_ROOM_DEFAULT_COLL_MASK : collision_mask;
+		coll_true      = (!D2JSP_UTIL_GEN_TypeOfString(coll_true))  ? "*" :
+			coll_true.charAt(0);
+		coll_false     = (!D2JSP_UTIL_GEN_TypeOfString(coll_false)) ? " " :
+			coll_false.charAt(0);
+
+		this.createCollisionInfo();
+
+		for (count_1 = 0; count_1 < this.coll_table.length; count_1++) {
+			out_list[count_1] = "";
+			for (count_2 = 0; count_2 < this.coll_table[count_1].length; count_2++)
+				out_list[count_1] += (this.coll_table[count_1][count_2] &
+					collision_mask) ? coll_true : coll_false;
+		}
+
+		runGC();
+
+		return(out_list);
+	}
+
+	function D2JSP_Room_getStringValueList(radix, separator) {
+		var out_list   = new Array(this.ySize1);
+		var width_list = [8, 3, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2];
+		var width;
+		var count_1;
+		var count_2;
+
+		radix     = ((radix >= 2) || (radix <= 16)) ? radix : 16;
+		separator = (!D2JSP_UTIL_GEN_TypeOfString(separator))  ? " " :
+			separator.charAt(0);
+		width     = width_list[radix - 2];
+
+		this.createCollisionInfo();
+
+		for (count_1 = 0; count_1 < this.coll_table.length; count_1++) {
+			out_list[count_1] = "";
+			for (count_2 = 0; count_2 < this.coll_table[count_1].length; count_2++)
+				out_list[count_1] += ((count_2) ? separator : "") +
+					D2JSP_UTIL_FORMAT_ZeroFill(this.coll_table[count_1][count_2].
+					toString(radix), width);
+		}
+
+		runGC();
+
+		return(out_list);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_Room_compareByCoord_X_1(r_1, r_2)
+	{ return((r_1.x_1 < r_2.x_1) ? -1 : ((r_1.x_1 > r_2.x_1) ? 1 : 0)); }
+function D2JSP_Room_compareByCoord_Y_1(r_1, r_2)
+	{ return((r_1.y_1 < r_2.y_1) ? -1 : ((r_1.y_1 > r_2.y_1) ? 1 : 0)); }
+function D2JSP_Room_compareByCoord_X_2(r_1, r_2)
+	{ return((r_1.x_2 < r_2.x_2) ? -1 : ((r_1.x_2 > r_2.x_2) ? 1 : 0)); }
+function D2JSP_Room_compareByCoord_Y_2(r_1, r_2)
+	{ return((r_1.y_2 < r_2.y_2) ? -1 : ((r_1.y_2 > r_2.y_2) ? 1 : 0)); }
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_Rooms_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output/RegressionTest._D2JSP_Rooms.d2l.txt";
+	var file_handle;
+	var tmp_room;
+
+	print("Writing '_D2JSP_Rooms.d2l' regression test output file to '" +
+		file_name + "'.");
+
+/*
+print("STARTING");
+var preset_list = D2JSP_ROOM_GetPresetListForArea(76, 2, null, null);
+print("PRESETS FOUND IN AREA SPIEDER FOREST: " + preset_list.length);
+while (preset_list.length) {
+	print("type = " + preset_list[0].type + ", " +
+		"id = " + preset_list[0].id + ", " +
+		"x = " + preset_list[0].x + ", " +
+		"y = " + preset_list[0].y + ", " +
+		"room_number = " + preset_list[0].room_number + ", " +
+		"room_base_x = " + preset_list[0].room_base_x + ", " +
+		"room_base_y = " + preset_list[0].room_base_y + ", " +
+		"area_x = " + preset_list[0].area_x + ", " +
+		"area_y = " + preset_list[0].area_y);
+	preset_list.shift();
+}
+print("STOPPING");
+stop();
+*/
+
+	file_handle = fileOpen(file_name, 1);
+	if (file_handle) {
+
+/*
+print("********** Core room creation...");
+var room_index = 0;
+var room_list  = new Array();
+var start_time = new Date();
+		var room_obj = getRoom(this.level);
+//		var room_obj = getRoom();
+		if (room_obj) {
+			do {
+				room_list.push(new D2JSP_Room(room_obj));
+			} while (room_obj && room_obj.getNext(this.level));
+		}
+var total_time = (new Date()) - start_time;
+//room_list.length = room_index;
+print("Room count = " + room_list.length);
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.length / 1000).toFixed(3));
+//print("STOPPING");
+//stop();
+*/
+
+print("********** Creating complete area...");
+var start_time = new Date();
+var room_list = new D2JSP_RoomList();
+var total_time = (new Date()) - start_time;
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+
+print("********** Creating collision info...");
+var start_time = new Date();
+for (count_1 = 0; count_1 < room_list.room_list.length; count_1++)
+	room_list.room_list[count_1].createCollisionInfo();
+var total_time = (new Date()) - start_time;
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+
+/*
+print("********** Creating collision info basic timing...");
+var start_time = new Date();
+for (count_1 = 0; count_1 < room_list.room_list.length; count_1++) {
+	var room_obj = room_list.room_list[count_1].getRoomByBaseXY(
+		room_list.room_list[count_1].x, room_list.room_list[count_1].y);
+	if (room_obj)
+		room_obj.getCollision();
+}
+var total_time = (new Date()) - start_time;
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+*/
+print("********** Creating collision info fundamental timing...");
+var start_time = new Date();
+var room_obj = getRoom();
+if (room_obj) {
+	do {
+		var tmp_coll_table = room_obj.getCollision();
+	} while (room_obj && room_obj.getNext());
+}
+var total_time = (new Date()) - start_time;
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+
+print("********** Finding accessible centers method 0...");
+var start_time = new Date();
+for (count_1 = 0; count_1 < room_list.room_list.length; count_1++)
+	room_list.room_list[count_1].getCenterAccessible();
+var total_time = (new Date()) - start_time;
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+
+print("********** Finding accessible centers method 1...");
+var start_time = new Date();
+for (count_1 = 0; count_1 < room_list.room_list.length; count_1++)
+	room_list.room_list[count_1].getCenterAccessible_1();
+var total_time = (new Date()) - start_time;
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+
+print("********** Finding accessible centers method 2...");
+var start_time = new Date();
+for (count_1 = 0; count_1 < room_list.room_list.length; count_1++)
+	room_list.room_list[count_1].getCenterAccessible_2();
+var total_time = (new Date()) - start_time;
+print("********** Done in total=" + (total_time / 1000).toFixed(3) +
+	", mean=" + (total_time / room_list.room_list.length / 1000).toFixed(3));
+print("STOPPING");
+stop();
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Area                  : " + room_list.level + " (" +
+	D2JSP_AREA_AreaToName(room_list.level) + ")");
+file_handle.writeLine("Room Count            : " + room_list.room_list.length);
+file_handle.writeLine("Calculated Area Coords: " +
+	"[" + room_list.x_1 + ", " + room_list.y_1 + "] ---> [" +
+	room_list.x_2 + ", " + room_list.y_2 + "]");
+file_handle.writeLine("Room-Based Area Coords: " +
+	room_list.room_list[0].levelx + ", " + room_list.room_list[0].levely +
+	" (multiplied by 5 = " + (room_list.room_list[0].levelx * 5) + ", " +
+	(room_list.room_list[0].levely * 5) + ")");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Meta-Map by Room Number");
+file_handle.writeLine("-------------------------------------------------");
+for (count_1 = 0; count_1 < room_list.meta_map.length; count_1++) {
+	var meta_string = "";
+	for (var count_2 = 0; count_2 < room_list.meta_map[count_1].length; count_2++)
+		meta_string += "|" + D2JSP_UTIL_FORMAT_RJust(
+			(room_list.meta_map[count_1][count_2] != null) ?
+			room_list.meta_map[count_1][count_2].number : "", 10);
+	file_handle.writeLine(meta_string + "|");
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Meta-Map by Coordinates");
+file_handle.writeLine("-------------------------------------------------");
+for (count_1 = 0; count_1 < room_list.meta_map.length; count_1++) {
+	var meta_string = "";
+	for (var count_2 = 0; count_2 < room_list.meta_map[count_1].length; count_2++) {
+		if (room_list.meta_map[count_1][count_2] != null)
+			meta_string += "|[" +
+				D2JSP_UTIL_FORMAT_RJust(
+					room_list.meta_map[count_1][count_2].x_1, 5) + "," +
+				D2JSP_UTIL_FORMAT_RJust(
+					room_list.meta_map[count_1][count_2].y_1, 5) + "][" +
+				D2JSP_UTIL_FORMAT_RJust(
+					room_list.meta_map[count_1][count_2].x_2, 5) + "," +
+				D2JSP_UTIL_FORMAT_RJust(
+					room_list.meta_map[count_1][count_2].y_2, 5) + "]";
+		else
+			meta_string += "|" + D2JSP_UTIL_FORMAT_RJust("", 1+5+1+5+2+5+1+5+1);
+	}
+	file_handle.writeLine(meta_string + "|");
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Room Number Hash");
+file_handle.writeLine("-------------------------------------------------");
+for (var this_prop in room_list.room_hash)
+	file_handle.writeLine(D2JSP_UTIL_FORMAT_LJust(this_prop, 5) + ": [" +
+		room_list.room_hash[this_prop] + "]");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Room Check Sum List");
+file_handle.writeLine("-------------------------------------------------");
+for (count_1 = 0; count_1 < room_list.room_list.length; count_1++) {
+	room_list.room_list[count_1].createCollisionInfo();
+	file_handle.writeLine("Number = " + room_list.room_list[count_1].number +
+		", meta-map = [" + room_list.room_list[count_1].room_row + ", " +
+		room_list.room_list[count_1].room_col + "], check sum = " +
+		room_list.room_list[count_1].check_sum);
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Adjacent Rooms List");
+file_handle.writeLine("-------------------------------------------------");
+var my_room = room_list.findRoomByObject();
+file_handle.writeLine("My current room is:");
+file_handle.writeLine(
+	D2JSP_UTIL_FORMAT_RJust(my_room.number, 5) + " | " +
+	D2JSP_UTIL_FORMAT_RJust(my_room.room_row, 3) + " | " +
+	D2JSP_UTIL_FORMAT_RJust(my_room.room_col, 3));
+file_handle.writeLine("-------------------------------------------------");
+file_handle.writeLine("Adjacent to that room are:");
+var adj_list = room_list.getAdjacentRooms(null, 1);
+for (count_1 = 0; count_1 < adj_list.length; count_1++)
+	file_handle.writeLine(
+		D2JSP_UTIL_FORMAT_RJust(adj_list[count_1].number, 5) + " | " +
+		D2JSP_UTIL_FORMAT_RJust(adj_list[count_1].room_row, 3) + " | " +
+		D2JSP_UTIL_FORMAT_RJust(adj_list[count_1].room_col, 3));
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Edge List");
+file_handle.writeLine("-------------------------------------------------");
+print("********** Getting edge list...");
+var edge_list = room_list.getAccessibleEdgeList();
+print("********** Done");
+for (count_1 = 0; count_1 < edge_list.length; count_1++) {
+	if (!edge_list[count_1].length)
+		file_handle.writeLine("Edge list index " + count_1 + " is empty.");
+	else {
+		for (var count_2 = 0; count_2 < edge_list[count_1].length; count_2++)
+			file_handle.writeLine(count_1 + ":" + count_2 + ":[" +
+				edge_list[count_1][count_2] + "]");
+	}
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Edge List (Simple)");
+file_handle.writeLine("-------------------------------------------------");
+print("********** Getting accessible edge list...");
+var edge_list = room_list.getAccessibleEdgeListSimple();
+print("********** Done");
+for (count_1 = 0; count_1 < edge_list.length; count_1++) {
+	if (!edge_list[count_1].length)
+		file_handle.writeLine("Edge list index " + count_1 + " is empty.");
+	else {
+		for (var count_2 = 0; count_2 < edge_list[count_1].length; count_2++)
+			file_handle.writeLine(count_1 + ":" + count_2 + ":[" +
+				edge_list[count_1][count_2] + "]");
+	}
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Accessible Center List");
+file_handle.writeLine("-------------------------------------------------");
+print("********** Getting accessible center list...");
+var center_list = room_list.getCenterAccessibleList();
+print("********** Done");
+for (count_1 = 0; count_1 < center_list.length; count_1++) {
+	file_handle.writeLine(count_1 + ":[" +
+		center_list[count_1] + "]");
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Area Map");
+file_handle.writeLine("-------------------------------------------------");
+print("Writing area map...");
+var map_list = room_list.getStringList();
+for (count_1 = 0; count_1 < map_list.length; count_1++) {
+	file_handle.writeLine(map_list[count_1]);
+}
+print("...done");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Area Map With Accessible Centers");
+file_handle.writeLine("-------------------------------------------------");
+print("Writing area map with accessible centers...");
+var map_list = room_list.getStringList();
+for (count_1 = 0; count_1 < center_list.length; count_1++)
+	map_list[center_list[count_1][1] - room_list.y_1] =
+		map_list[center_list[count_1][1] - room_list.y_1].substr(
+		0, center_list[count_1][0] - room_list.x_1) + "@" +
+		map_list[center_list[count_1][1] - room_list.y_1].substr(
+		(center_list[count_1][0] - room_list.x_1) + 1);
+for (count_1 = 0; count_1 < map_list.length; count_1++) {
+	file_handle.writeLine(map_list[count_1]);
+}
+print("...done");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Excluded room list:");
+file_handle.writeLine("=================================================");
+for (count_1 = 0; count_1 < room_list.room_list.length; count_1++) {
+	if (room_list.room_list[count_1].is_excluded) {
+		var tmp_string = "Room number = " + room_list.room_list[count_1].number +
+			", base X,Y = [" + room_list.room_list[count_1].x + ", " +
+			room_list.room_list[count_1].y + "], room extent = [" +
+			room_list.room_list[count_1].x_1 + ", " +
+			room_list.room_list[count_1].y_1 + "] ---> [" +
+			room_list.room_list[count_1].x_2 + ", " +
+			room_list.room_list[count_1].y_2 + "]";
+		file_handle.writeLine(tmp_string);
+	}
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("=================================================");
+tmp_room = room_list.findRoomByBaseXY(3840 / 5, 5200 / 5);
+if (tmp_room != null) {
+	print(tmp_room.number + ", " + tmp_room.x_1 + ", " + tmp_room.y_1);
+	print("CHECKSUM = " + tmp_room.check_sum + ", EXCLUDED = " + tmp_room.is_excluded);
+	file_handle.writeLine(tmp_room.number + ", " + tmp_room.x_1 + ", " + tmp_room.y_1);
+	file_handle.writeLine("CHECKSUM = " + tmp_room.check_sum + ", EXCLUDED = " + tmp_room.is_excluded);
+	for (count_1 = 0; count_1 < tmp_room.coll_table.length; count_1++) {
+		var tmp_string = "";
+		for (var count_2 = 0; count_2 < tmp_room.xSize1; count_2++) {
+			if (tmp_room.coll_table[count_1][count_2] &
+				D2JSP_ROOM_DEFAULT_COLL_MASK)
+				tmp_string += "|0b" + D2JSP_UTIL_FORMAT_ZeroFill(
+					tmp_room.coll_table[count_1][count_2].toString(16), 2);
+			else
+				tmp_string += "|    ";
+		}
+		file_handle.writeLine(tmp_string + "|");
+	}
+}
+else {
+	print("********** COULDN'T FIND ROOM AT BASE 3840, 5200!!!!");
+	var in_x = 3840;
+	var in_y = 5200;
+	for (var count_1 = 0; count_1 < room_list.room_list.length; count_1++) {
+		if ((room_list.room_list[count_1].x == in_x) &&
+			(room_list.room_list[count_1].y == in_y)) {
+			print("********** NOW FOUND ROOM AT BASE 3840, 5200!!!!");
+//			return(this.room_list[count_1]);
+		}
+	}
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("=================================================");
+var my_room = getRoom(0);
+print("My room information and collision map:");
+print("Number = " + my_room.number + ", [" + my_room.x + ", " + my_room.y +
+	"] ---> [" + (my_room.x * 5) + ", " + (my_room.y * 5) + "]");
+my_room.init();
+var coll_info = my_room.getCollision();
+var my_xSize1 = my_room.getStat(D2JSP_ROOMSTAT_XSIZE1);
+var my_ySize1 = my_room.getStat(D2JSP_ROOMSTAT_YSIZE1);
+my_room.release();
+print("Collision info array size = " + coll_info.length);
+print("Row size * Col size = " + (my_ySize1 * my_xSize1));
+for (count_1 = 0; count_1 < my_ySize1; count_1++) {
+	var my_string = "";
+	for (count_2 = 0; count_2 < my_xSize1; count_2++)
+		my_string += (coll_info[(count_1 * my_ySize1) + count_2] & 1) ? "*" : " ";
+	file_handle.writeLine(my_string);
+}
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+file_handle.writeLine("=================================================");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("Testing Hell Optimizations for Room 836:");
+file_handle.writeLine("=================================================");
+if ((me.area == D2JSP_AREA_RIVER_OF_FLAME) ||
+	(me.area == D2JSP_AREA_CHAOS_SANCTUM) || (me.area == D2JSP_AREA_HELL1) ||
+	(me.area == D2JSP_AREA_HELL2) || (me.area == D2JSP_AREA_HELL3)) {
+	for (count_1 = 0; count_1 < room_list.room_list.length; count_1++) {
+		if (room_list.room_list[count_1].number == 836) {
+			var coll_table = room_list.room_list[count_1].coll_table;
+			var tmp_string = "Room number = " +
+				room_list.room_list[count_1].number + ", base X,Y = [" +
+				room_list.room_list[count_1].x + ", " +
+				room_list.room_list[count_1].y + "], room extent = [" +
+				room_list.room_list[count_1].x_1 + ", " +
+				room_list.room_list[count_1].y_1 + "] ---> [" +
+				room_list.room_list[count_1].x_2 + ", " +
+				room_list.room_list[count_1].y_2 + "]";
+			var valid_flag = true;
+			for (var count_2 = 0; count_2 < coll_table.length; count_2++) {
+				for (var count_3 = 0; count_3 < coll_table[count_2].length;
+					count_3++) {
+					if (!(coll_table[count_2][count_3] & 1)) {
+						valid_flag = false;
+						break;
+					}
+				}
+			}
+			if (valid_flag != true) {
+				tmp_string += " (NOT VALID BEGINNING AT " + count_2 + ", " + count_3 + ")";
+				print(tmp_string);
+			}
+			file_handle.writeLine(tmp_string);
+			if (valid_flag != true) {
+				var tmp_list = room_list.room_list[count_1].getStringList();
+				while (tmp_list.length)
+					file_handle.writeLine(tmp_list.shift());
+			}
+			file_handle.writeLine("-------------------------------------------------");
+		}
+	}
+}
+else
+	file_handle.writeLine("Not in a Hell-type area.");
+file_handle.writeLine("=================================================");
+file_handle.writeLine("");
+
+/*
+tmp_room = room_list.meta_map[1][0];
+var map_list = tmp_room.getStringList();
+while (map_list.length)
+	file_handle.writeLine(map_list.shift());
+*/
+/*
+room_list.sortByCoord_X_1();
+TEST_EmitCoords("By X_1", file_handle, room_list.room_list);
+room_list.sortByCoord_Y_1();
+TEST_EmitCoords("By Y_1", file_handle, room_list.room_list);
+room_list.sortByCoord_X_2();
+TEST_EmitCoords("By X_2", file_handle, room_list.room_list);
+room_list.sortByCoord_Y_2();
+TEST_EmitCoords("By Y_2", file_handle, room_list.room_list);
+
+var access_list = D2JSP_ROOM_GetAreaFurthest();
+	for (var count_1 = 0; count_1 < 4; count_1++) {
+		for (var count_2 = 0; count_2 < access_list[count_1].length; count_2++)
+			file_handle.writeLine(((!count_2) ? count_1 : " ") + ": [" +
+				access_list[count_1][count_2] + "]");
+	}
+*/
+/*
+		var my_room   = new D2JSP_Room(D2JSP_ROOM_GetCurrentRoom());
+		var room_text = my_room.getStringList();
+		file_handle.writeLine(my_room);
+		while (room_text.length)
+			file_handle.writeLine(room_text.shift());
+*/
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+//	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+
+function TEST_EmitCoords(name, file_handle, room_list)
+{
+	file_handle.writeLine("By " + name + ":");
+
+	for (var count_1 = 0; count_1 < room_list.length; count_1++)
+		file_handle.writeLine("[" +
+			room_list[count_1].x_1 + ", " + room_list[count_1].y_1 + "] ---> [" +
+			room_list[count_1].x_2 + ", " + room_list[count_1].y_2 + "]");
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+
+

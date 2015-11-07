@@ -1,0 +1,230 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Bot Protocol Management Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_Protocol.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: TDW bot protocol library.
+//
+// Revison History : 2004-02-07 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(TDW_INCLUDE_GUARD_Protocol_d2l) == "undefined") {
+	var TDW_INCLUDE_GUARD_Protocol_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/_D2JSP_Utility.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_Protocol(marshall_func, unmarshall_func)
+{
+	this.marshall_func   = (D2JSP_UTIL_GEN_TypeOfFunction(marshall_func)) ?
+		marshall_func : TDW_PROTO_MarshallNull;
+	this.unmarshall_func = (D2JSP_UTIL_GEN_TypeOfFunction(unmarshall_func)) ?
+		unmarshall_func : TDW_PROTO_UnMarshallNull;
+
+	this.marshall        = function(text) {
+		return(this.marshall_func(text));
+	}
+
+	this.unmarshall      = function(text) {
+		return(this.unmarshall_func(text));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_MarshallNull(text)
+{
+	return(text + "");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_UnMarshallNull(text)
+{
+	return(text + "");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_Field(name, value)
+{
+	if (arguments.length) {
+		this.name  = (name + "").replace(/:|;/g, "_");
+		this.value = (value + "").replace(/=|;/g, "_");
+	}
+
+	this.toString = function() {
+		return(name + "=" + value);
+	}
+
+	this.getData  = function() {
+		return([name, value]);
+	}
+
+	this.setData  = function(name, value) {
+		this.name  = (name + "").replace(/=/g, "_");
+		this.value = value + "";
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_Message(tag, field_list)
+{
+	if (arguments.length) {
+		this.tag        = (tag + "").replace(/:|;/g, "_");
+		this.field_list = new Array();
+		if (field_list instanceof TDW_PROTO_Field)
+			this.field_list = [field_list];
+		else if (D2JSP_UTIL_GEN_TypeOfArrayIndexed(field_list)) {
+			for (var count_1 = 0; count_1 < field_list.length; count_1++) {
+				if (field_list[count_1] instanceof TDW_PROTO_Field)
+					this.field_list.push(field_list[count_1]);
+		}
+	}
+
+	this.toString  = function() {
+		return(this.tag + ":" + this.field_list.join(";"));
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_ParseMsg(raw_msg)
+{
+	if (!D2JSP_UTIL_GEN_TypeOfStringNotEmpty(raw_msg))
+		return(null);
+
+	var tag_end = raw_msg.indexOf(":");
+	if (tag_end < 1)
+		return(null);
+
+	var tag = raw_msg.substr(0, tag_end);
+	if (!D2JSP_UTIL_IsValidJSName(tag))
+		return(null);
+
+	var field_list      = new Array();
+	var text_field_list = substr(tag_end + 1).split(/;/g);
+	for (var count_1 = 0; count_1 < text_field_list.length; count_1++) {
+		var field_name_end = text_field_list[count_1].indexOf("=");
+		if (field_name_end < 1)
+			return(null);
+		var field_name = text_field_list[count_1].substr(0, field_name_end);
+		if (!D2JSP_UTIL_IsValidJSName(field_name))
+			return(null);
+		field_list.push(new TDW_PROTO_Field(field_name,
+			text_field_list[count_1].substr(field_name_end + 1));
+	}
+
+	return(new TDW_PROTO_Message(tag, field_list));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_Goto_REQ(area, area_x, area_y)
+{
+	return(
+		new TDW_PROTO_Message
+			("Goto",
+			[
+				new TDW_PROTO_Field("Area", area),
+				new TDW_PROTO_Field("X_Coord", x),
+				new TDW_PROTO_Field("Y_Coord", y)
+			]
+		)
+	);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_ReturnToTown_REQ()
+{
+	return(
+		new TDW_PROTO_Message("ReturnToTown")
+	);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_Target_REQ(target_name_or_gid)
+{
+	return(
+		new TDW_PROTO_Message
+			("Target",
+				new TDW_PROTO_Field("Identifier", target_name_or_gid)
+			)
+	);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_UnTarget_REQ(target_name_or_gid)
+{
+	return(
+		new TDW_PROTO_Message
+			("UnTarget",
+				new TDW_PROTO_Field("Identifier", target_name_or_gid)
+			)
+	);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PROTO_PrepareRun_REQ(run_name)
+{
+	return(
+		new TDW_PROTO_Message
+			("PrepareRun",
+				new TDW_PROTO_Field("RunName", run_name)
+			)
+	);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_UTIL_IsValidJSName(in_text)
+{
+	return((D2JSP_UTIL_GEN_TypeOfStringNotEmpty(in_text) &&
+		(in_text.match(/^[A-Za-z_]+[A-Za-z0-9_]*$/) != null)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (typeof(TDW_INCLUDE_GUARD_Protocol_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main()
+{
+	TDW_BOT_Log = new D2JSP_UTIL_Log("output/RegressionTest.TDW_Protocol.log",
+		"TDW_Protocol", null, null, null, true);
+
+	print("Done.");
+
+	TDW_BOT_Log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+} // if (false) {
+// ////////////////////////////////////////////////////////////////////////////
+
+

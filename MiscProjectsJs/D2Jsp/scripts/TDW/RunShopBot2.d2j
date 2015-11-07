@@ -1,0 +1,67 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+const D2J_RSB_GameLoadMS  = 3000;
+const D2J_RSB_ExitSleepMS = 3000;
+
+function main()
+{
+	var start_date = new Date();
+	var file_handle;
+
+	print("Waiting " + (D2J_RSB_GameLoadMS / 1000) +
+		" seconds for game load to complete...");
+	delay(D2J_RSB_GameLoadMS);
+
+	me.randommove = true;
+
+	TDW_MOVE_COMPAT_TownMove(5, "waypoint");
+
+	if (me.area != D2JSP_AREA_HARROGATH)
+		D2J_RSB_DelayWithMsg("Unable to get to Harrogath waypoint");
+
+	raw("shopbot loadconfig MLB");
+	delay(1000);
+	raw("shopbot loadpath larzuk");
+	delay(1000);
+
+	if (TDW_MOVE_WaypointUse(D2JSP_AREA_RIGID_HIGHLANDS, 3))
+		D2J_RSB_DelayWithMsg("Unable to use waypoint to Frigid Highlands");
+
+	delay(1000);
+
+	if (TDW_MOVE_WaypointUse(D2JSP_AREA_HARROGATH, 3))
+		D2J_RSB_DelayWithMsg("Unable to use waypoint to Harrogath");
+
+	file_name = "RunShopBot." + me.realm + "." + me.account + "." +
+		me.name + ".txt";
+	file_handle = fileOpen(file_name, 2);
+	if (file_handle) {
+		file_handle.writeLine("RunShopBot.d2j: " + start_date.toString());
+		file_handle.close();
+	}
+	else {
+		print("WARNING: Unable to open RunShopBot.d2j output file '" + file_name +
+			"' for writing.");
+		print("Am continuing without the output file...");
+		delay(1000);
+	}
+
+	print("Starting ShopBot...");
+	raw("shopbot start");
+}
+
+function D2J_RSB_DelayWithMsg(msg_string)
+{
+	print(msg_string + " --- exiting...");
+	print("... Waiting " + (D2J_RSB_ExitSleepMS / 1000) + " seconds ...");
+	delay(D2J_RSB_ExitSleepMS);
+	print("...Exiting...");
+	delay(1000);
+	quit();
+}
+
+
+

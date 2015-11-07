@@ -1,0 +1,391 @@
+//##################################################
+//######     Matts Binary Heap Library      ########
+//##################################################
+/*
+----------------------------------------------------*/
+var mlHeapVersion = "1.0.2";
+/*----------------------------------------------------
+Copyright (C) 2003 Matt Lanteigne aka mattlant <mattlant@hotmail.com>
+----------------------------------------------------
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTIBILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+----------------------------------------------------
+History
+
+Version 1.0.2
+- Optimized the oHeap object for ~15% performance
+improvement
+
+Version 1.0.1
+- Added other queue objects
+
+Version 1.0.0
+- Initial Release
+
+----------------------------------------------------
+SCRIPT USAGE:
+
+to create a heap, first instantiate it. When instantiating, make sure to provide
+the name of the variable on your object that holds the priority. You can optionally
+specify which order the heap will be in. If nothing is provide, a default priority
+name of "p" will be used and a highest value has highest priority system.
+
+var myheap = new oHeap("priority", mlHEAPHIGH);
+
+to add an object sinply use the insert method and provide the actual object:
+
+myheap.Insert(object);
+
+to get the first item AND remove it use teh remove method:
+
+var highestitem = myheap.Remove();
+
+to get the first item AND NOT remove it use the peek method:
+
+var highestitem = myheap.Peek();
+
+to get the heaps length use the getLength method:
+
+var lengthofheap = myheap.getLength();
+
+
+*/
+
+var mlHEAPLOW = 1; //lower number has higher priority
+var mlHEAPHIGH = 2; //higher number has higher priority
+
+function oHeap(pr, o)
+{
+	if(!pr) {pr = "p";}
+	if(!o) {o = mlHEAPHIGH;}
+	this._p = pr; //private
+	this._o = o; //private
+	if(this._o == mlHEAPHIGH){
+		this.Insert = oHeap_inserthigh;
+		this.Remove = oHeap_removehigh; }
+	else{
+		this.Insert = oHeap_insertlow;
+		this.Remove = oHeap_removelow; }
+
+	this.Peek = oHeap_peek;
+	this.Clear = oHeap_clear;
+	this.getLength = oHeap_qlength;
+
+	this._heap = new Array(); //private
+	this._heap.length++;
+
+	function oHeap_inserthigh(d)
+	{
+		var i = this._heap.length;
+		var id2 = Math.floor(i/2);
+		while (i > 1 && this._heap[id2][this._p] < d[this._p])
+		{
+			this._heap[i] = this._heap[id2];
+			i  =  id2;
+			id2 = Math.floor(i/2);
+		}
+		this._heap[i] = d;
+	}
+	function oHeap_removehigh()
+	{
+		if (this._heap.length == 1) return null;
+		var j, i = 1;
+		//var j;
+		var d = this._heap[1];
+		var hl1 = this._heap.length-1;
+		var hl12 = Math.floor(hl1 / 2);
+		var tmp = this._heap[hl1];
+		while (i <= hl12) {
+			j = i + i;
+			if ((j < hl1) && this._heap[j][this._p] < this._heap[j + 1][this._p])
+				j++;
+			if (this._heap[j][this._p] <= tmp[this._p])
+				break;
+			this._heap[i] = this._heap[j];
+			i = j;
+		}
+		this._heap[i] = tmp;
+		this._heap.pop();
+		return d;
+	}
+	function oHeap_insertlow(d)
+	{
+		var i = this._heap.length;
+		var id2 = Math.floor(i/2);
+		while (i > 1 && this._heap[id2][this._p] > d[this._p])
+		{
+			this._heap[i] = this._heap[id2];
+			i  =  id2;
+			id2 = Math.floor(i/2);
+		}
+		this._heap[i] = d;
+	}
+	function oHeap_removelow()
+	{
+		if (this._heap.length == 1) return null;
+		var j, i = 1;
+		//var j;
+		var d = this._heap[1];
+		var hl1 = this._heap.length-1;
+		var hl12 = Math.floor(hl1 / 2);
+		var tmp = this._heap[hl1];
+		while (i <= hl12) {
+			j = i+i;
+			if ((j < hl1) && this._heap[j][this._p] > this._heap[j + 1][this._p])
+				j++;
+			if (this._heap[j][this._p] >= tmp[this._p])
+				break;
+			this._heap[i] = this._heap[j];
+			i = j;
+		}
+		this._heap[i] = tmp;
+		this._heap.pop();
+		return d;
+	}
+
+	function oHeap_peek()
+	{
+		if (this._heap.length == 1) return null;
+		return this._heap[1];
+	}
+
+	function oHeap_clear()
+	{
+		this._heap.length = 1;
+	}
+
+	function oHeap_qlength()
+	{
+		return this._heap.length-1;
+	}
+
+}
+
+
+function oHeapLL(pr, o)
+{
+	//inherit the heap
+	this.temp = oHeap;
+	this.temp(pr, o);
+	delete this.temp;
+
+	this.getNext = oHeapLL_getnext;
+	this.getPrev = oHeapLL_getprev;
+	this.getItem = oHeapLL_getitem;
+	this.Index = 0;
+
+	function oHeapLL_getnext()
+	{
+		var diff = 0xFFFFFFFF;
+		var nextindex = -1;
+		if(this._heap.length <= 1 || this.Index == -1) return null;
+		if(this.Index == 0){
+			this.Index = 1;
+			return this._heap[1];
+		}
+
+		for(var gn = 1; gn < this._heap.length; gn++)
+		{
+			var newdiff = Math.abs(this._heap[this.Index][this._p] - this._heap[gn][this._p]);
+			switch(this._o)
+			{
+				case mlHEAPLOW:
+					if(this._heap[this.Index][this._p] < this._heap[gn][this._p] && newdiff < diff)
+					{
+						diff = newdiff;
+						nextindex = gn;
+					}
+					break;
+				case mlHEAPHIGH:
+					if(this._heap[this.Index][this._p] > this._heap[gn][this._p] && newdiff < diff)
+					{
+						diff = newdiff;
+						nextindex = gn;
+					}
+					break;
+			}
+		}
+
+		if(this.Index == nextindex){
+			this.Index = -1;
+			return null;
+		}
+		this.Index = nextindex;
+		return this._heap[this.Index];
+	}
+
+	function oHeapLL_getprev()
+	{
+		var diff = 0xFFFFFFFF;
+		var nextindex = 0;
+		if(this._heap.length == 1 || this.Index == -1) return null;
+		if(this.Index == 0){
+			this.Index = 1;
+			return this._heap[1];
+		}
+
+		for(var gn = 1; gn < this._heap.length; gn++)
+		{
+			var newdiff = Math.abs(this._heap[this.Index][this._p] - this._heap[gn][this._p]);
+			switch(this._o)
+			{
+				case mlHEAPLOW:
+					if(this._heap[this.Index][this._p] > this._heap[gn][this._p] && newdiff < diff)
+					{
+						diff = newdiff;
+						nextindex = gn;
+					}
+					break;
+				case mlHEAPHIGH:
+					if(this._heap[this.Index][this._p] < this._heap[gn][this._p] && newdiff < diff)
+					{
+						diff = newdiff;
+						nextindex = gn;
+					}
+					break;
+			}
+		}
+		if(this.Index == nextindex){
+			this.Index = -1;
+			return null;
+		}
+		this.Index = this.nextindex;
+		return this._heap[this.Index];
+	}
+
+	function oHeapLL_getitem()
+	{
+		if(this._heap.length == 1 || this.Index == 0) return null;
+		return this._heap[this.Index];
+	}
+}
+
+
+function oOrderedList(pr, o)
+{
+	if(!pr) {pr = "p";}
+	if(!o) {o = mlHEAPHIGH;}
+	this._p = pr; //private
+	this._o = o; //private
+
+	this._list = new Array();
+	this.Remove = oOrderedList_remove;
+	this.Peek = oOrderedList_peek;
+	this.getLength = oOrderedList_getlength;
+
+	this.sortlow = oOrderedList_sortlow;
+	this.sorthigh = oOrderedList_sorthigh;
+
+	if(this._o == mlHEAPHIGH)
+		this.Insert = oOrderedList_inserthigh;
+	else
+		this.Insert = oOrderedList_insertlow;
+
+	function oOrderedList_insertlow(d)
+	{
+		this._list.push(d);
+		this._list.sort(this.sortlow);
+	}
+	function oOrderedList_inserthigh(d)
+	{
+		this._list.push(d);
+		this._list.sort(this.sorthigh);
+	}
+
+	function oOrderedList_remove(type, value)
+	{
+		return this._list.pop();
+	}
+
+	function oOrderedList_peek()
+	{
+		return this._list[this._list.length - 1];
+	}
+
+	function oOrderedList_sortlow(a,b)
+	{
+		return (b[this._p] - a[this._p]);
+	}
+
+	function oOrderedList_sorthigh(a,b)
+	{
+		return (a[this._p] - b[this._p]);
+	}
+
+	function oOrderedList_getlength()
+	{
+		return this._list.length;
+	}
+
+	function oOrderedList_delete(type, value)
+	{
+		for (var i = 0; i<this._list.length;i++)
+		{
+			if(this_list[i][type] = value) {
+				for (var as = i; as < this._list.length-1; as++)
+				{
+					openqueue[as] = openqueue[as + 1];
+				}
+			}
+		}
+		if(this._o = mlHEAPHIGH)
+			this._list.sort(this.sorthigh);
+		else
+			this._list.sort(this.sortlow);
+	}
+
+
+
+
+
+}
+
+function oFIFO(_max)
+{
+	this._queue = new Array();
+	var qmax = _max;
+
+	this.Insert = oFIFO_insert;
+	this.Remove = oFIFO_remove;
+	this.Peek = oFIFO_peek;
+	this.Clear = oFIFO_clear;
+
+	function oFIFO_insert(d)
+	{
+		this._queue.push(d);
+		if(qmax && this._queue.length > qmax) this.Remove();
+	}
+
+	function oFIFO_remove()
+	{
+		if(this._queue.length == 0) return null;
+		return this._queue.shift();
+	}
+
+	function oFIFO_peek()
+	{
+		return this._queue[0];
+	}
+
+	function oFIFO_clear()
+	{
+		this._queue.length = 0;
+	}
+}
+
+
+
+
+
+
+
+

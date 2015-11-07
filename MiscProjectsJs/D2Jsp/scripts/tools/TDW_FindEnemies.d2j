@@ -1,0 +1,222 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	// Override configuration entries with 'config_list'.
+
+	TDW_BOT_FE_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_FE_Start(config_list)
+{
+//TDW_BOT_ConfigureList["operation.log.level.file"] = D2JSP_UTIL_LOG_Level_MINUTIAE;
+//TDW_BOT_ConfigureList["operation.log.sync.mode"]  = true;
+
+	var init_err_msg = TDW_BOT_FE_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_FE_Run();
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+
+print("STOPPING");
+stop();
+
+	TDW_BOT_FE_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_FE_Init(config_list)
+{
+	return(TDW_BOT_Init("TDW_FindEnemies", null, config_list,
+		TDW_BOT_INIT_FLAG_ISF_NONE));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_FE_Run()
+{
+	var npc_list         = new Array();
+	var access_strategy  = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+	var inited_area_list = TDW_PATH_GetInitedAreas();
+	var exclude_list     = new Array();
+
+	exclude_list["The Cow King"]            = true;
+	exclude_list["Infector of Souls"]       = true;
+	exclude_list["Lord De Seis"]            = true;
+	exclude_list["Grand Vizier of Chaos"]   = true;
+	exclude_list["Diablo"]                  = true;
+	exclude_list["Pindleskin"]              = true;
+	exclude_list["Talic"]                   = true;
+	exclude_list["Korlic"]                  = true;
+	exclude_list["Madawc"]                  = true;
+	exclude_list["Colenzo the Annihilator"] = true;
+	exclude_list["Achmel the Cursed"]       = true;
+	exclude_list["Bartuc the Bloody"]       = true;
+	exclude_list["Ventar the Unholy"]       = true;
+	exclude_list["Lister the Tormentor"]    = true;
+	exclude_list["Baal"]                    = true;
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	for (var this_prop in TDW_PATHL_EnemyList)
+		npc_list[TDW_PATHL_EnemyList[this_prop].npc_name] = true;
+
+	for (var this_prop in npc_list) {
+		var this_npc = TDW_PATHL_EnemyList[this_prop];
+		if (!(this_npc.npc_name in exclude_list)) {
+//		if (this_npc.npc_name == "Ancient Kaa the Soulless") {
+//		if (this_npc.npc_name == "Duriel") {
+/*
+		if ((this_npc.npc_name == "Andariel") ||
+			(this_npc.npc_name == "Beetleburst") ||
+			(this_npc.npc_name == "Ancient Kaa the Soulless")) {
+*/
+			if (D2JSP_AREA_GetAct(this_npc.dst_area) != me.act) {
+				TDW_PATH_FreeInitedAreas(inited_area_list, TDW_BOT_Log);
+				TDW_MOVE_COMPAT_TownMove(D2JSP_AREA_GetAct(this_npc.dst_area),
+					"waypoint");
+			}
+			if (!this_npc.gotoEnemy(access_strategy))
+				TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_GREEN +
+					"NPC " + this_npc.npc_name + " was found.");
+			else if (!this_npc.room_spec)
+				TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_RED +
+					"NPC " + this_npc.npc_name + " was not found and no room " +
+					"specification was provided.");
+			else
+				TDW_BOT_Log.logInfo(D2JSP_UTIL_COLOR_YELLOW +
+					"NPC " + this_npc.npc_name + " was not found in room " +
+					"specification [" + this_npc.room_spec + "]... looking for " +
+					"other preset units...");
+			TDW_BOT_FE_GetUnits(this_npc);
+		}
+//		else
+//			TDW_BOT_Log.logInfo("Skipping NPC " + this_npc.npc_name + ".");
+	}
+
+	TDW_PATH_FreeInitedAreas(inited_area_list, TDW_BOT_Log);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_FE_GetUnits(this_npc)
+{
+	var npc_obj     = this_npc.getUnit();
+	var preset_list = TDW_PATH_GetPresetList(this_npc.room_spec,
+		this_npc.unit_type);
+
+	TDW_BOT_Log.logInfo("Preset unit analysis for " + this_npc.npc_name +
+		" (area = " + this_npc.dst_area + ", room_spec = [" + this_npc.room_spec +
+		"], unit_type = " + this_npc.unit_type + ", unit id spec = [" +
+		this_npc.unit_id_spec + "]");
+ 
+	for (count_1 = 0; count_1 < preset_list.length; count_1++) {
+		var tmp_string = ">>> Found unit type = " + preset_list[count_1].type +
+			" (" + D2JSP_UTIL_UnitNameList[preset_list[count_1].type] +
+			"), unit_id = " + preset_list[count_1].id + " in room " +
+			preset_list[count_1].roomid;
+		if (npc_obj)
+			tmp_string += " (distance = " + Dist(npc_obj.x, npc_obj.y,
+				preset_list[count_1].area_x, preset_list[count_1].area_y) + ")";
+		TDW_BOT_Log.logInfo(tmp_string);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_FE_Finish()
+{
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	if (arguments[0].
+		match(/^\S+ joined our world. Diablo's minions grow stronger\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "")
+			;
+		else
+			log_obj.logWarning("Unable to resolve a character game join message " +
+				"because the joining player name could not be parsed.");
+	}
+	else if (arguments[0].
+		match(/^\S+ left our world\. Diablo's minions weaken.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+	else if (arguments[0].match(/^\S+ dropped due to timeout\.$/i)) {
+		log_obj.logInfoQuiet(arguments[0]);
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if ((player_name != "") && TDW_BOT_AttackNPCSpec.findNPC(player_name))
+			TDW_BOT_AttackNPCSpec.deleteNPC(player_name);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+

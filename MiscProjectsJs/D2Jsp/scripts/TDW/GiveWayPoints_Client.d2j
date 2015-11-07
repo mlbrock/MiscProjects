@@ -1,0 +1,152 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Modes.d2l");
+includeonce("TDW/TDW_Move.d2l");
+
+// If you want all your chars to have Anya's portal (as I do), you'll set
+// the below variable to 'true'. Important because you can get the Nihlathak
+// quest while standing in another area if partied with someone.
+var D2J_GWPS_C_SkipHallsOfPain = true;
+
+function main()
+{
+	me.randommove   = true;
+	me.autoparty    = true;
+	me.autoquitonpk = true;
+
+	print("Waiting 3 seconds for game load to complete...");
+	delay(3000);
+
+	if ((me.act != 1) || (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT)) {
+		if (!Sc_InTown(me))
+			Sc_GotoTown();
+		TDW_MOVE_COMPAT_TownMove(1, "portalspot");
+		if ((me.act != 1) || (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT))
+			D2J_GWPS_S_ErrorExit("Unable to get to the Rouge Encampment Way Point!");
+	}
+	else
+		TDW_MOVE_COMPAT_TownMove(1, "portalspot");
+
+	D2J_GWPS_C_GetWayPoints();
+
+	print("Exiting...");
+	delay(1000);
+}
+
+function D2J_GWPS_C_GetWayPoints()
+{
+	var town_area        = D2JSP_AREA_ROGUE_ENCAMPMENT;
+	var last_area        = me.area;
+	var portal_parent    = "";
+	var last_portal_area = -1;
+	var server_portal;
+	var way_point;
+
+	while (last_area != D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2) {
+		print("Looking for server character portal...");
+		do {
+			server_portal = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Portal",
+				D2JSP_MODE_OBJECT_OPENED);
+			do {
+				if (server_portal &&
+					(server_portal.mode == D2JSP_MODE_OBJECT_OPENED) &&
+					(last_portal_area != server_portal.area) &&
+					(server_portal.getParent() != me.name) &&
+					((portal_parent == "") ||
+					(server_portal.getParent() == portal_parent))) {
+					if (portal_parent == "") {
+						portal_parent = server_portal.getParent();
+						print("---> Portal parent = \"" + portal_parent + "\"");
+					}
+					break;
+				}
+			} while (server_portal && server_portal.getNext("Portal",
+					D2JSP_MODE_OBJECT_OPENED));
+			if (server_portal && (server_portal.getParent() == portal_parent))
+				break;
+			delay(250);
+		} while (1);
+		last_portal_area = server_portal.area;
+//		print("Portal found!");
+print("Portal found! (object = " + server_portal + ", parent = " +
+	server_portal.getParent() + ", area = " + server_portal.area);
+		me.move(server_portal.x,  server_portal.y);
+		delay(250);
+		while (me.mode != D2JSP_MODE_PLAYER_STANDING_IN_TOWN)
+			delay(100);
+		TDW_MOVE_MoveToObject(server_portal);
+		delay(250);
+		server_portal.interact();
+		while (me.area == town_area)
+			delay(100);
+print("Took portal from " + last_area + " to " + me.area);
+		last_area = me.area;
+//		print("Arrived at waypoint");
+print("Arrived at area " + me.area);
+		way_point = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Waypoint");
+		if (way_point) {
+			me.move(way_point.x, way_point.y);
+			delay(250);
+			way_point.move();
+			way_point.interact();
+			delay(500);
+			TDW_MOVE_WaypointCancel();
+			delay(100);
+			print("Acquired waypoint.");
+		}
+		else
+			print("Can't access waypoint object!");
+		server_portal = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Portal");
+		do {
+			if (server_portal && (server_portal.getParent() == portal_parent))
+				break;
+		} while (server_portal && server_portal.getNext("Portal"));
+		if ((!server_portal) || (server_portal.getParent() != portal_parent))
+			D2J_GWPS_C_ErrorExit("Can't find the portal I just used!!!");
+		me.move(me.x - 5, me.y - 5);
+		delay(250);
+		me.move(me.x + 5, me.y + 5);
+		delay(250);
+		me.move(server_portal.x, server_portal.y);
+		delay(100);
+		while (me.area != town_area) {
+			server_portal = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Portal");
+			me.move(server_portal.x,  server_portal.y);
+			delay(200);
+			while (me.mode != D2JSP_MODE_PLAYER_STANDING_OUTSIDE_TOWN)
+				delay(10);
+			server_portal.interact();
+			delay(250);
+			server_portal = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, "Portal");
+			D2JSP_UTIL_GEN_CancelObject(server_portal);
+			delay(250);
+		}
+		if (D2JSP_AREA_IsLastInActWithWayPoint(last_area)) {
+			if (last_area != D2JSP_AREA_THE_WORLDSTONE_KEEP_LEVEL_2) {
+				TDW_MOVE_COMPAT_TownMove(me.act + 1, "waypoint");
+				TDW_MOVE_WaypointCancel();
+				if (me.act == 5)
+					TDW_MOVE_COMPAT_TownMove(me.act, "malah");
+				else
+					TDW_MOVE_COMPAT_TownMove(me.act, "portalspot");
+				town_area = me.area;
+			}
+			else {
+				TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+				TDW_MOVE_WaypointCancel();
+				TDW_MOVE_COMPAT_TownMove(1, "portalspot");
+			}
+		}
+	}
+}
+
+function D2J_GWPS_C_ErrorExit(error_text)
+{
+	print(error_text);
+	delay(500);
+	print("Aborting...");
+	delay(1000);
+	return(-1);
+}
+

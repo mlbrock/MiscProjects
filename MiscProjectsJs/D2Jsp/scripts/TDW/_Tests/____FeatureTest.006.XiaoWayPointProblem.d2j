@@ -1,0 +1,18 @@
+includeonce("TDW/Move.d2l");
+
+var DesiredArea = 1;
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	TDW_MOVE_COMPAT_TownMove("waypoint");
+
+	if (me.area != DesiredArea
+	print("Done");
+	stop();
+}
+
+

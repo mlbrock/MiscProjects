@@ -1,0 +1,57 @@
+var NEW_CODE = true;
+
+function main()
+{
+	var player_obj;
+	var party_obj;
+
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+if (NEW_CODE) {
+print("********** NEW CODE");
+delay(1000);
+	party_obj = getParty(getUnit(0).gid);
+	if (party_obj) {
+		do {
+			if (party_obj.name != me.name) {
+				print("Inviting " + party_obj.name);
+				var this_string = "";
+				for (var this_prop in party_obj)
+					this_string += ((this_string == "") ? "" : ", ") +
+						this_prop + " = " + party_obj[this_prop];
+				print("TEST 1:[" + this_string + "]");
+				party_id = party_obj.partyid;
+//				clickParty(party_obj, 2);
+//if (getUnit(0, "BaalRunner"))
+//	print("UNIT: " + getUnit(0, "BaalRunner").name);
+//clickParty(getUnit(0, "BaalRunner"), 3);
+//print("Stopping");
+//stop();
+			}
+		} while (party_obj && party_obj.getNext());
+	}
+}
+else {
+print("********** OLD CODE");
+delay(1000);
+	var this_string = "";
+	party_obj = getParty(getUnit(0).gid);
+	if (party_obj) {
+		do {
+print("A:Sleeping for 10 seconds..."); delay(10000);
+			for (var this_prop in party_obj)
+				this_string += ((this_string == "") ? "" : ", ") +
+					this_prop + " = " + party_obj[this_prop];
+print("B:Sleeping for 10 seconds..."); delay(10000);
+			print("TEST 1:[" + this_string + "]");
+print("C:Sleeping for 10 seconds..."); delay(10000);
+		} while (party_obj && party_obj.getNext());
+	}
+}
+	print("Done");
+	stop();
+}
+
+

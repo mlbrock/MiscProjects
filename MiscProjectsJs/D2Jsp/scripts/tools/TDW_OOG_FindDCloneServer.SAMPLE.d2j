@@ -1,0 +1,25 @@
+include("TDW/TDW_OOG_Utility.d2l");
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var login_spec = new TDW_OOG_LoginSpec(TDW_OOG_CONN_TYPE_BATTLENET_CLOSED,
+		"SAMPLE_REALM", "SAMPLE_ACCOUNT", "SAMPLE_PASSWORD");
+	var char_spec  = new TDW_OOG_CharacterSpec("SAMPLE_CHARACTER_NAME");
+	var game_spec  = new TDW_OOG_CreateGameSpec("FindDC", "abc",
+		TDW_BASIC_DIFF_HELL, null, null, null, TDW_OOG_CREATE_GAME_FLAG_INCREMENT);
+
+	var bot_name   = "TDW_OOG_FindDCloneServer"; 
+	var my_log     = new TDW_BASIC_Log("output/" + bot_name + "." +
+		login_spec.realm + "." + login_spec.account_name + "." +
+		char_spec.character_spec + ".log", bot_name);
+
+//	my_log.setLevelFile(TDW_BASIC_LOG_Level_MINUTIAE);
+//	my_log.setLevelFile(TDW_BASIC_LOG_Level_DETAIL);
+
+	TDW_OOG_ManageCycleCreateGame(login_spec, char_spec, game_spec);
+
+	my_log.closeLog();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

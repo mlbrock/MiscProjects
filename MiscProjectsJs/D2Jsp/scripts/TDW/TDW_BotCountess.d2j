@@ -1,0 +1,136 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+//TDW_BOT_ConfigureList["teleport.step.size"]          = 15;
+//TDW_BOT_ConfigureList["teleport.step.size.max"]      = 120;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+//	config_list["chicken.mercenary.hp"]             = -1;
+//	config_list["town.revive.mercenary"]            = false;
+//	config_list["town.heal.mercenary.hp"]           = -1;
+//	config_list["mercernary.needed"]                = false;
+//	config_list["mercernary.wanted"]                = false;
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+	TDW_CB_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CB_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_Init("TDW_BotCountess", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_BOT_SUPP_DoMessageDND("talk witcha lata!");
+
+	TDW_CB_KillCountess();
+
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_CB_KillCountess()
+{
+	var return_code;
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	if (TDW_BOT_MOVE_GotoActTown(1))
+		return(-1);
+
+	TDW_BOT_AttackNPCSpec.copyFromMaster("The Countess");
+	TDW_BOT_AttackNPCSpec.setMustKillOn("The Countess");
+	TDW_BOT_AttackNPCSpec.setDoAttackOn();
+
+	TDW_BOT_AttackNPCSpec.findNPC("The Countess").flags      |=
+      TDW_BOT_ATTACK_NPC_FLAG_NO_RETURN;
+	TDW_BOT_AttackNPCSpec.findNPC("The Countess").final_func  =
+		TDW_BOT_FinalComplete;
+
+	TDW_PATH_CreateArea(D2JSP_AREA_TOWER_CELLAR_LEVEL_5);
+	var npc_list = TDW_PATH_MapGlobal.
+		area_list[D2JSP_AREA_TOWER_CELLAR_LEVEL_5].getPresetList(null,
+		D2JSP_UTIL_GETUNIT_NPC, 710, true);
+	if (!npc_list.length) {
+		TDW_BOT_Log.logWarning("Unable to find The Countess spawn preset " +
+			"unit (unit type = NPC, unit id = 710).");
+		return_code = -1;
+	}
+
+	TDW_BOT_CHECK_PrecastChecks();
+
+	TDW_BOT_Log.logInfo("Pre-calculating path to The Countess...");
+
+	if (!(return_code = TDW_PATH_GotoTargetArea(
+		D2JSP_AREA_TOWER_CELLAR_LEVEL_5, access_strategy,
+		TDW_PATHL_AREA_LOAD_FLAG_DEFAULT))) {
+		access_strategy.move_control.action_flags |=
+			TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_SPECIAL;
+		TDW_BOT_CHECK_PrecastChecks();
+		TDW_BOT_MOVE_TeleportToDestination([npc_list[0].area_x,
+			npc_list[0].area_y], TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_SPECIAL);
+		if (!TDW_BOT_CHECK_PrecastChecks(30000)) {
+			TDW_BOT_Log.logError("Aborting run because precasts could not be " +
+				"completed.");
+			return(-1);
+		}
+		if (TDW_BOT_AttackNPCSpec.findNPC("The Countess"))
+			TDW_BOT_MOVE_TeleportToDestinationList(
+				D2JSP_UTIL_PATH_ProgressivePathSort(
+				TDW_PATH_GetCenterAccessibleList()),
+				TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_SPECIAL);
+		if (TDW_BOT_AttackNPCSpec.findNPC("The Countess"))
+			TDW_BOT_Log.logWarning("Unable to locate The Countess in area " +
+				me.area + " (" + D2JSP_AREA_AreaToName() + ".");
+	}
+
+	return(return_code)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

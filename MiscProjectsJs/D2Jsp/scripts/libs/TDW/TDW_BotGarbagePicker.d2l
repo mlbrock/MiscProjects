@@ -1,0 +1,116 @@
+// ////////////////////////////////////////////////////////////////////////////
+// TDW Garbage Picker Bot Library Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : TDW_BotGarbagePicker.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Cow Level Garbage Picker Bot Library.
+//
+// Revison History : 2003-06-20 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotLib.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["teleport.step.size.max"]           = 120;
+TDW_BOT_ConfigureList["teleport.step.fudge.final"]        = 3;
+TDW_BOT_ConfigureList["mysnagit.radius"]                  = 50;
+TDW_BOT_ConfigureList["mysnagit.gold.minimum"]            = 2000;
+TDW_BOT_ConfigureList["chicken.mercenary.hp"]             = 0;
+TDW_BOT_ConfigureList["town.revive.mercenary"]            = false;
+TDW_BOT_ConfigureList["town.heal.mercenary.hp"]           = 0;
+TDW_BOT_ConfigureList["potion.mercenary.hp.health"]       = 0;
+TDW_BOT_ConfigureList["potion.mercenary.hp.rejuvenation"] = 0;
+TDW_BOT_ConfigureList["mercernary.needed"]                = false;
+TDW_BOT_ConfigureList["teleport.step.size"]               = 41;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_GP_Start(config_list)
+{
+	var init_err_msg = TDW_BOT_GP_Init(config_list);
+
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_BOT_GP_Run();
+
+	TDW_BOT_GP_Finish();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_GP_Init(config_list)
+{
+	return(TDW_BOT_Init("TDW_GarbagePicker", null, config_list,
+		TDW_BOT_INIT_FLAG_ISF_TRIPLE));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_GP_Run()
+{
+	if (me.act != 1)
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+	else if (me.area != D2JSP_AREA_ROGUE_ENCAMPMENT)
+		TDW_BOT_MOVE_RecoverInTown(false);
+
+	print("Creating the " + D2JSP_AREA_AreaToName(D2JSP_AREA_MOO_MOO_FARM) +
+		" map...");
+	TDW_PATH_CreateArea(D2JSP_AREA_MOO_MOO_FARM);
+
+	print("Loading room list for " +
+		D2JSP_AREA_AreaToName(D2JSP_AREA_MOO_MOO_FARM) + "...");
+	var my_rooms   =
+		TDW_PATH_MapGlobal.area_list[D2JSP_AREA_MOO_MOO_FARM].room_list;
+	var coord_list = new Array(my_rooms.length);
+	for (var count_1 = 0; count_1 < my_rooms.length; count_1++)
+		coord_list[count_1] = [[my_rooms[count_1].x, my_rooms[count_1].y],
+			my_rooms[count_1].getCenter(),
+			my_rooms[count_1].room_row, my_rooms[count_1].room_col];
+	print("...Map initialization complete");
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	if (TDW_BOT_ContextList["tdw.bot.garbagepicker.operation.manual"]) {
+		while (me.area != D2JSP_AREA_MOO_MOO_FARM) {
+			D2JSP_UTIL_BNET_OverheadSafe("Move into the " +
+				D2JSP_AREA_AreaToName(D2JSP_AREA_MOO_MOO_FARM));
+			delay(500);
+		}
+		D2JSP_UTIL_BNET_OverheadSafe("Picking up garbage");
+		if (me.area == D2JSP_AREA_MOO_MOO_FARM)
+			TDW_BOTLIB_ClearArea([D2JSP_AREA_MOO_MOO_FARM], null,
+				TDW_BOTLIB_CLEARAREA_FLAG_NO_KILL, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT);
+	}
+	else
+		TDW_BOTLIB_ClearArea([D2JSP_AREA_MOO_MOO_FARM], null,
+			TDW_BOTLIB_CLEARAREA_FLAG_NO_KILL, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT);
+
+	TDW_BOT_MOVE_RecoverInTown(false);
+	TDW_MOVE_TownReturnFinalize();
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_FORCE_ISF, TDW_ISF_Cfg))
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_BOT_GP_Finish()
+{
+	TDW_BOT_FinalComplete();
+}
+// ////////////////////////////////////////////////////////////////////////////
+

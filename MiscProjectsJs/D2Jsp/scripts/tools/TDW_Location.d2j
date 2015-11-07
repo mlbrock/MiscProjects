@@ -1,0 +1,87 @@
+include("TDW/_D2JSP_Utility.d2l");
+
+includeonce("TDW/_D2JSP_Rooms.d2l");
+
+function main()
+{
+	var last_act  = -1;
+	var last_area = -1;
+	var last_room = -1;
+	var last_x    = -1;
+	var last_y    = -1;
+	var room_obj;
+	var room_bounds;
+
+	delay(2000);
+
+	while(1) {
+		if ((me.area != last_area) || (me.x != last_x) || (me.y != last_y) ||
+			(last_room == -1)) {
+			D2JSP_UTIL_BNET_OverheadSafe(me.area + " | ????" + " : [" + me.x + ", " + me.y + "]");
+			if (me.act != last_act) {
+				last_room = -1;
+				delay(1000);						// Time for act to load...
+			}
+			if (me.area != last_area) {
+				last_room = -1;
+				delay(500);							// Time for area to load...
+			}
+			if ((me.area != last_area) || (last_room == -1) ||
+				(me.x < room_bounds[0]) || (me.y < room_bounds[1]) ||
+				(me.x > room_bounds[2]) || (me.y > room_bounds[3])) {
+				room_obj    = D2JSP_ROOM_GetCurrentRoom();
+				last_room   = room_obj.number;
+				room_bounds = D2JSP_ROOM_GetCoordsBoundary(room_obj);
+			}
+			last_act  = me.act;
+			last_area = me.area;
+			last_x    = me.x;
+			last_y    = me.y;
+		}
+		D2JSP_UTIL_BNET_OverheadSafe(me.area + " | " + last_room + ": [" + me.x + ", " + me.y + "]");
+		delay(500);
+	}
+}
+
+function GetRoom()
+{
+	var x = me.x;
+	var y = me.y;
+	var this_room;
+
+	if (me.area == RoomArea) {
+		for (count_1 = 0; count_1 < RoomList.length; count_1++) {
+			if (((x >= RoomList[count_1][0]) || (x <= RoomList[count_1][2])) &&
+				 ((y >= RoomList[count_1][1]) || (x <= RoomList[count_1][3])))
+				return(RoomList[count_1][4]);
+		}
+		return(-1);
+	}
+	else {
+		RoomArea = me.area;
+		RoomList = new Array();
+		this_room = getRoom();
+		if (this_room) {
+			var xsize1;
+			var ysize1;
+			do {
+				if (this_room.getStat(D2JSP_ROOMSTAT_XSIZE1)) {
+					xsize1    = this_room.getStat(D2JSP_ROOMSTAT_XSIZE1);
+					xsize2    = this_room.getStat(D2JSP_ROOMSTAT_XSIZE2);
+					this_room = getRoom();
+//print("Populated room found --- room count: " + RoomList.length);
+					if (this_room) {
+						do {
+							RoomList.push([this_room.x * 5, this_room.y * 5,
+								(this_room.x * 5) + xsize1, (this_room.y * 5) + ysize1,
+								this_room.number]);
+						} while (this_room && this_room.getNext());
+//print("Room count: " + RoomList.length);
+						return(GetRoom());
+					}
+				}
+			} while (this_room && this_room.getNext());
+		}
+		return(-1);
+	}
+}

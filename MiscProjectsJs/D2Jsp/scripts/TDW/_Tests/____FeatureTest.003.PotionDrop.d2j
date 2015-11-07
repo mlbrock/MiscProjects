@@ -1,0 +1,54 @@
+includeonce("TDW/_D2JSP_Areas.d2l");
+includeonce("TDW/_D2JSP_Common.d2l");
+includeonce("TDW/_D2JSP_Skills.d2l");
+includeonce("TDW/_D2JSP_States.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+
+function main()
+{
+	print("Waiting 1 second for game load to complete...");
+	delay(1000);
+	print("Ready");
+
+	while (true) {
+		if (D2JSP_AREA_IsTown())
+			me.overhead("Leave town for victims");
+		else {
+			var act_town   = D2JSP_AREA_AreaToTown();
+			var player_obj = getUnit(D2JSP_UTIL_GETUNIT_PLAYER, "Test_Sin");
+			var my_portal;
+			if (!player_obj)
+				me.overhead("Can't find player " + "Test_Sin");
+			else if (myDist(player_obj.x, player_obj.y) > 20)
+				me.overhead("Get closer to " + player_obj.name);
+			else if (me.getSkill(1) != "Throw")
+				me.overhead("Ready potion for throwing");
+			else if (!(my_portal =
+				TDW_MOVE_LookForPortal(act_town, me.name, 10, 10, false)))
+				me.overhead("Open a portal to town");
+			else {
+//				D2JSP_SKILL_UseSkill(1, player_obj.x, player_obj.y);
+				me.useSkillAt(player_obj.x, player_obj.y, 1);
+//stop();
+				my_portal.interact();
+/*
+				if (!TDW_MOVE_TakePortal(my_portal)) {
+					me.overhead("Potion drop execution complete");
+					print("Potion drop execution complete");
+				}
+				else {
+					me.overhead("Potion drop execution failed");
+					print("Potion drop execution failed");
+				}
+*/
+				break;
+			}
+		}
+		delay(250);
+	}
+
+	print("Done");
+	stop();
+}
+
+

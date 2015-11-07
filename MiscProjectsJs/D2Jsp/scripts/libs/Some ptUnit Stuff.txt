@@ -1,0 +1,291 @@
+Some ptUnit Stuff
+---- ------ -----
+ptUnit 
+
++00   Type: 
+   0 = player 
+   1 = monster 
+   2 = object 
+   3 = missile 
+   4 = item 
+   5 = tile 
++04   unit id: 
+   plrs = charstats.txt line # 
+   monsters/objects/missiles = ID from corresponding txt 
+   items = # from combined list from weapons.txt/armor.txt/misc.txt 
++08   unique ID (unid), type counter 
++0c   mode: 
+   plrs = plrmodes.txt 
+   mons = monmode.txt 
+   obj = objmode.txt 
+   missiles: unknown, 1 = can't hit monsters, 2 = cant hit plrs 
+   items: 0 = in inventory, 1 = equipped, 3 = on ground, 4 = mouse? 
++10   ptGame+1c 
++14   Act 
++18   some ptr, ptGame+(4*act num)+0A4 
++2c   seed stuff (1 at start) 
++30   more seed stuff (29a at start) 
++34   yet even more seed stuff 
++38   hPath 
+   +00 = x pos ^ 10h 
+   +04 = y pos ^ 10h 
+   +10 = target x 
+   +12 = target y 
+   +1c = hRoom 
+      +00 = x/y pos (not shifted) 
+      +04 = x/y pos (not shifted) 
+      +38 = ? 
+         +00 = levels.txt ptr? 
+            +04 = levelID 
+   +30 = ptUnit 
+   +34 = flags 
+   +3c = path type 
+      2 = toward    
+      4 = missile 
+      7 = normal move 
+      8 = knockback (server) 
+      11 = knockback (client) 
+   +38 = 0f if changed velocity increse 
+   +40 = previous path type 
+   +44 = size, 
+      players = 2 
+      monsters = SizeX from monstats.txt 
+      objects = SizeX from objects.txt 
+      missiles = size from missiles.txt 
+      items = 1 
+      tiles = 0 
+   +48 = collision pattern 
+   +4c = ?, 
+      players = 128 
+   +50 = ?, 
+      players = 7177 
+   +58 = target 
+   +5c = target type 
+   +60 = target unid 
+   +72 = x step length 
+   +76 = y step length 
+   +7c = velocity increase 
+   +84 = velocity increase 
+   +91 = byte, type specific. plrs = 49h 
+   +92 = byte, type specific. plrs = 46h 
+   +98 = some number for path type, see table at 6FDC1068 1.09d 
+   +1d4 = 1 at start 
+   +1d8 = unsifted xpos (starting?) 
+   +1da = unshifted ypos (starting?) 
++54   2nd byte from cof file * 256 
++58   frame count for run/walk animation? 
++60   cof file string for current mode (monsters and players) 
++6c   ptStats 
+   +00 = 0 ef player 
+   +04 = ptList 
+      +44 = ptStats 
+      +cc = ptNext 
+   +40 = unit type 
+   +44 = unit unid 
+   +48 = ptList (only if items?) 
++70   ptTypeData, unique ptr for each type. See below for structure 
++7e   if oblivion knight or abyss knight, rnd[4] 
++7f   if oblivion knight, rnd[4] 
++84   ptInventory 
+   +00 = ? ptGame+1c 
+   +04 = unit+00 
+   +0c = unid 
+   +10 = unid (same as +0c) 
+   +1c = ptLocInfo 
+      +00 = None 
+      +04 = Head 
+      +08 = Neck 
+      +0c = Torso 
+      +10 = Right Arm 
+      +14 = Left Arm 
+      +18 = Right Ring 
+      +1c = Left Ring 
+      +20 = Belt 
+      +24 = Feet 
+      +2c = Gloves 
+   +28 = ptNode 
+      +00 = 0 
+      +04 = ptr to first item in "inventory" (stash,cube,etc:all) 
+      +08 = item unid 
+      +0c = page 
+      +10 = next node 
++98   0 at start 
++a4   ptGame 
++cc   ptInfo 
+   +00 = ?, ptGame+1c 
+   +04 = ptSkill 
+      +00 = skills.txt ptr for skill 
+      +04 = ptr to next skill 
+      +08 = mode # (anim from skills.txt if players, else monanim) 
+      +18 = ?, info on target? (mode??) 
+      +1c = target type, if any 
+      +20 = target unid, if any 
+      +28 = slvl 
+      +2c = extra slvl bonus 
+      +28 = slvl 
+      +34 = state id for skill if passive, else -1 (if charged, then item unid) 
+   +08 = ptSkill for skill in left hand 
+   +0c = ptSkill for skill in right hand 
+   +10 = ptSkill, current 
++d0   combat ptr 
+      +00 = ptGame 
+      +04 = attacker type 
+      +08 = attacker unid 
+      +0c = defender type 
+      +10 = defender unid 
+      +14 = starting of combat stat listing 
+      +80 = previous combat ptr    
++e8   flags 
+   10 = spawning (unit creation.txt) 
+   players 
+      0E = initializing pointers (player spawn - inventory.txt) 
+
++ec   if lod: 2000000, classic: 0? 
++f4   0b at start, then client # 
++100   event list (hUnitEvents) 
+   +00 = 0 at start 
++108   Next unit 
+
+ptTypeData 
+
+ptPlrData, players 
+
++70   ptPlrData, ef player 
+   +00 = string with players name 
+   +10 = some quest ptr 
+      +00 = ptBuffer 
+      +04 = 60h * 2^3, 768 
+      +08 = 0 
+      +0c = 0 
+   +14 = some quest ptr 
+      +00 = ptBuffer 
+      +04 = 60h * 2^3, 768 
+      +08 = 0 
+      +0c = 0 
+   +18 = some quest ptr 
+      +00 = ptBuffer 
+      +04 = 60h * 2^3, 768 
+      +08 = 0 
+      +0c = 0 
+   +1c = some waypoint ptr 
+      +00 = 1021 
+      +04 = 0 
+      +08 = 0 
+      +0c = 0 
+   +20 = some waypoint ptr 
+      +00 = 1021 
+      +04 = 0 
+      +08 = 0 
+      +0c = 0 
+   +24 = some waypoint ptr 
+      +00 = 1021 
+      +04 = 0 
+      +08 = 0 
+      +0c = 0 
+   +924 = 1? stuff from leveldefs 
+   +92c = ptr, ? 
+      +00 = 0 
+      +04 = 0 
+   +93c = ptPet 
+   +944 = ptClient 
+      +00 = unit+00?? 
+      +08 = byte, class id 
+      +0a = word, ? (value from save file?) 
+      +0d = char name 
+      +158 = unit+00 
+      +15c = unid 
+      +160 = ptUnit 
+      +194 = ptGame 
+   +948 = 0 
+   +94c = 0 
+   +950 = 0 
+   +954 = 0 
+   +958 = some "intro" ptr 
+      +00 = some ptr 
+         +00 = ptBuffer 
+         +04 = 8 * 2^3, 64 
+         +08 = 0 
+         +0c = 0    
+      +04 = some ptr 
+         +00 = ptBuffer 
+         +04 = 8 * 2^3, 64 
+         +08 = 0 
+         +0c = 0    
+   +95c = some "intro" ptr, same structure as +958 
+   +960 = some "intro" ptr, same structure as +958 
+   +964 = 0 
+   +994 = 0    
+
+ptMonData, monster 
+
+   +00 = ai ptr, 
+      +00 = 0 on spawn 
+      +04 = pfnFunction, ptr, sjб "monster ai table.txt", at +08 (ef 0 og +00 = 0, юб 6FCD3AD0, annars 6FCCA0D0) 
+      +0c = -1 on spawn 
+      +10 = 1 on spawn 
+      +14 = 0 on spawn 
+      +18 = 0 on spawn 
+      +1c = 0 on spawn 
+      +28 = if minion, юб ptGame 
+      +2c = if minion, юб owner unid 
+      +30 = if minon, юб owner type 
+   +04 = ptr, ? 
+   +08 = ptr, regarding unique/champ info 
+      +2c = unique mod (?) 
+   +0c = ptr, ? 
+      +00 = 0 on spawn 
+      +04 = levelID (set at spawn, chenges when current level changes??) 
+      +08 = 0 on spawn 
+   +10 = ptr, ? 
+      +00 = 0 on spawn 
+   +30 = some level ptr 
+   +34 = monstats.txt ptr 
+
+ptItemstats 
++00 quality 
++04 seed Lo (for affix) 
++08 seed Hi (for affix) 
++0c 
++10 start seed Lo 
++14 cmdflags 
++18 flags 
+00000001 new item 
+00000010 magical??? 
+00000800 sockets 
+00001000 ear??? 
+00002000 new item 
+00010000 check at andra pris 
+00020000 check at gamble pris 
+00400000 ethereal 
+01000000 from player ??? 
++24 set/unique # (body part=> monster #) 
++28 ilvl 
++2c version (0,1,100??) (word) 
++2e prefix (word) 
++30 suffix (word) 
++32 autoprefix (word) 
++34 prefix 1 (word) 
++36 prefix 2 (word) 
++38 prefix 3 (word) 
++3a suffix 1 (word) (book mod) 
++3c suffix 2 (word) 
++3e suffix 3 (word) 
++40 byte (bodyloc) 
++41 byte (page), ff on creation (3=cube) 
++45 pic?? 
++4c ilvl ?? 
+
+ptMissilestats 
++04 flags 
++08 0 on start 
++0c -1 on start 
++20 nDirection 
++28 range? 
++2c range? 
++30 level 
++34 number of pierces (byte) 
++35 (byte) 
++36 (byte) 
++37 (byte) 
++38 range-activate 
+

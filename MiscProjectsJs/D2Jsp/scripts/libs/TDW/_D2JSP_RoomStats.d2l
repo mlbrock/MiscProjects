@@ -1,0 +1,191 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// D2Jsp Room Stats Include File
+// ////////////////////////////////////////////////////////////////////////////
+//
+// File Name       : _D2JSP_RoomStats.d2l
+//
+// File Version    : 1.0.0
+//
+// File Description: Contains Diablo II Expansion room stat constants.
+//
+// Revison History : 2003-01-25 --- Creation.
+//
+//	Author          : Michael L. Brock (TheDesertWind)
+//
+//	Copyright       : (c) 2003 - 2004, Michael L. Brock. All rights reserved.
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+	// Include guard
+if (typeof(D2JSP_INCLUDE_GUARD_RoomStats_d2l) == "undefined") {
+	var D2JSP_INCLUDE_GUARD_RoomStats_d2l = true;
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Constant room stat values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ROOMSTAT_XSTART     = 0;
+var D2JSP_ROOMSTAT_YSTART     = 1;
+var D2JSP_ROOMSTAT_XSIZE1     = 2;
+var D2JSP_ROOMSTAT_YSIZE1     = 3;
+var D2JSP_ROOMSTAT_XPOS       = 4;
+var D2JSP_ROOMSTAT_YPOS       = 5;
+var D2JSP_ROOMSTAT_XSIZE2     = 6;
+var D2JSP_ROOMSTAT_YSIZE2     = 7;
+var D2JSP_ROOMSTAT_UNUSED_8   = 8;
+var D2JSP_ROOMSTAT_NPOSGAMEX  = 9;
+var D2JSP_ROOMSTAT_NPOSGAMEY  = 10;
+var D2JSP_ROOMSTAT_NSIZEGAMEX = 11;
+var D2JSP_ROOMSTAT_NSIZEGAMEY = 12;
+var D2JSP_ROOMSTAT_NPOSROOMX  = 13;
+var D2JSP_ROOMSTAT_NPOSROOMY  = 14;
+var D2JSP_ROOMSTAT_NSIZEROOMX = 15;
+var D2JSP_ROOMSTAT_NSIZEROOMY = 16;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Some associated constant values...
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ROOMSTAT_MINIMUM = D2JSP_ROOMSTAT_XSTART;
+var D2JSP_ROOMSTAT_MAXIMUM = D2JSP_ROOMSTAT_NSIZEROOMY;
+var D2JSP_ROOMSTAT_COUNT   = (D2JSP_ROOMSTAT_MAXIMUM + 1);
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Maps room stat numbers to names.
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ROOMSTAT_StatNameList = [
+	"xStart",
+	"yStart",
+	"xSize1",
+	"ySize1",
+	"xPos",
+	"yPos",
+	"xSize2",
+	"ySize2",
+	"Unused_8",
+	"nPosGameX",
+	"nPosGameY",
+	"nSizeGameX",
+	"nSizeGameY",
+	"nPosRoomX",
+	"nPosRoomY",
+	"nSizeRoomX",
+	"nSizeRoomY"
+];
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+var D2JSP_ROOMSTAT_NameToStatList = new Array();
+for (var count_1 = 0; count_1 < D2JSP_ROOMSTAT_StatNameList.length; count_1++)
+	D2JSP_ROOMSTAT_NameToStatList[D2JSP_ROOMSTAT_StatNameList[count_1].
+		toLowerCase()] = count_1;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOMSTAT_IsValid(stat_number)
+{
+	return(((stat_number >= D2JSP_ROOMSTAT_MINIMUM) &&
+		(stat_number <= D2JSP_ROOMSTAT_MAXIMUM)) ? true : false);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOMSTAT_StatToName(stat_number)
+{
+	return((D2JSP_ROOMSTAT_IsValid(stat_number)) ?
+		D2JSP_ROOMSTAT_StatNameList[stat_number] : "*INVALID*");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOMSTAT_NameToStat(stat_name)
+{
+	return((typeof(D2JSP_ROOMSTAT_NameToStatList[stat_name.toLowerCase()]) ==
+		"number") ? D2JSP_ROOMSTAT_NameToStatList[stat_name.toLowerCase()] : -1);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOMSTAT_ParseToNumber(in_stat)
+{
+	var tmp_number;
+	var tmp_data;
+
+	in_stat  = D2JSP_UTIL_FORMAT_Trim(in_stat + "");
+	tmp_data = in_stat;
+	tmp_data = tmp_data.replace(/^\s+|\s+$/g, "");
+	tmp_data = tmp_data.replace(/\s+/g, "_");
+	tmp_data = tmp_data.replace(/^[^A-Za-z_]|[^A-Za-z0-9_]/g, "");
+	tmp_data = (tmp_data != "") ? tmp_data : "\"\"";
+
+	if (D2JSP_UTIL_FORMAT_IsDigit(in_stat)) {
+		tmp_number = parseInt(in_stat, 10);
+		return((D2JSP_ROOMSTAT_IsValid(tmp_number)) ? tmp_number : -1);
+	}
+	else if (eval("((typeof(D2JSP_ROOMSTAT_" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval("D2JSP_ROOMSTAT_" + tmp_data.toUpperCase()));
+	else if (eval("((typeof(" + tmp_data.toUpperCase() +
+		") == \"number\") ? true : false)"))
+		return(eval(tmp_data.toUpperCase()));
+	else
+		return(D2JSP_ROOMSTAT_NameToStat(in_stat));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function D2JSP_ROOMSTAT_ParseToName(in_stat)
+{
+	var tmp_number = D2JSP_ROOMSTAT_ParseToNumber(in_stat);
+
+	return(D2JSP_ROOMSTAT_StatToName(tmp_number));
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+delay(1);
+runGC();
+delay(1);
+
+} // if (typeof(D2JSP_INCLUDE_GUARD_RoomStats_d2l) == "undefined") {
+
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+//
+//	Regression tests. Change the conditional to 'true' to run.
+//
+// ////////////////////////////////////////////////////////////////////////////
+if (false) {
+function main() {
+	var count_1;
+	var file_name = "output/RegressionTest._D2JSP_RoomStats.d2l.txt";
+	var file_handle;
+
+	print("Writing '_D2JSP_RoomStats.d2l' regression test output file to '" +
+		file_name + "'.");
+
+	file_handle = fileOpen(file_name, 1);
+	if (file_handle) {
+		for (count_1 = 0; count_1 < D2JSP_ROOMSTAT_StatNameList.length; count_1++)
+			file_handle.writeLine(count_1 + "\t" +
+				D2JSP_ROOMSTAT_StatNameList[count_1]);
+		file_handle.close();
+		print("File written.");
+	}
+	else
+		print("Unable to open file '" + file_name + "' for writing!");
+
+	print("Regression test completed.");
+
+	stop();
+}
+// ////////////////////////////////////////////////////////////////////////////
+} // if (false) {
+
+// ////////////////////////////////////////////////////////////////////////////
+

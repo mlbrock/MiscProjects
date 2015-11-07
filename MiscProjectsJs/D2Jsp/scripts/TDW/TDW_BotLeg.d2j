@@ -1,0 +1,532 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// Necessary include files...
+// ////////////////////////////////////////////////////////////////////////////
+include("TDW/TDW_BotSupport.d2l");
+// ////////////////////////////////////////////////////////////////////////////
+
+var TDW_LB_ISF_Cfg = null;
+
+var TDW_LB_MakeRequests = [
+	"make please",
+	"make cows",
+	"make cows please",
+	"make cows plz",
+	"make plz",
+	"make",
+	"leg on ground",
+	"leg here",
+	"leg is here",
+	"leg down",
+	"leg is down",
+	"leg ready",
+	"leg is ready",
+	"leg near me",
+	"leg is near me",
+	"leg right here",
+	"leg is right here",
+];
+
+// ////////////////////////////////////////////////////////////////////////////
+TDW_BOT_ConfigureList["teleport.step.size"]          = 15;
+TDW_BOT_ConfigureList["teleport.step.size.max"]      = 120;
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function main()
+{
+	var config_list = new Array();
+
+	if ((me.name == "ChargeIt") || (me.name == "BjorkOnSpeed") ||
+		(me.name == "Virgin") || (me.name == "Virgin2") ||
+		(me.name == "Virgin2HF") || (me.name == "AKAB_PA") ||
+		(me.name == "AKAB_PB")) {
+		config_list["skill.attack.local"]    = new Array();
+		config_list["skill.attack.ranged"]   = ["Charged Bolt", "Charged Bolt", "Charged Bolt", "Frozen Orb"];
+	}
+
+TDW_BOT_ConfigureList["chicken.mercenary.hp"]             = 0;
+TDW_BOT_ConfigureList["town.revive.mercenary"]            = false;
+TDW_BOT_ConfigureList["town.heal.mercenary.hp"]           = 0;
+TDW_BOT_ConfigureList["potion.mercenary.hp.health"]       = 0;
+TDW_BOT_ConfigureList["potion.mercenary.hp.rejuvenation"] = 0;
+TDW_BOT_ConfigureList["mercernary.needed"]                = false;
+
+	TDW_PB_Start(config_list);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PB_Start(config_list)
+{
+	var error_list = new Array();
+	var error_msg_string;
+
+	if ((!D2JSP_QUEST_GetQuestBit(1, 3, D2JSP_QUEST_BIT_A1_Q3_COW_LEVEL)) &&
+		D2JSP_ITEM_HasHoradricCube())
+		TDW_BOT_ConfigureList["town.logic.minimum.tbk.count"] = 2;
+
+	var init_err_msg = TDW_BOT_Init("TDW_BotLeg", null, config_list);
+	if (init_err_msg)
+		TDW_BOT_SUPP_DoExitWithMsg(init_err_msg);
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_PB_ManageLeg();
+
+	if (!D2JSP_AREA_IsTown()) {
+		if (TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasicMe, null)) {
+			if (TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasicMe, null))
+				TDW_BOT_CHECK_PerformChicken("Unable to return to town.");
+		}
+		TDW_BOT_MOVE_RecoverInTown(false);
+	}
+
+	if (me.act != 1) {
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+		TDW_MOVE_TownReturnFinalize();
+	}
+
+	if (D2JSP_ITEM_HasWirtsLeg())
+		TDW_LB_HaveLeg();
+
+	if (TDW_BOT_MOVE_TownLogic(TDW_BOT_MOVE_TOWN_FLAG_NONE |
+		((TDW_BOT_ContextList["mercernary.needed"]) ?
+		TDW_BOT_MOVE_TOWN_FLAG_MERC_NEEDED : TDW_BOT_MOVE_TOWN_FLAG_NONE) |
+		((TDW_BOT_ContextList["mercernary.wanted"]) ?
+		TDW_BOT_MOVE_TOWN_FLAG_MERC_WANTED : TDW_BOT_MOVE_TOWN_FLAG_NONE),
+		TDW_ISF_Cfg))
+		TDW_BOT_SUPP_DoExitWithMsg("Unable to complete town logic.");
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+//	TDW_PB_CompleteRun();
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_PB_ManageLeg()
+{
+	var TDW_BOT_MOVE_Act1_CairnStones = [
+		"StoneAlpha",
+		"StoneDelta",
+		"StoneLambda",
+//		"StoneTheta",								// Stand-alone stone not used.
+		"StoneGamma",
+		"StoneBeta"
+	];
+
+	var access_strategy = TDW_BOT_MOVE_GetDefaultLinkAccessStrategy();
+
+	var space_avail     = D2JSP_ITEM_CONT_GetAvailableSpace(null);
+
+	if (D2JSP_ITEM_HasWirtsLeg() != null) {
+		TDW_LB_HaveLeg();
+		return(0);
+	}
+
+	if (!space_avail[2][1][D2JSP_ITEM_CONT_SRC_INVENTORY]) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_WARNING, "No space in inventory for Wirt's Leg.");
+		return(0);
+	}
+
+	if ((space_avail[2][1][D2JSP_ITEM_CONT_SRC_INVENTORY] > 1) &&
+		(D2JSP_COMM_CountTomesLessThan("tbk", 21) < 2)) {
+		var tome_npc_name =
+			D2JSP_NPC_GetVendorNameFromType(D2JSP_NPC_VENDOR_SCROLL);
+		var tome_npc_obj  = getUnit(D2JSP_UTIL_GETUNIT_NPC, tome_npc_name);
+		if (tome_npc_obj && (myDist(tome_npc_obj.x, tome_npc_obj.y) < 10))
+			D2JSP_NPC_PurchaseTBK();
+	}
+
+	var error_list = new Array();
+	if (!(TDW_LB_ISF_Cfg = ISF_Create(["leg"], 0, error_list))) {
+		while (error_list.length)
+			TDW_BOT_Log.logError(error_list.shift());
+		TDW_BOT_Log.logError("Unable to create ISF for Wirt's Leg.");
+		return(-1);
+	}
+
+	TDW_MOVE_GetMyWayPointAccess();
+
+	TDW_BOT_CHECK_PrecastChecks(30000);
+
+	if ((return_code = TDW_PATH_GotoTargetArea(D2JSP_AREA_STONY_FIELD,
+		access_strategy, TDW_PATHL_AREA_LOAD_FLAG_DEFAULT)))
+		return(return_code);
+
+	if (TDW_BOT_MOVE_GotoRoom(160, TDW_PATH_MAP_BUILD_FLAG_NO_ACCESS_CHECK))
+		return(-1);
+
+	access_strategy.callback_func(access_strategy,
+		TDW_PATH_ASCB_MSG_STATUS, "Looking for red portal to Tristram.");
+
+	for (var count_1 = 0; count_1 < TDW_BOT_MOVE_Act1_CairnStones.length;
+		count_1++) {
+		var this_portal = TDW_MOVE_LookForPortal(D2JSP_AREA_TRISTRAM, "",
+			1, 50, true);
+		if (this_portal)
+			D2JSP_SKILL_TeleportTo(this_portal.x, this_portal.y);
+		if (!TDW_MOVE_LookForAndTakePortal(D2JSP_AREA_TRISTRAM, "",
+			1, 50, true))
+			break;
+		var stone_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT,
+			TDW_BOT_MOVE_Act1_CairnStones[count_1]);
+		if (stone_obj)
+			D2JSP_SKILL_TeleportTo(stone_obj.x, stone_obj.y);
+		delay(100);
+	}
+
+	if (me.area != D2JSP_AREA_TRISTRAM) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_ERROR, "Unable to get to " +
+			D2JSP_AREA_AreaToName(D2JSP_AREA_TRISTRAM) + ".");
+		return(-1);
+	}
+
+	var desired_spot = [25047, 5178];
+
+	TDW_BOT_MOVE_TeleportToDestination(desired_spot,
+		TDW_BOT_SUPP_TP2DEST_FLAG_ATTACK_NONE);
+
+	target_obj = getUnit(D2JSP_UTIL_GETUNIT_OBJECT, 268);
+	if (!target_obj) {
+		access_strategy.callback_func(access_strategy,
+			TDW_PATH_ASCB_MSG_WARNING, "Hmmm... Can't find Wirt's body...");
+		return(-1);
+	}
+	else {
+		desired_spot = [target_obj.x, target_obj.y];
+		if (target_obj.mode != D2JSP_MODE_OBJECT_IDLE) {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_STATUS,
+				"Hmmm... Wirt's body has already been disturbed...");
+			if (D2JSP_ITEM_HasWirtsLeg() != null) {
+				TDW_LB_HaveLeg();
+				access_strategy.callback_func(access_strategy,
+					TDW_PATH_ASCB_MSG_STATUS, "Snagged Wirt's Leg.");
+				return(0);
+			}
+		}
+		else {
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_STATUS, "About to grave-rob Wirt's body...");
+			D2JSP_UTIL_InteractObject(target_obj);
+			for (var count_1 = 0; count_1 < 10; count_1++) {
+				D2JSP_SKILL_TeleportTo(target_obj.x + rnd(-5, 5),
+					target_obj.y + rnd(-5, 5));
+				delay(100);
+				if (target_obj.mode != D2JSP_MODE_OBJECT_IDLE)
+					break;
+			}
+		}
+	}
+
+	for (count_1 = 0; count_1 < 100; count_1++) {
+		target_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, 88);
+		if (D2JSP_ITEM_HasWirtsLeg() != null) {
+			TDW_LB_HaveLeg();
+			access_strategy.callback_func(access_strategy,
+				TDW_PATH_ASCB_MSG_STATUS, "Snagged Wirt's Leg.");
+			return(0);
+		}
+		else if (target_obj && ((target_obj.mode == D2JSP_MODE_ITEM_ON_GROUND) ||
+			(target_obj.mode == D2JSP_MODE_ITEM_BEING_DROPPED))) {
+			TDW_LB_ISF_Cfg.doPickup(ISF_PICKUP_FLAG_ITEM, 50,
+				TDW_BELTMAN_FLAG_NONE, 1000000, null,
+				TDW_BOT_CHECK_DoChecksReturnZero);
+/*
+			D2JSP_UTIL_InteractObject(target_obj);
+			delay(100);
+			for (count_2 = 0; count_2 < 100; count_2++) {
+				var results_data = D2JSP_OBJ_IterateItem(null,
+					D2JSP_OBJ_FilterParentMe, D2JSP_OBJ_ActionStop, 88);
+				if (results_data[D2JSP_OBJ_ACTION_COUNT]) {
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Snagged Wirt's Leg.");
+					TDW_LB_HaveLeg();
+					return(0);
+				}
+				delay(100);
+			}
+*/
+			for (count_2 = 0; count_2 < 100; count_2++) {
+				if (D2JSP_ITEM_HasWirtsLeg() != null) {
+					var worst_tbk = D2JSP_COMM_GetWorstTBK();
+					if (worst_tbk && worst_tbk.getStat(D2JSP_STAT_QUANTITY)) {
+						clickItem(D2JSP_ITEM_CLICK_BUTTON_RIGHT, worst_tbk);
+						delay(250);
+					}
+					TDW_LB_HaveLeg();
+					access_strategy.callback_func(access_strategy,
+						TDW_PATH_ASCB_MSG_STATUS, "Snagged Wirt's Leg.");
+					return(0);
+				}
+				delay(100);
+				target_obj = getUnit(D2JSP_UTIL_GETUNIT_ITEM, 88);
+				if (target_obj && ((target_obj.mode == D2JSP_MODE_ITEM_ON_GROUND) ||
+					(target_obj.mode == D2JSP_MODE_ITEM_BEING_DROPPED)))
+					TDW_LB_ISF_Cfg.doPickup(ISF_PICKUP_FLAG_ITEM, 50,
+					TDW_BELTMAN_FLAG_NONE, 1000000, null,
+					TDW_BOT_CHECK_DoChecksReturnZero);
+				else
+					break;
+			}
+			break;
+		}
+		delay(100);
+	}
+
+	access_strategy.callback_func(access_strategy,
+		TDW_PATH_ASCB_MSG_STATUS, "Unable to snag Wirt's leg.");
+	
+	return(0)
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_LB_HaveLeg()
+{
+	var the_leg;
+
+	TDW_BOT_ContextList["town.logic.minimum.tbk.count"] = 1;
+
+	if (!D2JSP_AREA_IsTown()) {
+		if (TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasicMe, null)) {
+			if (TDW_MOVE_PortalToTown(TDW_BOT_CHECK_ChickenChecksBasicMe, null))
+				TDW_BOT_CHECK_PerformChicken("Unable to return to town.");
+		}
+		TDW_BOT_MOVE_RecoverInTown(false);
+	}
+
+	if (me.act != 1) {
+		TDW_MOVE_COMPAT_TownMove(1, "waypoint");
+		TDW_MOVE_TownReturnFinalize();
+	}
+
+	if (!D2JSP_ITEM_HasWirtsLeg())
+		return(0);
+
+	if (D2JSP_QUEST_GetQuestBit(1, 3, D2JSP_QUEST_BIT_A1_Q3_COW_LEVEL) ||
+		(!D2JSP_ITEM_HasHoradricCube())) {
+		TDW_LB_DropStuff();
+		return(0);
+	}
+
+	var container_map_list = D2JSP_ITEM_CONT_BuildMapList();
+
+	if (!D2JSP_ITEM_CONT_FindSpace(3, 4, container_map_list,
+		D2JSP_ITEM_CONT_SRC_CUBE)) {
+		TDW_LB_DropStuff();
+		return(0);
+	}
+
+	var tbk_count   = D2JSP_COMM_CountTomesLessThan("tbk", 21);
+	var space_avail = D2JSP_ITEM_CONT_GetAvailableSpace(container_map_list);
+
+	if (tbk_count < 2) {
+		var tbk_needed = (!tbk_count) ? 2 : 1;
+		if (!space_avail[1][1][D2JSP_ITEM_CONT_SRC_INVENTORY] < tbk_needed) {
+			TDW_LB_DropStuff();
+			return(0);
+		}
+		if (D2JSP_ITEM_MyGoldTotal() < 10000) {
+			TDW_LB_DropStuff();
+			return(0);
+		}
+		while (D2JSP_COMM_CountTomesLessThan("tbk", 21) < tbk_needed)
+			D2JSP_NPC_PurchaseTBK();
+	}
+
+	if (D2JSP_COMM_CountTomesLessThan("tbk", 21) < 2) {
+		TDW_LB_DropStuff();
+		return(0);
+	}
+
+	var worst_tbk = D2JSP_COMM_GetWorstTBK();
+	if (!worst_tbk) {
+		TDW_LB_DropStuff();
+		return(0);
+	}
+
+	if (D2JSP_COMM_InteractWithStash() == null) {
+		TDW_LB_DropStuff();
+		return(0);
+	}
+
+	var dest;
+	if (dest = D2JSP_ITEM_CONT_ItemMove(D2JSP_ITEM_HasWirtsLeg(),
+		D2JSP_ITEM_CONT_BuildMapList(), D2JSP_ITEM_CONT_SRC_CUBE)) {
+		delay(250);
+		if (dest = D2JSP_ITEM_CONT_ItemMove(D2JSP_COMM_GetWorstTBK(),
+			D2JSP_ITEM_CONT_BuildMapList(), D2JSP_ITEM_CONT_SRC_CUBE)) {
+			delay(250);
+			D2JSP_UTIL_BNET_SaySafe("no king please");
+			delay(250);
+			if (D2JSP_COMM_InteractWithCube()) {
+				transmute();
+				delay(500);
+				D2JSP_UTIL_BNET_SaySafe("cows up!!!");
+				D2JSP_COMM_CancelCube();
+				var cube_obj = D2JSP_ITEM_HasHoradricCube();
+				if (cube_obj.itemloc == D2JSP_ITEMLOC_STASH) {
+					delay(500);
+					if ((stash_obj = D2JSP_COMM_InteractWithStash()) != null)
+						D2JSP_COMM_CancelStash();
+				}
+				return(0);
+			}
+		}
+	}
+
+	TDW_LB_DropStuff();
+
+	return(0);
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_LB_DropStuff()
+{
+	var the_leg = D2JSP_ITEM_HasWirtsLeg();
+
+	if (the_leg) {
+		var make_requests = D2JSP_UTIL_GEN_CloneObject(TDW_LB_MakeRequests);
+		if (the_leg.itemloc == D2JSP_ITEMLOC_INVENTORY) {
+			if (TDW_PATH_Act1FireCoords != null) {
+				TDW_MOVE_MoveToXYPair(TDW_PATH_Act1FireCoords, 10);
+				make_requests =
+					make_requests.push("leg near fire", "leg is near fire");
+			}
+			else {
+				TDW_MOVE_COMPAT_TownMove("stash");
+				make_requests =
+					make_requests.push("leg near stash", "leg is near stash");
+			}
+		}
+		else if (D2JSP_COMM_InteractWithStash() == null)
+			return(-1);
+		else if ((the_leg = D2JSP_ITEM_HasWirtsLeg()) == null)
+			return(-1);
+		if (TDW_LB_DropAnItem(the_leg))
+			return(-1);
+		if (D2JSP_COMM_CountTomesLessThan("tbk", 21) > 1) {
+			var worst_tbk = D2JSP_COMM_GetWorstTBK();
+			if (worst_tbk)
+				TDW_LB_DropAnItem(worst_tbk);
+		}
+		D2JSP_UTIL_BNET_SaySafe(TDW_LB_MakeRequests[rnd(0,
+			TDW_LB_MakeRequests.length - 1)]);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_LB_MoveAnItemToCube(this_obj)
+{
+	for (count_1 = 0; count_1 < 200; count_1++) {
+		clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, this_obj);
+		if (this_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+			break;
+		delay(50);
+	}
+
+	if (this_obj.mode != D2JSP_MODE_ITEM_ON_CURSOR) {
+		TDW_BOT_Log.logError("Unable to move the item to the cursor.");
+		return(-1);
+	}
+
+	this_obj.cancel();
+	D2JSP_UTIL_GEN_FuzzyDelay(100);
+	// ... and wait for it to get there.
+	D2JSP_UTIL_GEN_CheckCursor(1000, 10);
+
+	// We've got a serious problem if we can't clear the cursor.
+	if (D2JSP_UTIL_GEN_ClearCursor(true, TDW_BOT_Log)) {
+		TDW_BOT_Log.logFatal("Unable to clear cursor of discarded item.");
+		return(-1);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function TDW_LB_DropAnItem(this_obj)
+{
+	for (count_1 = 0; count_1 < 200; count_1++) {
+		clickItem(D2JSP_ITEM_CLICK_BUTTON_LEFT, this_obj);
+		if (this_obj.mode == D2JSP_MODE_ITEM_ON_CURSOR)
+			break;
+		delay(50);
+	}
+
+	if (this_obj.mode != D2JSP_MODE_ITEM_ON_CURSOR) {
+		TDW_BOT_Log.logError("Unable to move the item to the cursor.");
+		return(-1);
+	}
+
+	this_obj.cancel();
+	D2JSP_UTIL_GEN_FuzzyDelay(100);
+	// ... and wait for it to get there.
+	D2JSP_UTIL_GEN_CheckCursor(1000, 10);
+
+	// We've got a serious problem if we can't clear the cursor.
+	if (D2JSP_UTIL_GEN_ClearCursor(true, TDW_BOT_Log)) {
+		TDW_BOT_Log.logFatal("Unable to clear cursor of discarded item.");
+		return(-1);
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function hostilemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function partymsgHandler()
+{
+	var log_obj = D2JSP_UTIL_LOG_GetALog();
+
+	log_obj.logInfoQuiet(arguments[0]);
+
+	if (arguments[0].
+		match(/^\S+ invites you to ally against the forces of evil\.$/i)) {
+		var player_name = arguments[0].split(/[\s]/)[0];
+		if (player_name != "") {
+			var player_obj = D2JSP_COMM_GetPlayerByName(player_name);
+			if (player_obj) {
+				if (TDW_BOT_ContextList["operation.party"]) {
+					clickParty(player_obj, D2JSP_UTIL_PARTY_MODE_PARTY);
+					log_obj.logInfo("Accepted party invitation from player " +
+						player_name + ".");
+				}
+				else
+					log_obj.logInfo("Party invitation from player " + player_name +
+						" ignored.");
+			}
+			else
+				log_obj.logWarning("Unable to accept party invitation from player "+
+					player_name + " because the player object could not be located.");
+		}
+		else
+			log_obj.logWarning("Unable to resolve a party invitation because the "+
+				"inviting player name could not be parsed.");
+	}
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function gamemsgHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////////////////////////
+function keypressHandler()
+{
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

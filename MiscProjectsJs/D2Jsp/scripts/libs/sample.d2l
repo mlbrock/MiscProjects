@@ -1,0 +1,26 @@
+var right_hand=0, left_hand=1, rx=0, tx=1;
+var waypoints = [[0x01,0x03,0x04,0x05,0x06,0x1b,0x1d,0x20,0x23],[0x28,0x30,0x2a,0x39,0x2b,0x2c,0x34,0x4a,0x2e],[0x4b,0x4c,0x4d,0x4e,0x4f,0x50,0x51,0x53,0x65],[0x67,0x6a,0x6b],[0x6d,0x6f,0x70,0x71,0x73,0x7b,0x75,0x76,0x81]];
+
+// taken from fruitbar and lord's pindle script
+function walkto(x, y){
+	var arrived = false;
+	while(arrived==false) {
+		me.move(x, y);
+		delay(100);
+		if((Math.abs(me.x - x) < 4) && (Math.abs(me.y - y) < 4)) arrived=true;
+	}
+}
+
+function checkCorpse() {
+	mycorpse = getPlayer(me.name,17);
+	if(mycorpse) {
+		print("I'm dead as a doornail. Lets move to and pickup my body.");
+		mycorpse.move();
+		delay(1000);
+		mycorpse.interact();
+		delay(1000);
+		print("Got my body now.");
+	} else {
+		print("good, i'm not dead, no corpse to pick up.");
+	}
+}

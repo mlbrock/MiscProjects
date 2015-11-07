@@ -1,0 +1,54 @@
+includeonce("TDW/_D2JSP_Common.d2l");
+include("TDW/_D2JSP_Utility.d2l");
+
+function main()
+{
+	var my_log = new D2JSP_UTIL_Log("output/TestTownInteract." + me.realm +
+		"." + me.account + "." + me.name + ".log", "TestTownInteract", null, null,
+		null, true);
+
+	my_log.setLevelFile(D2JSP_UTIL_LOG_Level_MINUTIAE);
+
+	me.overhead(" ");
+
+	D2JSP_UTIL_GEN_CheckGameReady();
+
+	print("Ready");
+
+	var obj_list =
+		D2JSP_UTIL_GEN_CloneObject(D2JSP_NPC_VENDOR_VendorList[me.act - 1]);
+	obj_list.push("stash");
+
+	while (true) {
+		for (var count_1 = 0; count_1 < 10; count_1++) {
+			var obj_name = obj_list[D2JSP_UTIL_GEN_RandomRange(0, obj_list.length - 1)];
+//var obj_name = "Malah";
+//var obj_name = "stash";
+			var this_obj;
+			if (obj_name.toLowerCase() == "stash") {
+				this_obj = D2JSP_COMM_InteractWithStash();
+				if (this_obj) {
+					D2JSP_NPC_CancelUIMenu(this_obj);
+					D2JSP_UTIL_GEN_CancelObject(this_obj);
+				}
+			}
+			else {
+				this_obj = D2JSP_COMM_InteractWithNPC(obj_name);
+				if (this_obj)
+					D2JSP_UTIL_GEN_CancelNPC(this_obj);
+			}
+			if (this_obj)
+				my_log.logInfo("Interact with " + obj_name + " done.");
+			else
+				my_log.logError("Interact with " + obj_name + " failed.");
+//TDW_MOVE_RandomizeLocation(me.x, me.y, 10, 10);
+		}
+		print("Sleeping 5 seconds...");
+		delay(5000);
+	}
+
+	print("Script done.");
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+

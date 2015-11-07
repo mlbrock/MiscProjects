@@ -1,0 +1,151 @@
+/*
+	___CoreTest.009.d2j
+
+	Symptoms    :
+		Catastrophic failure: UNHANDLED EXCEPTION: ACCESS_VIOLATION (c0000005)
+
+		Catastrophic failure occurs when attempting to process messages.
+
+		A good way to test this is to start the script and take a few waypoints.
+
+	Tested under :
+		D2X Product and D2 Loader for
+			28 Core --- Win 2000 / SP 2 / 2 1.7 Ghz Xeon CPU / 2GB RAM
+*/
+/*
+	Problem Report Notes From IRC:
+	------- ------ ----- ---- ----
+14:17 <SwdishPower> njaguar: I am very positive that the msg command is corrupt
+      and is the cause of the crashes 
+14:17 <SwdishPower> any script I make with it crashes now 
+14:17 <SwdishPower> it worked a month ago 
+14:18 <SwdishPower> either it is the core that has changed or it is the
+      battle.net 
+14:18 <SwdishPower> either way it cant be used any longer
+njaguar says:
+14:18 <mattlant> i'v had the same issue using the command line thingy
+njaguar says:
+14:19 <njaguar> can you be more specific? 
+14:20 <SwedishPower> ah 
+14:20 <SwedishPower> a script which uses msg handling 
+14:20 <SwedishPower> hang on 
+14:20 <SwedishPower> I'll paste 
+14:21 <SwedishPower>      me.showtxmsg=1; 
+14:21 <SwedishPower>      wait_for_tx_msg=1; 
+14:21 <SwedishPower>      msg.watch('txpacket',txtest); 
+14:21 <SwedishPower> that in the main
+njaguar says:
+14:22 <SwedishPower> if (header=="1501" && !AllControl) { // This character is saying something 
+14:22 <SwedishPower>      m=Hexes2Ascii(txstr.slice(6,-6)).toUpperCase(); 
+14:22 <SwedishPower>      m2=m.slice(0,2); 
+14:22 <SwedishPower>      m4=m.slice(0,4); 
+14:22 <SwedishPower>      overhead(m4);
+njaguar says:
+14:22 <SwedishPower>      if (m4=="QUIT" || m4=="STOP") quitgame=true; 
+14:22 <SwedishPower>      if (m4=="HELP" || m=="?") helper=true; 
+14:22 <SwedishPower>      if (m2=="GO") go=true; 
+14:22 <SwedishPower>           if (m4=="ANDA" || m4=="A1Q6" || m4=="ANDY") doAndariel=true; 
+14:22 <SwedishPower>           if (m4=="CUBE" || m4=="A2Q2" || m4=="HALL") doHallsCube=true;
+njaguar says:
+14:22 <SwedishPower>           if (m4=="STAF" || m4=="A2Q3" || m4=="MAGG") doMaggotLair=true; 
+14:22 <SwedishPower>           if (m4=="AMUL" || m4=="A2Q4" || m4=="CLAW") doClawViper=true; 
+14:22 <SwedishPower>           if (m4=="DURI" || m4=="A2Q6" || m4=="CANY") doDuriel=true; 
+14:22 <SwedishPower>           if (m4=="MEPH" || m4=="A3Q6" || m4=="DURA") doMephisto=true;
+njaguar says:
+14:22 <SwedishPower>           if (m4=="DIAB" || m4=="A4Q3" || m4=="CHAO") doDiablo=true; 
+14:22 <SwedishPower>           if (m4=="SHEN" || m4=="A5Q1" || m4=="BLOO") doShenk=true; 
+14:22 <SwedishPower>           if (m4=="BAAL" || m4=="A5Q6" || m4=="WORL") doBaal=true; 
+14:22 <SwedishPower>           if (m2=="WP") {
+njaguar says:
+14:22 <SwedishPower>                act=parseInt(m.slice(2,3)); 
+14:22 <SwedishPower>                num=parseInt(m.slice(3,4)); 
+14:22 <SwedishPower>                if (act>0 && act<6 && num>1 && num<10) doWP=true; 
+14:22 <njaguar> dude 
+14:22 <SwedishPower>           } 
+14:22 <SwedishPower>      } 
+14:22 <njaguar> i dont want your life story 
+14:22 <SwedishPower> }
+njaguar says:
+14:23 <SwedishPower> function like that 
+14:23 <SwedishPower> that function coul be anything really 
+14:23 <SwedishPower> it makes d2 crash sooner or later 
+14:23 <SwedishPower> not the first call 
+14:23 <SwedishPower> not the second 
+14:23 <SwedishPower> hehe
+njaguar says:
+14:23 <njaguar> could be something wrong in your script too 
+14:23 <SwedishPower> look at the D2JSP Commander project 
+14:23 <SwedishPower> its easier 
+14:23 <njaguar> i'll have someone check into it tho 
+14:23 <SwedishPower> no njag because it is not limited to the script
+njaguar says:
+14:23 <njaguar> you wont be able to get raw packets in 0.29 i dont think 
+14:23 <SwedishPower> it happens in your example too 
+14:23 <SwedishPower> example.d2j 
+14:23 <njaguar> i see 
+14:24 <SwedishPower> it started happening a couple of weeks ago 
+14:24 <SwedishPower> and as I said it coul either be the core version changed
+      OR Blizz made something
+njaguar says:
+thats it
+*/
+var MyLogName   = "output\\____CoreTest.009.d2j.log";
+var MyLogHandle = null;
+
+function main()
+{
+	print("Waiting 3 seconds for game load completion...");
+	delay(3000);
+	print("Ready");
+
+	if (!(MyLogHandle = fileOpen(MyLogName, 1))) {
+		print("Unable to open log file '" + MyLogName + "'.");
+		quit();
+	}
+
+	me.showtxmsg=1;
+	me.showrxmsg=1;
+
+//	wait_for_tx_msg=1;
+
+	msg.watch('txpacket', TEST_txreceiver);
+	msg.watch('rxpacket', TEST_rxreceiver);
+
+	while (true)
+		delay(100);
+
+	print("Script ending");
+}
+
+function TEST_txreceiver()
+{
+	MyLogHandle.writeLine("********** tx entry");
+	TEST_Flush();
+	MyLogHandle.writeLine("TX packet: " + msg.txpacket);
+	TEST_Flush();
+	MyLogHandle.writeLine("********** tx exit");
+	TEST_Flush();
+}
+
+function TEST_rxreceiver()
+{
+	MyLogHandle.writeLine("********** rx entry");
+	TEST_Flush();
+	MyLogHandle.writeLine("RX packet: " + msg.rxpacket);
+	TEST_Flush();
+	MyLogHandle.writeLine("********** rx exit");
+	TEST_Flush();
+}
+
+function TEST_Flush()
+{
+	if (MyLogName != "") {
+		if (MyLogHandle != null)
+			MyLogHandle.close();
+		if (!(MyLogHandle = fileOpen(MyLogName, 2))) {
+			print("Unable to re-open log file '" + MyLogName + "'.");
+			stop();
+		}
+	}
+}
+
