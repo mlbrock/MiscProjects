@@ -588,6 +588,47 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 
 #include <boost/io/ios_state.hpp>
 
+namespace MLB {
+
+namespace ProtoBufSupport {
+
+//	////////////////////////////////////////////////////////////////////////////
+std::ostream &DumpColumnar(std::ostream &o_str, const GpbElementInfo &datum)
+{
+	if (datum.GetMemberIndex() >= 0) {
+		std::size_t depth     = datum.GetDepth();
+		std::size_t depth_pad = (depth) ? ((depth - 1) * 3) : 0;
+		o_str <<
+			std::right << std::setw(5)  << depth                  << " " <<
+							  std::setw(5)  << datum.GetMemberIndex() << " " <<
+			std::left  << std::setw(8)  << datum.GetLabelName()   << " " <<
+							  std::setw(31) << datum.GetTypeName()    << " " <<
+							  std::setw(depth_pad) << ""              << " " <<
+			std::left  << std::setw(31) << datum.GetMemberName()  << std::endl;
+		if (datum.GetDatumType() == GpbDatumType_Enum) {
+			GpbElementInfoDescriptors descrips(datum.GetDescriptors());
+			for (int count_1 = 0; count_1 <
+				descrips.enum_descriptor_->value_count(); ++count_1) {
+				o_str <<
+					std::setw(5 + 1 + 5 + 1 + 8 + 1 + 3) << "" <<
+						descrips.enum_descriptor_->value(count_1)->name() <<
+						std::endl;
+			}
+		}
+	}
+
+	for (std::size_t count_1 = 0; count_1 < datum.GetMemberList().size();
+		++count_1)
+		DumpColumnar(o_str, datum.GetMemberList()[count_1]);
+
+	return(o_str);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+} // namespace ProtoBufSupport
+
+} // namespace MLB
+
 namespace {
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -604,11 +645,13 @@ void TEST_EmitSep(char sep_char, std::streamsize sep_width = 79,
 void TEST_EmitDatum(const MLB::ProtoBufSupport::GpbElementInfo &datum)
 {
 #if 1
-	std::cout << datum << std::endl;
+//	std::cout << datum << std::endl;
+DumpColumnar(std::cout, datum);
 #else
 	datum.TestFileName();
 	std::cout << std::endl;
 #endif // #if 1
+
 }
 //	////////////////////////////////////////////////////////////////////////////
 

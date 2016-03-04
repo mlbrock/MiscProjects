@@ -91,6 +91,21 @@ public:
 	explicit GpbElementInfo(const GPB_Descriptor *descriptor);
 	explicit GpbElementInfo(const std::string &message_name);
 
+	inline std::size_t GetDepth() const
+	{
+		return(depth_);
+	}
+
+	inline int         GetMemberIndex() const
+	{
+		return(member_index_);
+	}
+
+	inline std::size_t GetMaxDepth() const
+	{
+		return(max_depth_);
+	}
+
 	inline ::google::protobuf::FieldDescriptor::CppType GetCppType() const
 	{
 		return(cpp_type_);
@@ -136,6 +151,11 @@ public:
 
 	GpbElementInfoDescriptors GetDescriptors() const;
 
+	const GpbElementInfoVector_I &GetMemberList() const
+	{
+		return(member_list_);
+	}
+
 	GpbElementInfoVector_I SetIntersection(const GpbElementInfo &other) const;
 	GpbElementInfoVector_I SetDifference(const GpbElementInfo &other) const;
 
@@ -163,8 +183,7 @@ private:
 	std::size_t                                   depth_;
 	int                                           member_index_;
 	std::size_t                                   max_depth_;
-
-	GpbElementInfoVector_I     member_list_;
+	GpbElementInfoVector_I                        member_list_;
 
 	explicit GpbElementInfo(const GPB_Descriptor *descriptor,
 		std::size_t depth);
