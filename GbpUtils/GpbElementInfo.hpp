@@ -74,6 +74,44 @@ struct GpbElementInfoDescriptors {
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+struct GpbElementInfoMaxLengths {
+	enum GpbElementInfoMaxLengthsIndex {
+		GpbElementInfoMaxLengthsIndex_TypeNameFull,
+		GpbElementInfoMaxLengthsIndex_TypeName,
+		GpbElementInfoMaxLengthsIndex_MemberName,
+		GpbElementInfoMaxLengthsIndex_Name,
+		GpbElementInfoMaxLengthsIndex_TypeFileName,
+		GpbElementInfoMaxLengthsIndex_MemberFileName,
+		GpbElementInfoMaxLengthsIndex_FileName,
+		GpbElementInfoMaxLengthsIndex_LabelName,
+		GpbElementInfoMaxLengthsIndex_Count
+	};
+
+	GpbElementInfoMaxLengths()
+	{
+		::memset(&max_length_, '\0', sizeof(max_length_));
+	}
+
+	std::size_t operator [](GpbElementInfoMaxLengthsIndex idx) const
+	{
+		return(max_length_[idx]);
+	}
+
+/*
+	std::size_t type_name_full_;		//	GpbElementInfo::GetTypeNameFull()
+	std::size_t type_name_;				//	GpbElementInfo::GetTypeName()
+	std::size_t member_name_;			//	GpbElementInfo::GetMemberName()
+	std::size_t name_;					//	GpbElementInfo::GetName()
+	std::size_t type_file_name_;		//	GpbElementInfo::GetTypeFileName()
+	std::size_t member_file_name_;	//	GpbElementInfo::GetMemberFileName()
+	std::size_t file_name_;				//	GpbElementInfo::GetFileName()
+	std::size_t label_name_;			//	GpbElementInfo::GetLabelName()
+*/
+	std::size_t max_length_[GpbElementInfoMaxLengthsIndex_Count];
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 class GpbElementInfo {
 	typedef ::google::protobuf::Descriptor      GPB_Descriptor;
 	typedef ::google::protobuf::FieldDescriptor GPB_FieldDescriptor;
@@ -155,6 +193,10 @@ public:
 	{
 		return(member_list_);
 	}
+
+	GpbElementInfoMaxLengths  GetMaxLengths() const;
+	GpbElementInfoMaxLengths &GetMaxLengths(
+		GpbElementInfoMaxLengths &max_lengths) const;
 
 	GpbElementInfoVector_I SetIntersection(const GpbElementInfo &other) const;
 	GpbElementInfoVector_I SetDifference(const GpbElementInfo &other) const;

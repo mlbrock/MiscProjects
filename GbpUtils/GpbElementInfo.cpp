@@ -320,6 +320,54 @@ GpbElementInfoDescriptors GpbElementInfo::GetDescriptors() const
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+//namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+typedef const char * (GpbElementInfo::*GpbElementInfoNameFunc)() const;
+//	----------------------------------------------------------------------------
+GpbElementInfoNameFunc NameFuncList[] = {
+	&GpbElementInfo::GetTypeNameFull,
+	&GpbElementInfo::GetTypeName,
+	&GpbElementInfo::GetMemberName,
+	&GpbElementInfo::GetName,
+	&GpbElementInfo::GetTypeFileName,
+	&GpbElementInfo::GetMemberFileName,
+	&GpbElementInfo::GetFileName,
+	&GpbElementInfo::GetLabelName
+};
+const std::size_t            NameFuncCount  =
+	sizeof(NameFuncList) / sizeof(NameFuncList[0]);
+//	////////////////////////////////////////////////////////////////////////////
+
+//} // Anonymous namespace
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoMaxLengths GpbElementInfo::GetMaxLengths() const
+{
+	GpbElementInfoMaxLengths max_lengths;
+
+	return(GetMaxLengths(max_lengths));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+GpbElementInfoMaxLengths &GpbElementInfo::GetMaxLengths(
+	GpbElementInfoMaxLengths &max_lengths) const
+{
+	for (std::size_t count_1 = 0; count_1 < NameFuncCount; ++count_1) {
+		const char *tmp_ptr = (this->*NameFuncList[count_1])();
+		max_lengths.max_length_[count_1] =
+			std::max(max_lengths.max_length_[count_1],
+			((tmp_ptr) ? ::strlen(tmp_ptr) : 0));
+	}
+
+	for (std::size_t count_1 = 0; count_1 < GetMemberList().size(); ++count_1)
+		GetMemberList()[count_1].GetMaxLengths(max_lengths);
+
+	return(max_lengths);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
 //	////////////////////////////////////////////////////////////////////////////
@@ -593,25 +641,62 @@ namespace MLB {
 namespace ProtoBufSupport {
 
 //	////////////////////////////////////////////////////////////////////////////
-std::ostream &DumpColumnar(std::ostream &o_str, const GpbElementInfo &datum)
+std::pair<std::size_t, std::size_t> GetEnumValueMaxLengths(
+	const ::google::protobuf::EnumDescriptor &enum_descriptor)
 {
+	std::pair<std::size_t, std::size_t> max_lengths(0, 0);
+
+	for (int count_1 = 0; count_1 < enum_descriptor.value_count(); ++count_1) {
+		char buffer[(sizeof(int) * 2) + 1];
+		::sprintf(buffer, "%d", enum_descriptor.value(count_1)->number());
+		max_lengths.first  = std::max(max_lengths.first,  ::strlen(buffer));
+		max_lengths.second = std::max(max_lengths.second,
+			enum_descriptor.value(count_1)->name().size());
+	}
+
+	return(max_lengths);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::pair<std::size_t, std::size_t> GetEnumValueMaxLengths(
+	const GpbElementInfoDescriptors &descriptors)
+{
+	return((descriptors.enum_descriptor_) ?
+		GetEnumValueMaxLengths(*descriptors.enum_descriptor_) :
+		std::pair<std::size_t, std::size_t>(0, 0));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::ostream &DumpTabular(std::ostream &o_str, const GpbElementInfo &datum,
+	const GpbElementInfoMaxLengths &max_lengths)
+{
+	boost::io::ios_all_saver io_state(o_str);
+
 	if (datum.GetMemberIndex() >= 0) {
 		std::size_t depth     = datum.GetDepth();
 		std::size_t depth_pad = (depth) ? ((depth - 1) * 3) : 0;
 		o_str <<
 			std::right << std::setw(5)  << depth                  << " " <<
 							  std::setw(5)  << datum.GetMemberIndex() << " " <<
-			std::left  << std::setw(8)  << datum.GetLabelName()   << " " <<
-							  std::setw(31) << datum.GetTypeName()    << " " <<
+			std::left  << std::setw(max_lengths[GpbElementInfoMaxLengths::GpbElementInfoMaxLengthsIndex_LabelName])  << datum.GetLabelName()   << " " <<
+							  std::setw(max_lengths[GpbElementInfoMaxLengths::GpbElementInfoMaxLengthsIndex_TypeName]) << datum.GetTypeName()    << " " <<
 							  std::setw(depth_pad) << ""              << " " <<
-			std::left  << std::setw(31) << datum.GetMemberName()  << std::endl;
+			std::left  << std::setw(max_lengths[GpbElementInfoMaxLengths::GpbElementInfoMaxLengthsIndex_MemberName]) << datum.GetMemberName()  << std::endl;
 		if (datum.GetDatumType() == GpbDatumType_Enum) {
-			GpbElementInfoDescriptors descrips(datum.GetDescriptors());
-			for (int count_1 = 0; count_1 <
-				descrips.enum_descriptor_->value_count(); ++count_1) {
+			const ::google::protobuf::EnumDescriptor &enum_descriptor(
+				*datum.GetDescriptors().enum_descriptor_);
+			std::pair<std::size_t, std::size_t>       enum_widths(
+				GetEnumValueMaxLengths(enum_descriptor));
+			for (int count_1 = 0; count_1 < enum_descriptor.value_count();
+				++count_1) {
 				o_str <<
-					std::setw(5 + 1 + 5 + 1 + 8 + 1 + 3) << "" <<
-						descrips.enum_descriptor_->value(count_1)->name() <<
+					std::setw(5 + 1 + 5 + 1 +
+						max_lengths[GpbElementInfoMaxLengths::GpbElementInfoMaxLengthsIndex_LabelName] + 1 + 3) << "" <<
+						std::right << std::setw(enum_widths.first) <<
+						enum_descriptor.value(count_1)->number() << " = " <<
+						std::left << enum_descriptor.value(count_1)->name() <<
 						std::endl;
 			}
 		}
@@ -619,9 +704,18 @@ std::ostream &DumpColumnar(std::ostream &o_str, const GpbElementInfo &datum)
 
 	for (std::size_t count_1 = 0; count_1 < datum.GetMemberList().size();
 		++count_1)
-		DumpColumnar(o_str, datum.GetMemberList()[count_1]);
+		DumpTabular(o_str, datum.GetMemberList()[count_1], max_lengths);
 
 	return(o_str);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::ostream &DumpTabular(std::ostream &o_str, const GpbElementInfo &datum)
+{
+	GpbElementInfoMaxLengths max_lengths(datum.GetMaxLengths());
+
+	return(DumpTabular(o_str, datum, max_lengths));
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -646,7 +740,7 @@ void TEST_EmitDatum(const MLB::ProtoBufSupport::GpbElementInfo &datum)
 {
 #if 1
 //	std::cout << datum << std::endl;
-DumpColumnar(std::cout, datum);
+DumpTabular(std::cout, datum);
 #else
 	datum.TestFileName();
 	std::cout << std::endl;
