@@ -471,17 +471,86 @@ GpbElementInfoPairVector GpbElementInfo::SetIntersectionPair(
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+const char        *EmitColumnText_1[] = {
+	"Member",
+	"Member",
+	"Label",
+	"Member",
+	"Member",
+	"Member",
+	"Type",
+	"Member"
+};
+const char        *EmitColumnText_2[] = {
+	"Depth",
+	"Index",
+	"Name",
+	"Type",
+	"Name",
+	"Full Name",
+	"File Name",
+	"File Name"
+};
+const std::size_t  EmitColumnCount     =
+	sizeof(EmitColumnText_1) / sizeof(EmitColumnText_1[0]);
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
 //	////////////////////////////////////////////////////////////////////////////
 std::ostream &GpbElementInfo::EmitTabular(GpbEmitFlags::EmitFlags emit_flags,
 	std::ostream &o_str) const
 {
-emit_flags = static_cast<GpbEmitFlags::EmitFlags>(emit_flags | GpbEmitFlags::FullName);
+//	CODE NOTE: Test code. To be removed.
+emit_flags = GpbEmitFlags::SetFlag(emit_flags, GpbEmitFlags::FullName);
 
 	GpbElementInfoMaxLengths max_lengths(GetMaxLengths());
 
 	max_lengths.FixMaxLengths(GetMaxDepth(), emit_flags);
 
 	return(EmitTabular(max_lengths, emit_flags, o_str));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::ostream &GpbElementInfo::EmitCsv(GpbEmitFlags::EmitFlags emit_flags,
+	std::ostream &o_str) const
+{
+//	CODE NOTE: Test code. To be removed.
+emit_flags = GpbEmitFlags::SetFlag(emit_flags, GpbEmitFlags::FullName);
+
+	emit_flags = GpbEmitFlags::SetFlag(emit_flags, GpbEmitFlags::Csv);
+
+	std::vector<std::string> head_1(EmitColumnText_1, EmitColumnText_1 + 5);
+	std::vector<std::string> head_2(EmitColumnText_2, EmitColumnText_2 + 5);
+
+	if (emit_flags & GpbEmitFlags::FullName) {
+		head_1.push_back(EmitColumnText_1[5]);
+		head_2.push_back(EmitColumnText_2[5]);
+	}
+
+	if (emit_flags & GpbEmitFlags::TypeFileName) {
+		head_1.push_back(EmitColumnText_1[6]);
+		head_2.push_back(EmitColumnText_2[6]);
+	}
+
+	if (emit_flags & GpbEmitFlags::MemberFileName) {
+		head_1.push_back(EmitColumnText_1[7]);
+		head_2.push_back(EmitColumnText_2[7]);
+	}
+
+	for (std::size_t count_1 = 0; count_1 < head_1.size(); ++count_1)
+		o_str << ((count_1) ? "," : "") << "\"" << head_1[count_1] << "\"";
+	o_str << std::endl;
+
+	for (std::size_t count_1 = 0; count_1 < head_2.size(); ++count_1)
+		o_str << ((count_1) ? "," : "") << "\"" << head_2[count_1] << "\"";
+	o_str << std::endl;
+
+	return(EmitCsv(true, emit_flags, o_str));
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -642,6 +711,93 @@ std::ostream &GpbElementInfo::EmitTabular(
 }
 //	////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string EmitCsvHelper(bool pad_flag, std::size_t pad_width,
+	const char *in_string)
+{
+	std::ostringstream o_str;
+
+	o_str << "\"";
+
+	if (pad_flag)
+		o_str << std::setw(pad_width) << "";
+
+	o_str << in_string << "\"";
+
+	return(o_str.str());
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string EmitCsvHelper(const char *in_string)
+{
+	return(EmitCsvHelper(false, 0, in_string));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
+std::string EmitCsvHelper(const std::string &in_string)
+{
+	return(EmitCsvHelper(in_string.c_str()));
+}
+//	////////////////////////////////////////////////////////////////////////////
+
+} // Anonymous namespace
+
+//	////////////////////////////////////////////////////////////////////////////
+std::ostream &GpbElementInfo::EmitCsv(bool /* disambiguation */, 
+	GpbEmitFlags::EmitFlags emit_flags, std::ostream &o_str) const
+{
+	boost::io::ios_all_saver io_state(o_str);
+
+	if (GetMemberIndex() >= 0) {
+		std::size_t depth     = GetDepth();
+		std::size_t depth_pad = (depth) ? ((depth - 1) * 3) : 0;
+		o_str <<
+			depth                  << "," <<
+			GetMemberIndex() << "," <<
+			EmitCsvHelper(GetLabelName())  << "," <<
+			EmitCsvHelper((emit_flags & GpbEmitFlags::IndentType) > 0,
+				depth_pad, GetTypeName())    << "," <<
+			EmitCsvHelper((emit_flags & GpbEmitFlags::IndentName) > 0,
+				depth_pad, GetMemberName());
+			if (emit_flags & GpbEmitFlags::FullName)
+				o_str << "," <<
+					EmitCsvHelper(GetNameFull());
+			if (emit_flags & GpbEmitFlags::TypeFileName)
+				o_str << "," <<
+					EmitCsvHelper(GetTypeFileName());
+			if (emit_flags & GpbEmitFlags::MemberFileName)
+				o_str << "," <<
+					EmitCsvHelper(GetMemberFileName());
+			o_str << std::endl;
+		if ((emit_flags & GpbEmitFlags::EnumValues) &&
+			(GetDatumType() == GpbDatumType_Enum)) {
+			const ::google::protobuf::EnumDescriptor &enum_descriptor(
+				*GetDescriptors().enum_descriptor_);
+			std::pair<std::size_t, std::size_t>       enum_widths(
+				GetEnumValueMaxLengths(enum_descriptor));
+			for (int count_1 = 0; count_1 < enum_descriptor.value_count();
+				++count_1)
+				o_str <<
+					",,,\"   " <<
+					std::right << std::setw(enum_widths.first) <<
+					enum_descriptor.value(count_1)->number() << " = " <<
+					std::left << enum_descriptor.value(count_1)->name() << "\"" <<
+					std::endl;
+		}
+	}
+
+	for (std::size_t count_1 = 0; count_1 < GetMemberList().size();
+		++count_1)
+		member_list_[count_1].EmitCsv(true, emit_flags, o_str);
+
+	return(o_str);
+}
+//	////////////////////////////////////////////////////////////////////////////
+
 //	////////////////////////////////////////////////////////////////////////////
 const GpbElementInfo::GPB_FileDescriptor
 	*GpbElementInfo::DetermineFileDescriptorPtr(
@@ -704,59 +860,6 @@ std::ostream & operator << (std::ostream &o_str, const GpbElementInfo &datum)
 		o_str << std::endl << datum.member_list_[count_1];
 
 	return(o_str);
-/*
-	o_str << std::setw(datum.depth_ * 3) << "" << "{"
-		"\"Depth\": "            << datum.depth_              << ", "
-		"\"TypeNameFull\": \""   << datum.GetTypeNameFull()   << "\", "
-		"\"TypeName\": \""       << datum.GetTypeName()       << "\", "
-		"\"MemberName\": \""     << datum.GetMemberName()     << "\", "
-		"\"Label\": "            << datum.GetLabel()          << ", "
-		"\"LabelName\": \""      << datum.GetLabelName()      << "\", "
-		"\"TypeFileName\": \""   << datum.GetTypeFileName()   << "\", "
-		"\"MemberFileName\": \"" << datum.GetMemberFileName() << "\"";
-
-	for (std::size_t count_1 = 0; count_1 < datum.member_list_.size();
-		++count_1)
-		o_str << std::endl << datum.member_list_[count_1];
-
-	o_str << "}";
-
-	return(o_str);
-*/
-/*
-	std::string pad;
-
-	{
-		std::ostringstream tmp_o_str;
-		tmp_o_str << std::setw((datum.depth_ + 1) * 3) << "";
-		pad = tmp_o_str.str();
-	}
-
-	o_str << std::setw(datum.depth_ * 3) << "" << "{\n"
-		<< pad << "\"Depth\": "            << datum.depth_              << ",\n"
-		<< pad << "\"TypeNameFull\": \""   << datum.GetTypeNameFull()   << "\",\n"
-		<< pad << "\"TypeName\": \""       << datum.GetTypeName()       << "\",\n"
-		<< pad << "\"MemberName\": \""     << datum.GetMemberName()     << "\",\n"
-		<< pad << "\"Label\": "            << datum.GetLabel()          << ",\n"
-		<< pad << "\"LabelName\": \""      << datum.GetLabelName()      << "\",\n"
-		<< pad << "\"TypeFileName\": \""   << datum.GetTypeFileName()   << "\",\n"
-		<< pad << "\"MemberFileName\": \"" << datum.GetMemberFileName() << "\"\n";
-
-	o_str << pad << "\"MemberList\": [\n";
-
-	for (std::size_t count_1 = 0; count_1 < datum.member_list_.size();
-		++count_1)
-		o_str << ((count_1) ? ",\n" : "") << datum.member_list_[count_1];
-
-	if (datum.member_list_.empty())
-		o_str << "]\n";
-	else
-		o_str << "\n" << pad << "]\n";
-
-	o_str << std::setw(datum.depth_ * 3) << "" << "}";
-
-	return(o_str);
-*/
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -787,6 +890,7 @@ void TEST_EmitDatum(const MLB::ProtoBufSupport::GpbElementInfo &datum)
 #if 1
 //	std::cout << datum << std::endl;
 	datum.EmitTabular();
+	datum.EmitCsv();
 #else
 	datum.TestFileName();
 	std::cout << std::endl;

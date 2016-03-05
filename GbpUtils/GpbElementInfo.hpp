@@ -90,6 +90,16 @@ struct GpbEmitFlags {
 		Default        = IndentType | IndentName,
 		Mask           = (Maximum | (Maximum - 1))
 	};
+
+	static inline EmitFlags SetFlag(EmitFlags flags, EmitFlags set_flag)
+	{
+		return(static_cast<EmitFlags>(flags | set_flag));
+	}
+
+	static inline EmitFlags ClearFlag(EmitFlags flags, EmitFlags clear_flag)
+	{
+		return(static_cast<EmitFlags>(flags & ~clear_flag));
+	}
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -135,16 +145,6 @@ struct GpbElementInfoMaxLengths {
 		return(max_length_[idx]);
 	}
 
-/*
-	std::size_t type_name_full_;		//	GpbElementInfo::GetTypeNameFull()
-	std::size_t type_name_;				//	GpbElementInfo::GetTypeName()
-	std::size_t member_name_;			//	GpbElementInfo::GetMemberName()
-	std::size_t name_;					//	GpbElementInfo::GetName()
-	std::size_t type_file_name_;		//	GpbElementInfo::GetTypeFileName()
-	std::size_t member_file_name_;	//	GpbElementInfo::GetMemberFileName()
-	std::size_t file_name_;				//	GpbElementInfo::GetFileName()
-	std::size_t label_name_;			//	GpbElementInfo::GetLabelName()
-*/
 	std::size_t max_length_[Count];
 };
 //	////////////////////////////////////////////////////////////////////////////
@@ -246,6 +246,9 @@ public:
 	std::ostream &EmitTabular(
 		GpbEmitFlags::EmitFlags emit_flags = GpbEmitFlags::Default,
 		std::ostream &o_str = std::cout) const;
+	std::ostream &EmitCsv(
+		GpbEmitFlags::EmitFlags emit_flags = GpbEmitFlags::Default,
+		std::ostream &o_str = std::cout) const;
 
 	static std::string SourceLocationToString(
 		const ::google::protobuf::SourceLocation &datum);
@@ -277,6 +280,9 @@ private:
 		std::size_t depth, int member_index);
 
 	std::ostream &EmitTabular(const GpbElementInfoMaxLengths &max_lengths,
+		GpbEmitFlags::EmitFlags emit_flags = GpbEmitFlags::Default,
+		std::ostream &o_str = std::cout) const;
+	std::ostream &EmitCsv(bool /* disambiguation */,
 		GpbEmitFlags::EmitFlags emit_flags = GpbEmitFlags::Default,
 		std::ostream &o_str = std::cout) const;
 
