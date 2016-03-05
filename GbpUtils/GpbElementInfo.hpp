@@ -27,6 +27,8 @@
 //	Include necessary header files...
 //	////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>	//	Needed by GpbElementInfo class methods decls.
+
 #ifdef _MSC_VER
 # pragma warning(push)
 # pragma warning(disable:4100 4512)
@@ -241,6 +243,10 @@ public:
 	GpbElementInfoPairVector_I SetIntersectionPair(
 		const GpbElementInfo &other) const;
 
+	std::ostream &EmitTabular(
+		GpbEmitFlags::EmitFlags emit_flags = GpbEmitFlags::Default,
+		std::ostream &o_str = std::cout) const;
+
 	static std::string SourceLocationToString(
 		const ::google::protobuf::SourceLocation &datum);
 
@@ -269,6 +275,10 @@ private:
 	explicit GpbElementInfo(const GPB_Descriptor *descriptor,
 		const GPB_FieldDescriptor *field_descriptor,
 		std::size_t depth, int member_index);
+
+	std::ostream &EmitTabular(const GpbElementInfoMaxLengths &max_lengths,
+		GpbEmitFlags::EmitFlags emit_flags = GpbEmitFlags::Default,
+		std::ostream &o_str = std::cout) const;
 
 	static const GPB_FileDescriptor *DetermineFileDescriptorPtr(
 		const GPB_Descriptor *descriptor,
