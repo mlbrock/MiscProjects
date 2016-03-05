@@ -74,17 +74,36 @@ struct GpbElementInfoDescriptors {
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
+struct GpbEmitFlags {
+	enum EmitFlags {
+		None           = 0x0000,
+		Csv            = 0x0001,
+		IndentType     = 0x0002,
+		IndentName     = 0x0004,
+		EnumValues     = 0x0008,
+		FullName       = 0x0010,
+		TypeFileName   = 0x0020,
+		MemberFileName = 0x0040,
+		Maximum        = MemberFileName,
+		Default        = IndentType | IndentName,
+		Mask           = (Maximum | (Maximum - 1))
+	};
+};
+//	////////////////////////////////////////////////////////////////////////////
+
+//	////////////////////////////////////////////////////////////////////////////
 struct GpbElementInfoMaxLengths {
-	enum GpbElementInfoMaxLengthsIndex {
-		GpbElementInfoMaxLengthsIndex_TypeNameFull,
-		GpbElementInfoMaxLengthsIndex_TypeName,
-		GpbElementInfoMaxLengthsIndex_MemberName,
-		GpbElementInfoMaxLengthsIndex_Name,
-		GpbElementInfoMaxLengthsIndex_TypeFileName,
-		GpbElementInfoMaxLengthsIndex_MemberFileName,
-		GpbElementInfoMaxLengthsIndex_FileName,
-		GpbElementInfoMaxLengthsIndex_LabelName,
-		GpbElementInfoMaxLengthsIndex_Count
+	enum MaxLengthsIndex {
+		TypeNameFull,
+		TypeName,
+		MemberName,
+		Name,
+		NameFull,
+		TypeFileName,
+		MemberFileName,
+		FileName,
+		LabelName,
+		Count
 	};
 
 	GpbElementInfoMaxLengths()
@@ -92,7 +111,24 @@ struct GpbElementInfoMaxLengths {
 		::memset(&max_length_, '\0', sizeof(max_length_));
 	}
 
-	std::size_t operator [](GpbElementInfoMaxLengthsIndex idx) const
+	void FixMaxLengths(std::size_t max_depth,
+		GpbEmitFlags::EmitFlags emit_flags)
+	{
+		if (max_depth-- > 1) {
+			max_depth *= 3;
+			max_length_[TypeName]   +=
+				(emit_flags & GpbEmitFlags::IndentType) ? max_depth : 0;
+			max_length_[MemberName] +=
+				(emit_flags & GpbEmitFlags::IndentName) ? max_depth : 0;
+		}
+	}
+
+	const std::size_t & operator [](MaxLengthsIndex idx) const
+	{
+		return(max_length_[idx]);
+	}
+
+	std::size_t & operator [](MaxLengthsIndex idx)
 	{
 		return(max_length_[idx]);
 	}
@@ -107,7 +143,7 @@ struct GpbElementInfoMaxLengths {
 	std::size_t file_name_;				//	GpbElementInfo::GetFileName()
 	std::size_t label_name_;			//	GpbElementInfo::GetLabelName()
 */
-	std::size_t max_length_[GpbElementInfoMaxLengthsIndex_Count];
+	std::size_t max_length_[Count];
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -120,7 +156,6 @@ class GpbElementInfo {
 	typedef ::google::protobuf::Reflection      GPB_Reflection;
 public:
 	typedef std::vector<GpbElementInfo>               GpbElementInfoVector_I;
-
 	typedef std::pair<GpbElementInfo, GpbElementInfo> GpbElementInfoPair_I;
 	typedef std::vector<GpbElementInfoPair_I>         GpbElementInfoPairVector_I;
 
@@ -161,6 +196,8 @@ public:
 	const char *GetMemberName() const;
 
 	const char *GetName() const;
+
+	const char *GetNameFull() const;
 
 	const char *GetTypeFileName() const;
 
