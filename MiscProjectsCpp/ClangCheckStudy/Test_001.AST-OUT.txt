@@ -1,0 +1,106 @@
+// ////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////
+// File Name: Test_001.cpp
+// ////////////////////////////////////////////////////////////////////////////
+TranslationUnitDecl 0x2082120 <<invalid sloc>>
+|-TypedefDecl 0x2082660 <<invalid sloc>> __int128_t '__int128'
+|-TypedefDecl 0x20826c0 <<invalid sloc>> __uint128_t 'unsigned __int128'
+|-TypedefDecl 0x2082a80 <<invalid sloc>> __builtin_va_list '__va_list_tag [1]'
+|-TypedefDecl 0x2082ae0 <Test_001.cpp:18:1, col:22> MyUInt 'unsigned int'
+|-FunctionDecl 0x2082c00 <line:22:1, col:33> AFunction_001 'int (int)'
+| `-ParmVarDecl 0x2082b40 <col:19, col:23> some_value 'int'
+|-FunctionDecl 0x2082d60 <line:23:1, col:38> AFunction_002 'int (int)'
+| `-ParmVarDecl 0x2082cc0 <col:19, col:36> some_value 'int'
+|   `-IntegerLiteral 0x2082d18 <col:36> 'int' 42
+|-CXXRecordDecl 0x20ca950 <line:27:1, line:56:1> struct SomeClass definition
+| |-CXXRecordDecl 0x20caa60 <line:27:1, col:8> struct SomeClass
+| |-CXXConstructorDecl 0x20cac60 <line:28:2, line:32:2> SomeClass 'void (int, double)'
+| | |-ParmVarDecl 0x20cab00 <line:28:12, col:28> int_value 'int'
+| | | `-IntegerLiteral 0x20cb318 <col:28> 'int' 42
+| | |-ParmVarDecl 0x20cab70 <col:32, col:54> double_value 'double'
+| | | `-FloatingLiteral 0x20cb338 <col:54> 'double' 4.350000e+01
+| | |-CXXCtorInitializer Field 0x20cb270 'int_value_' 'int'
+| | | |-ImplicitCastExpr 0x20cb3e0 <line:29:15> 'int' <LValueToRValue>
+| | | | `-DeclRefExpr 0x20cb388 <col:15> 'int' lvalue ParmVar 0x20cab00 'int_value' 'int'
+| | |-CXXCtorInitializer Field 0x20cb2d0 'double_value_' 'double'
+| | | |-ImplicitCastExpr 0x20cb480 <line:30:18> 'double' <LValueToRValue>
+| | | | `-DeclRefExpr 0x20cb428 <col:18> 'double' lvalue ParmVar 0x20cab70 'double_value' 'double'
+| | `-CompoundStmt 0x20cb4d8 <line:31:2, line:32:2>
+| |-CXXDestructorDecl 0x20cada0 <line:34:2, line:37:2> ~SomeClass 'void (void)'
+| | `-CompoundStmt 0x20cb5d0 <line:35:2, line:37:2>
+| |   `-CompoundAssignOperator 0x20cb598 <line:36:3, col:17> 'int' lvalue '^=' ComputeLHSTy='int' ComputeResultTy='int'
+| |     |-MemberExpr 0x20cb508 <col:3> 'int' lvalue ->int_value_ 0x20cb270
+| |     | `-CXXThisExpr 0x20cb4f0 <col:3> 'struct SomeClass *' this
+| |     `-ImplicitCastExpr 0x20cb580 <col:17> 'int' <LValueToRValue>
+| |       `-MemberExpr 0x20cb550 <col:17> 'int' lvalue ->int_value_ 0x20cb270
+| |         `-CXXThisExpr 0x20cb538 <col:17> 'struct SomeClass *' this
+| |-CXXMethodDecl 0x20caf50 <line:39:2, line:42:2> operator< '_Bool (const struct SomeClass &) const'
+| | |-ParmVarDecl 0x20cae90 <line:39:19, col:36> other 'const struct SomeClass &'
+| | `-CompoundStmt 0x20cb750 <line:40:2, line:42:2>
+| |   `-ReturnStmt 0x20cb730 <line:41:3, col:39>
+| |     `-ParenExpr 0x20cb710 <col:9, col:39> '_Bool'
+| |       `-BinaryOperator 0x20cb6e8 <col:10, col:29> '_Bool' '<'
+| |         |-ImplicitCastExpr 0x20cb6b8 <col:10> 'int' <LValueToRValue>
+| |         | `-MemberExpr 0x20cb630 <col:10> 'const int' lvalue ->int_value_ 0x20cb270
+| |         |   `-CXXThisExpr 0x20cb618 <col:10> 'const struct SomeClass *' this
+| |         `-ImplicitCastExpr 0x20cb6d0 <col:23, col:29> 'int' <LValueToRValue>
+| |           `-MemberExpr 0x20cb688 <col:23, col:29> 'const int' lvalue .int_value_ 0x20cb270
+| |             `-DeclRefExpr 0x20cb660 <col:23> 'const struct SomeClass' lvalue ParmVar 0x20cae90 'other' 'const struct SomeClass &'
+| |-CXXMethodDecl 0x20cb090 <line:44:2, line:47:2> GetDoubleRef 'const double &(void) const'
+| | `-CompoundStmt 0x20cb7f8 <line:45:2, line:47:2>
+| |   `-ReturnStmt 0x20cb7d8 <line:46:3, col:23>
+| |     `-ParenExpr 0x20cb7b8 <col:9, col:23> 'const double' lvalue
+| |       `-MemberExpr 0x20cb788 <col:10> 'const double' lvalue ->double_value_ 0x20cb2d0
+| |         `-CXXThisExpr 0x20cb770 <col:10> 'const struct SomeClass *' this
+| |-CXXMethodDecl 0x20cb1c0 <line:49:2, line:52:2> GetDoubleRef 'double &(void)'
+| | `-CompoundStmt 0x20cb8a0 <line:50:2, line:52:2>
+| |   `-ReturnStmt 0x20cb880 <line:51:3, col:23>
+| |     `-ParenExpr 0x20cb860 <col:9, col:23> 'double' lvalue
+| |       `-MemberExpr 0x20cb830 <col:10> 'double' lvalue ->double_value_ 0x20cb2d0
+| |         `-CXXThisExpr 0x20cb818 <col:10> 'struct SomeClass *' this
+| |-FieldDecl 0x20cb270 <line:54:2, col:9> int_value_ 'int'
+| |-FieldDecl 0x20cb2d0 <line:55:2, col:9> double_value_ 'double'
+| `-CXXConstructorDecl 0x20d36a0 <line:27:8> SomeClass 'void (const struct SomeClass &)' inline noexcept-unevaluated 0x20d36a0
+|   `-ParmVarDecl 0x20d37e0 <col:8> 'const struct SomeClass &'
+|-CXXRecordDecl 0x20d2f60 <line:60:1, line:73:1> struct DescendantClass definition
+| |-public 'struct SomeClass'
+| |-CXXRecordDecl 0x20d30b0 <line:60:1, col:8> struct DescendantClass
+| |-CXXConstructorDecl 0x20d3270 <line:61:2, line:65:2> DescendantClass 'void (int, double)'
+| | |-ParmVarDecl 0x20d3150 <line:61:18, col:34> int_value 'int'
+| | | `-IntegerLiteral 0x20d3598 <col:34> 'int' 42
+| | |-ParmVarDecl 0x20d31c0 <col:38, col:60> double_value 'double'
+| | | `-FloatingLiteral 0x20d35b8 <col:60> 'double' 4.350000e+01
+| | |-CXXCtorInitializer 'struct SomeClass'
+| | | |-CXXConstructExpr 0x20d3870 <line:62:4, col:37> 'struct SomeClass' 'void (int, double)'
+| | | | |-ImplicitCastExpr 0x20d3840 <col:14> 'int' <LValueToRValue>
+| | | | | `-DeclRefExpr 0x20d3608 <col:14> 'int' lvalue ParmVar 0x20d3150 'int_value' 'int'
+| | | | `-ImplicitCastExpr 0x20d3858 <col:25> 'double' <LValueToRValue>
+| | | |   `-DeclRefExpr 0x20d3630 <col:25> 'double' lvalue ParmVar 0x20d31c0 'double_value' 'double'
+| | |-CXXCtorInitializer Field 0x20d3440 'mo_data_' 'double'
+| | | |-FloatingLiteral 0x20d38d8 <line:63:13> 'double' 1.000000e+02
+| | `-CompoundStmt 0x20d3968 <line:64:2, line:65:2>
+| |-CXXMethodDecl 0x20d3390 <line:67:2, line:70:2> GetMoData 'float (void) const'
+| | `-CompoundStmt 0x20d3bb8 <line:68:2, line:70:2>
+| |   `-ReturnStmt 0x20d3b98 <line:69:3, col:35>
+| |     `-ImplicitCastExpr 0x20d3b80 <col:9, col:35> 'float' <FloatingCast>
+| |       `-ParenExpr 0x20d3b60 <col:9, col:35> 'double'
+| |         `-BinaryOperator 0x20d3b38 <col:10, col:27> 'double' '+'
+| |           |-ImplicitCastExpr 0x20d3b08 <col:10, col:23> 'double' <LValueToRValue>
+| |           | `-CXXMemberCallExpr 0x20d3a78 <col:10, col:23> 'const double' lvalue
+| |           |   `-MemberExpr 0x20d3a48 <col:10> '<bound member function type>' ->GetDoubleRef 0x20cb090
+| |           |     `-ImplicitCastExpr 0x20d3aa0 <col:10> 'const struct SomeClass *' <UncheckedDerivedToBase (SomeClass)>
+| |           |       `-CXXThisExpr 0x20d3a30 <col:10> 'const struct DescendantClass *' this
+| |           `-ImplicitCastExpr 0x20d3b20 <col:27> 'double' <LValueToRValue>
+| |             `-MemberExpr 0x20d3ad8 <col:27> 'const double' lvalue ->mo_data_ 0x20d3440
+| |               `-CXXThisExpr 0x20d3ac0 <col:27> 'const struct DescendantClass *' this
+| |-FieldDecl 0x20d3440 <line:72:2, col:9> mo_data_ 'double'
+| `-CXXDestructorDecl 0x20d34b0 <line:60:8> ~DescendantClass 'void (void)' inline noexcept-unevaluated 0x20d34b0
+`-ClassTemplateDecl 0x20d3dd0 <line:77:1, line:80:1> SomeWrapper
+  |-TemplateTypeParmDecl 0x20d3be0 <line:77:11, col:20> typename T
+  |-TemplateTypeParmDecl 0x20d3c80 <col:23, col:32> typename U
+  `-CXXRecordDecl 0x20d3d40 <col:35, line:80:1> struct SomeWrapper definition
+    |-CXXRecordDecl 0x20d56e0 <line:77:35, col:42> struct SomeWrapper
+    |-FieldDecl 0x20d5780 <line:78:2, col:4> datum_t_ 'T'
+    `-FieldDecl 0x20d57e0 <line:79:2, col:4> datum_u_ 'U'
+// ////////////////////////////////////////////////////////////////////////////
+
