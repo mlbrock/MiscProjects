@@ -18,15 +18,35 @@ namespace MLB {
 
 namespace XllInterface {
 
+//	CODE NOTE: Use short name = Xli?
+
 //	////////////////////////////////////////////////////////////////////////////
+#ifdef ExcelInterface_4
+typedef WORD           XlOperType;
+typedef double         XlOperNum;
+typedef char           XlOperChar;
+typedef char          *XlOperStr;
+typedef Native_UInt8   XlOperStrLen;
+typedef WORD           XlOperBool;
+typedef WORD           XlOperErr;
+typedef Native_SInt16  XlOperWInt;
+typedef XLREF12        XlOperSRefItem;
+typedef XLMREF12       XlOperMRefItem;
+typedef WORD           XlOperRows;
+typedef WORD           XlOperCols;
+typedef FP             XlOperFp;
+typedef Native_UInt16  XlOperFpRow;
+typedef Native_UInt16  XlOperFpCol;
+typedef IDSHEET        XlOperSheetId;
+#else
 typedef DWORD          XlOperType;
 typedef double         XlOperNum;
 typedef XCHAR          XlOperChar;
 typedef XCHAR         *XlOperStr;
 typedef Native_SInt16  XlOperStrLen;
 typedef BOOL           XlOperBool;
-typedef int            XlOperErr;
-typedef int            XlOperWInt;
+typedef Native_SInt32  XlOperErr;
+typedef Native_SInt32  XlOperWInt;
 typedef XLREF12        XlOperSRefItem;
 typedef XLMREF12       XlOperMRefItem;
 typedef RW             XlOperRows;
@@ -34,6 +54,8 @@ typedef COL            XlOperCols;
 typedef FP12           XlOperFp;
 typedef INT32          XlOperFpRow;
 typedef INT32          XlOperFpCol;
+typedef IDSHEET        XlOperSheetId;
+#endif // #ifdef ExcelInterface_4
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
