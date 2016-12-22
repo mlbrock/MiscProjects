@@ -32,10 +32,13 @@
 
 #include <pcap.h>
 
-//#include <exception>
 #include <stdexcept>
 #include <ostream>
 #include <sstream>
+
+#include <net/ethernet.h>			//	ether_header
+#include <netinet/ip.h>				//	ip	--- for IP_HEADER_STRUCT.ip_hl * 4
+#include <netinet/udp.h>			//	udphdr
 
 #include <strings.h>
 
@@ -52,10 +55,55 @@ typedef boost::shared_ptr<pcap_t> pcap_t_SPtr;
 class PacketProcessorBase {
 public:
 
-	virtual void DoCallback(const struct pcap_pkthdr * /* h */,
-		const u_char * /* bytes */)
+	virtual void DoCallback(const struct pcap_pkthdr *header_ptr,
+		const u_char *packet_ptr)
 	{
-		std::cout << "DoCallback():\n";
+		const u_char       *packet_data_ptr  = packet_ptr;
+		const ether_header *ether_header_ptr =
+			reinterpret_cast<const ether_header *>(packet_data_ptr);
+		std::size_t         remaining_length =
+			static_cast<std::size_t>(header_ptr->caplen);
+
+		if (remaining_length < sizeof(ether_header))
+			throw std::runtime_error("Remaining capture length < Ethernet header "
+				"structure length.");
+
+		remaining_length -= sizeof(ether_header);
+		packet_data_ptr  += sizeof(ether_header);
+
+		if (remaining_length < sizeof(ip))
+			throw std::runtime_error("Remaining capture length < IP header "
+				"structure length.");
+
+		const ip *ip_header_ptr = reinterpret_cast<const ip *>(packet_data_ptr);
+
+//		remaining_length -= sizeof(ip);
+//		packet_data_ptr  += sizeof(ip);
+
+		std::size_t ip_header_length = ip_header_ptr->ip_hl * 4;
+
+		if (remaining_length < ip_header_length)
+			throw std::runtime_error("Remaining capture length < indicated "
+				"length of the IP header.");
+
+		if (ip_header_ptr->ip_p != IPPROTO_UDP)
+			throw std::runtime_error("Captured packet IP protocol is not UDP.");
+
+		remaining_length -= ip_header_length;
+		packet_data_ptr  += ip_header_length;
+
+		if (remaining_length < sizeof(udphdr))
+			throw std::runtime_error("Remaining capture length < UDP header "
+				"structure length.");
+
+		const udphdr *udp_header_ptr =
+			reinterpret_cast<const udphdr *>(packet_data_ptr);
+
+		remaining_length -= sizeof(udphdr);
+		packet_data_ptr  += sizeof(udphdr);
+
+		std::cout << "DoCallback(): Payload length = " << remaining_length <<
+			"\n";
 	}
 
 	static void MyHackyPCapCallback(::u_char *user,
