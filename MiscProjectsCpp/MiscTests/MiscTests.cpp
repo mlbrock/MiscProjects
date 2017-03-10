@@ -3,7 +3,7 @@
 //	MLB Test Logic
 // ////////////////////////////////////////////////////////////////////////////
 /*
-	File Name			:	MiscTests.cpp
+	File Name			:	MiscTests.hpp
 
 	File Description	:	A miscellany of C++ tests.
 
@@ -31,7 +31,6 @@
 #include <exception>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
 #include <list>
 #include <sstream>
 #include <stdexcept>
@@ -98,125 +97,7 @@ void EmitTextAndSep(const std::string &text, char sep_char = '-')
 }
 //	////////////////////////////////////////////////////////////////////////////
 
-//	////////////////////////////////////////////////////////////////////////////
-std::string FixFuncName(const char *in_func_name)
-{
-	std::string func_name;
-
-	if ((!in_func_name) || (!(*in_func_name)))
-		func_name = "***UNKNOWN-NAMESPACE***::***UNKNOWN-FUNCTION***";
-	else {
-		func_name = in_func_name;
-		std::size_t found_pos;
-		if ((found_pos = func_name.rfind(' ')) != std::string::npos)
-			func_name = func_name.substr(found_pos + 1);
-		if ((found_pos = func_name.rfind('(')) != std::string::npos)
-			func_name = func_name.substr(0, found_pos);
-	}
-
-	return(func_name);
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-class EmitSepRaii {
-public:
-	explicit EmitSepRaii(char sep_char = '=', std::streamsize sep_width = 79)
-		:sep_char_(sep_char)
-		,sep_width_(sep_width)
-		,nl_flag_(true)
-	{
-	}
-
-	~EmitSepRaii()
-	{
-		EmitSep(sep_char_, sep_width_, nl_flag_);
-		std::cout << std::endl;
-	}
-
-private:
-	char            sep_char_;
-	std::streamsize sep_width_;
-	bool            nl_flag_;
-};
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-#ifdef _MSC_VER
-# define MLB_MISC_TESTS_RUN_TEST_FUNC_NAME	__FUNCSIG__
-#else
-# define MLB_MISC_TESTS_RUN_TEST_FUNC_NAME	__PRETTY_FUNCTION__
-#endif // #ifdef _MSC_VER
-//	----------------------------------------------------------------------------
-#define MLB_MISC_TESTS_RUN_TEST_OPEN												\
-	EmitSepRaii my_function_local_exit_func_emit_sep;							\
-	{																							\
-		EmitSep('=');																		\
-		EmitSep('=');																		\
-		EmitTextAndSep(FixFuncName(MLB_MISC_TESTS_RUN_TEST_FUNC_NAME));	\
-	}
-//	////////////////////////////////////////////////////////////////////////////
-
 } // Anonymous namespace
-
-namespace TEST_RadixCharsInfo {
-
-//	////////////////////////////////////////////////////////////////////////////
-template <std::size_t Radix> struct RadixChars_INVALID {
-	static const std::size_t value = 0;
-};
-//	----------------------------------------------------------------------------
-template <std::size_t Radix> struct RadixChars_0_9 {
-	static const std::size_t value  = (Radix > 10) ? 10 : Radix;
-	static const std::size_t remain = Radix - value;
-};
-//	----------------------------------------------------------------------------
-template <std::size_t Radix> struct RadixChars_A_Z {
-	static const std::size_t value  = (RadixChars_0_9<Radix>::remain > 26) ?
-		26 : RadixChars_0_9<Radix>::remain;
-	static const std::size_t remain = RadixChars_0_9<Radix>::remain - value;
-};
-//	----------------------------------------------------------------------------
-template <std::size_t Radix> struct RadixChars_a_z {
-	static const std::size_t value  = (RadixChars_A_Z<Radix>::remain > 26) ?
-		RadixChars_INVALID<Radix>::value : RadixChars_A_Z<Radix>::remain;
-	static const std::size_t remain = RadixChars_0_9<Radix>::remain - value;
-};
-//	----------------------------------------------------------------------------
-template <std::size_t SomeRadix> void TEST_GetRadixInfo()
-{
-	RadixChars_0_9<SomeRadix> chars_0_9;
-	RadixChars_A_Z<SomeRadix> chars_A_Z;
-	RadixChars_a_z<SomeRadix> chars_a_z;
-
-	std::cout
-		<< "Radix " << std::setw(2) << SomeRadix
-		<<         ": 0-9 = " << std::setw(2) << chars_0_9.value << "\n"
-		<< "        : A-Z = " << std::setw(2) << chars_A_Z.value << "\n"
-		<< "        : a-z = " << std::setw(2) << chars_a_z.value << "\n";
-}
-//	----------------------------------------------------------------------------
-void RunTest()
-{
-	EmitSep('=');
-	EmitSep('=');
-	EmitTextAndSep("TEST_RadixCharsInfo::RunTest()");
-
-	TEST_GetRadixInfo< 2>();
-	TEST_GetRadixInfo< 8>();
-	TEST_GetRadixInfo<10>();
-	TEST_GetRadixInfo<16>();
-	TEST_GetRadixInfo<36>();
-	TEST_GetRadixInfo<60>();
-	TEST_GetRadixInfo<62>();
-
-	EmitSep('=');
-
-	std::cout << std::endl;
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-} // TEST_RadixCharsInfo
 
 namespace TEST_RuntimeStaticCastOverhead {
 
@@ -326,31 +207,22 @@ void RunTest()
 namespace TEST_LifetimeOfLocalsDeclaredInElseIfBlocks {
 
 //	////////////////////////////////////////////////////////////////////////////
-void DoBlockTest()
+void RunTest()
 {
 	int rand_value = ::rand();
 
 	if (rand_value == 100) {
-		std::cout << "BLOCK if     : rand_value == 100";
+		std::cout << "rand_value == 100";
 	}
 	else if (int my_tmp = 42 + rand_value) {
 		my_tmp -= rand_value;
-		std::cout << "BLOCK else if: rand_value != 100: A: my_tmp = " << my_tmp;
+		std::cout << "rand_value != 100: A: my_tmp = " << my_tmp;
 	}
 	else {
-		std::cout << "BLOCK else   : rand_value != 100: B: my_tmp = " << my_tmp;
+		std::cout << "rand_value != 100: B: my_tmp = " << my_tmp;
 	}
 
 	std::cout << std::endl;
-}
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-void RunTest()
-{
-	MLB_MISC_TESTS_RUN_TEST_OPEN;
-
-	DoBlockTest();
 }
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -1262,7 +1134,7 @@ void RunTest()
 namespace TEST_ZeroStorageBitCount {
 
 //	////////////////////////////////////////////////////////////////////////////
-std::size_t Masks[] = {
+size_t Masks[] = {
 	0x55555555,
 	0x33333333,
 	0x0F0F0F0F,
@@ -1274,11 +1146,10 @@ std::size_t Masks[] = {
 //	////////////////////////////////////////////////////////////////////////////
 void DumpMasks()
 {
-	for (std::size_t count_1 = 0, shift = 1; count_1 < 5; ++count_1, shift *= 2)
+	for (size_t count_1 = 0, shift = 1; count_1 < 5; ++count_1, shift *= 2)
 		std::cout << count_1 << ": 0x" << std::hex << std::setfill('0') <<
 			std::setw(8) << Masks[count_1] << " = " << std::setw(32) <<
-			std::bitset<sizeof(Masks[0]) * CHAR_BIT>(
-			static_cast<unsigned long long>(Masks[count_1])) <<
+			std::bitset<sizeof(Masks[0]) * CHAR_BIT>(Masks[count_1]) <<
 			std::dec << std::setfill(' ') << std::endl;
 }
 //	////////////////////////////////////////////////////////////////////////////
@@ -3858,13 +3729,74 @@ void RunTest()
 
 } // namespace TEST_DominicConner
 
+#include <boost/tti/has_data.hpp>
+#include <boost/tti/has_member_data.hpp>
+
+//	////////////////////////////////////////////////////////////////////////////
+struct SomeMessage_1 {
+	unsigned int u_int_32_;
+	signed int   s_int_32_;
+};
+//	----------------------------------------------------------------------------
+struct SomeMessage_2 {
+	signed int   s_int_32_;
+	unsigned int u_int_32_;
+};
+//	----------------------------------------------------------------------------
+#define TEST_TTI_Test_001(param)	\
+	std::cout << #param << '=' << param << '\n';
+//	----------------------------------------------------------------------------
+BOOST_TTI_HAS_DATA(u_int_32_)
+BOOST_TTI_HAS_MEMBER_DATA(u_int_32_)
+BOOST_TTI_HAS_MEMBER_DATA(s_int_32_)
+BOOST_TTI_TRAIT_HAS_MEMBER_DATA(CheckIceMarketIDName, u_int_32_)
+//	----------------------------------------------------------------------------
+template <std::size_t> struct CheckIceMarketIDOffset {
+	static const bool value = false;
+};
+//	----------------------------------------------------------------------------
+template <> struct CheckIceMarketIDOffset<0> {
+	static const bool value = true;
+};
+//	----------------------------------------------------------------------------
+template <typename IceMessageType> struct CheckIceMarketID {
+	static const bool value =
+		CheckIceMarketIDName<IceMessageType, unsigned int>::value &&
+		CheckIceMarketIDOffset<offsetof(IceMessageType, u_int_32_)>::value;
+};
+//	----------------------------------------------------------------------------
+void TEST_TTI_001()
+{
+	TEST_TTI_Test_001( (has_member_data_u_int_32_<SomeMessage_1, unsigned int>::value) )
+	TEST_TTI_Test_001( (has_member_data_u_int_32_<SomeMessage_1,   signed int>::value) )
+	TEST_TTI_Test_001( (has_member_data_s_int_32_<SomeMessage_1, unsigned int>::value) )
+	TEST_TTI_Test_001( (has_member_data_s_int_32_<SomeMessage_1,   signed int>::value) )
+
+	TEST_TTI_Test_001( (CheckIceMarketIDName<SomeMessage_1, unsigned int>::value) )
+	TEST_TTI_Test_001( (CheckIceMarketIDName<SomeMessage_1,   signed int>::value) )
+
+	TEST_TTI_Test_001( (CheckIceMarketID<SomeMessage_1>::value) )
+
+	TEST_TTI_Test_001( (has_member_data_u_int_32_<SomeMessage_2, unsigned int>::value) )
+	TEST_TTI_Test_001( (has_member_data_u_int_32_<SomeMessage_2,   signed int>::value) )
+	TEST_TTI_Test_001( (has_member_data_s_int_32_<SomeMessage_2, unsigned int>::value) )
+	TEST_TTI_Test_001( (has_member_data_s_int_32_<SomeMessage_2,   signed int>::value) )
+
+	TEST_TTI_Test_001( (CheckIceMarketIDName<SomeMessage_2, unsigned int>::value) )
+	TEST_TTI_Test_001( (CheckIceMarketIDName<SomeMessage_2,   signed int>::value) )
+
+	TEST_TTI_Test_001( (CheckIceMarketID<SomeMessage_2>::value) )
+}
+//	////////////////////////////////////////////////////////////////////////////
+
 //	////////////////////////////////////////////////////////////////////////////
 int main()
 {
 	int return_code = EXIT_SUCCESS;
 
+TEST_TTI_001();
+
 	try {
-TEST_RadixCharsInfo::RunTest();
 //	TEST_WindowsMemoryBarriers::RunTest();
 //	TEST_ResolveOverloadOnClassHierarchy::RunTest();
 //	TEST_InitializeArrayofPodsMember::RunTest();
