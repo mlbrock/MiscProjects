@@ -303,7 +303,7 @@ private:
 		for ( ; iter_b != iter_e ; ++iter_b) {
 			if ((val_lo <= iter_b->second) &&
 				 (val_hi >= iter_b->first)) {
-				//	CASES: #3, #4, #5, #6, #7, #8, #9
+				//	CASES: #5, #6, #7, #8, #9
 				if (val_lo == iter_b->first)
 					iter_b->second = std::max(iter_b->second, val_hi);
 				else {
