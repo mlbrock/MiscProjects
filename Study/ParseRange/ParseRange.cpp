@@ -180,7 +180,7 @@ template <typename DatumType> struct IntervalWrapper {
 		std::string              tmp_src(src);
 		std::vector<std::string> tmp_list;
 		ValIntervalVec           range_list;
-ValIntervalMap           range_map;
+		ValIntervalMap           range_map;
 
 		split(tmp_list, tmp_src, is_any_of(","), token_compress_off);
 
@@ -270,24 +270,37 @@ RangeMapInsert(range_map, val_lo, val_hi);
 return(ValIntervalVec(range_map.begin(), range_map.end()));
 	}
 
+	static ValIntervalMap &RangeMapInsert(ValIntervalMap &range_map,
+		const ValInterval &val_interval)
+	{
+		return(RangeMapInsert(range_map, val_interval.first,
+			val_interval.second));
+	}
+
+	static ValIntervalMap &RangeMapInsert(ValIntervalMap &range_map,
+		DatumType val_lo, DatumType val_hi)
+	{
+		return(RangeMapInsert(range_map, val_lo, val_hi, false));
+	}
+
 private:
 
 	static ValIntervalMap &RangeMapInsert(ValIntervalMap &range_map,
-		const DatumType &val_lo, const DatumType &val_hi)
+		DatumType val_lo, DatumType val_hi, bool /* disambiguation */)
 	{
+		if (val_lo > val_hi)
+			std::swap(val_lo, val_hi);
+
 		if (range_map.empty()) {
 			range_map.insert(ValInterval(val_lo, val_hi));
 			return(range_map);
 		}
 
+		bool               merge_flag = false;
 		ValIntervalMapIter iter_b(range_map.begin());
 		ValIntervalMapIter iter_e(range_map.end());
 
 		for ( ; iter_b != iter_e ; ++iter_b) {
-/*
-			if (ignore_ptr == &(*iter_b))
-				continue;
-*/
 			if ((val_lo <= iter_b->second) &&
 				 (val_hi >= iter_b->first)) {
 				//	CASES: #3, #4, #5, #6, #7, #8, #9
@@ -299,77 +312,30 @@ private:
 					range_map.erase(iter_b);
 					iter_b = range_map.insert(tmp).first;
 				}
-
-ToStream(std::cout, range_map, ">>>") << std::endl;
-
 				if (range_map.size() > 1) {
 					ValIntervalMap tmp_range_map(range_map);
 					ValInterval    tmp_interval(iter_b->first, iter_b->second);
 					tmp_range_map.erase(iter_b->first);
-					RangeMapInsert(tmp_range_map, tmp_interval.first, tmp_interval.second);
+					RangeMapInsert(tmp_range_map, tmp_interval.first, tmp_interval.second, false);
 					if (tmp_range_map != range_map)
 						range_map.swap(tmp_range_map);
 				}
-
-ToStream(std::cout, range_map, "<<<") << std::endl;
-
 				return(range_map);
+//				merge_flag = true;
+//				break;
 			}
 		}
 
-		range_map.insert(ValInterval(val_lo, val_hi));
+		/*
+			Next, an ajacency search ...
+		*/
+
+		//	Otherwise, it's an independent interval.
+		if (!merge_flag)
+			range_map.insert(ValInterval(val_lo, val_hi));
 
 		return(range_map);
 	}
-
-/*
-ValIntervalBiMap range_map;
-		for (const auto &src_intv : range_list) {
-			if (range_map.empty())
-				range_map.insert(src_intv);
-			else {
-				bool merged_flag = false;
-				ValIntervalBiMapIter iter_e(range_map.end());
-				ValIntervalBiMapIter iter_tmp(range_map.find(src_intv.first));
-				if (iter_tmp != iter_e) {
-					iter_tmp->second = std::max(iter_tmp->second, src_intv.second);
-					continue;
-				}
-				ValIntervalBiMapIter iter_ub(range_map.upper_bound(src_intv.first));
-				iter_tmp = iter_ub;
-				while (iter_tmp != iter_e) {
-					if (*iter_tmp == src_intv) {
-						merged_flag = true;
-						break;
-					}
-					if ((src_intv.first <= iter_tmp->second) &&
-						 (src_intv.second >= iter_tmp->first)) {
-						ValInterval tmp_intv(
-							std::min(iter_tmp->first, src_intv.first);
-							std::max(iter_tmp->second, src_intv.second));
-						range_map.erase(iter_tmp);
-						range_map[tmp_intv.first] = tmp_intv.second;
-						merged_flag               = true;
-						break;
-					}
-					++iter_tmp;
-				}
-				for (auto &dst_intv : dst) {
-					if ((src_intv.first <= dst_intv.second) &&
-						 (src_intv.second >= dst_intv.first)) {
-						//	CASES: #3, #4, #5, #6, #7, #8, #9
-						dst_intv.first  = std::min(dst_intv.first, src_intv.first);
-						dst_intv.second = std::max(dst_intv.second, src_intv.second);
-						merged_flag     = true;
-						break;
-					}
-				}
-				if (!merged_flag)
-					dst.push_back(ValInterval(src_intv.first, src_intv.second));
-			}
-		}
-	}
-*/
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -439,6 +405,11 @@ const TEST_Instance TEST_InstanceList[] = {
 	},
 	{
 		"7-9",
+		{ 7, 8 },
+		{ -42,  -1, 0, 1, 42 }
+	},
+	{
+		"7-9,17,18",
 		{ 7, 8 },
 		{ -42,  -1, 0, 1, 42 }
 	},
@@ -532,23 +503,6 @@ typedef typename ValIntervalBiMap::left_const_iterator ValIntervalBiMapLIterC;
 //	////////////////////////////////////////////////////////////////////////////
 
 //	////////////////////////////////////////////////////////////////////////////
-/*
-template <typename SiMapType>
-	void TEST_RunBiMap_Helper(SiMapType &range_bimap,
-		const ValInterval &new_value)
-{
-	if (range_bimap.empty()) {
-		range_bimap.insert(new_value);
-		return;
-	}
-
-	ValIntervalBiMapIter iter_f_r(ra)
-}
-*/
-//	////////////////////////////////////////////////////////////////////////////
-
-//	////////////////////////////////////////////////////////////////////////////
-/**/
 void TEST_RunBiMap_Helper(ValIntervalBiMap &range_bimap,
 	const ValInterval &new_value)
 {
