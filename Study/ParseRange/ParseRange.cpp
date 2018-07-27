@@ -154,6 +154,12 @@ template <typename DatumType>
 	----------------------------------------------------------------------------
 */
 //	////////////////////////////////////////////////////////////////////////////
+/*
+	PCRE Meta-Characters:
+	---------------------
+	\ --> \\\\
+	^$.[](){}|?*+
+*/
 template <typename DatumType> struct IntervalWrapper {
 //	typedef DatumType                           DatumType;
 	typedef std::pair<DatumType, DatumType>         ValInterval;
