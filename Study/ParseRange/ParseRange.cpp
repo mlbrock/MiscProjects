@@ -260,13 +260,13 @@ return(ValIntervalVec(range_map.begin(), range_map.end()));
 	static ValIntervalMap &RangeMapInsert(ValIntervalMap &range_map,
 		DatumType val_lo, DatumType val_hi)
 	{
-		return(RangeMapInsert(range_map, val_lo, val_hi, false));
+		return(RangeMapInsert(range_map, val_lo, val_hi, 0));
 	}
 
 private:
 
 	static ValIntervalMap &RangeMapInsert(ValIntervalMap &range_map,
-		DatumType val_lo, DatumType val_hi, bool /* disambiguation */)
+		DatumType val_lo, DatumType val_hi, unsigned int depth)
 	{
 		if (val_lo > val_hi)
 			std::swap(val_lo, val_hi);
@@ -298,7 +298,8 @@ private:
 						ValIntervalMap tmp_range_map(range_map);
 						ValInterval    tmp_interval(iter_b->first, iter_b->second);
 						tmp_range_map.erase(iter_b->first);
-						RangeMapInsert(tmp_range_map, tmp_interval.first, tmp_interval.second, false);
+						RangeMapInsert(tmp_range_map, tmp_interval.first,
+							tmp_interval.second, depth + 1);
 						if (tmp_range_map != range_map)
 							range_map.swap(tmp_range_map);
 					}
@@ -433,6 +434,11 @@ const TEST_Instance TEST_InstanceList[] = {
 		"6-2400,7-9,19,100-2399",
 		{ 7, 8, 19, 2000 },
 		{ -42,  -1, 0, 1 }
+	},
+	{
+		"10-19,30-39,50-59,70-79,90-99,1-100",
+		{10, 100 },
+		{ 0, 101 }
 	},
 };
 const std::size_t   TEST_InstanceCount  =
