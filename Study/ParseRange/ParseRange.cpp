@@ -233,8 +233,6 @@ template <typename DatumType> struct IntervalWrapper {
 						"separator characters were encountered.");
 
 RangeMapInsert(range_map, val_lo, val_hi);
-
-				range_list.push_back(ValInterval(val_lo, val_hi));
 			}
 			catch (const std::exception &except) {
 				std::ostringstream o_str;
@@ -243,30 +241,6 @@ RangeMapInsert(range_map, val_lo, val_hi);
 				throw std::invalid_argument(o_str.str());
 			}
 		}
-
-		for (const auto &src_intv : range_list) {
-			if (dst.empty())
-				dst.push_back(src_intv);
-			else {
-				bool merged_flag = false;
-				for (auto &dst_intv : dst) {
-					if ((src_intv.first <= dst_intv.second) &&
-						 (src_intv.second >= dst_intv.first)) {
-						//	CASES: #3, #4, #5, #6, #7, #8, #9
-						dst_intv.first  = std::min(dst_intv.first, src_intv.first);
-						dst_intv.second = std::max(dst_intv.second, src_intv.second);
-						merged_flag     = true;
-						break;
-					}
-				}
-				if (!merged_flag)
-					dst.push_back(ValInterval(src_intv.first, src_intv.second));
-			}
-		}
-
-/*
-		return(dst);
-*/
 return(ValIntervalVec(range_map.begin(), range_map.end()));
 	}
 
@@ -291,48 +265,74 @@ private:
 		if (val_lo > val_hi)
 			std::swap(val_lo, val_hi);
 
+		bool merge_flag = false;
+
+/*
 		if (range_map.empty()) {
 			range_map.insert(ValInterval(val_lo, val_hi));
 			return(range_map);
 		}
-
-		bool               merge_flag = false;
-		ValIntervalMapIter iter_b(range_map.begin());
-		ValIntervalMapIter iter_e(range_map.end());
-
-		for ( ; iter_b != iter_e ; ++iter_b) {
-			if ((val_lo <= iter_b->second) &&
-				 (val_hi >= iter_b->first)) {
-				//	CASES: #5, #6, #7, #8, #9
-				if (val_lo == iter_b->first)
-					iter_b->second = std::max(iter_b->second, val_hi);
-				else {
-					ValInterval tmp(std::min(iter_b->first, val_lo),
-						std::max(iter_b->second, val_hi));
-					range_map.erase(iter_b);
-					iter_b = range_map.insert(tmp).first;
+*/
+		if (!range_map.empty()) {
+			ValIntervalMapIter iter_b(range_map.begin());
+			ValIntervalMapIter iter_e(range_map.end());
+			for ( ; iter_b != iter_e ; ++iter_b) {
+				if ((val_lo <= iter_b->second) &&
+					 (val_hi >= iter_b->first)) {
+					//	CASES: #5, #6, #7, #8, #9
+					if (val_lo == iter_b->first)
+						iter_b->second = std::max(iter_b->second, val_hi);
+					else {
+						ValInterval tmp(std::min(iter_b->first, val_lo),
+							std::max(iter_b->second, val_hi));
+						range_map.erase(iter_b);
+						iter_b = range_map.insert(tmp).first;
+					}
+					if (range_map.size() > 1) {
+						ValIntervalMap tmp_range_map(range_map);
+						ValInterval    tmp_interval(iter_b->first, iter_b->second);
+						tmp_range_map.erase(iter_b->first);
+						RangeMapInsert(tmp_range_map, tmp_interval.first, tmp_interval.second, false);
+						if (tmp_range_map != range_map)
+							range_map.swap(tmp_range_map);
+					}
+	//				return(range_map);
+					merge_flag = true;
+					break;
 				}
-				if (range_map.size() > 1) {
-					ValIntervalMap tmp_range_map(range_map);
-					ValInterval    tmp_interval(iter_b->first, iter_b->second);
-					tmp_range_map.erase(iter_b->first);
-					RangeMapInsert(tmp_range_map, tmp_interval.first, tmp_interval.second, false);
-					if (tmp_range_map != range_map)
-						range_map.swap(tmp_range_map);
-				}
-				return(range_map);
-//				merge_flag = true;
-//				break;
 			}
+		}
+
+		//	Otherwise, it's an independent interval.
+		if (!merge_flag) {
+			range_map.insert(ValInterval(val_lo, val_hi));
+			merge_flag = true;
 		}
 
 		/*
 			Next, an ajacency search ...
-		*/
 
-		//	Otherwise, it's an independent interval.
-		if (!merge_flag)
-			range_map.insert(ValInterval(val_lo, val_hi));
+			Not strictly necessary as there's no room for an integer between
+			the end and beginning of two adjacent intervals. However, doing so
+			does reduce the number of intervals in the map.
+		*/
+		if (merge_flag && (range_map.size() > 1)) {
+			ValIntervalMapIter iter_b(range_map.begin());
+			ValIntervalMapIter iter_e(range_map.end());
+			for ( ; iter_b != iter_e ; ) {
+				if (iter_b->second < std::numeric_limits<DatumType>::max()) {
+					ValIntervalMapIter iter_f(range_map.find(iter_b->second + 1));
+					if (iter_f == range_map.end())
+						++iter_b;
+					else {
+						iter_b->second = iter_f->second;
+						range_map.erase(iter_f);
+					}
+				}
+				else
+					++iter_b;
+			}
+		}
 
 		return(range_map);
 	}
@@ -420,6 +420,11 @@ const TEST_Instance TEST_InstanceList[] = {
 	},
 	{
 		"7-9,19,100-2399,6-2400",
+		{ 7, 8, 19, 2000 },
+		{ -42,  -1, 0, 1 }
+	},
+	{
+		"6-2400,7-9,19,100-2399",
 		{ 7, 8, 19, 2000 },
 		{ -42,  -1, 0, 1 }
 	},
