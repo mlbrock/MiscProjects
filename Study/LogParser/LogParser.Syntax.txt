@@ -1,0 +1,27 @@
+
+MatchSpec
+{
+	MatchPattern : <regex-match-pattern>
+	SpecList
+	{
+		<spec-list>
+	}
+}
+
+<spec-list>		:=	<spec-item> [ , <spec-item> ... ]
+
+<spec-item>		:=	{ <formal-name> , <match-index> }
+
+<formal-name>	:=	<known-name> | <ad-hoc-name>
+
+<known-name>	:=		LogEntryStampDTN
+						|	GreyjoyOid
+						|	ExternOid
+						|	ExternOidOriginal
+						|	ExecId
+
+<ad-hoc-name>	:=	[A-Za-z0-9_-]+
+
+<match-index>	:=	\d+ (greater than 0)
+
+
