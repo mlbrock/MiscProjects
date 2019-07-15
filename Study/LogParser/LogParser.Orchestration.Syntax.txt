@@ -1,3 +1,5 @@
+<string-literal>		:=	" <character>* "
+
 <simple-name>			:=	{ <alpha> | _ }{ <alphanumeric> | _ }*
 
 <fixmsg-spec>			:=	FIXMSG
@@ -14,19 +16,29 @@
 
 <ulbmsg-field>			:=	ULBMSG.<ulbmsg-field-name>
 
+<msg-field-spec>		:=	{ <fixmsg-field> | <ulbmsg-field> }
+
 <field-name>			:=	<simple-name>
 
-<field-datum>	:= <parser-name>/<field-name>
+<field-datum>			:= <parser-name>/<field-name>
 
-<field-regex>	:= REGEX <parser-name>/<field-name>
+<field-regex>			:= REGEX/<parser-name>/<field-name>
 
-<regex-spec>	:=	{ <field-spec> | <regex-string> ]
+<regex-string>       := " .* "
 
+<regex-spec>			:=	{ <field-datum> | <field-regex> | <regex-string> }
 
-<field-op-type>	:=	{ APPEND | UPDATE | EITHER }
+<field-op-type>		:=	{ APPEND | UPDATE | EITHER }
 
-CREATEPARSER <parser-name> [ <parser-template-name> ]
+CREATEPARSER <parser-name>
+CREATEPARSER <parser-name> COPY <parser-name>
+CREATEPARSER <parser-name> FILE <json-file-name>
+CREATEPARSER <parser-name> STRING <json-string>
+
+SETMATCHPATTERN <parser-name> <regex-spec>
 
 SETFIELDPATTERN <parser-name> <field-op-type> <field-name> [ <regex-spec> ]
+
+CREATE-FILTER <action-name> <parser-name> FIRST-FROM-START
 
 
