@@ -1,0 +1,81 @@
+//	////////////////////////////////////////////////////////////////////////////
+// Order Centric Operations / UL Bridge Logs
+//	----------------------------------------------------------------------------
+FIND-ORDER-INFO-BY-PM-INFO(<PM-CONN> <PM-OID>, POSITION=START, DIRECTION=FORWARD):
+
+FIND-<POSITION>-<DIRECTION>: FixSend(CONN=<PM-CONN> and FIXMSG.11=<PM-OID>)
+	IF NOT FOUND: ERROR
+
+IF FIND MORE OF SAME: ERROR
+
+ADD PARSERS:
+	FIND-CURRENT-FORWARD: ExtendedParsers
+	FIND-CURRENT-FORWARD: OidMapping (known SRC-CONN/SRC-OID to DST-CONN/DST-OID):
+		ADD ExtendedParsers for DST-CONN/DST-OID
+		IF DST-CONN="OMS_Plugin":
+			EXTRACT-PREFIX-OID: PREFIX-OID=(<DST-OID>)
+			FIND-CURRENT-FORWARD: OmsPlugin_SEventCB_PassedAllChecks(CONN="OMS_Plugin" and "ClOrdId="<PREFIX-OID>)
+
+*: OmsPlugin_SEventCB_PassedAllChecks(CONN="OMS_Plugin" and "ClOrdId="<DST-OID>)
+	EXTRACT-GREYJOY-OID: GREYJOY-OID=("\\(parent\\) OrderID=(\\S+)")
+	ADD PARSERS:
+		FIND-CURRENT-FORWARD: ExtendedParsers
+		FIND-CURRENT-FORWARD: OidMapping (known "OMS_Plugin"/<GREYJOY-OID> to DST-CONN/DST-OID):
+		FIND-CURRENT-FORWARD: OmsPlugIn_VEvent*(known "OMS_Plugin"/<GREYJOY-OID>)
+//	----------------------------------------------------------------------------
+FIND-ORDER-INFO-BY-PREFIX-OID(<PREFIX-OID>, POSITION=START, DIRECTION=FORWARD):
+
+FIND-<POSITION>-<DIRECTION>: OidMapping(FROM <SRC-CONN>/<SRC-OID> TO "OMS_Plugin"/<PREFIX-OID>):
+	IF NOT FOUND: ERROR
+EXTRACT-PM-CONN: PM-CONN=(<SRC-CONN>)
+EXTRACT-PM-OID : PM=OID =(<SRC-OID>)
+INVOKE: FIND-ORDER-INFO-BY-PM-INFO(<PM-CONN>, <PM-OID>, CURRENT, BACKWARD)
+//	----------------------------------------------------------------------------
+FIND-ORDER-INFO-BY-GREYJOY-OID(<GREYJOY-OID>, POSITION=START, DIRECTION=FORWARD):
+
+FIND-<POSITION>-<DIRECTION>: OmsPlugin_SEventCB_PassedAllChecks(CONN="OMS_Plugin" and "\\(parent\\) OrderID=(<GREYJOY-OID>)")
+	IF NOT FOUND: ERROR
+EXTRACT-PREFIX-OID: PREFIX-OID=("ClOrdId=(\\S+)")
+INVOKE: FIND-ORDER-INFO-BY-PREFIX-OID(<PREFIX-OID>, CURRENT, BACKWARD)
+//	----------------------------------------------------------------------------
+FIND-ORDER-INFO-BY-BROKER-INFO(<BROKER-CONN>, <BROKER-OID>, POSITION=START, DIRECTION=FORWARD)
+
+FIND-<POSITION>-<DIRECTION>: FixSend(CONN=<BROKER-CONN> FIX.11=<BROKER-OID>)
+	IF NOT FOUND: ERROR
+
+ADD PARSERS:
+	FIND-CURRENT-BACKWARD: OidMapping(FROM "OMS_Plugin"/<SRC-OID> TO <BROKER-CONN>/<BROKER-OID>):
+		IF NOT FOUND: ERROR
+	EXTRACT-GREYJOY-OID: GREYJOY-OID=(<SRC-OID>)
+	INVOKE: FIND-ORDER-INFO-BY-GREYJOY-OID(<GREYJOY-OID>, CURRENT, BACKWARD)
+//	////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+//	////////////////////////////////////////////////////////////////////////////
+FIND-ORDER-INFO-BY: <BROKER-CONN> <BROKER-OID> / COMPLETE
+
+FIND-START-FORWARD: FixSend(CONN=<BROKER-CONN> FIX.11=<BROKER-OID>)
+	IF NOT FOUND: ERROR
+
+ADD PARSERS:
+	FIND-CURRENT-BACKWARD: OidMapping(FROM "OMS_Plugin"/<SRC-OID> TO <BROKER-CONN>/<BROKER-OID>):
+		IF NOT FOUND: ERROR
+	EXTRACT-GREYJOY-OID: GREYJOY-OID=(<SRC-OID>)
+	FIND-CURRENT-BACKWARD: OmsPlugin_SEventCB_PassedAllChecks(CONN="OMS_Plugin" and "\\(parent\\) OrderID=(<GREYJOY-OID>)")
+		IF NOT FOUND: ERROR
+	EXTRACT-PREFIX-OID: PREFIX-OID=("ClOrdId=(\\S+)")
+	FIND-CURRENT-BACKWARD: OidMapping(FROM <SRC-CONN>/<SRC-OID> TO "OMS_Plugin"/<PREFIX-OID>):
+		IF NOT FOUND: ERROR
+	EXTRACT-PM-CONN: PM-CONN=(<SRC-CONN>)
+	EXTRACT-PM-OID : PM=OID =(<SRC-OID>)
+	INVOKE: FIND-ORDER-INFO-BY-PM-INFO(<PM-CONN> <PM-OID>):
+//	////////////////////////////////////////////////////////////////////////////
+
