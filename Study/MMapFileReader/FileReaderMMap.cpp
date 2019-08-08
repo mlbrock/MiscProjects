@@ -57,6 +57,14 @@ typedef boost::string_ref MyStringView;
 //	////////////////////////////////////////////////////////////////////////////
 struct LineInfo
 {
+	LineInfo()
+		:line_view_()
+		,line_data_()
+		,line_number_(0)
+		,line_offset_(0)
+	{
+	}
+
 	LineInfo(const char *src, std::size_t src_length, 
 		std::size_t line_number, std::size_t line_offset)
 		:line_view_(src, src_length)
@@ -157,6 +165,7 @@ private:
 	std::string  line_data_;
 	std::size_t  line_number_;
 	std::size_t  line_offset_;
+
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -166,26 +175,53 @@ class FileReaderBase
 public:
 	FileReaderBase()
 		:file_name_()
-		,last_size_(0)
-		,curr_size_(0)
+		,file_size_old_(0)
+		,file_size_(0)
 		,line_number_(0)
 		,line_offset_(0)
+		,line_length_(0)
 		,line_info_()
 	{
 	}
 
 	explicit FileReaderBase(const std::string &file_name)
 		:file_name_(file_name)
-		,last_size_(0)
-		,curr_size_(0)
+		,file_size_old_(0)
+		,file_size_(0)
 		,line_number_(0)
 		,line_offset_(0)
+		,line_length_(0)
 		,line_info_()
 	{
 	}
 
 	virtual ~FileReader()
 	{
+	}
+
+	const std::string &GetFileName() const
+	{
+		return(file_name_);
+	}
+
+	std::size_t GetFileSize() const
+	{
+
+	}
+
+	std::size_t GetLineNumber() const
+	{
+		return(line_lnumber_);
+	}
+
+	std::size_t GetLineOffset() const
+	{
+		return(line_offset_);
+	}
+
+	std::size_t GetLineLength() const
+	{
+		return(line_length_);
 	}
 
 	const LineInfo &ReadLineNext() const
@@ -205,12 +241,26 @@ protected:
 
 protected:
 	std::string file_name_;
-	std::size_t last_size_;
-	std::size_t curr_size_;
+	std::size_t file_size_;
+	std::size_t file_size_old_;
 	std::size_t line_number_;
 	std::size_t line_offset_;
+	std::size_t line_length_;
 	LineInfo    line_info_;
 };
+//	//////////////////////////////////////////////////////////////////////////// 
+
+//	//////////////////////////////////////////////////////////////////////////// 
+inline constexpr bool IsEolChar(char datum)
+{
+	return((datum == '\n') || (datum == '\r'));
+}
+//	//////////////////////////////////////////////////////////////////////////// 
+
+//	//////////////////////////////////////////////////////////////////////////// 
+/* 
+	aaaaaCLbbbbbCcccccCCCCCddddd 
+*/
 //	//////////////////////////////////////////////////////////////////////////// 
 
 //	//////////////////////////////////////////////////////////////////////////// 
@@ -229,12 +279,39 @@ class FileReader : FileReaderBase
 protected:
 	virtual const LineInfo &ReadLineNextImpl() const
 	{
+		if (!line_offset_)
+			line_number_ = 1;
 	}
 
 	virtual const LineInfo &ReadLinePrevImpl() const
 	{
 		if (!line_offset_)
 			LineInfo(file_data_.c_str(), 0, 1, 0).swap(line_info_);
+		else
+		{
+			std::size_t line_offset_next = line_offset_;
+			--line_number_;
+			--line_offset_;
+			if (file_data_[line_offset_] == '\n')
+			{
+				if (!line_offset_)
+					LineInfo(file_data_.c_str(), 0, 1, 0).swap(line_info_);
+				else if (file_data_[--line_offset_] == '\r')
+				{
+					if (!line_offset_)
+						LineInfo(file_data_.c_str(), 0, 1, 0).swap(line_info_);
+					else
+				}
+			}
+			if (line_offset_ && (file_data_[line_offset_ - 1] == '\r'))
+				--line_offset_;
+
+			while (line_offset_)
+			{
+				if ((file_data_[line_offset_] == '\n') ||
+					 (file_data_[line_offset_] == '\r'))
+			}
+		}
 
 		return(line_info_);
 	}
