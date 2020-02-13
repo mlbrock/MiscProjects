@@ -47,11 +47,6 @@ template <typename DatumType>
 }
 //	////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
 //	////////////////////////////////////////////////////////////////////////////
 template <typename DatumType>
 	std::ostream & operator << (std::ostream &o_str,
@@ -376,9 +371,10 @@ template <typename DatumType> bool IsInInterval(
 
 //	////////////////////////////////////////////////////////////////////////////
 struct TEST_Instance {
-	std::string      input_;
-	std::vector<int> success_list_;
-	std::vector<int> failure_list_;
+	std::string                       input_;
+	std::vector<std::pair<int, int> > output_;
+	std::vector<int>                  success_list_;
+	std::vector<int>                  failure_list_;
 };
 //	////////////////////////////////////////////////////////////////////////////
 
@@ -386,57 +382,102 @@ struct TEST_Instance {
 const TEST_Instance TEST_InstanceList[] = {
 	{
 		"-",
+		{
+			{         -2147483647 - 1,          2147483647},
+		},
 	},
 	{
 		"-0",
+		{
+			{         -2147483647 - 1,                   0},
+		},
 		{ -1, -42 },
 		{  2,   3 }
 	},
 	{
 		"-1",
+		{
+			{         -2147483647 - 1,                   1},
+		},
 	},
 	{
 		"0-",
+		{
+			{                   0,          2147483647},
+		},
 	},
 	{
 		"1-",
+		{
+			{                   1,          2147483647},
+		},
 	},
 	{
 		"0-0",
+		{
+			{                   0,                   0},
+		},
 	},
 	{
 		"0-1",
+		{
+			{                   0,                   1},
+		},
 	},
 	{
 		"0-9",
+		{
+			{                   0,                   9},
+		},
 	},
 	{
 		"7-9",
+		{
+			{                   7,                   9},
+		},
 		{ 7, 8 },
 		{ -42,  -1, 0, 1, 42 }
 	},
 	{
 		"7-9,17,18",
+		{
+			{                   7,                   9},
+			{                  17,                  18},
+		},
 		{ 7, 8 },
 		{ -42,  -1, 0, 1, 42 }
 	},
 	{
 		"7-9,19,100-2399",
+		{
+			{                   7,                   9},
+			{                  19,                  19},
+			{                 100,                2399},
+		},
 		{ 7, 8, 19, 2000 },
 		{ -42,  -1, 0, 1, 42 }
 	},
 	{
 		"7-9,19,100-2399,6-2400",
+		{
+			{                   6,                2400},
+		},
 		{ 7, 8, 19, 2000 },
 		{ -42,  -1, 0, 1 }
 	},
 	{
 		"6-2400,7-9,19,100-2399",
+		{
+			{                   6,                2400},
+		},
 		{ 7, 8, 19, 2000 },
 		{ -42,  -1, 0, 1 }
 	},
 	{
 		"10-19,30-39,50-59,70-79,90-99,1-100",
+		{
+			{                   1,                 100},
+		},
 		{10, 100 },
 		{ 0, 101 }
 	},
@@ -489,7 +530,14 @@ void TEST_RunInterval_Helper_1(const TEST_Instance &instance,
 	std::vector<std::pair<int, int> > intv_list(
 		ParseInterval<int>(instance.input_));
 
-	std::cout << intv_list << std::endl;
+	if (instance.output_.empty())
+		std::cout << "RESULT  :\n" << intv_list << std::endl;
+	else if (intv_list == instance.output_)
+		std::cout << "EXPECTED:\n" << intv_list << std::endl;
+	else {
+		std::cout << "EXPECTED:\n" << instance.output_ << std::endl;
+		std::cout << "ACTUAL  :\n" << intv_list        << std::endl;
+	}
 
 	TEST_RunInterval_Helper_2(intv_list, instance.success_list_,
 		true, return_code);
@@ -565,4 +613,3 @@ int main(int argc, char **argv)
 //	////////////////////////////////////////////////////////////////////////////
 
 #endif // #ifdef TEST_MAIN
-
