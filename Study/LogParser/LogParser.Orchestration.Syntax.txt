@@ -1,0 +1,66 @@
+<string-literal>		:=	" <character>* "
+
+<simple-name>			:=	{ <alpha> | _ }{ <alphanumeric> | _ }*
+
+<fixmsg-spec>			:=	FIXMSG
+
+<ulbmsg-spec>			:=	ULBMSG
+
+<msg-spec>				:=	{ <fixmsg-spec> | <ulbmsg-spec> }
+
+<fix-fid>				:=	<unsigned-short-greater-than-0>
+
+<ulbmsg-field-name>	:=	[#]<simple-name>
+
+<fixmsg-field>			:=	FIXMSG.<fid>
+
+<ulbmsg-field>			:=	ULBMSG.<ulbmsg-field-name>
+
+<msg-field-spec>		:=	{ <fixmsg-field> | <ulbmsg-field> }
+
+<field-name>			:=	<simple-name>
+
+<field-datum>			:= <parser-name>/<field-name>
+
+<field-regex>			:= REGEX/<parser-name>/<field-name>
+
+<regex-string>       := " .* "
+
+<regex-spec>			:=	{ <field-datum> | <field-regex> | <regex-string> }
+
+<field-op-type>		:=	{ APPEND | UPDATE | EITHER }
+
+CREATEPARSER <parser-name>
+CREATEPARSER <parser-name> COPY <parser-name>
+CREATEPARSER <parser-name> FILE <json-file-name>
+CREATEPARSER <parser-name> STRING <json-string>
+
+SETMATCHPATTERN <parser-name> <regex-spec>
+
+<field-op-type> <parser-name> <field-name> [ <regex-spec> ]
+
+# ----- Not initially supported: FROMEND | FROMPREVIOUS
+<traversal-position>	:=	{ FROMSTART | FROMNEXT | FROMEND | FROMPREVIOUS }
+
+<traversal-action>	:=	{ FIND | ALL }
+
+TRAVERSE <traversal-action> <traversal-position>
+
+===============================================================================
+Example:
+	Trace order messages for Y_Intercept order YINA000034
+-------------------------------------------------------------------------------
+CREATEPARSER FindMyOrder COPYBUILTIN UlbFixReceive
+UPDATEFIELD FindMyOrder UlbConnSrc Y_Intercept
+UPDATEFIELD FindMyOrder FIXMSG.11 YINA000034
+TRAVERSE FIND FROMSTART
+# ----- 
+CREATEPARSER MyUlbFixReceive COPYBUILTIN UlbFixReceive
+UPDATEFIELD FindMyOrder UlbConnSrc Y_Intercept
+UPDATEFIELD FindMyOrder FIXMSG.11 YINA000034
+# ----- 
+CREATEPARSER MapOid_Orig_to_Prefix FindMyOrder COPYBUILTIN UlbOidMapping
+UPDATEFIELD MapOid_Orig_to_Prefix UlbSrcPlugIn Y_Intercept
+UPDATEFIELD MapOid_Orig_to_Prefix UlbSrcOid YINA000034
+===============================================================================
+
