@@ -213,3 +213,7 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# Directory in which Scripts/GetGccChangeNotes.sh puts its output:
+VersionChangeNotesForGcc/
+
