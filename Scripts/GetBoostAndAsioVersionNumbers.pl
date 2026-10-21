@@ -29,7 +29,8 @@
 		print "USAGE:\n";
 		print "   $0 ",
 			"[ <src-dir> [ <src-dir> ... ] ]\n\n",
-"   <src-dir>                --- Defaults to current directory and children.\n";
+			"   ",
+			"<src-dir> If not specified, defaults to the current directory.\n";
 		print "\n";
 		exit($return_code);
 	}
