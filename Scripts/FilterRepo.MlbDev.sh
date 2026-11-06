@@ -71,6 +71,7 @@ do
 	    --path .gitignore \
 	    --path include/mbcompat.h \
 	    --path include/mbtypes.h \
+	    --path include/BoostX.hpp \
 	    --path ${this_repo_name} \
 	    --path include/${this_repo_name} \
 	    --path include/${this_repo_name}.hpp \
