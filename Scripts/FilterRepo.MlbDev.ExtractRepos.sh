@@ -4,7 +4,7 @@
 # Miscellaneous Utility Script
 # #############################################################################
 #
-# File Name       : FilterRepo.MlbDev.sh
+# File Name       : FilterRepo.MlbDev.ExtractRepos.sh
 #
 # File Description: Use git-filter-repo to create independent repositories
 #                   from individual library and executable directory targets
