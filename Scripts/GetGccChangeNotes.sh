@@ -11,7 +11,7 @@
 # Revision History: 2026-09-19 --- Creation.
 #                       Michael L. Brock
 #
-#       Copyright Michael L. Brock 2026.
+#       Copyright Michael L. Brock 2026 - 2026.
 #
 #       Distributed under the Boost Software License, Version 1.0.
 #       (See accompanying file LICENSE_1_0.txt or copy at
