@@ -27,26 +27,17 @@ MY_ORIGIN_URL="git@github.com:mlbrock/MlbDev.git"
 
 # #############################################################################
 MY_REPO_LIST="\
-LbmWrapper \
-LSFWrapper \
-MlbUtilities
+Utility \
 RapidXmlUtils \
-RvUtilX \
+XercesUtils \
 SocketIo \
 SockLibX \
-Utility \
+LbmWrapper \
+LSFWrapper \
+RvUtilX \
 VFast \
-XercesUtils \
+MlbUtilities
 "
-# #############################################################################
-
-# #############################################################################
-MY_DIR_NAME=${PWD}
-MY_BASE_DIR=`basename ${MY_DIR_NAME}`
-MY_CURR_DATE=`date -u +%Y_%m_%d_%H_%M_%S_%N`
-MY_HOST_NAME=`hostname -s`
-MY_USER_NAME=`whoami`
-GCC_DIR_NAME="./VersionChangeNotesForGcc/${MY_CURR_DATE}.${MY_HOST_NAME}.${MY_USER_NAME}.${BASHPID}"
 # #############################################################################
 
 # #############################################################################
