@@ -30,7 +30,6 @@ MY_REPO_LIST="\
 LbmWrapper \
 LSFWrapper \
 MlbUtilities
-ProtoBuf \
 RapidXmlUtils \
 RvUtilX \
 SocketIo \
