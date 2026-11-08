@@ -88,6 +88,11 @@ do
 	   "present within the new filter-repo repository."
 	exit 1
     fi
+    if [ ! -f ${this_repo_dir}/SimpleBuildDriverLocalList.sh ]; then
+	echo "The file '${this_repo_dir}/SimpleBuildDriverLocalList.sh' is" \
+	    "not present within the new filter-repo repository."
+	exit 1
+    fi
     # ----- Set the USE_XLIBS_FLAG in <repo-dir>/.MASCaPS/MakePrefix.mk:
     ( chmod u+w ${this_repo_dir}/.MASCaPS/MakePrefix.mk && \
 	sed -i -E 's/^(\s*USE_XLIBS_FLAG\s*=\s*)0(\s*)$/\11\2/' \
@@ -102,6 +107,16 @@ do
 	-e "s/XLIB_EXTRACT_YEAR/${MY_CURR_YEAR}/g" \
 	SimpleBuildDriverLocalList.TEMPLATE.sh > \
 	${this_repo_dir}/SimpleBuildDriverLocalList.sh
+    )
+    # ----- Commit the modified .MASCaPS/MakePrefix.mk file:
+    (	pushd ${this_repo_dir} && \
+	git commit -m "Enable the MASCaPS USE_XLIBS_FLAG" \
+	    .MASCaPS/MakePrefix.mk
+    )
+    # ----- Commit the modified SimpleBuildDriverLocalList.sh file:
+    (	pushd ${this_repo_dir} && \
+	git commit -m "Update the build list for current repo target" \
+	    SimpleBuildDriverLocalList.sh
     )
 done
 # #############################################################################
