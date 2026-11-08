@@ -44,7 +44,7 @@ do
     fi
     if [ ! -e ${this_repo_dir} ]; then
 	echo "Unable to build: directory '${this_repo_dir}' does not exist."
-	exit
+	exit 1
     fi
     ( pushd ${this_repo_dir} ; \
 	clear ; printf "\\033c;\\033[2J;\\033[H" ; \
