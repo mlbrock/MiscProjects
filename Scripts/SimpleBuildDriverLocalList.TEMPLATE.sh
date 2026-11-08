@@ -2,12 +2,12 @@
 # #############################################################################
 # #############################################################################
 # Multiple Architecture Source Code Production System (MASCaPS) Version 3
-# 	Simple Build Driver Local Target Directory List for XLIB_REPO_NAME
+# 	Simple Build Driver Local Target Directory List for XLIB_REPO_DIR
 # #############################################################################
 #
 # File Name       : SimpleBuildDriverLocalList.sh
 #
-# File Description: Simple build driver local target list for XLIB_REPO_NAME.
+# File Description: Simple build driver local target list for XLIB_REPO_DIR.
 #
 # Revision History: 2016-01-29 --- Creation.
 #                       Michael L. Brock
