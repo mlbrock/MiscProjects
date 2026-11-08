@@ -48,6 +48,15 @@ MlbUtilities
 # #############################################################################
 
 # #############################################################################
+# Ensure SimpleBuildDriverLocalList.TEMPLATE.sh is available:
+if [ ! -f SimpleBuildDriverLocalList.TEMPLATE.sh ]; then
+    echo "The template file 'SimpleBuildDriverLocalList.TEMPLATE.sh' is not" \
+	"present in the current directory --- processing halted."
+    exit 1
+fi
+# #############################################################################
+
+# #############################################################################
 for this_repo_name in ${MY_REPO_LIST}
 do
     this_repo_dir=${this_repo_name}
@@ -57,7 +66,7 @@ do
     if [ -e ${this_repo_dir} ]; then
 	echo "Unable to clone from '${MY_ORIGIN_URL}':" \
 	    "directory '${this_repo_dir}' already exists."
-	exit
+	exit 1
     fi
     ( git clone ${MY_ORIGIN_URL} ${this_repo_dir} && \
 	pushd ${this_repo_dir} && \
@@ -74,8 +83,26 @@ do
 	    --path include/${this_repo_name} \
 	    --path include/${this_repo_name}.hpp \
     )
-#    echo git clone ${MY_ORIGIN_URL} ${this_repo_dir}
-#    echo pushd ${this_repo_dir}
+    if [ ! -f ${this_repo_dir}/.MASCaPS/MakePrefix.mk ]; then
+	echo "The file '${this_repo_dir}/.MASCaPS/MakePrefix.mk' is not" \
+	   "present within the new filter-repo repository."
+	exit 1
+    fi
+    # ----- Set the USE_XLIBS_FLAG in <repo-dir>/.MASCaPS/MakePrefix.mk:
+    ( chmod u+w ${this_repo_dir}/.MASCaPS/MakePrefix.mk && \
+	sed -i -E 's/^(\s*USE_XLIBS_FLAG\s*=\s*)0(\s*)$/\11\2/' \
+	${this_repo_dir}/.MASCaPS/MakePrefix.mk
+    )
+    # ----- Update the <repo-dir>/SimpleBuildDriverLocalList.sh file:
+    ( chmod u+w ${this_repo_dir}/SimpleBuildDriverLocalList.sh ; \
+	sed -E \
+	-e "s/XLIB_REPO_DIR/${this_repo_dir}/g" \
+	-e "s/XLIB_REPO_NAME/${this_repo_name}/g" \
+	-e "s/XLIB_EXTRACT_DATE/${MY_CURR_DATE}/g" \
+	-e "s/XLIB_EXTRACT_YEAR/${MY_CURR_YEAR}/g" \
+	SimpleBuildDriverLocalList.TEMPLATE.sh > \
+	${this_repo_dir}/SimpleBuildDriverLocalList.sh
+    )
 done
 # #############################################################################
 
